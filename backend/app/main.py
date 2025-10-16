@@ -13,11 +13,15 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173", 
+        "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "https://grocerygenius-api.onrender.com",  # Your actual Vercel URL
-        "https://*.vercel.app"
+        "https://grocery-genius-hj3w6xvnt-smit-kotharis-projects.vercel.app",
+        "https://*.vercel.app",
+        "*"  # Temporarily allow all for demo
     ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include routers

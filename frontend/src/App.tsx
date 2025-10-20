@@ -76,7 +76,7 @@ const App: React.FC = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [errorMsg, setErrorMsg] = useState('');
   const [dietaryFilter, setDietaryFilter] = useState('');
-
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [pantry, setPantry] = useState<PantryItem[]>([]);
   const [showAddPantry, setShowAddPantry] = useState(false);
   const [newPantryItem, setNewPantryItem] = useState({ 
@@ -137,6 +137,11 @@ const App: React.FC = () => {
     return () => {
       authListener?.subscription.unsubscribe();
     };
+  }, []);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
   useEffect(() => {
     if (!authLoading && user) {
@@ -570,6 +575,7 @@ const App: React.FC = () => {
       <!DOCTYPE html>
       <html>
         <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>Shopping List - ${new Date().toLocaleDateString()}</title>
           <style>
             body { font-family: Arial, sans-serif; padding: 20px; }
@@ -1085,7 +1091,7 @@ const App: React.FC = () => {
     <div style={{ minHeight: '100vh', background: bgColor }}>
       <header style={{
         background: cardBg,
-        padding: '1rem',
+        padding: isMobile ? '0.75rem 1rem' : '1rem',
         boxShadow: '0 2px 20px rgba(0,0,0,0.1)',
         position: 'sticky',
         top: 0,
@@ -1093,16 +1099,16 @@ const App: React.FC = () => {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '1.5rem' }}>👨‍🍳</span>
-            <h1 style={{ margin: 0, color: '#10b981', fontSize: '1.8rem', fontWeight: '700' }}>GroceryGenius</h1>
-          </div>
+            <span style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>👨‍🍳</span>                      </div><h1 style={{ margin: 0, color: '#10b981', fontSize: isMobile ? '1.25rem' : '1.8rem', fontWeight: '700' }}>GroceryGenius</h1>
+
+
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button onClick={() => setShowCalorieTracker(!showCalorieTracker)} style={{
               padding: '0.5rem', background: todayCalories > dailyCalorieGoal ? '#fee2e2' : '#f0fdf4',
               border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem'
             }}>
               <span style={{ fontSize: '1.1rem' }}>📊</span>
-              <span style={{ fontSize: '0.875rem', fontWeight: '600', color: textColor }}>{todayCalories}/{dailyCalorieGoal + " Cal"}</span>
+              <span style={{ fontSize: isMobile ? '0.75rem' : '0.875rem', fontWeight: '600', color: textColor }}>{todayCalories}/{dailyCalorieGoal + " Cal"}</span>
             </button>
             <button onClick={() => setShowDemoConfirm(true)} style={{
               padding: '0.5rem 1rem',
@@ -1141,34 +1147,46 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
-
       <nav style={{
-        background: cardBg, display: 'flex', justifyContent: 'center', padding: '0.5rem', gap: '0.5rem',
-        position: 'sticky', top: '72px', zIndex: 99
+        background: cardBg, 
+        display: 'flex', 
+        justifyContent: isMobile ? 'flex-start' : 'center', 
+        padding: '0.5rem', 
+        gap: '0.5rem',
+        position: 'sticky', 
+        top: isMobile ? '56px' : '72px', 
+        zIndex: 99,
+        overflowX: 'auto',
+        flexWrap: isMobile ? 'nowrap' : 'wrap'
       }}>
         {(['pantry', 'recipes', 'mealplan', 'shopping', 'donate', 'favorites'] as const).map((tab) => (
 
           <button key={tab} onClick={() => handleTabChange(tab)} style={{
-            padding: '0.75rem 1.5rem', border: 'none',
+            padding: isMobile ? '0.5rem 1rem' : '0.75rem 1.5rem', 
+            border: 'none',
             background: currentTab === tab ? '#10b981' : 'transparent',
             color: currentTab === tab ? 'white' : mutedText,
-            borderRadius: '12px', cursor: 'pointer', fontWeight: '600',
-            transition: 'all 0.3s ease'
+            borderRadius: '12px', 
+            cursor: 'pointer', 
+            fontWeight: '600',
+            transition: 'all 0.3s ease',
+            fontSize: isMobile ? '0.875rem' : '1rem',
+            whiteSpace: 'nowrap',
+            flex: isMobile ? '0 0 auto' : 'initial'
           }}>
             {tab === 'recipes' && '🍳 Recipes'}
-            {tab === 'mealplan' && '📅 Meal Plan'}
-            {tab === 'pantry' && `📦 Pantry (${pantry.length})`}
-            {tab === 'shopping' && `🛒 Shopping (${shoppingList.filter(i => !i.checked).length})`}
-            {tab === 'donate' && `❤️ Donate (${getExpiringItems().length})`}
-            {tab === 'favorites' && `⭐ Favorites (${favorites.length})`}
+            {tab === 'mealplan' && (isMobile ? '📅 Plan' : '📅 Meal Plan')}
+            {tab === 'pantry' && (isMobile ? `📦 ${pantry.length}` : `📦 Pantry (${pantry.length})`)}
+            {tab === 'shopping' && (isMobile ? `🛒 ${shoppingList.filter(i => !i.checked).length}` : `🛒 Shopping (${shoppingList.filter(i => !i.checked).length})`)}
+            {tab === 'donate' && (isMobile ? `❤️ ${getExpiringItems().length}` : `❤️ Donate (${getExpiringItems().length})`)}
+            {tab === 'favorites' && (isMobile ? `⭐ ${favorites.length}` : `⭐ Favorites (${favorites.length})`)}
           </button>
         ))}
       </nav>
-
       <main style={{ 
         maxWidth: '1200px', 
         margin: '0 auto', 
-        padding: '2rem',
+        padding: isMobile ? '1rem' : '2rem',
         animation: isTabChanging ? 'fadeOut 0.15s ease-out' : 'fadeIn 0.3s ease-out'
       }}>
         {currentTab === 'recipes' && (
@@ -1193,12 +1211,12 @@ const App: React.FC = () => {
                   if (!ingredientTags.includes(tag)) setIngredientTags([...ingredientTags, tag]);
                   (e.target as HTMLInputElement).value = '';
                 }
-              }} style={{ width: '100%', padding: '1rem', border: '2px solid #e5e7eb', borderRadius: '12px', marginBottom: '1rem', boxSizing: 'border-box' }} />
+              }} style={{ width: '100%', padding: isMobile ? '0.75rem' : '1rem', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: isMobile ? '0.875rem' : '1rem', marginBottom: '1rem', boxSizing: 'border-box' }} />
 
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>🔍 Or search for a specific recipe:</label>
               <input type="text" placeholder="e.g., apple pie, chicken pasta, orange glazed salmon..." value={recipeSearchQuery}
                 onChange={(e) => setRecipeSearchQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && !recipeLoading && handleGetRecipes()}
-                style={{ width: '100%', padding: '1rem', border: '2px solid #e5e7eb', borderRadius: '12px', marginBottom: '1rem', boxSizing: 'border-box' }} />
+                style={{ width: '100%', padding: isMobile ? '0.75rem' : '1rem', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: isMobile ? '0.875rem' : '1rem', marginBottom: '1rem', boxSizing: 'border-box' }} />
 
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
                 <select value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
@@ -1252,7 +1270,7 @@ const App: React.FC = () => {
             </div>
 
             {recipeLoading && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
                 {[1, 2, 3].map(i => (
                   <div key={i} style={{
                     background: cardBg,
@@ -1327,7 +1345,7 @@ const App: React.FC = () => {
                     <div onClick={() => { setSelectedRecipe(recipe); setShowDetailedView(true); }} style={{ cursor: 'pointer', marginBottom: '0.5rem' }}>
                       <div style={{ background: cardBg, borderRadius: '16px', padding: '1.5rem', boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                          <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', flex: 1, paddingRight: '1rem' }}>
+                          <h3 style={{ margin: 0, fontSize: isMobile ? '1rem' : '1.25rem', fontWeight: '700', flex: 1, paddingRight: '1rem' }}>
                             {idx + 1}. {recipe.name}
                           </h3>
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
@@ -1391,7 +1409,8 @@ const App: React.FC = () => {
 
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       <button onClick={() => addMissingToShopping(recipe)} style={{
-                        flex: 1, padding: '0.75rem', background: 'linear-gradient(45deg, #ec4899, #8b5cf6)',
+                        flex: 1, padding: isMobile ? '0.5rem' : '0.75rem', background: 'linear-gradient(45deg, #ec4899, #8b5cf6)',
+                        fontSize: isMobile ? '0.875rem' : '1rem',
                         color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600', minWidth: '120px'
                       }}>🛒 Shopping</button>
                       

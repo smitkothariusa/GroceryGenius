@@ -14,20 +14,52 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
   const [error, setError] = useState('');
 
   // Check for email confirmation token in URL
-  useEffect(() => {
+// Handle email confirmation from URL
+useEffect(() => {
+  const handleEmailConfirmation = async () => {
+    // Check URL hash params (format: #access_token=...)
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const token = hashParams.get('access_token');
+    const accessToken = hashParams.get('access_token');
     const type = hashParams.get('type');
+    
+    // Check URL query params (format: ?token_hash=...)
+    const queryParams = new URLSearchParams(window.location.search);
+    const tokenHash = queryParams.get('token_hash');
+    const queryType = queryParams.get('type');
 
-    if (token && type === 'signup') {
-      // User just confirmed their email
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
+    // If we have an access token in the hash, user is already authenticated
+    if (accessToken && type === 'signup') {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        onAuthSuccess();
+      }
+      return;
+    }
+
+    // If we have a token_hash in the query, we need to verify it
+    if (tokenHash && queryType === 'email') {
+      try {
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: 'email'
+        });
+        
+        if (error) {
+          console.error('Verification error:', error);
+          setError('Email confirmation failed. Please try again.');
+        } else if (data.session) {
+          console.log('Email verified successfully!');
           onAuthSuccess();
         }
-      });
+      } catch (err) {
+        console.error('Verification exception:', err);
+        setError('Email confirmation failed. Please try again.');
+      }
     }
-  }, [onAuthSuccess]);
+  };
+
+  handleEmailConfirmation();
+}, [onAuthSuccess]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

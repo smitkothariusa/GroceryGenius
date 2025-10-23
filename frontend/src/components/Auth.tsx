@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { authService } from '../lib/supabase';
+import React, { useState, useEffect } from 'react';
+import { authService, supabase } from '../lib/supabase';
 
 interface AuthProps {
   onAuthSuccess: () => void;
@@ -12,6 +12,22 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Check for email confirmation token in URL
+  useEffect(() => {
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const token = hashParams.get('access_token');
+    const type = hashParams.get('type');
+
+    if (token && type === 'signup') {
+      // User just confirmed their email
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          onAuthSuccess();
+        }
+      });
+    }
+  }, [onAuthSuccess]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

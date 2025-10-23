@@ -121,7 +121,8 @@ export const authService = {
       options: {
         data: {
           full_name: fullName
-        }
+        },
+        emailRedirectTo: `${window.location.origin}` // This ensures redirect to your app
       }
     });
     return { data, error };
@@ -455,4 +456,18 @@ export const calorieService = {
       .order('date');
     return { data, error };
   }
+};
+// Add this to your supabase.ts file
+
+export const setupAuthListener = (onAuthSuccess: () => void) => {
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      onAuthSuccess();
+    }
+    
+    if (event === 'PASSWORD_RECOVERY') {
+      // Handle password recovery
+      console.log('Password recovery');
+    }
+  });
 };

@@ -7,6 +7,8 @@ import { authService } from './lib/supabase';
 import Auth from './components/Auth';
 import MealPlanCalendar from './components/MealPlanCalendar';
 import IngredientSubstitution from './components/IngredientSubstitution';
+
+
 interface PantryItem {
   id: string;
   name: string;

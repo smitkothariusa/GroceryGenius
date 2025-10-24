@@ -123,7 +123,12 @@ const App: React.FC = () => {
   const textColor = '#1f2937';
   const mutedText = '#6b7280';
   const [showAddShopping, setShowAddShopping] = useState(false);
-  const [newShoppingItem, setNewShoppingItem] = useState({
+  const [newShoppingItem, setNewShoppingItem] = useState<{
+    name: string;
+    quantity: number | '';
+    unit: string;
+    category: string;
+  }>({
     name: '',
     quantity: 1,
     unit: 'pc',
@@ -2683,11 +2688,12 @@ const App: React.FC = () => {
                   value={newShoppingItem.name}
                   onChange={(e) => setNewShoppingItem({...newShoppingItem, name: e.target.value})}
                   onKeyPress={(e) => {
-                    if (e.key === 'Enter' && newShoppingItem.name.trim()) {
-                      const item: ShoppingItem = {
-                        id: `${Date.now()}-${Math.random()}`,
-                        name: newShoppingItem.name.trim(),
-                        quantity: newShoppingItem.quantity,
+                  if (e.key === 'Enter' && newShoppingItem.name.trim()) {
+                    const quantity = typeof newShoppingItem.quantity === 'number' ? newShoppingItem.quantity : 1;
+                    const item: ShoppingItem = {
+                      id: `${Date.now()}-${Math.random()}`,
+                      name: newShoppingItem.name.trim(),
+                      quantity: quantity,
                         unit: newShoppingItem.unit,
                         checked: false,
                         category: newShoppingItem.category,
@@ -2724,8 +2730,20 @@ const App: React.FC = () => {
                     type="number" 
                     min="1" 
                     value={newShoppingItem.quantity}
-                    onChange={(e) => setNewShoppingItem({...newShoppingItem, quantity: Math.max(1, parseInt(e.target.value) || 1)})}
-                    style={{ 
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '') {
+                        setNewShoppingItem({...newShoppingItem, quantity: '' as any});
+                      } else {
+                        setNewShoppingItem({...newShoppingItem, quantity: Math.max(1, parseInt(val) || 1)});
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value === '' || parseInt(e.target.value) < 1) {
+                        setNewShoppingItem({...newShoppingItem, quantity: 1});
+                      }
+                    }}
+                    style={{
                       width: '100%',
                       padding: '0.75rem', 
                       border: '2px solid #e5e7eb', 
@@ -2825,10 +2843,11 @@ const App: React.FC = () => {
                     return;
                   }
 
+                  const quantity = typeof newShoppingItem.quantity === 'number' ? newShoppingItem.quantity : 1;
                   const item: ShoppingItem = {
                     id: `${Date.now()}-${Math.random()}`,
                     name: newShoppingItem.name.trim(),
-                    quantity: newShoppingItem.quantity,
+                    quantity: quantity,
                     unit: newShoppingItem.unit,
                     checked: false,
                     category: newShoppingItem.category,

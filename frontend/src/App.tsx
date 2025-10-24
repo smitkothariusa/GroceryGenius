@@ -72,8 +72,7 @@ const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<'pantry' | 'recipes' | 'mealplan' | 'shopping' | 'donate' | 'favorites'>('pantry');  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [showDetailedView, setShowDetailedView] = useState(false);
   const [recipeSearchQuery, setRecipeSearchQuery] = useState('');
-  const [recipeServings, setRecipeServings] = useState(2);
-  
+  const [recipeServings, setRecipeServings] = useState<number | ''>(2);  
   const [ingredientTags, setIngredientTags] = useState<string[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [errorMsg, setErrorMsg] = useState('');
@@ -81,9 +80,15 @@ const App: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [pantry, setPantry] = useState<PantryItem[]>([]);
   const [showAddPantry, setShowAddPantry] = useState(false);
-  const [newPantryItem, setNewPantryItem] = useState({ 
-    name: '', 
-    quantity: 1, 
+  const [newPantryItem, setNewPantryItem] = useState<{ 
+    name: string;
+    quantity: number | '';
+    unit: string;
+    category: string;
+    expiryDate: string;
+  }>({ 
+  name: '', 
+  quantity: 1,
     unit: 'pc', 
     category: 'other',
     expiryDate: ''
@@ -420,11 +425,12 @@ const App: React.FC = () => {
       // Scale recipes to requested servings
       const scaledRecipes = data.map((recipe: Recipe) => {
         const originalServings = recipe.servings || 2;
-        const scale = recipeServings / originalServings;
+        const servings = typeof recipeServings === 'number' ? recipeServings : 2;
+        const scale = servings / originalServings;
         
         return {
           ...recipe,
-          servings: recipeServings,
+          servings: servings,
           nutrition: recipe.nutrition ? {
             calories: Math.round(recipe.nutrition.calories * scale),
             protein: Math.round(recipe.nutrition.protein * scale),
@@ -619,19 +625,20 @@ const App: React.FC = () => {
 
   const handleSaveEditPantryItem = () => {
     if (!editingPantryItem || !newPantryItem.name.trim()) return;
+    const quantity = typeof newPantryItem.quantity === 'number' ? newPantryItem.quantity : 1;
     
     setPantry(prev => prev.map(item => 
       item.id === editingPantryItem.id 
         ? {
             ...item,
             name: newPantryItem.name.trim(),
-            quantity: newPantryItem.quantity,
-            unit: newPantryItem.unit,
-            category: newPantryItem.category,
-            expiryDate: newPantryItem.expiryDate || undefined
-          }
-        : item
-    ));
+            quantity: quantity,
+              unit: newPantryItem.unit,
+              category: newPantryItem.category,
+              expiryDate: newPantryItem.expiryDate || undefined
+            }
+          : item
+      ));
     
     success('Pantry item updated!');
     setShowEditPantry(false);
@@ -1234,7 +1241,19 @@ const App: React.FC = () => {
                   <span>⚖️</span>
                   <label style={{ fontWeight: '600' }}>Servings:</label>
                   <input type="number" min="1" max="12" value={recipeServings}
-                    onChange={(e) => setRecipeServings(Math.max(1, parseInt(e.target.value) || 2))}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '') {
+                        setRecipeServings('' as any);
+                      } else {
+                        setRecipeServings(Math.max(1, Math.min(12, parseInt(val) || 2)));
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value === '' || parseInt(e.target.value) < 1) {
+                        setRecipeServings(2);
+                      }
+                    }}
                     style={{ width: '60px', padding: '0.5rem', border: '2px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', fontWeight: '600' }} />
                 </div>
 
@@ -1771,7 +1790,19 @@ const App: React.FC = () => {
                   onChange={(e) => setNewPantryItem({...newPantryItem, name: e.target.value})}
                   style={{ padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '8px' }} />
                 <input type="number" min="1" value={newPantryItem.quantity}
-                  onChange={(e) => setNewPantryItem({...newPantryItem, quantity: Math.max(1, parseInt(e.target.value) || 1)})}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '') {
+                      setNewPantryItem({...newPantryItem, quantity: '' as any});
+                    } else {
+                      setNewPantryItem({...newPantryItem, quantity: Math.max(1, parseInt(val) || 1)});
+                    }
+                  }}
+                  onBlur={(e) => {
+                    if (e.target.value === '' || parseInt(e.target.value) < 1) {
+                      setNewPantryItem({...newPantryItem, quantity: 1});
+                    }
+                  }}
                   style={{ padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '8px' }} />
                 <select value={newPantryItem.unit} onChange={(e) => setNewPantryItem({...newPantryItem, unit: e.target.value})}
                   style={{ padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '8px' }}>
@@ -1785,10 +1816,11 @@ const App: React.FC = () => {
                   style={{ gridColumn: '1 / -1', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '8px' }} />
                 <button onClick={() => {
                   if (!newPantryItem.name.trim()) return;
+                  const quantity = typeof newPantryItem.quantity === 'number' ? newPantryItem.quantity : 1;
                   const item: PantryItem = {
                     id: `${Date.now()}`,
                     name: newPantryItem.name.trim(),
-                    quantity: newPantryItem.quantity,
+                    quantity: quantity,
                     unit: newPantryItem.unit,
                     category: newPantryItem.category,
                     expiryDate: newPantryItem.expiryDate || undefined

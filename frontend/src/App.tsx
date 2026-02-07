@@ -1113,42 +1113,54 @@ const App: React.FC = () => {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>👨‍🍳</span>                      </div><h1 style={{ margin: 0, color: '#10b981', fontSize: isMobile ? '1.25rem' : '1.8rem', fontWeight: '700' }}>GroceryGenius</h1>
+            <span style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>👨‍🍳</span>
+            <h1 style={{ margin: 0, color: '#10b981', fontSize: isMobile ? '1.25rem' : '1.8rem', fontWeight: '700' }}>
+              {isMobile ? 'GG' : 'GroceryGenius'}
+            </h1>
+          </div>
 
-
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', gap: isMobile ? '0.5rem' : '0.75rem', alignItems: 'center' }}>
             <button onClick={() => setShowCalorieTracker(!showCalorieTracker)} style={{
-              padding: '0.5rem', background: todayCalories > dailyCalorieGoal ? '#fee2e2' : '#f0fdf4',
-              border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem'
+              padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 1rem',
+              background: todayCalories > dailyCalorieGoal ? '#fee2e2' : '#f0fdf4',
+              border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem',
+              fontSize: isMobile ? '0.7rem' : '0.875rem'
             }}>
-              <span style={{ fontSize: '1.1rem' }}>📊</span>
-              <span style={{ fontSize: isMobile ? '0.75rem' : '0.875rem', fontWeight: '600', color: textColor }}>{todayCalories}/{dailyCalorieGoal + " Cal"}</span>
+              <span style={{ fontSize: isMobile ? '0.9rem' : '1.1rem' }}>📊</span>
+              <span style={{ fontWeight: '600', color: textColor }}>
+                {isMobile ? `${todayCalories}/${dailyCalorieGoal}` : `${todayCalories}/${dailyCalorieGoal} Cal`}
+              </span>
             </button>
-            <button onClick={() => setShowDemoConfirm(true)} style={{
-              padding: '0.5rem 1rem',
-              background: 'linear-gradient(45deg, #8b5cf6, #6366f1)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: '600',
-              fontSize: '0.875rem'
-            }}>
-              🎬 Demo
-            </button>
+            
+            {!isMobile && (
+              <button onClick={() => setShowDemoConfirm(true)} style={{
+                padding: '0.5rem 1rem',
+                background: 'linear-gradient(45deg, #8b5cf6, #6366f1)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                fontSize: '0.875rem'
+              }}>
+                🎬 Demo
+              </button>
+            )}
+            
             <button onClick={async () => {
               await authService.signOut();
               setUser(null);
             }} style={{
-              padding: '0.5rem 1rem',
+              padding: isMobile ? '0.4rem 0.8rem' : '0.5rem 1rem',
               background: '#ef4444',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
               cursor: 'pointer',
-              fontWeight: '600'
+              fontWeight: '600',
+              fontSize: isMobile ? '0.75rem' : '1rem'
             }}>
-              Sign Out
+              {isMobile ? '🚪' : 'Sign Out'}
             </button>
           </div>
         </div>
@@ -1358,8 +1370,7 @@ const App: React.FC = () => {
                 ))}
               </div>
             )}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
-              {recipes.map((recipe, idx) => {
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>              {recipes.map((recipe, idx) => {
                 const grade = calculateHealthGrade(recipe);
                 const ingredients = parseIngredients(recipe);
                 return (
@@ -1435,10 +1446,13 @@ const App: React.FC = () => {
 
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       <button onClick={() => addMissingToShopping(recipe)} style={{
-                        flex: 1, padding: isMobile ? '0.5rem' : '0.75rem', background: 'linear-gradient(45deg, #ec4899, #8b5cf6)',
+                        flex: isMobile ? '1 1 100%' : '1',
+                        padding: isMobile ? '0.75rem' : '0.75rem',
+                        background: 'linear-gradient(45deg, #ec4899, #8b5cf6)',
                         fontSize: isMobile ? '0.875rem' : '1rem',
-                        color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600', minWidth: '120px'
-                      }}>🛒 Shopping</button>
+                        color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600',
+                        minWidth: isMobile ? 'auto' : '120px'
+                      }}>🛒 {isMobile ? 'Add to Shopping' : 'Shopping'}</button>
                       
                       <button onClick={() => {
                         const fav: FavoriteRecipe = { ...recipe, id: `${Date.now()}`, savedDate: new Date().toISOString() };
@@ -1450,27 +1464,38 @@ const App: React.FC = () => {
                           info('Already in favorites!');
                         }
                       }} style={{
-                        padding: '0.75rem', background: 'linear-gradient(45deg, #f59e0b, #d97706)',
-                        color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '1rem', minWidth: '50px'
-                      }}>💖</button>
+                        flex: isMobile ? '1' : 'initial',
+                        padding: '0.75rem',
+                        background: 'linear-gradient(45deg, #f59e0b, #d97706)',
+                        color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer',
+                        fontSize: isMobile ? '0.875rem' : '1rem',
+                        minWidth: isMobile ? 'auto' : '50px'
+                      }}>💖 {isMobile && 'Favorite'}</button>
 
                       <button onClick={() => {
                         setCurrentTab('mealplan');
-                        // Scroll to top
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                         info('Switched to Meal Plan! Drag this recipe onto your calendar.');
                       }} style={{
-                        padding: '0.75rem', background: 'linear-gradient(45deg, #3b82f6, #2563eb)',
-                        color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600', minWidth: '120px'
-                      }}>📅 Meal Plan</button>
+                        flex: isMobile ? '1' : 'initial',
+                        padding: '0.75rem',
+                        background: 'linear-gradient(45deg, #3b82f6, #2563eb)',
+                        color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600',
+                        fontSize: isMobile ? '0.875rem' : '1rem',
+                        minWidth: isMobile ? 'auto' : '120px'
+                      }}>📅 {isMobile ? 'Plan' : 'Meal Plan'}</button>
                       
                       {recipe.nutrition && (
                         <button onClick={() => {
                           setTodayCalories(prev => prev + recipe.nutrition!.calories);
                           success(`Added ${recipe.nutrition!.calories} calories`);
                         }} style={{
-                          padding: '0.75rem', background: '#10b981', color: 'white',
-                          border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '0.875rem', minWidth: '80px'
+                          flex: isMobile ? '1' : 'initial',
+                          padding: '0.75rem',
+                          background: '#10b981', color: 'white',
+                          border: 'none', borderRadius: '12px', cursor: 'pointer',
+                          fontSize: isMobile ? '0.875rem' : '0.875rem',
+                          minWidth: isMobile ? 'auto' : '80px'
                         }}>📊 {recipe.nutrition.calories}</button>
                       )}
                     </div>
@@ -1514,17 +1539,35 @@ const App: React.FC = () => {
           />
         )}
         {currentTab === 'pantry' && (
-          <div style={{ background: cardBg, padding: '2rem', borderRadius: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', gap: '1rem', flexWrap: 'wrap' }}>
-              <h2 style={{ margin: 0 }}>📦 My Pantry</h2>
-                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <div style={{ 
+            background: cardBg, 
+            padding: isMobile ? '1rem' : '2rem', 
+            borderRadius: '16px' 
+          }}>
+              <div style={{ 
+              display: 'flex', 
+              flexDirection: isMobile ? 'column' : 'row',
+              justifyContent: 'space-between', 
+              marginBottom: isMobile ? '1rem' : '2rem', 
+              gap: '1rem'
+            }}>
+              <h2 style={{ 
+                margin: 0,
+                fontSize: isMobile ? '1.5rem' : '2rem'
+              }}>📦 My Pantry</h2>
+              <div style={{ 
+                display: 'flex', 
+                gap: '0.75rem', 
+                flexWrap: 'wrap',
+                justifyContent: isMobile ? 'stretch' : 'flex-start'
+              }}>
                   <button 
                     onClick={() => {
                       setCameraSource('pantry');
                       setShowImageUpload(true);
                     }}
                     style={{
-                      padding: '0.75rem 1.5rem',
+                      padding: isMobile ? '0.75rem' : '0.75rem 1.5rem',
                       background: '#8b5cf6',
                       color: 'white',
                       border: 'none',
@@ -1533,45 +1576,52 @@ const App: React.FC = () => {
                       fontWeight: '600',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.5rem'
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      flex: isMobile ? '1' : 'initial',
+                      fontSize: isMobile ? '0.875rem' : '1rem'
                     }}
                   >
-                    📷 Scan Items
+                    📷 {isMobile ? 'Scan' : 'Scan Items'}
                   </button>
-                  
+
                   {getExpiringItems().length > 0 && (
+                    <button 
+                      onClick={() => {
+                        setItemsToDonate(getExpiringItems().map(i => i.id));
+                        setShowDonationModal(true);
+                      }}
+                      style={{
+                        padding: isMobile ? '0.75rem' : '0.75rem 1.5rem',
+                        background: 'linear-gradient(45deg, #f59e0b, #d97706)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        fontWeight: '600',
+                        flex: isMobile ? '1' : 'initial',
+                        fontSize: isMobile ? '0.875rem' : '1rem'
+                      }}
+                    >
+                      🎁 {isMobile ? `Donate (${getExpiringItems().length})` : `Donate Expiring (${getExpiringItems().length})`}
+                    </button>
+                  )}
                   <button 
-                    onClick={() => {
-                      setItemsToDonate(getExpiringItems().map(i => i.id));
-                      setShowDonationModal(true);
-                    }}
+                    onClick={() => setShowAddPantry(!showAddPantry)} 
                     style={{
-                      padding: '0.75rem 1.5rem',
-                      background: 'linear-gradient(45deg, #f59e0b, #d97706)',
+                      padding: isMobile ? '0.75rem' : '0.75rem 1.5rem',
+                      background: '#10b981', 
                       color: 'white',
-                      border: 'none',
-                      borderRadius: '12px',
-                      cursor: 'pointer',
-                      fontWeight: '600'
+                      border: 'none', 
+                      borderRadius: '12px', 
+                      cursor: 'pointer', 
+                      fontWeight: '600',
+                      flex: isMobile ? '1' : 'initial',
+                      fontSize: isMobile ? '0.875rem' : '1rem'
                     }}
                   >
-                    🎁 Donate Expiring ({getExpiringItems().length})
+                    {showAddPantry ? '✕ Cancel' : (isMobile ? '+ Add' : '+ Add Item')}
                   </button>
-                )}
-                <button 
-                  onClick={() => setShowAddPantry(!showAddPantry)} 
-                  style={{
-                    padding: '0.75rem 1.5rem', 
-                    background: '#10b981', 
-                    color: 'white',
-                    border: 'none', 
-                    borderRadius: '12px', 
-                    cursor: 'pointer', 
-                    fontWeight: '600'
-                  }}
-                >
-                  {showAddPantry ? '✕ Cancel' : '+ Add Item'}
-                </button>
               </div>
             </div>
             {/* Edit Pantry Item Modal */}
@@ -1849,16 +1899,22 @@ const App: React.FC = () => {
                     className="card-hover"
                     style={{
                       display: 'flex', 
+                      flexDirection: isMobile ? 'column' : 'row',
                       justifyContent: 'space-between', 
-                      alignItems: 'center',
-                      padding: '1rem',
+                      alignItems: isMobile ? 'stretch' : 'center',
+                      padding: isMobile ? '0.75rem' : '1rem',
                       background: expiring ? '#fee2e2' : '#f9fafb',
                       border: `1px solid ${expiring ? '#dc2626' : '#e5e7eb'}`,
-                      borderRadius: '8px'
+                      borderRadius: '8px',
+                      gap: isMobile ? '0.75rem' : '0'
                     }}
                   >
                     <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: isMobile ? '0.5rem' : '0.75rem' 
+                      }}>
                         <div style={{
                           fontSize: '2rem',
                           width: '40px',
@@ -1898,24 +1954,30 @@ const App: React.FC = () => {
                       </div>
                     </div>
                     
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      gap: '0.5rem',
+                      width: isMobile ? '100%' : 'auto'
+                    }}>
                       <button 
                         onClick={() => handleEditPantryItem(item)}
                         style={{
                           background: '#3b82f6',
                           color: 'white',
                           border: 'none',
-                          padding: '0.5rem 1rem',
+                          padding: isMobile ? '0.5rem' : '0.5rem 1rem',
                           borderRadius: '6px',
                           cursor: 'pointer',
                           fontWeight: '600',
-                          fontSize: '0.875rem',
+                          fontSize: isMobile ? '0.75rem' : '0.875rem',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '0.25rem'
+                          justifyContent: 'center',
+                          gap: '0.25rem',
+                          flex: isMobile ? '1' : 'initial'
                         }}
                       >
-                        ✏️ Edit
+                        ✏️ {isMobile ? '' : 'Edit'}
                       </button>
                       <button 
                         onClick={() => setPantry(prev => prev.filter(i => i.id !== item.id))} 
@@ -1923,14 +1985,15 @@ const App: React.FC = () => {
                           background: '#fee2e2', 
                           color: '#dc2626', 
                           border: 'none',
-                          padding: '0.5rem 1rem', 
+                          padding: isMobile ? '0.5rem' : '0.5rem 1rem',
                           borderRadius: '6px', 
                           cursor: 'pointer',
                           fontWeight: '600',
-                          fontSize: '0.875rem'
+                          fontSize: isMobile ? '0.75rem' : '0.875rem',
+                          flex: isMobile ? '1' : 'initial'
                         }}
                       >
-                        Remove
+                        {isMobile ? '🗑️' : 'Remove'}
                       </button>
                     </div>
                   </div>
@@ -1947,14 +2010,35 @@ const App: React.FC = () => {
         )}
 
         {currentTab === 'shopping' && (
-          <div style={{ background: cardBg, padding: '2rem', borderRadius: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-              <h2 style={{ margin: 0 }}>🛒 Shopping List ({shoppingList.filter(i => !i.checked).length} items)</h2>
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <div style={{ 
+            background: cardBg, 
+            padding: isMobile ? '1rem' : '2rem', 
+            borderRadius: '16px' 
+          }}>
+              <div style={{ 
+              display: 'flex', 
+              flexDirection: isMobile ? 'column' : 'row',
+              justifyContent: 'space-between', 
+              alignItems: isMobile ? 'stretch' : 'center',
+              marginBottom: '1.5rem', 
+              gap: '1rem' 
+            }}>
+              <h2 style={{ 
+                margin: 0,
+                fontSize: isMobile ? '1.5rem' : '2rem'
+              }}>
+                🛒 Shopping List ({shoppingList.filter(i => !i.checked).length} items)
+              </h2>
+              <div style={{ 
+                display: 'flex', 
+                gap: '0.75rem', 
+                flexWrap: 'wrap',
+                justifyContent: isMobile ? 'stretch' : 'flex-start'
+              }}>
                 <button 
                   onClick={() => setShowAddShopping(true)}
                   style={{
-                    padding: '0.75rem 1.5rem',
+                    padding: isMobile ? '0.75rem' : '0.75rem 1.5rem',
                     background: 'linear-gradient(45deg, #10b981, #059669)',
                     color: 'white',
                     border: 'none',
@@ -1963,15 +2047,25 @@ const App: React.FC = () => {
                     fontWeight: '600',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem'
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    flex: isMobile ? '1' : 'initial',
+                    fontSize: isMobile ? '0.875rem' : '1rem'
                   }}
                 >
-                  ➕ Add Item
+                  ➕ {isMobile ? 'Add' : 'Add Item'}
                 </button>
                 <button onClick={() => setShowExportMenu(!showExportMenu)} style={{
-                  padding: '0.75rem 1.5rem', background: '#8b5cf6', color: 'white',
-                  border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600'
-                }}>📤 Export & Share</button>
+                  padding: isMobile ? '0.75rem' : '0.75rem 1.5rem',
+                  background: '#8b5cf6', 
+                  color: 'white',
+                  border: 'none', 
+                  borderRadius: '12px', 
+                  cursor: 'pointer', 
+                  fontWeight: '600',
+                  flex: isMobile ? '1' : 'initial',
+                  fontSize: isMobile ? '0.875rem' : '1rem'
+                }}>📤 {isMobile ? 'Export' : 'Export & Share'}</button>
               </div>
             </div>
 
@@ -2038,45 +2132,94 @@ const App: React.FC = () => {
                   key={item.id}
                   className="card-hover"
                   style={{
-                    display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem',
+                    display: 'flex',
+                    flexDirection: isMobile ? 'column' : 'row',
+                    alignItems: isMobile ? 'stretch' : 'center',
+                    gap: isMobile ? '0.75rem' : '1rem',
+                    padding: isMobile ? '0.75rem' : '1rem',
                     background: item.checked ? '#f3f4f6' : '#fff',
-                    border: '1px solid #e5e7eb', borderRadius: '8px',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
                     textDecoration: item.checked ? 'line-through' : 'none',
                     opacity: item.checked ? 0.6 : 1
                   }}
                 >
-                  <input type="checkbox" checked={item.checked}
-                    onChange={() => setShoppingList(prev => prev.map(i => i.id === item.id ? {...i, checked: !i.checked} : i))}
-                    style={{ width: '20px', height: '20px', cursor: 'pointer' }} />
-                  
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: '500' }}>{item.name}</div>
-                    <div style={{ fontSize: '0.875rem', color: mutedText }}>
-                      {item.quantity} {item.unit} • {item.category}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.75rem' : '1rem', flex: 1 }}>
+                    <input type="checkbox" checked={item.checked}
+                      onChange={() => setShoppingList(prev => prev.map(i => i.id === item.id ? {...i, checked: !i.checked} : i))}
+                      style={{ 
+                        width: isMobile ? '18px' : '20px', 
+                        height: isMobile ? '18px' : '20px', 
+                        cursor: 'pointer',
+                        flexShrink: 0
+                      }} />
+                    
+                    <div style={{ flex: 1 }}>
+                      <div style={{ 
+                        fontWeight: '500',
+                        fontSize: isMobile ? '0.875rem' : '1rem'
+                      }}>{item.name}</div>
+                      <div style={{ 
+                        fontSize: isMobile ? '0.75rem' : '0.875rem', 
+                        color: mutedText 
+                      }}>
+                        {item.quantity} {item.unit} • {item.category}
+                      </div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    gap: '0.5rem', 
+                    flexWrap: 'wrap',
+                    width: isMobile ? '100%' : 'auto'
+                  }}>
                     <a href={`https://www.amazon.com/s?k=${encodeURIComponent(item.name)}&i=amazonfresh`}
                       target="_blank" rel="noopener noreferrer"
                       style={{
-                        padding: '0.5rem 0.75rem', background: '#ff9900', color: 'white',
-                        borderRadius: '6px', textDecoration: 'none', fontSize: '0.875rem', fontWeight: '600'
+                        flex: isMobile ? '1' : 'initial',
+                        padding: isMobile ? '0.5rem' : '0.5rem 0.75rem',
+                        background: '#ff9900',
+                        color: 'white',
+                        borderRadius: '6px',
+                        textDecoration: 'none',
+                        fontSize: isMobile ? '0.75rem' : '0.875rem',
+                        fontWeight: '600',
+                        textAlign: 'center',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
                       }}>
-                      🛒 Amazon
+                      {isMobile ? '🛒' : '🛒 Amazon'}
                     </a>
                     <a href={`https://www.walmart.com/search?q=${encodeURIComponent(item.name)}`}
                       target="_blank" rel="noopener noreferrer"
                       style={{
-                        padding: '0.5rem 0.75rem', background: '#0071ce', color: 'white',
-                        borderRadius: '6px', textDecoration: 'none', fontSize: '0.875rem', fontWeight: '600'
+                        flex: isMobile ? '1' : 'initial',
+                        padding: isMobile ? '0.5rem' : '0.5rem 0.75rem',
+                        background: '#0071ce',
+                        color: 'white',
+                        borderRadius: '6px',
+                        textDecoration: 'none',
+                        fontSize: isMobile ? '0.75rem' : '0.875rem',
+                        fontWeight: '600',
+                        textAlign: 'center',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
                       }}>
-                      Walmart
+                      {isMobile ? 'W' : 'Walmart'}
                     </a>
                     <button onClick={() => setShoppingList(prev => prev.filter(i => i.id !== item.id))} style={{
-                      background: '#fee2e2', color: '#dc2626', border: 'none',
-                      padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.875rem'
-                    }}>Remove</button>
+                      flex: isMobile ? '1' : 'initial',
+                      background: '#fee2e2',
+                      color: '#dc2626',
+                      border: 'none',
+                      padding: isMobile ? '0.5rem' : '0.5rem 1rem',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: isMobile ? '0.75rem' : '0.875rem'
+                    }}>{isMobile ? '🗑️' : 'Remove'}</button>
                   </div>
                 </div>
               ))}
@@ -2110,8 +2253,15 @@ const App: React.FC = () => {
         )}
 
         {currentTab === 'favorites' && (
-          <div style={{ background: cardBg, padding: '2rem', borderRadius: '16px' }}>
-            <h2 style={{ margin: '0 0 2rem 0' }}>⭐ Favorite Recipes ({favorites.length})</h2>
+          <div style={{ 
+            background: cardBg, 
+            padding: isMobile ? '1rem' : '2rem', 
+            borderRadius: '16px' 
+          }}>
+            <h2 style={{ 
+              margin: '0 0 2rem 0',
+              fontSize: isMobile ? '1.5rem' : '2rem'
+            }}>⭐ Favorite Recipes ({favorites.length})</h2>
             <div style={{ display: 'grid', gap: '1rem' }}>
               {favorites.map(recipe => (
                 <div 
@@ -2162,13 +2312,20 @@ const App: React.FC = () => {
             {/* Impact Dashboard */}
             <div style={{ 
               background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)',
-              padding: '2rem',
+              padding: isMobile ? '1.5rem' : '2rem',
               borderRadius: '16px',
-              marginBottom: '2rem',
+              marginBottom: isMobile ? '1rem' : '2rem',
               color: 'white'
             }}>
-              <h2 style={{ margin: '0 0 1rem 0', fontSize: '2rem' }}>❤️ Your Donation Impact</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+              <h2 style={{ 
+                margin: '0 0 1rem 0', 
+                fontSize: isMobile ? '1.5rem' : '2rem' 
+              }}>❤️ Your Donation Impact</h2>
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(200px, 1fr))', 
+                gap: isMobile ? '0.75rem' : '1rem' 
+              }}>
                 <div style={{ background: 'rgba(255,255,255,0.2)', padding: '1.5rem', borderRadius: '12px' }}>
                   <div style={{ fontSize: '3rem', fontWeight: '700' }}>{donationImpact.totalMeals}</div>
                   <div style={{ fontSize: '1rem', opacity: 0.9 }}>Meals Donated</div>
@@ -2450,15 +2607,23 @@ const App: React.FC = () => {
             )}
 
             {/* Food Bank Directory */}
-            <div style={{ background: cardBg, padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
-              <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.75rem' }}>🏛️ Local Food Banks Near You</h3>
+            <div style={{ 
+              background: cardBg, 
+              padding: isMobile ? '1rem' : '2rem', 
+              borderRadius: '16px', 
+              marginBottom: isMobile ? '1rem' : '2rem' 
+            }}>
+              <h3 style={{ 
+                margin: '0 0 1.5rem 0', 
+                fontSize: isMobile ? '1.25rem' : '1.75rem' 
+              }}>🏛️ Local Food Banks Near You</h3>
               <div style={{ display: 'grid', gap: '1rem' }}>
                 {foodBanks.map(bank => (
                   <div
                     key={bank.id}
                     className="card-hover"
                     style={{
-                      padding: '1.5rem',
+                      padding: isMobile ? '1rem' : '1.5rem',
                       background: '#f9fafb',
                       border: '2px solid #e5e7eb',
                       borderRadius: '12px',
@@ -2469,18 +2634,40 @@ const App: React.FC = () => {
                       setShowDonationModal(true);
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
-                      <div>
-                        <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', color: '#1f2937' }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      flexDirection: isMobile ? 'column' : 'row',
+                      justifyContent: 'space-between', 
+                      alignItems: isMobile ? 'stretch' : 'start',
+                      marginBottom: '1rem',
+                      gap: isMobile ? '1rem' : '0'
+                    }}>
+                      <div style={{ flex: 1 }}>
+                        <h4 style={{ 
+                          margin: '0 0 0.5rem 0', 
+                          fontSize: isMobile ? '1.1rem' : '1.25rem', 
+                          color: '#1f2937' 
+                        }}>
                           {bank.name}
                         </h4>
-                        <div style={{ color: '#6b7280', fontSize: '0.875rem' }}>
+                        <div style={{ 
+                          color: '#6b7280', 
+                          fontSize: isMobile ? '0.75rem' : '0.875rem' 
+                        }}>
                           📍 {bank.address}, {bank.city}, {bank.state} {bank.zipCode}
                         </div>
-                        <div style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                        <div style={{ 
+                          color: '#6b7280', 
+                          fontSize: isMobile ? '0.75rem' : '0.875rem', 
+                          marginTop: '0.25rem' 
+                        }}>
                           📞 {bank.phone}
                         </div>
-                        <div style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                        <div style={{ 
+                          color: '#6b7280', 
+                          fontSize: isMobile ? '0.75rem' : '0.875rem', 
+                          marginTop: '0.25rem' 
+                        }}>
                           🕐 {bank.hours}
                         </div>
                       </div>
@@ -2490,14 +2677,15 @@ const App: React.FC = () => {
                           window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(bank.address + ', ' + bank.city + ', ' + bank.state)}`, '_blank');
                         }}
                         style={{
-                          padding: '0.5rem 1rem',
+                          padding: isMobile ? '0.75rem' : '0.5rem 1rem',
                           background: '#3b82f6',
                           color: 'white',
                           border: 'none',
                           borderRadius: '8px',
                           cursor: 'pointer',
                           fontWeight: '600',
-                          fontSize: '0.875rem'
+                          fontSize: isMobile ? '0.875rem' : '0.875rem',
+                          width: isMobile ? '100%' : 'auto'
                         }}
                       >
                         🗺️ Directions
@@ -2641,11 +2829,11 @@ const App: React.FC = () => {
           onClick={(e) => e.stopPropagation()}
           style={{
             background: cardBg,
-            borderRadius: '20px',
-            padding: '2rem',
-            maxWidth: '500px',
-            width: '90%',
-            maxHeight: '90vh',
+            borderRadius: isMobile ? '16px' : '20px',
+            padding: isMobile ? '1rem' : '2rem',
+            maxWidth: isMobile ? '95vw' : '500px',
+            width: isMobile ? '95vw' : '90%',
+            maxHeight: isMobile ? '85vh' : '90vh',
             overflow: 'auto',
             animation: 'scaleIn 0.3s ease-out',
             position: 'relative'
@@ -2658,21 +2846,25 @@ const App: React.FC = () => {
               }}
               style={{
                 position: 'absolute',
-                top: '1rem',
-                right: '1rem',
+                top: isMobile ? '0.75rem' : '1rem',
+                right: isMobile ? '0.75rem' : '1rem',
                 background: '#f3f4f6',
                 border: 'none',
                 borderRadius: '50%',
-                width: '40px',
-                height: '40px',
+                width: isMobile ? '36px' : '40px',
+                height: isMobile ? '36px' : '40px',
                 cursor: 'pointer',
-                fontSize: '1.5rem'
+                fontSize: isMobile ? '1.25rem' : '1.5rem'
               }}
             >
               ×
             </button>
 
-            <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.75rem', fontWeight: '700' }}>
+            <h3 style={{ 
+              margin: '0 0 1.5rem 0', 
+              fontSize: isMobile ? '1.25rem' : '1.75rem', 
+              fontWeight: '700' 
+            }}>
               🛒 Add to Shopping List
             </h3>
 
@@ -2906,8 +3098,14 @@ const App: React.FC = () => {
           <div 
             onClick={(e) => e.stopPropagation()} 
             style={{
-              background: cardBg, borderRadius: '20px', padding: '2rem',
-              maxWidth: '800px', maxHeight: '90vh', overflow: 'auto', position: 'relative',
+              background: cardBg,
+              borderRadius: '20px',
+              padding: isMobile ? '1.5rem' : '2rem',
+              maxWidth: isMobile ? '95vw' : '800px',
+              width: isMobile ? '95vw' : 'auto',
+              maxHeight: '90vh',
+              overflow: 'auto',
+              position: 'relative',
               animation: 'scaleIn 0.3s ease-out'
             }}
           >
@@ -3141,13 +3339,16 @@ const App: React.FC = () => {
         >
           <div style={{ 
             background: cardBg, 
-            padding: '2rem', 
-            borderRadius: '16px', 
-            maxWidth: '500px', 
-            width: '90%',
+            padding: isMobile ? '1rem' : '2rem', 
+            borderRadius: isMobile ? '12px' : '16px', 
+            maxWidth: isMobile ? '95vw' : '500px', 
+            width: isMobile ? '95vw' : '90%',
             animation: 'scaleIn 0.3s ease-out'
           }}>
-            <h3 style={{ marginTop: 0 }}>
+            <h3 style={{ 
+              marginTop: 0,
+              fontSize: isMobile ? '1.25rem' : '1.5rem'
+            }}>
               📷 AI {cameraSource === 'pantry' ? 'Pantry' : 'Ingredient'} Scanner
             </h3>
             <p style={{ color: mutedText }}>

@@ -36,6 +36,7 @@ interface MealPlanCalendarProps {
 }
 
 const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ onAddToShoppingList }) => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(getWeekStart(new Date()));
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
   const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([]);
@@ -87,6 +88,11 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ onAddToShoppingList
       setSavedRecipes(recipes);
     }
   }, [currentWeekStart]);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Save meal plans to localStorage
   useEffect(() => {
@@ -249,28 +255,63 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ onAddToShoppingList
     };
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+    <div style={{ padding: isMobile ? '1rem' : '2rem', maxWidth: '1400px', margin: '0 auto' }}>
       {/* Header */}
-      <div style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h2 style={{ margin: 0, fontSize: '2rem', fontWeight: '700' }}>📅 Weekly Meal Plan</h2>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <button onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))} style={{
-              padding: '0.5rem 1rem', background: '#f3f4f6', border: 'none',
-              borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
-            }}>← Previous Week</button>
-            <div style={{ fontWeight: '600', fontSize: '1.1rem' }}>
-              {currentWeekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - {addDays(currentWeekStart, 6).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+      <div style={{ marginBottom: isMobile ? '1rem' : '2rem' }}>
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: isMobile ? 'column' : 'row',
+          justifyContent: 'space-between', 
+          alignItems: isMobile ? 'stretch' : 'center',
+          marginBottom: '1rem',
+          gap: isMobile ? '0.75rem' : '0'
+        }}>
+          <h2 style={{ margin: 0, fontSize: isMobile ? '1.5rem' : '2rem', fontWeight: '700' }}>
+            📅 {isMobile ? 'Meal Plan' : 'Weekly Meal Plan'}
+          </h2>
+          <div style={{ 
+            display: 'flex', 
+            gap: isMobile ? '0.5rem' : '1rem',
+            alignItems: 'center',
+            flexDirection: isMobile ? 'column' : 'row'
+          }}>
+            <div style={{ 
+              display: 'flex',
+              gap: '0.5rem',
+              width: isMobile ? '100%' : 'auto'
+            }}>
+              <button onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))} style={{
+                flex: isMobile ? '1' : 'initial',
+                padding: isMobile ? '0.75rem' : '0.5rem 1rem',
+                background: '#f3f4f6', border: 'none',
+                borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
+                fontSize: isMobile ? '0.875rem' : '1rem'
+              }}>← {isMobile ? 'Prev' : 'Previous Week'}</button>
+              <button onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))} style={{
+                flex: isMobile ? '1' : 'initial',
+                padding: isMobile ? '0.75rem' : '0.5rem 1rem',
+                background: '#f3f4f6', border: 'none',
+                borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
+                fontSize: isMobile ? '0.875rem' : '1rem'
+              }}>{isMobile ? 'Next' : 'Next Week'} →</button>
             </div>
-            <button onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))} style={{
-              padding: '0.5rem 1rem', background: '#f3f4f6', border: 'none',
-              borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
-            }}>Next Week →</button>
+            <div style={{ 
+              fontWeight: '600', 
+              fontSize: isMobile ? '0.875rem' : '1.1rem',
+              textAlign: isMobile ? 'center' : 'left'
+            }}>
+              {currentWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {addDays(currentWeekStart, 6).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </div>
           </div>
         </div>
 
         {/* Week Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+          gap: isMobile ? '0.75rem' : '1rem',
+          marginBottom: isMobile ? '1rem' : '1.5rem'
+        }}>
           <div style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '1rem', borderRadius: '12px', color: 'white' }}>
             <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>Meals Planned</div>
             <div style={{ fontSize: '2rem', fontWeight: '700' }}>{stats.mealsPlanned}/21</div>
@@ -298,10 +339,24 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ onAddToShoppingList
         </button>
       </div>
 
-      <div style={{ display: 'flex', gap: '2rem' }}>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? '1.5rem' : '2rem' 
+      }}>
         {/* Saved Recipes Sidebar */}
-        <div style={{ width: '280px', flexShrink: 0 }}>
-          <div style={{ background: 'rgba(255,255,255,0.95)', borderRadius: '16px', padding: '1.5rem', position: 'sticky', top: '1rem' }}>
+        <div style={{ 
+          width: isMobile ? '100%' : '280px', 
+          flexShrink: 0,
+          order: isMobile ? 2 : 1
+        }}>
+          <div style={{ 
+            background: 'rgba(255,255,255,0.95)', 
+            borderRadius: '16px', 
+            padding: isMobile ? '1rem' : '1.5rem', 
+            position: isMobile ? 'relative' : 'sticky', 
+            top: isMobile ? '0' : '1rem' 
+          }}>
             <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.25rem' }}>📚 Saved Recipes</h3>
             <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
               Drag recipes onto the calendar
@@ -350,15 +405,42 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ onAddToShoppingList
           </div>
         </div>
 
-        {/* Calendar Grid */}
-        <div style={{ flex: 1, overflowX: 'auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: `120px repeat(7, 1fr)`, gap: '1px', background: '#e5e7eb', borderRadius: '12px', overflow: 'hidden', minWidth: '900px' }}>
+        <div style={{ 
+          flex: 1, 
+          overflowX: 'auto',
+          order: isMobile ? 1 : 2
+        }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: isMobile ? `80px repeat(7, minmax(100px, 1fr))` : `120px repeat(7, 1fr)`, 
+            gap: '1px', 
+            background: '#e5e7eb', 
+            borderRadius: '12px', 
+            overflow: 'hidden', 
+            minWidth: isMobile ? '800px' : '900px'
+          }}>
             {/* Header Row */}
-            <div style={{ background: '#f9fafb', padding: '1rem', fontWeight: '600' }}>Meal Type</div>
+            <div style={{ 
+              background: '#f9fafb', 
+              padding: isMobile ? '0.5rem' : '1rem', 
+              fontWeight: '600',
+              fontSize: isMobile ? '0.75rem' : '1rem'
+            }}>
+              {isMobile ? 'Type' : 'Meal Type'}
+            </div>
             {weekDates.map((date, idx) => (
-              <div key={idx} style={{ background: '#f9fafb', padding: '1rem', textAlign: 'center' }}>
-                <div style={{ fontWeight: '700', fontSize: '1.1rem' }}>{daysOfWeek[date.getDay()]}</div>
-                <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+              <div key={idx} style={{ 
+                background: '#f9fafb', 
+                padding: isMobile ? '0.5rem' : '1rem', 
+                textAlign: 'center' 
+              }}>
+                <div style={{ 
+                  fontWeight: '700', 
+                  fontSize: isMobile ? '0.75rem' : '1.1rem' 
+                }}>
+                  {isMobile ? daysOfWeek[date.getDay()].substring(0, 3) : daysOfWeek[date.getDay()]}
+                </div>
+                <div style={{ fontSize: isMobile ? '0.65rem' : '0.875rem', color: '#6b7280' }}>
                   {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </div>
               </div>
@@ -367,9 +449,17 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ onAddToShoppingList
             {/* Meal Rows */}
             {mealTypes.map(mealType => (
               <React.Fragment key={mealType}>
-                <div style={{ background: 'white', padding: '1rem', display: 'flex', alignItems: 'center', fontWeight: '600', textTransform: 'capitalize' }}>
-                  {mealType === 'breakfast' && '🳳'} {mealType === 'lunch' && '🥗'} {mealType === 'dinner' && '🽽️'} {mealType === 'snack' && '�'}
-                  {' '}{mealType}
+                <div style={{ 
+                  background: 'white', 
+                  padding: isMobile ? '0.5rem' : '1rem', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  fontWeight: '600', 
+                  textTransform: 'capitalize',
+                  fontSize: isMobile ? '0.75rem' : '1rem'
+                }}>
+                  {mealType === 'breakfast' && '🍳'} {mealType === 'lunch' && '🥗'} {mealType === 'dinner' && '🍽️'} {mealType === 'snack' && '🍿'}
+                  {!isMobile && ' '}{!isMobile && mealType}
                 </div>
                 {weekDates.map((date) => {
                   const dateStr = formatDate(date);
@@ -383,8 +473,8 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ onAddToShoppingList
                       onClick={() => handleSlotClick(dateStr, mealType)}
                       style={{
                         background: 'white',
-                        padding: '0.75rem',
-                        minHeight: '120px',
+                        padding: isMobile ? '0.5rem' : '0.75rem',
+                        minHeight: isMobile ? '80px' : '120px',
                         cursor: meal ? 'default' : 'pointer',
                         transition: 'background 0.2s',
                         position: 'relative'
@@ -400,15 +490,28 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ onAddToShoppingList
                         <div style={{
                           background: meal.completed ? '#f0fdf4' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                           color: meal.completed ? '#166534' : 'white',
-                          padding: '0.75rem',
+                          padding: isMobile ? '0.5rem' : '0.75rem',
                           borderRadius: '8px',
-                          fontSize: '0.875rem',
+                          fontSize: isMobile ? '0.75rem' : '0.875rem',
                           textDecoration: meal.completed ? 'line-through' : 'none',
                           opacity: meal.completed ? 0.7 : 1
                         }}>
-                          <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>{meal.recipe?.name}</div>
-                          <div style={{ fontSize: '0.75rem', opacity: 0.9 }}>
-                            {meal.recipe?.nutrition?.calories || 0} cal • {meal.servings} servings
+                          <div style={{ 
+                            fontWeight: '600', 
+                            marginBottom: '0.25rem',
+                            fontSize: isMobile ? '0.7rem' : '0.875rem',
+                            lineHeight: '1.2'
+                          }}>
+                            {meal.recipe?.name}
+                          </div>
+                          <div style={{ 
+                            fontSize: isMobile ? '0.65rem' : '0.75rem', 
+                            opacity: 0.9,
+                            whiteSpace: isMobile ? 'nowrap' : 'normal',
+                            overflow: isMobile ? 'hidden' : 'visible',
+                            textOverflow: isMobile ? 'ellipsis' : 'clip'
+                          }}>
+                            {meal.recipe?.nutrition?.calories || 0} cal{!isMobile && ` • ${meal.servings} servings`}
                           </div>
                           <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
                             <button onClick={(e) => { e.stopPropagation(); handleToggleComplete(meal.id); }} style={{

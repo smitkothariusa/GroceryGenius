@@ -1892,53 +1892,123 @@ const App: React.FC = () => {
               </div>
             )}
             {showAddPantry && (
-              <div style={{ background: '#f9fafb', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem' }}>
-                <input type="text" placeholder="Item name" value={newPantryItem.name}
+              <div style={{ 
+                background: '#f9fafb', 
+                padding: isMobile ? '1rem' : '1.5rem', 
+                borderRadius: '12px', 
+                marginBottom: '2rem', 
+                display: 'grid', 
+                gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr 1fr', 
+                gap: isMobile ? '0.75rem' : '1rem' 
+              }}>
+                <input 
+                  type="text" 
+                  placeholder="Item name" 
+                  value={newPantryItem.name}
                   onChange={(e) => setNewPantryItem({...newPantryItem, name: e.target.value})}
-                  style={{ padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '8px' }} />
-                <input type="number" min="1" value={newPantryItem.quantity}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val === '') {
-                      setNewPantryItem({...newPantryItem, quantity: '' as any});
-                    } else {
-                      setNewPantryItem({...newPantryItem, quantity: Math.max(1, parseInt(val) || 1)});
-                    }
-                  }}
-                  onBlur={(e) => {
-                    if (e.target.value === '' || parseInt(e.target.value) < 1) {
-                      setNewPantryItem({...newPantryItem, quantity: 1});
-                    }
-                  }}
-                  style={{ padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '8px' }} />
-                <select value={newPantryItem.unit} onChange={(e) => setNewPantryItem({...newPantryItem, unit: e.target.value})}
-                  style={{ padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '8px' }}>
-                  <option value="pc">pieces</option>
-                  <option value="kg">kg</option>
-                  <option value="lbs">lbs</option>
-                  <option value="cups">cups</option>
-                </select>
-                <input type="date" value={newPantryItem.expiryDate}
+                  style={{ 
+                    padding: '0.75rem', 
+                    border: '1px solid #d1d5db', 
+                    borderRadius: '8px',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }} 
+                />
+                
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr', 
+                  gap: isMobile ? '0.75rem' : '0',
+                  gridColumn: isMobile ? '1' : 'auto'
+                }}>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    placeholder="Quantity"
+                    value={newPantryItem.quantity}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '') {
+                        setNewPantryItem({...newPantryItem, quantity: '' as any});
+                      } else {
+                        setNewPantryItem({...newPantryItem, quantity: Math.max(1, parseInt(val) || 1)});
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value === '' || parseInt(e.target.value) < 1) {
+                        setNewPantryItem({...newPantryItem, quantity: 1});
+                      }
+                    }}
+                    style={{ 
+                      padding: '0.75rem', 
+                      border: '1px solid #d1d5db', 
+                      borderRadius: '8px',
+                      width: '100%',
+                      boxSizing: 'border-box'
+                    }} 
+                  />
+                  
+                  <select 
+                    value={newPantryItem.unit} 
+                    onChange={(e) => setNewPantryItem({...newPantryItem, unit: e.target.value})}
+                    style={{ 
+                      padding: '0.75rem', 
+                      border: '1px solid #d1d5db', 
+                      borderRadius: '8px',
+                      width: '100%',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <option value="pc">pieces</option>
+                    <option value="kg">kg</option>
+                    <option value="lbs">lbs</option>
+                    <option value="cups">cups</option>
+                  </select>
+                </div>
+                
+                <input 
+                  type="date" 
+                  value={newPantryItem.expiryDate}
                   onChange={(e) => setNewPantryItem({...newPantryItem, expiryDate: e.target.value})}
-                  style={{ gridColumn: '1 / -1', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '8px' }} />
-                <button onClick={() => {
-                  if (!newPantryItem.name.trim()) return;
-                  const quantity = typeof newPantryItem.quantity === 'number' ? newPantryItem.quantity : 1;
-                  const item: PantryItem = {
-                    id: `${Date.now()}`,
-                    name: newPantryItem.name.trim(),
-                    quantity: quantity,
-                    unit: newPantryItem.unit,
-                    category: newPantryItem.category,
-                    expiryDate: newPantryItem.expiryDate || undefined
-                  };
-                  setPantry(prev => [...prev, item]);
-                  setNewPantryItem({ name: '', quantity: 1, unit: 'pc', category: 'other', expiryDate: '' });
-                  setShowAddPantry(false);
-                }} style={{
-                  gridColumn: '1 / -1', padding: '0.75rem', background: '#10b981', color: 'white',
-                  border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
-                }}>Add to Pantry</button>
+                  style={{ 
+                    gridColumn: '1 / -1', 
+                    padding: '0.75rem', 
+                    border: '1px solid #d1d5db', 
+                    borderRadius: '8px',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }} 
+                />
+                
+                <button 
+                  onClick={() => {
+                    if (!newPantryItem.name.trim()) return;
+                    const quantity = typeof newPantryItem.quantity === 'number' ? newPantryItem.quantity : 1;
+                    const item: PantryItem = {
+                      id: `${Date.now()}`,
+                      name: newPantryItem.name.trim(),
+                      quantity: quantity,
+                      unit: newPantryItem.unit,
+                      category: newPantryItem.category,
+                      expiryDate: newPantryItem.expiryDate || undefined
+                    };
+                    setPantry(prev => [...prev, item]);
+                    setNewPantryItem({ name: '', quantity: 1, unit: 'pc', category: 'other', expiryDate: '' });
+                    setShowAddPantry(false);
+                  }} 
+                  style={{
+                    gridColumn: '1 / -1', 
+                    padding: '0.75rem', 
+                    background: '#10b981', 
+                    color: 'white',
+                    border: 'none', 
+                    borderRadius: '8px', 
+                    cursor: 'pointer', 
+                    fontWeight: '600'
+                  }}
+                >
+                  Add to Pantry
+                </button>
               </div>
             )}
 
@@ -3218,8 +3288,11 @@ const App: React.FC = () => {
                     💡 Tip: Click highlighted ingredients to find substitutions!
                   </div>
                 </div>
-                {selectedRecipe.ingredients.split('\n').map((line, idx) => {
-                  // Parse ingredient from line
+                {(typeof selectedRecipe.ingredients === 'string' 
+                  ? selectedRecipe.ingredients.split('\n') 
+                  : selectedRecipe.ingredients
+                ).map((line, idx) => {
+                    // Parse ingredient from line
                   const match = line.match(/^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)\s+(.+)$/);
                   
                   if (match) {
@@ -3343,8 +3416,32 @@ const App: React.FC = () => {
               <h3 style={{ fontSize: '1.5rem', fontWeight: '600', borderBottom: '2px solid #10b981', paddingBottom: '0.5rem' }}>
                 👨‍🍳 Instructions
               </h3>
-              <div style={{ lineHeight: '2', fontSize: '1.05rem', whiteSpace: 'pre-wrap', marginTop: '1rem' }}>
-                {selectedRecipe.instructions}
+              <div style={{ 
+                lineHeight: '2', 
+                fontSize: isMobile ? '0.95rem' : '1.05rem', 
+                marginTop: '1rem',
+                whiteSpace: 'pre-wrap'
+              }}>
+                {(() => {
+                  const instructions = selectedRecipe.instructions as any;
+                  
+                  // If it's a string, display normally
+                  if (typeof instructions === 'string') {
+                    return instructions;
+                  }
+                  
+                  // If it's an array, display with step numbers
+                  if (Array.isArray(instructions)) {
+                    return instructions.map((step: any, idx: number) => (
+                      <div key={idx} style={{ marginBottom: '1rem', whiteSpace: 'normal' }}>
+                        <strong>Step {idx + 1}:</strong> {step}
+                      </div>
+                    ));
+                  }
+                  
+                  // Fallback - convert to string
+                  return String(instructions);
+                })()}
               </div>
             </div>
 

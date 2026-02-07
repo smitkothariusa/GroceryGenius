@@ -129,8 +129,14 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ onAddToShoppingList
   const handleSlotClick = (date: string, mealType: string) => {
     const existing = getMealForSlot(date, mealType);
     if (!existing) {
-      setSelectedSlot({ date, mealType });
-      setShowRecipePicker(true);
+      // On mobile, if a recipe is selected, place it immediately
+      if (isMobile && draggedRecipe) {
+        handleDrop(date, mealType);
+        setDraggedRecipe(null);
+      } else {
+        setSelectedSlot({ date, mealType });
+        setShowRecipePicker(true);
+      }
     }
   };
 
@@ -338,6 +344,20 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ onAddToShoppingList
           🛒 Generate Shopping List for This Week
         </button>
       </div>
+      {isMobile && savedRecipes.length > 0 && (
+        <div style={{
+          background: '#eff6ff',
+          padding: '0.75rem',
+          borderRadius: '8px',
+          marginTop: '1rem',
+          border: '1px solid #bfdbfe',
+          fontSize: '0.75rem',
+          color: '#1e40af',
+          textAlign: 'center'
+        }}>
+          💡 <strong>Mobile Tip:</strong> Tap empty calendar slots to add recipes, then select from your saved recipes list
+        </div>
+      )}
 
       <div style={{ 
         display: 'flex', 
@@ -385,13 +405,19 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ onAddToShoppingList
                   draggable={!isMobile}
                   onDragStart={() => !isMobile && setDraggedRecipe(recipe)}
                   onDragEnd={() => !isMobile && setDraggedRecipe(null)}
-                  onClick={() => isMobile && (setSelectedSlot(null), setShowRecipePicker(false))}
+                  onClick={() => {
+                    if (isMobile) {
+                      setDraggedRecipe(recipe);
+                    }
+                  }}
                   style={{
                     padding: isMobile ? '0.65rem' : '0.75rem',
-                    background: 'white',
+                    background: isMobile && draggedRecipe?.id === recipe.id ? '#dbeafe' : 'white',
                     marginBottom: '0.5rem',
                     borderRadius: '8px',
-                    border: '2px solid #e5e7eb',
+                    border: isMobile && draggedRecipe?.id === recipe.id 
+                      ? '2px solid #3b82f6' 
+                      : '2px solid #e5e7eb',
                     cursor: isMobile ? 'pointer' : 'grab',
                     transition: 'all 0.2s'
                   }}

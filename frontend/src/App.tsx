@@ -4,6 +4,7 @@ import Toast from './components/Toast';
 import { useToast } from './hooks/useToast';
 import { useState, useEffect } from 'react';
 import { authService } from './lib/supabase';
+import { pantryService, shoppingService, recipesService, mealPlansService, donationService } from './lib/database';
 import Auth from './components/Auth';
 import MealPlanCalendar from './components/MealPlanCalendar';
 import IngredientSubstitution from './components/IngredientSubstitution';
@@ -136,14 +137,96 @@ const App: React.FC = () => {
   });
   const [editingPantryItem, setEditingPantryItem] = useState<PantryItem | null>(null);
   const [showEditPantry, setShowEditPantry] = useState(false);
+  // Load all user data from Supabase
+  const loadUserData = async () => {
+    try {
+      console.log('📥 Loading user data from Supabase...');
+      
+      // Load pantry items
+      const pantryData = await pantryService.getAll();
+      setPantry(pantryData.map(item => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        category: item.category,
+        expiryDate: item.expiry_date || undefined,
+      })));
+
+      // Load shopping list
+      const shoppingData = await shoppingService.getAll();
+      setShoppingList(shoppingData.map(item => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        category: item.category,
+        checked: item.checked,
+        priority: item.priority as 'high' | 'medium' | 'low',
+      })));
+
+      // Load favorite recipes
+      const recipesData = await recipesService.getAll();
+      setFavorites(recipesData.map(recipe => ({
+        id: recipe.id,
+        name: recipe.name,
+        ingredients: recipe.ingredients,
+        instructions: recipe.instructions,
+        prep_time: recipe.prep_time,
+        cook_time: recipe.cook_time,
+        difficulty: recipe.difficulty,
+        servings: recipe.servings,
+        nutrition: recipe.nutrition,
+        health_benefits: recipe.health_benefits,
+        budget_tip: recipe.budget_tip,
+        savedDate: recipe.created_at,
+      })));
+
+      // Load donation history
+      const historyData = await donationService.getHistory();
+      setDonationHistory(historyData.map(donation => ({
+        id: donation.id,
+        date: donation.date,
+        foodBank: donation.food_bank,
+        items: donation.items,
+        totalMeals: donation.total_meals,
+      })));
+
+      // Load donation impact
+      const impactData = await donationService.getImpact();
+      setDonationImpact({
+        totalDonations: impactData.total_donations || 0,
+        totalMeals: impactData.total_meals || 0,
+        totalPounds: impactData.total_pounds || 0,
+        co2Saved: impactData.co2_saved || 0,
+        lastDonation: impactData.last_donation,
+      });
+
+      console.log('✅ User data loaded from Supabase');
+      success('Welcome back! Your data has been synced.');
+    } catch (error) {
+      console.error('❌ Error loading user data:', error);
+      warning('Failed to load some data. Please refresh the page.');
+    }
+  };
   useEffect(() => {
-    authService.getSession().then(session => {
+    authService.getSession().then(async session => {
       setUser(session?.user || null);
-      setAuthLoading(false);  // ← Changed from setLoading
+      setAuthLoading(false);
+      
+      // Load user data from Supabase after authentication
+      if (session?.user) {
+        await loadUserData();
+      }
     });
 
-    const { data: authListener } = authService.onAuthStateChange((event, session) => {
+    const { data: authListener } = authService.onAuthStateChange(async (event, session) => {
       setUser(session?.user || null);
+      
+      // Load data when user signs in
+      if (session?.user) {
+        await loadUserData();
+      }
     });
 
     return () => {
@@ -155,56 +238,8 @@ const App: React.FC = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  useEffect(() => {
-    if (!authLoading && user) {
-      const saved = {
-        ingredients: localStorage.getItem('ingredients'),
-        pantry: localStorage.getItem('pantry'),
-        shopping: localStorage.getItem('shopping'),
-        favorites: localStorage.getItem('favorites'),
-        calorieGoal: localStorage.getItem('calorieGoal'),
-        todayCalories: localStorage.getItem('todayCalories'),
-        donationImpact: localStorage.getItem('donationImpact'),
-        donationHistory: localStorage.getItem('donationHistory'),
-        hasSeenMission: localStorage.getItem('hasSeenMission')
-      };
-      
-      if (saved.ingredients) setIngredientTags(JSON.parse(saved.ingredients));
-      if (saved.pantry) setPantry(JSON.parse(saved.pantry));
-      if (saved.shopping) setShoppingList(JSON.parse(saved.shopping));
-      if (saved.favorites) setFavorites(JSON.parse(saved.favorites));
-      if (saved.calorieGoal) setDailyCalorieGoal(Number(saved.calorieGoal));
-      if (saved.todayCalories) setTodayCalories(Number(saved.todayCalories));
-      if (saved.donationImpact) setDonationImpact(JSON.parse(saved.donationImpact));
-      if (saved.donationHistory) setDonationHistory(JSON.parse(saved.donationHistory));
-      
-      // Show mission popup on first visit
-      if (!saved.hasSeenMission) {
-        setShowMissionPopup(true);
-      }
-    }
-  }, [user, authLoading]);
   // Load from localStorage
   // Load from localStorage - wait for user to be loaded first
-  useEffect(() => {
-    if (!authLoading && user) {
-      const saved = {
-        ingredients: localStorage.getItem('ingredients'),
-        pantry: localStorage.getItem('pantry'),
-        shopping: localStorage.getItem('shopping'),
-        favorites: localStorage.getItem('favorites'),
-        calorieGoal: localStorage.getItem('calorieGoal'),
-        todayCalories: localStorage.getItem('todayCalories')
-      };
-      
-      if (saved.ingredients) setIngredientTags(JSON.parse(saved.ingredients));
-      if (saved.pantry) setPantry(JSON.parse(saved.pantry));
-      if (saved.shopping) setShoppingList(JSON.parse(saved.shopping));
-      if (saved.favorites) setFavorites(JSON.parse(saved.favorites));
-      if (saved.calorieGoal) setDailyCalorieGoal(Number(saved.calorieGoal));
-      if (saved.todayCalories) setTodayCalories(Number(saved.todayCalories));
-    }
-  }, [user, authLoading]);
   useEffect(() => {
   if (!authLoading && user) {
       const saved = {
@@ -1506,12 +1541,33 @@ const App: React.FC = () => {
                         minWidth: isMobile ? 'auto' : '120px'
                       }}>🛒 {isMobile ? 'Add to Shopping' : 'Shopping'}</button>
                       
-                      <button onClick={() => {
-                        const fav: FavoriteRecipe = { ...recipe, id: `${Date.now()}`, savedDate: new Date().toISOString() };
+                      <button onClick={async () => {
                         const exists = favorites.some(f => f.name === recipe.name);
                         if (!exists) {
-                          setFavorites(prev => [...prev, fav]);
-                          success('Added to favorites & meal planner!');
+                          try {
+                            const savedRecipe = await recipesService.add({
+                              name: recipe.name,
+                              ingredients: recipe.ingredients,
+                              instructions: recipe.instructions,
+                              prep_time: recipe.prep_time,
+                              cook_time: recipe.cook_time,
+                              difficulty: recipe.difficulty,
+                              servings: recipe.servings,
+                              nutrition: recipe.nutrition,
+                              health_benefits: recipe.health_benefits,
+                              budget_tip: recipe.budget_tip,
+                            });
+
+                            setFavorites(prev => [...prev, {
+                              ...recipe,
+                              id: savedRecipe.id,
+                              savedDate: savedRecipe.created_at,
+                            }]);
+                            success('Added to favorites & meal planner!');
+                          } catch (error) {
+                            console.error('Error saving recipe:', error);
+                            warning('Failed to save recipe');
+                          }
                         } else {
                           info('Already in favorites!');
                         }
@@ -1981,21 +2037,36 @@ const App: React.FC = () => {
                 />
                 
                 <button 
-                  onClick={() => {
+                  onClick={async () => {
                     if (!newPantryItem.name.trim()) return;
                     const quantity = typeof newPantryItem.quantity === 'number' ? newPantryItem.quantity : 1;
-                    const item: PantryItem = {
-                      id: `${Date.now()}`,
-                      name: newPantryItem.name.trim(),
-                      quantity: quantity,
-                      unit: newPantryItem.unit,
-                      category: newPantryItem.category,
-                      expiryDate: newPantryItem.expiryDate || undefined
-                    };
-                    setPantry(prev => [...prev, item]);
-                    setNewPantryItem({ name: '', quantity: 1, unit: 'pc', category: 'other', expiryDate: '' });
-                    setShowAddPantry(false);
-                  }} 
+                    
+                    try {
+                      const savedItem = await pantryService.add({
+                        name: newPantryItem.name.trim(),
+                        quantity: quantity,
+                        unit: newPantryItem.unit,
+                        category: newPantryItem.category,
+                        expiryDate: newPantryItem.expiryDate || undefined
+                      });
+
+                      setPantry(prev => [...prev, {
+                        id: savedItem.id,
+                        name: savedItem.name,
+                        quantity: savedItem.quantity,
+                        unit: savedItem.unit,
+                        category: savedItem.category,
+                        expiryDate: savedItem.expiry_date || undefined
+                      }]);
+
+                      setNewPantryItem({ name: '', quantity: 1, unit: 'pc', category: 'other', expiryDate: '' });
+                      setShowAddPantry(false);
+                      success('Item added to pantry!');
+                    } catch (error) {
+                      console.error('Error adding pantry item:', error);
+                      warning('Failed to add item. Please try again.');
+                    }
+                  }}
                   style={{
                     gridColumn: '1 / -1', 
                     padding: '0.75rem', 
@@ -2102,7 +2173,16 @@ const App: React.FC = () => {
                         ✏️ {isMobile ? '' : 'Edit'}
                       </button>
                       <button 
-                        onClick={() => setPantry(prev => prev.filter(i => i.id !== item.id))} 
+                          onClick={async () => {
+                            try {
+                              await pantryService.delete(item.id);
+                              setPantry(prev => prev.filter(i => i.id !== item.id));
+                              success('Item removed');
+                            } catch (error) {
+                              console.error('Error deleting pantry item:', error);
+                              warning('Failed to remove item');
+                            }
+                          }} 
                         style={{
                           background: '#fee2e2', 
                           color: '#dc2626', 
@@ -2268,7 +2348,14 @@ const App: React.FC = () => {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.75rem' : '1rem', flex: 1 }}>
                     <input type="checkbox" checked={item.checked}
-                      onChange={() => setShoppingList(prev => prev.map(i => i.id === item.id ? {...i, checked: !i.checked} : i))}
+                      onChange={async () => {
+                        try {
+                          await shoppingService.update(item.id, { checked: !item.checked });
+                          setShoppingList(prev => prev.map(i => i.id === item.id ? {...i, checked: !i.checked} : i));
+                        } catch (error) {
+                          console.error('Error updating shopping item:', error);
+                        }
+                      }}
                       style={{ 
                         width: isMobile ? '18px' : '20px', 
                         height: isMobile ? '18px' : '20px', 
@@ -2332,16 +2419,24 @@ const App: React.FC = () => {
                       }}>
                       {isMobile ? 'W' : 'Walmart'}
                     </a>
-                    <button onClick={() => setShoppingList(prev => prev.filter(i => i.id !== item.id))} style={{
-                      flex: isMobile ? '1' : 'initial',
+                    <button onClick={async () => {
+                      try {
+                        await shoppingService.delete(item.id);
+                        setShoppingList(prev => prev.filter(i => i.id !== item.id));
+                      } catch (error) {
+                        console.error('Error deleting shopping item:', error);
+                        warning('Failed to remove item');
+                      }
+                    }} style={{flex: isMobile ? '1' : 'initial',
                       background: '#fee2e2',
                       color: '#dc2626',
                       border: 'none',
                       padding: isMobile ? '0.5rem' : '0.5rem 1rem',
                       borderRadius: '6px',
                       cursor: 'pointer',
-                      fontSize: isMobile ? '0.75rem' : '0.875rem'
-                    }}>{isMobile ? '🗑️' : 'Remove'}</button>
+                      fontSize: isMobile ? '0.75rem' : '0.875rem'}}>
+                      {isMobile ? '🗑️ Remove' : 'Remove'}
+                    </button>
                   </div>
                 </div>
               ))}
@@ -2409,9 +2504,16 @@ const App: React.FC = () => {
                         Saved: {new Date(recipe.savedDate).toLocaleDateString()}
                       </div>
                     </div>
-                    <button onClick={(e) => {
+                    <button onClick={async (e) => {
                       e.stopPropagation();
-                      setFavorites(prev => prev.filter(f => f.id !== recipe.id));
+                      try {
+                        await recipesService.delete(recipe.id);
+                        setFavorites(prev => prev.filter(f => f.id !== recipe.id));
+                        success('Recipe removed');
+                      } catch (error) {
+                        console.error('Error deleting recipe:', error);
+                        warning('Failed to remove recipe');
+                      }
                     }} style={{
                       background: '#fee2e2', color: '#dc2626', border: 'none',
                       padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', height: 'fit-content'
@@ -3151,25 +3253,38 @@ const App: React.FC = () => {
               </button>
 
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (!newShoppingItem.name.trim()) {
                     warning('Please enter an item name');
                     return;
                   }
 
                   const quantity = typeof newShoppingItem.quantity === 'number' ? newShoppingItem.quantity : 1;
-                  const item: ShoppingItem = {
-                    id: `${Date.now()}-${Math.random()}`,
-                    name: newShoppingItem.name.trim(),
-                    quantity: quantity,
-                    unit: newShoppingItem.unit,
-                    checked: false,
-                    category: newShoppingItem.category,
-                    priority: 'medium'
-                  };
+                  try {
+                    const savedItem = await shoppingService.add({
+                      name: newShoppingItem.name.trim(),
+                      quantity: quantity,
+                      unit: newShoppingItem.unit,
+                      category: newShoppingItem.category,
+                      checked: false,
+                      priority: 'medium'
+                    });
 
-                  setShoppingList(prev => [...prev, item]);
-                  success(`Added ${newShoppingItem.name} to shopping list!`);
+                    setShoppingList(prev => [...prev, {
+                      id: savedItem.id,
+                      name: savedItem.name,
+                      quantity: savedItem.quantity,
+                      unit: savedItem.unit,
+                      category: savedItem.category,
+                      checked: savedItem.checked,
+                      priority: savedItem.priority as 'high' | 'medium' | 'low'
+                    }]);
+
+                    success(`Added ${newShoppingItem.name} to shopping list!`);
+                  } catch (error) {
+                    console.error('Error adding shopping item:', error);
+                    warning('Failed to add item');
+                  }
                   setNewShoppingItem({ name: '', quantity: 1, unit: 'pc', category: 'other' });
                   setShowAddShopping(false);
                 }}

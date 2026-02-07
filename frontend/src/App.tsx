@@ -248,41 +248,7 @@ const App: React.FC = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  // Load from localStorage
-  // Load from localStorage - wait for user to be loaded first
-  useEffect(() => {
-  if (!authLoading && user) {
-      const saved = {
-        ingredients: localStorage.getItem('ingredients'),
-        pantry: localStorage.getItem('pantry'),
-        shopping: localStorage.getItem('shopping'),
-        favorites: localStorage.getItem('favorites'),
-        calorieGoal: localStorage.getItem('calorieGoal'),
-        todayCalories: localStorage.getItem('todayCalories'),
-        donationImpact: localStorage.getItem('donationImpact'),
-        donationHistory: localStorage.getItem('donationHistory')
-      };
-      
-      if (saved.ingredients) setIngredientTags(JSON.parse(saved.ingredients));
-      if (saved.pantry) setPantry(JSON.parse(saved.pantry));
-      if (saved.shopping) setShoppingList(JSON.parse(saved.shopping));
-      if (saved.favorites) setFavorites(JSON.parse(saved.favorites));
-      if (saved.calorieGoal) setDailyCalorieGoal(Number(saved.calorieGoal));
-      if (saved.todayCalories) setTodayCalories(Number(saved.todayCalories));
-      if (saved.donationImpact) setDonationImpact(JSON.parse(saved.donationImpact));
-      if (saved.donationHistory) setDonationHistory(JSON.parse(saved.donationHistory));
-    }
-  }, [user, authLoading]);
 
-  // Save to localStorage
-  useEffect(() => { localStorage.setItem('donationImpact', JSON.stringify(donationImpact)); }, [donationImpact]);
-  useEffect(() => { localStorage.setItem('donationHistory', JSON.stringify(donationHistory)); }, [donationHistory]);
-  useEffect(() => { localStorage.setItem('ingredients', JSON.stringify(ingredientTags)); }, [ingredientTags]);
-  useEffect(() => { localStorage.setItem('pantry', JSON.stringify(pantry)); }, [pantry]);
-  useEffect(() => { localStorage.setItem('shopping', JSON.stringify(shoppingList)); }, [shoppingList]);
-  useEffect(() => { localStorage.setItem('favorites', JSON.stringify(favorites)); }, [favorites]);
-  useEffect(() => { localStorage.setItem('calorieGoal', dailyCalorieGoal.toString()); }, [dailyCalorieGoal]);
-  useEffect(() => { localStorage.setItem('todayCalories', todayCalories.toString()); }, [todayCalories]);
   const handleTabChange = (tab: typeof currentTab) => {
     setIsTabChanging(true);
     setTimeout(() => {
@@ -511,7 +477,7 @@ const App: React.FC = () => {
     setIngredientTags(Array.from(new Set([...ingredientTags, ...names])));
   };
 
-  const addMissingToShopping = (recipe: Recipe) => {
+  const addMissingToShopping = async (recipe: Recipe) => {
     const ingredients = parseIngredients(recipe);
     const pantryNames = pantry.map(i => i.name.toLowerCase());
     const existingItems = shoppingList.map(i => i.name.toLowerCase());
@@ -544,18 +510,38 @@ const App: React.FC = () => {
     });
 
     if (missing.length > 0) {
-      const newItems: ShoppingItem[] = missing.map(ing => ({
-        id: `${Date.now()}-${Math.random()}`,
-        name: ing.name,
-        quantity: ing.quantity,
-        unit: ing.unit,
-        checked: false,
-        category: 'recipe',
-        priority: 'medium'
-      }));
+      try {
+        // Add each item to Supabase
+        const savedItems = await Promise.all(
+          missing.map(ing => 
+            shoppingService.add({
+              name: ing.name,
+              quantity: ing.quantity,
+              unit: ing.unit,
+              category: 'recipe',
+              checked: false,
+              priority: 'medium'
+            })
+          )
+        );
 
-      setShoppingList(prev => [...prev, ...newItems]);
-      success(`Added ${newItems.length} ingredients to shopping list!`);
+        // Update local state
+        const newItems: ShoppingItem[] = savedItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          unit: item.unit,
+          checked: item.checked,
+          category: item.category,
+          priority: item.priority as 'high' | 'medium' | 'low'
+        }));
+
+        setShoppingList(prev => [...prev, ...newItems]);
+        success(`Added ${newItems.length} ingredients to shopping list!`);
+      } catch (error) {
+        console.error('Error adding shopping items:', error);
+        warning('Failed to add some items');
+      }
     } else {
       info('You already have all ingredients!');
     }
@@ -3272,7 +3258,7 @@ const App: React.FC = () => {
             {/* Action Buttons */}
             <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
               <button
-                onClick={() => {
+                onClick={async() => {
                   setShowAddShopping(false);
                   setNewShoppingItem({ name: '', quantity: 1, unit: 'pc', category: 'other' });
                 }}

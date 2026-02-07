@@ -203,39 +203,45 @@ const App: React.FC = () => {
       });
 
       console.log('✅ User data loaded from Supabase');
-      success('Welcome back! Your data has been synced.');
+      console.log('📊 Data counts:', {
+        pantry: pantryData.length,
+        shopping: shoppingData.length,
+        favorites: recipesData.length,
+        donations: historyData.length
+      });
+      console.log('🎯 Favorites:', recipesData.map(r => r.name));
     } catch (error) {
       console.error('❌ Error loading user data:', error);
-      warning('Failed to load some data. Please refresh the page.');
+      // Only show warning for critical errors, not empty data
     }
   };
   useEffect(() => {
-    authService.getSession().then(async session => {
+    const initAuth = async () => {
+    try {
+      const sessionData = await authService.getSession();
+      const session = sessionData?.data?.session || null;
       setUser(session?.user || null);
-      
-      // Load user data from Supabase after authentication
-      if (session?.user) {
-        try {
+        
+        // Load user data from Supabase after authentication
+        if (session?.user) {
           await loadUserData();
-        } catch (error) {
-          console.error('Failed to load user data:', error);
         }
+      } catch (error) {
+        console.error('Auth error:', error);
+      } finally {
+        // ALWAYS set loading to false, even if there's an error
+        setAuthLoading(false);
       }
-      
-      // Set loading to false AFTER everything is done
-      setAuthLoading(false);
-    });
+    };
+
+    initAuth();
 
     const { data: authListener } = authService.onAuthStateChange(async (event, session) => {
       setUser(session?.user || null);
       
       // Load data when user signs in
       if (event === 'SIGNED_IN' && session?.user) {
-        try {
-          await loadUserData();
-        } catch (error) {
-          console.error('Failed to load user data:', error);
-        }
+        await loadUserData();
       }
     });
 
@@ -1647,26 +1653,47 @@ const App: React.FC = () => {
         {currentTab === 'mealplan' && (
         <MealPlanCalendar 
           savedRecipes={favorites}
-          onAddToShoppingList={(items) => {
-            const newItems = items.map(ing => ({
-              id: `${Date.now()}-${Math.random()}`,
-              name: ing.name,
-              quantity: ing.quantity,
-              unit: ing.unit,
-              checked: false,
-              category: 'meal-plan',
-              priority: 'medium' as const
-            }));
-            setShoppingList(prev => [...prev, ...newItems]);
-            
-            // Switch tab FIRST
-            setCurrentTab('shopping');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            
-            // Show success message AFTER with a small delay
-            setTimeout(() => {
-              success(`Added ${newItems.length} ingredients to shopping list!`);
-            }, 300);
+          onAddToShoppingList={async (items) => {
+            try {
+              // Save to Supabase
+              const savedItems = await Promise.all(
+                items.map(ing => 
+                  shoppingService.add({
+                    name: ing.name,
+                    quantity: ing.quantity,
+                    unit: ing.unit,
+                    category: 'meal-plan',
+                    checked: false,
+                    priority: 'medium'
+                  })
+                )
+              );
+
+              // Update local state
+              const newItems = savedItems.map(item => ({
+                id: item.id,
+                name: item.name,
+                quantity: item.quantity,
+                unit: item.unit,
+                checked: item.checked,
+                category: item.category,
+                priority: item.priority as 'high' | 'medium' | 'low'
+              }));
+              
+              setShoppingList(prev => [...prev, ...newItems]);
+              
+              // Switch tab FIRST
+              setCurrentTab('shopping');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              
+              // Show success message AFTER with a small delay
+              setTimeout(() => {
+                success(`Added ${newItems.length} ingredients to shopping list!`);
+              }, 300);
+            } catch (error) {
+              console.error('Error adding to shopping list:', error);
+              warning('Failed to add some items to shopping list');
+            }
           }}
         />
         )}

@@ -36,11 +36,10 @@ interface MealPlanCalendarProps {
   onAddToShoppingList?: (items: ParsedIngredient[]) => void;
 }
 
-const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes: savedRecipesProp, onAddToShoppingList }) => {
+const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, onAddToShoppingList }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(getWeekStart(new Date()));
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
-  const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<{ date: string; mealType: string } | null>(null);
   const [showRecipePicker, setShowRecipePicker] = useState(false);
   const [draggedRecipe, setDraggedRecipe] = useState<Recipe | null>(null);
@@ -71,7 +70,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes: saved
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Load meal plans
+        // Load meal plans from Supabase
         const mealPlansData = await mealPlansService.getAll();
         setMealPlans(mealPlansData.map(plan => ({
           id: plan.id,
@@ -83,21 +82,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes: saved
           completed: plan.completed
         })));
 
-        // Load saved recipes from localStorage (they're already in Supabase via App.tsx)
-        const savedFavorites = localStorage.getItem('favorites');
-        if (savedFavorites) {
-          const favorites = JSON.parse(savedFavorites);
-          const recipes = favorites.map((fav: any) => ({
-            id: fav.id,
-            name: fav.name,
-            ingredients: fav.ingredients,
-            instructions: fav.instructions,
-            prep_time: fav.prep_time,
-            servings: fav.servings,
-            nutrition: fav.nutrition
-          }));
-          setSavedRecipes(recipes);
-        }
+        // Use saved recipes from props (already loaded from Supabase in App.tsx)
       } catch (error) {
         console.error('Error loading meal plans:', error);
       }

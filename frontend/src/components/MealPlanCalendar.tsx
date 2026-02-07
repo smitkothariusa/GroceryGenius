@@ -32,10 +32,11 @@ interface ParsedIngredient {
 }
 
 interface MealPlanCalendarProps {
+  savedRecipes: Recipe[];
   onAddToShoppingList?: (items: ParsedIngredient[]) => void;
 }
 
-const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ onAddToShoppingList }) => {
+const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes: savedRecipesProp, onAddToShoppingList }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(getWeekStart(new Date()));
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);

@@ -212,20 +212,30 @@ const App: React.FC = () => {
   useEffect(() => {
     authService.getSession().then(async session => {
       setUser(session?.user || null);
-      setAuthLoading(false);
       
       // Load user data from Supabase after authentication
       if (session?.user) {
-        await loadUserData();
+        try {
+          await loadUserData();
+        } catch (error) {
+          console.error('Failed to load user data:', error);
+        }
       }
+      
+      // Set loading to false AFTER everything is done
+      setAuthLoading(false);
     });
 
     const { data: authListener } = authService.onAuthStateChange(async (event, session) => {
       setUser(session?.user || null);
       
       // Load data when user signs in
-      if (session?.user) {
-        await loadUserData();
+      if (event === 'SIGNED_IN' && session?.user) {
+        try {
+          await loadUserData();
+        } catch (error) {
+          console.error('Failed to load user data:', error);
+        }
       }
     });
 
@@ -1069,55 +1079,82 @@ const App: React.FC = () => {
     
     setShowShareModal(false);
   };
-  const handleDonation = (foodBank: FoodBank, items: typeof pantry) => {
-    // Calculate impact
-    let totalMeals = 0;
-    let totalPounds = 0;
+  const handleDonation = async (foodBank: FoodBank, items: typeof pantry) => {
+    try {
+      // Calculate impact
+      let totalMeals = 0;
+      let totalPounds = 0;
 
-    const donationItems = items.map(item => {
-      const meals = calculateMeals(item.quantity, item.unit, item.name);
-      const pounds = item.unit === 'lbs' ? item.quantity : item.quantity * 0.5; // Rough estimate
-      
-      totalMeals += meals;
-      totalPounds += pounds;
+      const donationItems = items.map(item => {
+        const meals = calculateMeals(item.quantity, item.unit, item.name);
+        const pounds = item.unit === 'lbs' ? item.quantity : item.quantity * 0.5; // Rough estimate
+        
+        totalMeals += meals;
+        totalPounds += pounds;
 
-      return {
-        name: item.name,
-        quantity: item.quantity,
-        unit: item.unit,
-        estimatedMeals: meals
+        return {
+          name: item.name,
+          quantity: item.quantity,
+          unit: item.unit,
+          estimatedMeals: meals
+        };
+      });
+
+      const co2Saved = totalPounds * 3.8; // EPA: 1 lb food waste = 3.8 lbs CO2
+
+      // Save donation to Supabase
+      await donationService.add({
+        date: new Date().toISOString(),
+        food_bank: foodBank.name,
+        items: donationItems,
+        total_meals: totalMeals
+      });
+
+      // Calculate new impact totals
+      const newImpact = {
+        total_donations: donationImpact.totalDonations + 1,
+        total_meals: donationImpact.totalMeals + totalMeals,
+        total_pounds: donationImpact.totalPounds + totalPounds,
+        co2_saved: donationImpact.co2Saved + co2Saved,
+        last_donation: new Date().toISOString()
       };
-    });
 
-    const co2Saved = totalPounds * 3.8; // EPA: 1 lb food waste = 3.8 lbs CO2
+      // Update impact in Supabase
+      await donationService.updateImpact(newImpact);
 
-    // Create donation record
-    const donation: DonationRecord = {
-      id: `${Date.now()}`,
-      date: new Date().toISOString(),
-      items: donationItems,
-      foodBank: foodBank.name,
-      totalMeals: totalMeals
-    };
+      // Update local state
+      setDonationImpact({
+        totalDonations: newImpact.total_donations,
+        totalMeals: newImpact.total_meals,
+        totalPounds: newImpact.total_pounds,
+        co2Saved: newImpact.co2_saved,
+        lastDonation: newImpact.last_donation
+      });
 
-    // Update impact
-    setDonationImpact(prev => ({
-      totalDonations: prev.totalDonations + 1,
-      totalMeals: prev.totalMeals + totalMeals,
-      totalPounds: prev.totalPounds + totalPounds,
-      co2Saved: prev.co2Saved + co2Saved,
-      lastDonation: new Date().toISOString()
-  }));
+      // Reload donation history
+      const historyData = await donationService.getHistory();
+      setDonationHistory(historyData.map(donation => ({
+        id: donation.id,
+        date: donation.date,
+        foodBank: donation.food_bank,
+        items: donation.items,
+        totalMeals: donation.total_meals,
+      })));
 
-  setDonationHistory(prev => [donation, ...prev]);
+      // Remove donated items from pantry (both locally and in database)
+      for (const item of items) {
+        await pantryService.delete(item.id);
+      }
+      const donatedItemIds = items.map(item => item.id);
+      setPantry(prev => prev.filter(item => !donatedItemIds.includes(item.id)));
 
-  // Remove donated items from pantry
-  const donatedItemIds = items.map(item => item.id);
-  setPantry(prev => prev.filter(item => !donatedItemIds.includes(item.id)));
-
-  success(`Donation recorded! You're feeding ${totalMeals} meals! 🎉`);
-  setShowDonationModal(false);
-  setItemsToDonate([]);
+      success(`Donation recorded! You're feeding ${totalMeals} meals! 🎉`);
+      setShowDonationModal(false);
+      setItemsToDonate([]);
+    } catch (error) {
+      console.error('Error recording donation:', error);
+      warning('Failed to record donation. Please try again.');
+    }
   };
   if (authLoading) {  // ← Changed from loading
     return (
@@ -1622,29 +1659,30 @@ const App: React.FC = () => {
           </>
         )}
         {currentTab === 'mealplan' && (
-          <MealPlanCalendar 
-            onAddToShoppingList={(items) => {
-              const newItems = items.map(ing => ({
-                id: `${Date.now()}-${Math.random()}`,
-                name: ing.name,
-                quantity: ing.quantity,
-                unit: ing.unit,
-                checked: false,
-                category: 'meal-plan',
-                priority: 'medium' as const
-              }));
-              setShoppingList(prev => [...prev, ...newItems]);
-              
-              // Switch tab FIRST
-              setCurrentTab('shopping');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-              
-              // Show success message AFTER with a small delay
-              setTimeout(() => {
-                success(`Added ${newItems.length} ingredients to shopping list!`);
-              }, 300);
-            }}
-          />
+        <MealPlanCalendar 
+          savedRecipes={favorites}
+          onAddToShoppingList={(items) => {
+            const newItems = items.map(ing => ({
+              id: `${Date.now()}-${Math.random()}`,
+              name: ing.name,
+              quantity: ing.quantity,
+              unit: ing.unit,
+              checked: false,
+              category: 'meal-plan',
+              priority: 'medium' as const
+            }));
+            setShoppingList(prev => [...prev, ...newItems]);
+            
+            // Switch tab FIRST
+            setCurrentTab('shopping');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Show success message AFTER with a small delay
+            setTimeout(() => {
+              success(`Added ${newItems.length} ingredients to shopping list!`);
+            }, 300);
+          }}
+        />
         )}
         {currentTab === 'pantry' && (
           <div style={{ 

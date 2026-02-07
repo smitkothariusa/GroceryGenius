@@ -382,18 +382,21 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ onAddToShoppingList
               {savedRecipes.map(recipe => (
                 <div
                   key={recipe.id}
-                  draggable
-                  onDragStart={() => handleDragStart(recipe)}
+                  draggable={!isMobile}
+                  onDragStart={() => !isMobile && setDraggedRecipe(recipe)}
+                  onDragEnd={() => !isMobile && setDraggedRecipe(null)}
+                  onClick={() => isMobile && (setSelectedSlot(null), setShowRecipePicker(false))}
                   style={{
-                    background: '#f9fafb',
-                    padding: '1rem',
+                    padding: isMobile ? '0.65rem' : '0.75rem',
+                    background: 'white',
+                    marginBottom: '0.5rem',
                     borderRadius: '8px',
                     border: '2px solid #e5e7eb',
-                    cursor: 'grab',
+                    cursor: isMobile ? 'pointer' : 'grab',
                     transition: 'all 0.2s'
                   }}
-                  onMouseDown={(e) => (e.currentTarget.style.cursor = 'grabbing')}
-                  onMouseUp={(e) => (e.currentTarget.style.cursor = 'grab')}
+                  onMouseDown={(e) => !isMobile && (e.currentTarget.style.cursor = 'grabbing')}
+                  onMouseUp={(e) => !isMobile && (e.currentTarget.style.cursor = 'grab')}
                 >
                   <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>{recipe.name}</div>
                   <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>

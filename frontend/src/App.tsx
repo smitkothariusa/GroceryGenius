@@ -1380,17 +1380,50 @@ const App: React.FC = () => {
                     style={{ animationDelay: `${idx * 0.1}s` }}
                   >
                     <div onClick={() => { setSelectedRecipe(recipe); setShowDetailedView(true); }} style={{ cursor: 'pointer', marginBottom: '0.5rem' }}>
-                      <div style={{ background: cardBg, borderRadius: '16px', padding: '1.5rem', boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                          <h3 style={{ margin: 0, fontSize: isMobile ? '1rem' : '1.25rem', fontWeight: '700', flex: 1, paddingRight: '1rem' }}>
+                      <div style={{ 
+                        background: cardBg, 
+                        borderRadius: isMobile ? '12px' : '16px', 
+                        padding: isMobile ? '1rem' : '1.5rem', 
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)' 
+                      }}>
+                        <div style={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          marginBottom: isMobile ? '0.75rem' : '1rem',
+                          gap: isMobile ? '0.75rem' : '1rem'
+                        }}>
+                          <h3 style={{ 
+                            margin: 0, 
+                            fontSize: isMobile ? '0.95rem' : '1.25rem', 
+                            fontWeight: '700', 
+                            flex: 1, 
+                            paddingRight: isMobile ? '0.5rem' : '1rem',
+                            lineHeight: '1.3'
+                          }}>
                             {idx + 1}. {recipe.name}
                           </h3>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
+                          <div style={{ 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            alignItems: 'center', 
+                            gap: '0.25rem',
+                            flexShrink: 0
+                          }}>
                             <div style={{
-                              background: getGradeColor(grade), color: 'white', padding: '0.5rem 0.75rem',
-                              borderRadius: '12px', fontSize: '1.1rem', fontWeight: '700', minWidth: '55px', textAlign: 'center'
+                              background: getGradeColor(grade), 
+                              color: 'white', 
+                              padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 0.75rem',
+                              borderRadius: '12px', 
+                              fontSize: isMobile ? '0.9rem' : '1.1rem', 
+                              fontWeight: '700', 
+                              minWidth: isMobile ? '45px' : '55px', 
+                              textAlign: 'center'
                             }}>{grade}</div>
-                            <span style={{ fontSize: '0.7rem', color: mutedText, fontWeight: '600' }}>Health</span>
+                            <span style={{ 
+                              fontSize: isMobile ? '0.65rem' : '0.7rem', 
+                              color: mutedText, 
+                              fontWeight: '600' 
+                            }}>Health</span>
                           </div>
                         </div>
 
@@ -1407,13 +1440,32 @@ const App: React.FC = () => {
                         </div>
 
                         {ingredients.length > 0 && (
-                          <div style={{ background: '#f0fdf4', padding: '1rem', borderRadius: '12px', marginBottom: '1rem', border: '1px solid #bbf7d0' }}>
-                            <div style={{ fontWeight: '600', color: '#166534', marginBottom: '0.5rem', fontSize: '0.875rem' }}>📝 Key Ingredients:</div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', fontSize: '0.8rem', color: '#047857' }}>
-                              {ingredients.slice(0, 8).map((ing, i) => (
+                          <div style={{ 
+                            background: '#f0fdf4', 
+                            padding: isMobile ? '0.75rem' : '1rem', 
+                            borderRadius: isMobile ? '8px' : '12px', 
+                            marginBottom: isMobile ? '0.75rem' : '1rem', 
+                            border: '1px solid #bbf7d0' 
+                          }}>
+                            <div style={{ 
+                              fontWeight: '600', 
+                              color: '#166534', 
+                              marginBottom: '0.5rem', 
+                              fontSize: isMobile ? '0.75rem' : '0.875rem' 
+                            }}>📝 Key Ingredients:</div>
+                            <div style={{ 
+                              display: 'grid', 
+                              gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', 
+                              gap: isMobile ? '0.25rem' : '0.5rem', 
+                              fontSize: isMobile ? '0.7rem' : '0.8rem', 
+                              color: '#047857' 
+                            }}>
+                              {ingredients.slice(0, isMobile ? 4 : 8).map((ing, i) => (
                                 <div key={i}>• {Math.round(ing.quantity * 10) / 10} {ing.unit} {ing.name}</div>
                               ))}
-                              {ingredients.length > 8 && <div style={{ fontStyle: 'italic' }}>+ {ingredients.length - 8} more...</div>}
+                              {ingredients.length > (isMobile ? 4 : 8) && (
+                                <div style={{ fontStyle: 'italic' }}>+ {ingredients.length - (isMobile ? 4 : 8)} more...</div>
+                              )}
                             </div>
                           </div>
                         )}
@@ -1643,10 +1695,10 @@ const App: React.FC = () => {
                   onClick={(e) => e.stopPropagation()}
                   style={{
                     background: cardBg,
-                    borderRadius: '20px',
-                    padding: '2rem',
-                    maxWidth: '500px',
-                    width: '90%',
+                    borderRadius: isMobile ? '16px' : '20px',
+                    padding: isMobile ? '1.25rem' : '2rem',
+                    maxWidth: isMobile ? '95vw' : '500px',
+                    width: isMobile ? '95vw' : '90%',
                     animation: 'scaleIn 0.3s ease-out',
                     position: 'relative'
                   }}
@@ -3794,29 +3846,30 @@ const App: React.FC = () => {
           style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
             background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', zIndex: 3000, padding: '2rem'
+            justifyContent: 'center', zIndex: 3000, 
+            padding: isMobile ? '1rem' : '2rem'
           }}
         >
           <div 
             onClick={(e) => e.stopPropagation()}
             style={{
               background: 'white',
-              borderRadius: '24px',
-              padding: '3rem',
-              maxWidth: '700px',
+              borderRadius: isMobile ? '16px' : '24px',
+              padding: isMobile ? '1.5rem' : '3rem',
+              maxWidth: isMobile ? '95vw' : '700px',
               width: '100%',
-              maxHeight: '90vh',
+              maxHeight: isMobile ? '95vh' : '90vh',
               overflow: 'auto',
               animation: 'scaleIn 0.4s ease-out',
               position: 'relative'
             }}
           >
             {/* Hero Section */}
-            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-              <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>👨‍🍳❤️</div>
+            <div style={{ textAlign: 'center', marginBottom: isMobile ? '1.5rem' : '2rem' }}>
+              <div style={{ fontSize: isMobile ? '3rem' : '4rem', marginBottom: isMobile ? '0.5rem' : '1rem' }}>👨‍🍳❤️</div>
               <h1 style={{ 
                 margin: '0 0 1rem 0', 
-                fontSize: '2.5rem', 
+                fontSize: isMobile ? '1.75rem' : '2.5rem', 
                 fontWeight: '800',
                 background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                 WebkitBackgroundClip: 'text',
@@ -3826,7 +3879,7 @@ const App: React.FC = () => {
                 Welcome to GroceryGenius
               </h1>
               <p style={{ 
-                fontSize: '1.25rem', 
+                fontSize: isMobile ? '1rem' : '1.25rem', 
                 color: '#6b7280', 
                 fontWeight: '500',
                 lineHeight: '1.6'
@@ -3838,13 +3891,21 @@ const App: React.FC = () => {
             {/* Mission Statement */}
             <div style={{
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              padding: '2rem',
-              borderRadius: '16px',
+              padding: isMobile ? '1.25rem' : '2rem',
+              borderRadius: isMobile ? '12px' : '16px',
               color: 'white',
-              marginBottom: '2rem'
+              marginBottom: isMobile ? '1.5rem' : '2rem'
             }}>
-              <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.5rem' }}>Our Mission</h2>
-              <p style={{ fontSize: '1.1rem', lineHeight: '1.8', margin: 0, opacity: 0.95 }}>
+              <h2 style={{ 
+                margin: '0 0 1rem 0', 
+                fontSize: isMobile ? '1.25rem' : '1.5rem' 
+              }}>Our Mission</h2>
+              <p style={{ 
+                fontSize: isMobile ? '0.875rem' : '1.1rem', 
+                lineHeight: '1.8', 
+                margin: 0, 
+                opacity: 0.95 
+              }}>
                 We're on a mission to end food waste and fight hunger. GroceryGenius helps you plan meals, 
                 use what you have, and donate surplus food to those in need. Every expiring item becomes 
                 an opportunity to feed families in your community.
@@ -3854,27 +3915,70 @@ const App: React.FC = () => {
             {/* Impact Stats */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '1rem',
-              marginBottom: '2rem'
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+              gap: isMobile ? '0.75rem' : '1rem',
+              marginBottom: isMobile ? '1.5rem' : '2rem'
             }}>
-              <div style={{ textAlign: 'center', padding: '1rem', background: '#f0fdf4', borderRadius: '12px' }}>
-                <div style={{ fontSize: '2rem', fontWeight: '700', color: '#10b981' }}>42M</div>
-                <div style={{ fontSize: '0.875rem', color: '#166534', fontWeight: '600' }}>Americans Face Hunger</div>
+              <div style={{ 
+                textAlign: 'center', 
+                padding: isMobile ? '0.75rem' : '1rem', 
+                background: '#f0fdf4', 
+                borderRadius: '12px' 
+              }}>
+                <div style={{ 
+                  fontSize: isMobile ? '1.5rem' : '2rem', 
+                  fontWeight: '700', 
+                  color: '#10b981' 
+                }}>42M</div>
+                <div style={{ 
+                  fontSize: isMobile ? '0.75rem' : '0.875rem', 
+                  color: '#166534', 
+                  fontWeight: '600' 
+                }}>Americans Face Hunger</div>
               </div>
-              <div style={{ textAlign: 'center', padding: '1rem', background: '#fef3c7', borderRadius: '12px' }}>
-                <div style={{ fontSize: '2rem', fontWeight: '700', color: '#f59e0b' }}>40%</div>
-                <div style={{ fontSize: '0.875rem', color: '#92400e', fontWeight: '600' }}>Food Wasted Yearly</div>
+              <div style={{ 
+                textAlign: 'center', 
+                padding: isMobile ? '0.75rem' : '1rem', 
+                background: '#fef3c7', 
+                borderRadius: '12px' 
+              }}>
+                <div style={{ 
+                  fontSize: isMobile ? '1.5rem' : '2rem', 
+                  fontWeight: '700', 
+                  color: '#f59e0b' 
+                }}>40%</div>
+                <div style={{ 
+                  fontSize: isMobile ? '0.75rem' : '0.875rem', 
+                  color: '#92400e', 
+                  fontWeight: '600' 
+                }}>Food Wasted Yearly</div>
               </div>
-              <div style={{ textAlign: 'center', padding: '1rem', background: '#dbeafe', borderRadius: '12px' }}>
-                <div style={{ fontSize: '2rem', fontWeight: '700', color: '#3b82f6' }}>8%</div>
-                <div style={{ fontSize: '0.875rem', color: '#1e40af', fontWeight: '600' }}>Global Emissions</div>
+              <div style={{ 
+                textAlign: 'center', 
+                padding: isMobile ? '0.75rem' : '1rem', 
+                background: '#dbeafe', 
+                borderRadius: '12px' 
+              }}>
+                <div style={{ 
+                  fontSize: isMobile ? '1.5rem' : '2rem', 
+                  fontWeight: '700', 
+                  color: '#3b82f6' 
+                }}>8%</div>
+                <div style={{ 
+                  fontSize: isMobile ? '0.75rem' : '0.875rem', 
+                  color: '#1e40af', 
+                  fontWeight: '600' 
+                }}>Global Emissions</div>
               </div>
             </div>
 
             {/* How to Use */}
-            <div style={{ marginBottom: '2rem' }}>
-              <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#1f2937' }}>
+            <div style={{ marginBottom: isMobile ? '1.5rem' : '2rem' }}>
+              <h3 style={{ 
+                fontSize: isMobile ? '1.25rem' : '1.5rem', 
+                marginBottom: '1rem', 
+                color: '#1f2937' 
+              }}>
                 Quick Start Guide
               </h3>
               
@@ -3985,13 +4089,13 @@ const App: React.FC = () => {
               }}
               style={{
                 width: '100%',
-                padding: '1.25rem',
+                padding: isMobile ? '1rem' : '1.25rem',
                 background: 'linear-gradient(45deg, #10b981, #059669)',
                 color: 'white',
                 border: 'none',
-                borderRadius: '16px',
+                borderRadius: isMobile ? '12px' : '16px',
                 fontWeight: '700',
-                fontSize: '1.25rem',
+                fontSize: isMobile ? '1rem' : '1.25rem',
                 cursor: 'pointer',
                 boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
               }}

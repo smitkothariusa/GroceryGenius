@@ -171,8 +171,13 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ onAddToShoppingList
     let totalProtein = 0;
     let mealsPlanned = 0;
 
+    // Get date range for current week
+    const weekStart = formatDate(currentWeekStart);
+    const weekEnd = formatDate(addDays(currentWeekStart, 6));
+
     mealPlans.forEach(meal => {
-      if (meal.recipe?.nutrition) {
+      // Only count meals in the current week
+      if (meal.date >= weekStart && meal.date <= weekEnd && meal.recipe?.nutrition) {
         totalCalories += meal.recipe.nutrition.calories;
         totalProtein += meal.recipe.nutrition.protein;
         mealsPlanned++;

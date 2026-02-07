@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
+import { mealPlansService } from '../lib/database';
 interface Recipe {
   id: string;
   name: string;
@@ -66,38 +66,50 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ onAddToShoppingList
 
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
 
-  // Load meal plans and recipes
+  // Load meal plans and recipes from Supabase
   useEffect(() => {
-    const savedMealPlans = localStorage.getItem('mealPlans');
-    if (savedMealPlans) {
-      setMealPlans(JSON.parse(savedMealPlans));
-    }
+    const loadData = async () => {
+      try {
+        // Load meal plans
+        const mealPlansData = await mealPlansService.getAll();
+        setMealPlans(mealPlansData.map(plan => ({
+          id: plan.id,
+          date: plan.date,
+          meal_type: plan.meal_type as 'breakfast' | 'lunch' | 'dinner' | 'snack',
+          recipe: plan.recipe,
+          servings: plan.servings,
+          notes: plan.notes,
+          completed: plan.completed
+        })));
 
-    const savedFavorites = localStorage.getItem('favorites');
-    if (savedFavorites) {
-      const favorites = JSON.parse(savedFavorites);
-      const recipes = favorites.map((fav: any) => ({
-        id: fav.id,
-        name: fav.name,
-        ingredients: fav.ingredients,
-        instructions: fav.instructions,
-        prep_time: fav.prep_time,
-        servings: fav.servings,
-        nutrition: fav.nutrition
-      }));
-      setSavedRecipes(recipes);
-    }
+        // Load saved recipes from localStorage (they're already in Supabase via App.tsx)
+        const savedFavorites = localStorage.getItem('favorites');
+        if (savedFavorites) {
+          const favorites = JSON.parse(savedFavorites);
+          const recipes = favorites.map((fav: any) => ({
+            id: fav.id,
+            name: fav.name,
+            ingredients: fav.ingredients,
+            instructions: fav.instructions,
+            prep_time: fav.prep_time,
+            servings: fav.servings,
+            nutrition: fav.nutrition
+          }));
+          setSavedRecipes(recipes);
+        }
+      } catch (error) {
+        console.error('Error loading meal plans:', error);
+      }
+    };
+
+    loadData();
   }, [currentWeekStart]);
+
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  // Save meal plans to localStorage
-  useEffect(() => {
-    localStorage.setItem('mealPlans', JSON.stringify(mealPlans));
-  }, [mealPlans]);
 
   const getMealForSlot = (date: string, mealType: string): MealPlan | undefined => {
     return mealPlans.find(m => m.date === date && m.meal_type === mealType);
@@ -140,30 +152,56 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ onAddToShoppingList
     }
   };
 
-  const handleRecipeSelect = (recipe: Recipe) => {
+  const handleRecipeSelect = async (recipe: Recipe) => {
     if (selectedSlot) {
-      const newMeal: MealPlan = {
-        id: `${Date.now()}`,
-        date: selectedSlot.date,
-        meal_type: selectedSlot.mealType as any,
-        recipe,
-        servings: recipe.servings || 2,
-        completed: false
-      };
-      setMealPlans([...mealPlans, newMeal]);
-      setShowRecipePicker(false);
-      setSelectedSlot(null);
+      try {
+        const savedMeal = await mealPlansService.add({
+          date: selectedSlot.date,
+          meal_type: selectedSlot.mealType,
+          recipe: recipe,
+          servings: recipe.servings || 2,
+          completed: false
+        });
+
+        const newMeal: MealPlan = {
+          id: savedMeal.id,
+          date: savedMeal.date,
+          meal_type: savedMeal.meal_type as any,
+          recipe: savedMeal.recipe,
+          servings: savedMeal.servings,
+          completed: savedMeal.completed
+        };
+        
+        setMealPlans([...mealPlans, newMeal]);
+        setShowRecipePicker(false);
+        setSelectedSlot(null);
+      } catch (error) {
+        console.error('Error adding meal plan:', error);
+      }
     }
   };
 
-  const handleDeleteMeal = (mealId: string) => {
-    setMealPlans(mealPlans.filter(m => m.id !== mealId));
+  const handleDeleteMeal = async (mealId: string) => {
+    try {
+      await mealPlansService.delete(mealId);
+      setMealPlans(mealPlans.filter(m => m.id !== mealId));
+    } catch (error) {
+      console.error('Error deleting meal:', error);
+    }
   };
 
-  const handleToggleComplete = (mealId: string) => {
-    setMealPlans(mealPlans.map(m => 
-      m.id === mealId ? { ...m, completed: !m.completed } : m
-    ));
+  const handleToggleComplete = async (mealId: string) => {
+    const meal = mealPlans.find(m => m.id === mealId);
+    if (meal) {
+      try {
+        await mealPlansService.update(mealId, { completed: !meal.completed });
+        setMealPlans(mealPlans.map(m => 
+          m.id === mealId ? { ...m, completed: !m.completed } : m
+        ));
+      } catch (error) {
+        console.error('Error updating meal:', error);
+      }
+    }
   };
 
   const calculateWeekStats = () => {

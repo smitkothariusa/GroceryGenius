@@ -369,6 +369,7 @@ export const donationService = {
   },
 
   // Update donation impact stats
+// Update donation impact stats
   async updateImpact(impact: {
     total_donations: number;
     total_meals: number;
@@ -384,6 +385,8 @@ export const donationService = {
       .upsert({
         user_id: userData.user.id,
         ...impact,
+      }, {
+        onConflict: 'user_id'  // ← ADD THIS - tells upsert which column is unique
       })
       .select()
       .single();

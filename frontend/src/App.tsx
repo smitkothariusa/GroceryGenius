@@ -139,10 +139,12 @@ const App: React.FC = () => {
   const [showEditPantry, setShowEditPantry] = useState(false);
   // Load all user data from Supabase
   const loadUserData = async () => {
+    console.log('📦 Loading user data from Supabase...');
+
+    // Load each data source independently so one failure doesn't break everything
+    
+    // Load pantry items
     try {
-      console.log('📥 Loading user data from Supabase...');
-      
-      // Load pantry items
       const pantryData = await pantryService.getAll();
       setPantry(pantryData.map(item => ({
         id: item.id,
@@ -150,10 +152,16 @@ const App: React.FC = () => {
         quantity: item.quantity,
         unit: item.unit,
         category: item.category,
-        expiryDate: item.expiry_date || undefined,
+        expiryDate: item.expiry_date,
       })));
+      console.log('✅ Pantry loaded:', pantryData.length, 'items');
+    } catch (error) {
+      console.error('❌ Error loading pantry:', error);
+      setPantry([]); // Reset to empty instead of leaving in broken state
+    }
 
-      // Load shopping list
+    // Load shopping items
+    try {
       const shoppingData = await shoppingService.getAll();
       setShoppingList(shoppingData.map(item => ({
         id: item.id,
@@ -164,8 +172,14 @@ const App: React.FC = () => {
         checked: item.checked,
         priority: item.priority as 'high' | 'medium' | 'low',
       })));
+      console.log('✅ Shopping list loaded:', shoppingData.length, 'items');
+    } catch (error) {
+      console.error('❌ Error loading shopping list:', error);
+      setShoppingList([]);
+    }
 
-      // Load favorite recipes
+    // Load favorite recipes
+    try {
       const recipesData = await recipesService.getAll();
       setFavorites(recipesData.map(recipe => ({
         id: recipe.id,
@@ -181,8 +195,14 @@ const App: React.FC = () => {
         budget_tip: recipe.budget_tip,
         savedDate: recipe.created_at,
       })));
+      console.log('✅ Favorites loaded:', recipesData.length, 'recipes');
+    } catch (error) {
+      console.error('❌ Error loading favorites:', error);
+      setFavorites([]);
+    }
 
-      // Load donation history
+    // Load donation history
+    try {
       const historyData = await donationService.getHistory();
       setDonationHistory(historyData.map(donation => ({
         id: donation.id,
@@ -191,8 +211,14 @@ const App: React.FC = () => {
         items: donation.items,
         totalMeals: donation.total_meals,
       })));
+      console.log('✅ Donation history loaded:', historyData.length, 'donations');
+    } catch (error) {
+      console.error('❌ Error loading donation history:', error);
+      setDonationHistory([]);
+    }
 
-      // Load donation impact
+    // Load donation impact
+    try {
       const impactData = await donationService.getImpact();
       setDonationImpact({
         totalDonations: impactData.total_donations || 0,
@@ -201,19 +227,18 @@ const App: React.FC = () => {
         co2Saved: impactData.co2_saved || 0,
         lastDonation: impactData.last_donation,
       });
-
-      console.log('✅ User data loaded from Supabase');
-      console.log('📊 Data counts:', {
-        pantry: pantryData.length,
-        shopping: shoppingData.length,
-        favorites: recipesData.length,
-        donations: historyData.length
-      });
-      console.log('🎯 Favorites:', recipesData.map(r => r.name));
+      console.log('✅ Donation impact loaded');
     } catch (error) {
-      console.error('❌ Error loading user data:', error);
-      // Only show warning for critical errors, not empty data
+      console.error('❌ Error loading donation impact:', error);
+      setDonationImpact({
+        totalDonations: 0,
+        totalMeals: 0,
+        totalPounds: 0,
+        co2Saved: 0
+      });
     }
+
+    console.log('✅ All user data loading attempts complete');
   };
   useEffect(() => {
       const initAuth = async () => {
@@ -222,7 +247,7 @@ const App: React.FC = () => {
           const session = await authService.getSession();
           console.log('📝 Session:', session ? 'Found' : 'None');
           setUser(session?.user || null);
-      
+          setAuthLoading(false);
           if (session?.user) {
             console.log('👤 User authenticated, loading data...');
             try {
@@ -1138,25 +1163,35 @@ const App: React.FC = () => {
 
         console.log('📊 Updating impact stats...');
 
-        // Update impact
-        const newImpact = {
-          total_donations: donationImpact.totalDonations + 1,
-          total_meals: donationImpact.totalMeals + totalMeals,
-          total_pounds: donationImpact.totalPounds + totalPounds,
-          co2_saved: donationImpact.co2Saved + co2Saved,
-          last_donation: new Date().toISOString()
-        };
+        // Update impact - fetch current values first to avoid duplicate key issues
+        try {
+          const currentImpact = await donationService.getImpact();
+          
+          const newImpact = {
+            total_donations: (currentImpact.total_donations || 0) + 1,
+            total_meals: (currentImpact.total_meals || 0) + totalMeals,
+            total_pounds: (currentImpact.total_pounds || 0) + totalPounds,
+            co2_saved: (currentImpact.co2_saved || 0) + co2Saved,
+            last_donation: new Date().toISOString()
+          };
 
-        await donationService.updateImpact(newImpact);
+          await donationService.updateImpact(newImpact);
+          
+          // Update local state
+          setDonationImpact({
+            totalDonations: newImpact.total_donations,
+            totalMeals: newImpact.total_meals,
+            totalPounds: newImpact.total_pounds,
+            co2Saved: newImpact.co2_saved,
+            lastDonation: newImpact.last_donation
+          });
+          
+          console.log('✅ Impact stats updated');
+        } catch (impactError) {
+          console.error('⚠️ Error updating impact stats:', impactError);
+          // Don't fail the whole donation if just stats update fails
+        }
 
-        // Update local state
-        setDonationImpact({
-          totalDonations: newImpact.total_donations,
-          totalMeals: newImpact.total_meals,
-          totalPounds: newImpact.total_pounds,
-          co2Saved: newImpact.co2_saved,
-          lastDonation: newImpact.last_donation
-        });
 
         console.log('🗑️ Removing donated items from pantry...');
 
@@ -1189,8 +1224,19 @@ const App: React.FC = () => {
         setCurrentTab('donate');
       } catch (err: any) {
         console.error('❌ Error recording donation:', err);
-        console.error('Error details:', err.message, err.code);
-        error(`Failed to record donation: ${err.message || 'Please try again.'}`);
+        console.error('Error details:', {
+          message: err.message,
+          code: err.code,
+          details: err.details,
+          hint: err.hint
+        });
+        
+        // Show specific error message
+        if (err.code === '23505') {
+          error('Database sync error. Please refresh the page and try again.');
+        } else {
+          error(`Failed to record donation: ${err.message || 'Please try again.'}`);
+        }
       }
     };
   if (authLoading) {  // ← Changed from loading

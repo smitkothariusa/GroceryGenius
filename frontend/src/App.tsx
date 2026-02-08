@@ -218,16 +218,21 @@ const App: React.FC = () => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const { data } = await authService.getSession();
-        setUser(data?.session?.user || null);
-        
-        if (data?.session?.user) {
-          await loadUserData();
+        const session = await authService.getSession();
+        setUser(session?.user || null);
+    
+        if (session?.user) {
+          try {
+            await loadUserData();
+          } catch (loadError) {
+            console.error('Error loading user data:', loadError);
+            // User is still authenticated, just failed to load data
+          }
         }
       } catch (error) {
         console.error('Auth error:', error);
       } finally {
-        setAuthLoading(false);  // ✅ ALWAYS set false in finally
+        setAuthLoading(false);  // ✅ ALWAYS runs
       }
     };
 
@@ -237,7 +242,11 @@ const App: React.FC = () => {
       setUser(session?.user || null);
       
       if (event === 'SIGNED_IN' && session?.user) {
-        await loadUserData();
+        try {
+          await loadUserData();
+        } catch (loadError) {
+          console.error('Error loading user data on sign in:', loadError);
+        }
       }
     });
 
@@ -1067,12 +1076,27 @@ const App: React.FC = () => {
     
     setShowShareModal(false);
   };
-  const handleDonation = async (foodBank: FoodBank, items: typeof pantry) => {
+  const handleDonation = async (foodBank: FoodBank, items: PantryItem[]) => {
+    if (!selectedFoodBank || itemsToDonate.length === 0) {
+      warning('Please select a food bank and items to donate');
+      return;
+    }
+
     try {
+      console.log('🎁 Starting donation process...');
+      
+      // Get the actual items to donate
+      const itemsToDonateFull = pantry.filter(item => itemsToDonate.includes(item.id));
+      
+      if (itemsToDonateFull.length === 0) {
+        warning('No items selected for donation');
+        return;
+      }
+
       let totalMeals = 0;
       let totalPounds = 0;
 
-      const donationItems = items.map(item => {
+      const donationItems = itemsToDonateFull.map(item => {
         const meals = calculateMeals(item.quantity, item.unit, item.name);
         const pounds = item.unit === 'lbs' ? item.quantity : item.quantity * 0.5;
         
@@ -1089,14 +1113,19 @@ const App: React.FC = () => {
 
       const co2Saved = totalPounds * 3.8;
 
+      console.log('💾 Saving donation to Supabase...');
+      
       // SAVE TO SUPABASE
       await donationService.add({
         date: new Date().toISOString(),
-        food_bank: foodBank.name,
+        food_bank: selectedFoodBank.name,
         items: donationItems,
         total_meals: totalMeals
       });
 
+      console.log('📊 Updating impact stats...');
+
+      // Update impact
       const newImpact = {
         total_donations: donationImpact.totalDonations + 1,
         total_meals: donationImpact.totalMeals + totalMeals,
@@ -1107,6 +1136,7 @@ const App: React.FC = () => {
 
       await donationService.updateImpact(newImpact);
 
+      // Update local state
       setDonationImpact({
         totalDonations: newImpact.total_donations,
         totalMeals: newImpact.total_meals,
@@ -1115,6 +1145,17 @@ const App: React.FC = () => {
         lastDonation: newImpact.last_donation
       });
 
+      console.log('🗑️ Removing donated items from pantry...');
+
+      // Remove from Supabase AND local state
+      await Promise.all(itemsToDonateFull.map(item => pantryService.delete(item.id)));
+      
+      const donatedItemIds = itemsToDonateFull.map(item => item.id);
+      setPantry(prev => prev.filter(item => !donatedItemIds.includes(item.id)));
+
+      console.log('📜 Reloading donation history...');
+
+      // Reload donation history to show the new donation
       const historyData = await donationService.getHistory();
       setDonationHistory(historyData.map(donation => ({
         id: donation.id,
@@ -1124,19 +1165,18 @@ const App: React.FC = () => {
         totalMeals: donation.total_meals,
       })));
 
-      for (const item of items) {
-        await pantryService.delete(item.id);
-      }
-      
-      const donatedItemIds = items.map(item => item.id);
-      setPantry(prev => prev.filter(item => !donatedItemIds.includes(item.id)));
+      console.log('✅ Donation complete!');
 
       success(`Donation recorded! You're feeding ${totalMeals} meals! 🎉`);
       setShowDonationModal(false);
       setItemsToDonate([]);
-    } catch (error) {
-      console.error('Error recording donation:', error);
-      warning('Failed to record donation. Please try again.');
+      setSelectedFoodBank(null);
+      
+      // Switch to donate tab to show the impact
+      setCurrentTab('donate');
+      } catch (err) {
+      console.error('❌ Error recording donation:', err);
+      error('Failed to record donation. Please try again.');
     }
   };
   if (authLoading) {  // ← Changed from loading
@@ -4045,23 +4085,21 @@ const App: React.FC = () => {
                 Cancel
               </button>
               
-              <button
-                onClick={() => {
-                  if (!selectedFoodBank) {
-                    warning('Please select a food bank');
+              <button 
+                onClick={async () => {
+                  if (!selectedFoodBank || itemsToDonate.length === 0) {
+                    warning('Please select a food bank and items to donate');
                     return;
                   }
-                  if (itemsToDonate.length === 0) {
-                    warning('Please select items to donate');
-                    return;
-                  }
-
-                  const itemsToRecord = pantry.filter(item => itemsToDonate.includes(item.id));
-                  handleDonation(selectedFoodBank, itemsToRecord);
+                  
+                  const itemsToDonateFull = pantry.filter(item => 
+                    itemsToDonate.includes(item.id)
+                  );
+                  
+                  await handleDonation(selectedFoodBank, itemsToDonateFull);
                 }}
                 disabled={!selectedFoodBank || itemsToDonate.length === 0}
                 style={{
-                  flex: 1,
                   padding: '1rem',
                   background: (!selectedFoodBank || itemsToDonate.length === 0) 
                     ? '#9ca3af' 
@@ -4069,7 +4107,9 @@ const App: React.FC = () => {
                   color: 'white',
                   border: 'none',
                   borderRadius: '12px',
-                  cursor: (!selectedFoodBank || itemsToDonate.length === 0) ? 'not-allowed' : 'pointer',
+                  cursor: (!selectedFoodBank || itemsToDonate.length === 0) 
+                    ? 'not-allowed' 
+                    : 'pointer',
                   fontWeight: '600',
                   fontSize: '1rem'
                 }}

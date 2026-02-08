@@ -67,24 +67,49 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, onAdd
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
 
   // Load meal plans and recipes from Supabase
+// Load meal plans and recipes from Supabase
   useEffect(() => {
     const loadData = async () => {
       try {
         // Load meal plans from Supabase
         const mealPlansData = await mealPlansService.getAll();
-        setMealPlans(mealPlansData.map(plan => ({
-          id: plan.id,
-          date: plan.date,
-          meal_type: plan.meal_type as 'breakfast' | 'lunch' | 'dinner' | 'snack',
-          recipe: plan.recipe,
-          servings: plan.servings,
-          notes: plan.notes,
-          completed: plan.completed
-        })));
+        
+        // Transform the data to match the expected format
+        const transformedPlans = mealPlansData.map(plan => {
+          // Parse recipe if it's stored as JSON string
+          let recipeData = plan.recipe;
+          if (typeof recipeData === 'string') {
+            try {
+              recipeData = JSON.parse(recipeData);
+            } catch (e) {
+              console.error('Failed to parse recipe:', e);
+              recipeData = null;
+            }
+          }
 
-        // Use saved recipes from props (already loaded from Supabase in App.tsx)
+          return {
+            id: plan.id,
+            date: plan.date,
+            meal_type: plan.meal_type as 'breakfast' | 'lunch' | 'dinner' | 'snack',
+            recipe: recipeData ? {
+              id: recipeData.id || plan.id,
+              name: recipeData.name || '',
+              ingredients: recipeData.ingredients || '',
+              instructions: recipeData.instructions || '',
+              prep_time: recipeData.prep_time,
+              servings: recipeData.servings || 2,
+              nutrition: recipeData.nutrition
+            } : undefined,
+            servings: plan.servings || 2,
+            notes: plan.notes,
+            completed: plan.completed || false
+          };
+        });
+
+        setMealPlans(transformedPlans);
+        console.log('✅ Meal plans loaded:', transformedPlans.length);
       } catch (error) {
-        console.error('Error loading meal plans:', error);
+        console.error('❌ Error loading meal plans:', error);
       }
     };
 

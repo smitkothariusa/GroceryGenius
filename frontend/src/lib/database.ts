@@ -240,29 +240,46 @@ export const mealPlansService = {
   },
 
   // Add meal plan
-  async add(mealPlan: {
+    // Add meal plan
+    async add(mealPlan: {
     date: string;
     meal_type: string;
     recipe: any;
     servings: number;
     notes?: string;
     completed?: boolean;
-  }) {
+    }) {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) throw new Error('Not authenticated');
 
+    // Serialize the recipe object as JSONB
+    const recipeToStore = mealPlan.recipe ? {
+        id: mealPlan.recipe.id,
+        name: mealPlan.recipe.name,
+        ingredients: mealPlan.recipe.ingredients,
+        instructions: mealPlan.recipe.instructions,
+        prep_time: mealPlan.recipe.prep_time,
+        servings: mealPlan.recipe.servings,
+        nutrition: mealPlan.recipe.nutrition
+    } : null;
+
     const { data, error } = await supabase
-      .from('meal_plans')
-      .insert({
+        .from('meal_plans')
+        .insert({
         user_id: userData.user.id,
-        ...mealPlan,
-      })
-      .select()
-      .single();
+        date: mealPlan.date,
+        meal_type: mealPlan.meal_type,
+        recipe: recipeToStore,  // Store as JSONB
+        servings: mealPlan.servings,
+        notes: mealPlan.notes,
+        completed: mealPlan.completed || false
+        })
+        .select()
+        .single();
     
     if (error) throw error;
     return data;
-  },
+    },
 
   // Update meal plan
   async update(id: string, updates: Partial<{

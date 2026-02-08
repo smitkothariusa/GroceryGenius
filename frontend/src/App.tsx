@@ -247,7 +247,8 @@ const App: React.FC = () => {
           const session = await authService.getSession();
           console.log('📝 Session:', session ? 'Found' : 'None');
           setUser(session?.user || null);
-          setAuthLoading(false);
+          // DON'T set loading false here - wait until data loads
+          
           if (session?.user) {
             console.log('👤 User authenticated, loading data...');
             try {
@@ -262,10 +263,9 @@ const App: React.FC = () => {
           setUser(null);
         } finally {
           console.log('✅ Auth initialization complete');
-          setAuthLoading(false);  // ✅ ALWAYS runs
+          setAuthLoading(false);  // ✅ Set loading false AFTER everything completes
         }
       };
-
       initAuth();
 
       const { data: authListener } = authService.onAuthStateChange(async (event, session) => {

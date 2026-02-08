@@ -139,13 +139,14 @@ const App: React.FC = () => {
   const [showEditPantry, setShowEditPantry] = useState(false);
   // Load all user data from Supabase
   const loadUserData = async () => {
-    console.log('📦 Loading user data from Supabase...');
-
-    // Load each data source independently so one failure doesn't break everything
-    
-    // Load pantry items
     try {
-      const pantryData = await pantryService.getAll();
+      console.log('📦 Loading user data from Supabase...');
+
+      // Load each data source independently so one failure doesn't break everything
+      
+      // Load pantry items
+      try {
+        const pantryData = await pantryService.getAll();
       setPantry(pantryData.map(item => ({
         id: item.id,
         name: item.name,
@@ -239,6 +240,15 @@ const App: React.FC = () => {
     }
 
     console.log('✅ All user data loading attempts complete');
+    } catch (criticalError: any) {
+      console.error('🚨 CRITICAL ERROR in loadUserData:', criticalError);
+      console.error('Error type:', typeof criticalError);
+      console.error('Error message:', criticalError?.message);
+      console.error('Error stack:', criticalError?.stack);
+      // Don't throw - just log and continue so app doesn't break
+    } finally {
+      console.log('🏁 loadUserData execution finished');
+    }
   };
   useEffect(() => {
       const initAuth = async () => {

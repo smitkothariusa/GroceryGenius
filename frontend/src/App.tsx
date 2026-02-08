@@ -295,10 +295,16 @@ const App: React.FC = () => {
         setAuthLoading(false); // ← ADD THIS LINE to fix stuck loading
         
         if (event === 'SIGNED_IN' && session?.user) {
-          try {
-            await loadUserData();
-          } catch (loadError) {
-            console.error('Error loading user data on sign in:', loadError);
+          // Only reload if this is a fresh sign-in, not a page refresh
+          if (event === 'SIGNED_IN' && !user) {
+            console.log('🔄 Fresh sign in detected, reloading data...');
+            setTimeout(async () => {
+              try {
+                await loadUserData();
+              } catch (loadError) {
+                console.error('Error loading user data:', loadError);
+              }
+            }, 100);
           }
         }
         

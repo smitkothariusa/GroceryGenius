@@ -217,20 +217,17 @@ const App: React.FC = () => {
   };
   useEffect(() => {
     const initAuth = async () => {
-    try {
-      const sessionData = await authService.getSession();
-      const session = sessionData?.data?.session || null;
-      setUser(session?.user || null);
+      try {
+        const { data } = await authService.getSession();
+        setUser(data?.session?.user || null);
         
-        // Load user data from Supabase after authentication
-        if (session?.user) {
+        if (data?.session?.user) {
           await loadUserData();
         }
       } catch (error) {
         console.error('Auth error:', error);
       } finally {
-        // ALWAYS set loading to false, even if there's an error
-        setAuthLoading(false);
+        setAuthLoading(false);  // ✅ ALWAYS set false in finally
       }
     };
 
@@ -239,7 +236,6 @@ const App: React.FC = () => {
     const { data: authListener } = authService.onAuthStateChange(async (event, session) => {
       setUser(session?.user || null);
       
-      // Load data when user signs in
       if (event === 'SIGNED_IN' && session?.user) {
         await loadUserData();
       }
@@ -1073,13 +1069,12 @@ const App: React.FC = () => {
   };
   const handleDonation = async (foodBank: FoodBank, items: typeof pantry) => {
     try {
-      // Calculate impact
       let totalMeals = 0;
       let totalPounds = 0;
 
       const donationItems = items.map(item => {
         const meals = calculateMeals(item.quantity, item.unit, item.name);
-        const pounds = item.unit === 'lbs' ? item.quantity : item.quantity * 0.5; // Rough estimate
+        const pounds = item.unit === 'lbs' ? item.quantity : item.quantity * 0.5;
         
         totalMeals += meals;
         totalPounds += pounds;
@@ -1092,9 +1087,9 @@ const App: React.FC = () => {
         };
       });
 
-      const co2Saved = totalPounds * 3.8; // EPA: 1 lb food waste = 3.8 lbs CO2
+      const co2Saved = totalPounds * 3.8;
 
-      // Save donation to Supabase
+      // SAVE TO SUPABASE
       await donationService.add({
         date: new Date().toISOString(),
         food_bank: foodBank.name,
@@ -1102,7 +1097,6 @@ const App: React.FC = () => {
         total_meals: totalMeals
       });
 
-      // Calculate new impact totals
       const newImpact = {
         total_donations: donationImpact.totalDonations + 1,
         total_meals: donationImpact.totalMeals + totalMeals,
@@ -1111,10 +1105,8 @@ const App: React.FC = () => {
         last_donation: new Date().toISOString()
       };
 
-      // Update impact in Supabase
       await donationService.updateImpact(newImpact);
 
-      // Update local state
       setDonationImpact({
         totalDonations: newImpact.total_donations,
         totalMeals: newImpact.total_meals,
@@ -1123,7 +1115,6 @@ const App: React.FC = () => {
         lastDonation: newImpact.last_donation
       });
 
-      // Reload donation history
       const historyData = await donationService.getHistory();
       setDonationHistory(historyData.map(donation => ({
         id: donation.id,
@@ -1133,10 +1124,10 @@ const App: React.FC = () => {
         totalMeals: donation.total_meals,
       })));
 
-      // Remove donated items from pantry (both locally and in database)
       for (const item of items) {
         await pantryService.delete(item.id);
       }
+      
       const donatedItemIds = items.map(item => item.id);
       setPantry(prev => prev.filter(item => !donatedItemIds.includes(item.id)));
 

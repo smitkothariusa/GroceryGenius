@@ -145,8 +145,11 @@ const App: React.FC = () => {
       // Load each data source independently so one failure doesn't break everything
       
       // Load pantry items
-      try {
-        const pantryData = await pantryService.getAll();
+      // Load pantry items
+    console.log('⏳ Starting to load pantry...');
+    try {
+      const pantryData = await pantryService.getAll();
+      console.log('📦 Pantry data received, transforming...');
       setPantry(pantryData.map(item => ({
         id: item.id,
         name: item.name,
@@ -158,12 +161,14 @@ const App: React.FC = () => {
       console.log('✅ Pantry loaded:', pantryData.length, 'items');
     } catch (error) {
       console.error('❌ Error loading pantry:', error);
-      setPantry([]); // Reset to empty instead of leaving in broken state
+      setPantry([]);
     }
 
     // Load shopping items
+    console.log('⏳ Starting to load shopping items...');
     try {
       const shoppingData = await shoppingService.getAll();
+      console.log('📦 Shopping data received, transforming...');
       setShoppingList(shoppingData.map(item => ({
         id: item.id,
         name: item.name,
@@ -180,8 +185,10 @@ const App: React.FC = () => {
     }
 
     // Load favorite recipes
+    console.log('⏳ Starting to load favorites...');
     try {
       const recipesData = await recipesService.getAll();
+      console.log('📦 Favorites data received, transforming...');
       setFavorites(recipesData.map(recipe => ({
         id: recipe.id,
         name: recipe.name,
@@ -203,8 +210,10 @@ const App: React.FC = () => {
     }
 
     // Load donation history
+    console.log('⏳ Starting to load donation history...');
     try {
       const historyData = await donationService.getHistory();
+      console.log('📦 History data received, transforming...');
       setDonationHistory(historyData.map(donation => ({
         id: donation.id,
         date: donation.date,
@@ -219,8 +228,10 @@ const App: React.FC = () => {
     }
 
     // Load donation impact
+    console.log('⏳ Starting to load donation impact...');
     try {
       const impactData = await donationService.getImpact();
+      console.log('📦 Impact data received, transforming...');
       setDonationImpact({
         totalDonations: impactData.total_donations || 0,
         totalMeals: impactData.total_meals || 0,

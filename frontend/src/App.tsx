@@ -246,6 +246,7 @@ const App: React.FC = () => {
       const { data: authListener } = authService.onAuthStateChange(async (event, session) => {
         console.log('🔄 Auth state changed:', event);
         setUser(session?.user || null);
+        setAuthLoading(false); // ← ADD THIS LINE to fix stuck loading
         
         if (event === 'SIGNED_IN' && session?.user) {
           try {
@@ -1186,9 +1187,10 @@ const App: React.FC = () => {
         
         // Switch to donate tab to show the impact
         setCurrentTab('donate');
-      } catch (err) {
+      } catch (err: any) {
         console.error('❌ Error recording donation:', err);
-        error('Failed to record donation. Please try again.');
+        console.error('Error details:', err.message, err.code);
+        error(`Failed to record donation: ${err.message || 'Please try again.'}`);
       }
     };
   if (authLoading) {  // ← Changed from loading

@@ -140,10 +140,19 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, onAdd
           console.log('📅 Saving meal to calendar:', { date, mealType, recipe: draggedRecipe.name });
           
           // Save to Supabase
+          // Save to Supabase
           const savedMeal = await mealPlansService.add({
             date: date,
             meal_type: mealType,
-            recipe: draggedRecipe,
+            recipe: {
+              id: draggedRecipe.id,
+              name: draggedRecipe.name,
+              ingredients: draggedRecipe.ingredients,
+              instructions: draggedRecipe.instructions,
+              prep_time: draggedRecipe.prep_time,
+              servings: draggedRecipe.servings,
+              nutrition: draggedRecipe.nutrition
+            },
             servings: draggedRecipe.servings || 2,
             completed: false
           });

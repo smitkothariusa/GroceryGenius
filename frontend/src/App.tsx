@@ -216,44 +216,63 @@ const App: React.FC = () => {
     }
   };
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const session = await authService.getSession();
+      const initAuth = async () => {
+        try {
+          console.log('🔐 Initializing auth...');
+          const session = await authService.getSession();
+          console.log('📝 Session:', session ? 'Found' : 'None');
+          setUser(session?.user || null);
+      
+          if (session?.user) {
+            console.log('👤 User authenticated, loading data...');
+            try {
+              await loadUserData();
+            } catch (loadError) {
+              console.error('⚠️ Error loading user data:', loadError);
+              // User is still authenticated, just failed to load data
+            }
+          }
+        } catch (err) {
+          console.error('❌ Auth error:', err);
+          setUser(null);
+        } finally {
+          console.log('✅ Auth initialization complete');
+          setAuthLoading(false);  // ✅ ALWAYS runs
+        }
+      };
+
+      initAuth();
+
+      const { data: authListener } = authService.onAuthStateChange(async (event, session) => {
+        console.log('🔄 Auth state changed:', event);
         setUser(session?.user || null);
-    
-        if (session?.user) {
+        
+        if (event === 'SIGNED_IN' && session?.user) {
           try {
             await loadUserData();
           } catch (loadError) {
-            console.error('Error loading user data:', loadError);
-            // User is still authenticated, just failed to load data
+            console.error('Error loading user data on sign in:', loadError);
           }
         }
-      } catch (error) {
-        console.error('Auth error:', error);
-      } finally {
-        setAuthLoading(false);  // ✅ ALWAYS runs
-      }
-    };
-
-    initAuth();
-
-    const { data: authListener } = authService.onAuthStateChange(async (event, session) => {
-      setUser(session?.user || null);
-      
-      if (event === 'SIGNED_IN' && session?.user) {
-        try {
-          await loadUserData();
-        } catch (loadError) {
-          console.error('Error loading user data on sign in:', loadError);
+        
+        if (event === 'SIGNED_OUT') {
+          setPantry([]);
+          setShoppingList([]);
+          setFavorites([]);
+          setDonationHistory([]);
+          setDonationImpact({
+            totalDonations: 0,
+            totalMeals: 0,
+            totalPounds: 0,
+            co2Saved: 0
+          });
         }
-      }
-    });
+      });
 
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
-  }, []);
+      return () => {
+        authListener?.subscription?.unsubscribe();
+      };
+    }, []);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
@@ -1077,108 +1096,101 @@ const App: React.FC = () => {
     setShowShareModal(false);
   };
   const handleDonation = async (foodBank: FoodBank, items: PantryItem[]) => {
-    if (!selectedFoodBank || itemsToDonate.length === 0) {
-      warning('Please select a food bank and items to donate');
-      return;
-    }
-
-    try {
-      console.log('🎁 Starting donation process...');
-      
-      // Get the actual items to donate
-      const itemsToDonateFull = pantry.filter(item => itemsToDonate.includes(item.id));
-      
-      if (itemsToDonateFull.length === 0) {
-        warning('No items selected for donation');
+      if (!foodBank || items.length === 0) {
+        warning('Please select a food bank and items to donate');
         return;
       }
 
-      let totalMeals = 0;
-      let totalPounds = 0;
-
-      const donationItems = itemsToDonateFull.map(item => {
-        const meals = calculateMeals(item.quantity, item.unit, item.name);
-        const pounds = item.unit === 'lbs' ? item.quantity : item.quantity * 0.5;
+      try {
+        console.log('🎁 Starting donation process...');
+        console.log('📦 Items to donate:', items);
         
-        totalMeals += meals;
-        totalPounds += pounds;
+        let totalMeals = 0;
+        let totalPounds = 0;
 
-        return {
-          name: item.name,
-          quantity: item.quantity,
-          unit: item.unit,
-          estimatedMeals: meals
+        const donationItems = items.map(item => {
+          const meals = calculateMeals(item.quantity, item.unit, item.name);
+          const pounds = item.unit === 'lbs' ? item.quantity : item.quantity * 0.5;
+          
+          totalMeals += meals;
+          totalPounds += pounds;
+
+          return {
+            name: item.name,
+            quantity: item.quantity,
+            unit: item.unit,
+            estimatedMeals: meals
+          };
+        });
+
+        const co2Saved = totalPounds * 3.8;
+
+        console.log('💾 Saving donation to Supabase...');
+        
+        // SAVE TO SUPABASE
+        await donationService.add({
+          date: new Date().toISOString(),
+          food_bank: foodBank.name,
+          items: donationItems,
+          total_meals: totalMeals
+        });
+
+        console.log('📊 Updating impact stats...');
+
+        // Update impact
+        const newImpact = {
+          total_donations: donationImpact.totalDonations + 1,
+          total_meals: donationImpact.totalMeals + totalMeals,
+          total_pounds: donationImpact.totalPounds + totalPounds,
+          co2_saved: donationImpact.co2Saved + co2Saved,
+          last_donation: new Date().toISOString()
         };
-      });
 
-      const co2Saved = totalPounds * 3.8;
+        await donationService.updateImpact(newImpact);
 
-      console.log('💾 Saving donation to Supabase...');
-      
-      // SAVE TO SUPABASE
-      await donationService.add({
-        date: new Date().toISOString(),
-        food_bank: selectedFoodBank.name,
-        items: donationItems,
-        total_meals: totalMeals
-      });
+        // Update local state
+        setDonationImpact({
+          totalDonations: newImpact.total_donations,
+          totalMeals: newImpact.total_meals,
+          totalPounds: newImpact.total_pounds,
+          co2Saved: newImpact.co2_saved,
+          lastDonation: newImpact.last_donation
+        });
 
-      console.log('📊 Updating impact stats...');
+        console.log('🗑️ Removing donated items from pantry...');
 
-      // Update impact
-      const newImpact = {
-        total_donations: donationImpact.totalDonations + 1,
-        total_meals: donationImpact.totalMeals + totalMeals,
-        total_pounds: donationImpact.totalPounds + totalPounds,
-        co2_saved: donationImpact.co2Saved + co2Saved,
-        last_donation: new Date().toISOString()
-      };
+        // Remove from Supabase AND local state
+        await Promise.all(items.map(item => pantryService.delete(item.id)));
+        
+        const donatedItemIds = items.map(item => item.id);
+        setPantry(prev => prev.filter(item => !donatedItemIds.includes(item.id)));
 
-      await donationService.updateImpact(newImpact);
+        console.log('📜 Reloading donation history...');
 
-      // Update local state
-      setDonationImpact({
-        totalDonations: newImpact.total_donations,
-        totalMeals: newImpact.total_meals,
-        totalPounds: newImpact.total_pounds,
-        co2Saved: newImpact.co2_saved,
-        lastDonation: newImpact.last_donation
-      });
+        // Reload donation history to show the new donation
+        const historyData = await donationService.getHistory();
+        setDonationHistory(historyData.map(donation => ({
+          id: donation.id,
+          date: donation.date,
+          foodBank: donation.food_bank,
+          items: donation.items,
+          totalMeals: donation.total_meals,
+        })));
 
-      console.log('🗑️ Removing donated items from pantry...');
+        console.log('✅ Donation complete!');
 
-      // Remove from Supabase AND local state
-      await Promise.all(itemsToDonateFull.map(item => pantryService.delete(item.id)));
-      
-      const donatedItemIds = itemsToDonateFull.map(item => item.id);
-      setPantry(prev => prev.filter(item => !donatedItemIds.includes(item.id)));
-
-      console.log('📜 Reloading donation history...');
-
-      // Reload donation history to show the new donation
-      const historyData = await donationService.getHistory();
-      setDonationHistory(historyData.map(donation => ({
-        id: donation.id,
-        date: donation.date,
-        foodBank: donation.food_bank,
-        items: donation.items,
-        totalMeals: donation.total_meals,
-      })));
-
-      console.log('✅ Donation complete!');
-
-      success(`Donation recorded! You're feeding ${totalMeals} meals! 🎉`);
-      setShowDonationModal(false);
-      setItemsToDonate([]);
-      setSelectedFoodBank(null);
-      
-      // Switch to donate tab to show the impact
-      setCurrentTab('donate');
+        success(`Donation recorded! You're feeding ${totalMeals} meals! 🎉`);
+        setShowDonationModal(false);
+        setItemsToDonate([]);
+        setSelectedFoodBank(null);
+        
+        // Switch to donate tab to show the impact
+        setCurrentTab('donate');
       } catch (err) {
-      console.error('❌ Error recording donation:', err);
-      error('Failed to record donation. Please try again.');
-    }
-  };
+        console.error('❌ Error recording donation:', err);
+        error('Failed to record donation. Please try again.');
+      }
+    };
   if (authLoading) {  // ← Changed from loading
     return (
       <div style={{ 

@@ -134,20 +134,50 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, onAdd
     e.preventDefault();
   };
 
-  const handleDrop = (date: string, mealType: string) => {
-    if (draggedRecipe) {
-      const newMeal: MealPlan = {
-        id: `${Date.now()}`,
-        date,
-        meal_type: mealType as any,
-        recipe: draggedRecipe,
-        servings: draggedRecipe.servings || 2,
-        completed: false
-      };
-      setMealPlans([...mealPlans, newMeal]);
-      setDraggedRecipe(null);
-    }
-  };
+  const handleDrop = async (date: string, mealType: string) => {
+      if (draggedRecipe) {
+        try {
+          console.log('📅 Saving meal to calendar:', { date, mealType, recipe: draggedRecipe.name });
+          
+          // Save to Supabase
+          const savedMeal = await mealPlansService.add({
+            date: date,
+            meal_type: mealType,
+            recipe: draggedRecipe,
+            servings: draggedRecipe.servings || 2,
+            completed: false
+          });
+
+          console.log('✅ Meal saved to Supabase:', savedMeal);
+
+          // Add to local state with the real ID from Supabase
+          const newMeal: MealPlan = {
+            id: savedMeal.id,
+            date: savedMeal.date,
+            meal_type: savedMeal.meal_type as any,
+            recipe: savedMeal.recipe,
+            servings: savedMeal.servings,
+            completed: savedMeal.completed
+          };
+          
+          setMealPlans([...mealPlans, newMeal]);
+          setDraggedRecipe(null);
+        } catch (error) {
+          console.error('❌ Error saving meal:', error);
+          // Still add to local state as fallback
+          const newMeal: MealPlan = {
+            id: `temp-${Date.now()}`,
+            date,
+            meal_type: mealType as any,
+            recipe: draggedRecipe,
+            servings: draggedRecipe.servings || 2,
+            completed: false
+          };
+          setMealPlans([...mealPlans, newMeal]);
+          setDraggedRecipe(null);
+        }
+      }
+    };
 
   const handleSlotClick = (date: string, mealType: string) => {
     const existing = getMealForSlot(date, mealType);

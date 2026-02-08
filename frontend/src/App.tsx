@@ -3,7 +3,8 @@ import { foodBanks, calculateMeals } from './data/foodBanks';
 import Toast from './components/Toast';
 import { useToast } from './hooks/useToast';
 import { useState, useEffect } from 'react';
-import { authService } from './lib/supabase';
+import { authService, supabase } from './lib/supabase';
+import { calorieService } from './lib/database';
 import { pantryService, shoppingService, recipesService, mealPlansService, donationService } from './lib/database';
 import Auth from './components/Auth';
 import MealPlanCalendar from './components/MealPlanCalendar';
@@ -116,6 +117,8 @@ const App: React.FC = () => {
   const [showCalorieTracker, setShowCalorieTracker] = useState(false);
   const [dailyCalorieGoal, setDailyCalorieGoal] = useState(2000);
   const [todayCalories, setTodayCalories] = useState(0);
+  const [lastResetDate, setLastResetDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [manualCalorieInput, setManualCalorieInput] = useState<string>('');
   const { toasts, removeToast, success, error, warning, info } = useToast();
   const [isTabChanging, setIsTabChanging] = useState(false);
   const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -138,11 +141,37 @@ const App: React.FC = () => {
   const [editingPantryItem, setEditingPantryItem] = useState<PantryItem | null>(null);
   const [showEditPantry, setShowEditPantry] = useState(false);
   // Load all user data from Supabase
+  // Load all user data from Supabase
   const loadUserData = async () => {
     try {
       console.log('📦 Loading user data from Supabase...');
 
       // Load each data source independently so one failure doesn't break everything
+      
+      // Load calorie data
+      console.log('⏳ Starting to load calorie data...');
+      try {
+        // Get user profile for calorie goal
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('daily_calorie_goal')
+          .eq('id', user.id)
+          .single();
+        
+        if (profileData?.daily_calorie_goal) {
+          setDailyCalorieGoal(profileData.daily_calorie_goal);
+        }
+        
+        // Get today's calorie total
+        const calorieData = await calorieService.getTodayCalories();
+        if (calorieData && calorieData.total !== undefined) {
+          setTodayCalories(calorieData.total);
+        }
+        
+        console.log('✅ Calorie data loaded');
+      } catch (error) {
+        console.error('❌ Error loading calorie data:', error);
+      }
       
       // Load pantry items
       // Load pantry items
@@ -261,6 +290,45 @@ const App: React.FC = () => {
       console.log('🏁 loadUserData execution finished');
     }
   };
+  // Daily reset check - runs every minute to check if we've crossed midnight
+  useEffect(() => {
+    const checkDailyReset = () => {
+      const today = new Date().toISOString().split('T')[0];
+      if (lastResetDate !== today) {
+        console.log('🔄 New day detected, resetting calories');
+        setTodayCalories(0);
+        setLastResetDate(today);
+      }
+    };
+    
+    // Check immediately
+    checkDailyReset();
+    
+    // Check every minute for midnight rollover
+    const interval = setInterval(checkDailyReset, 60000);
+    return () => clearInterval(interval);
+  }, [lastResetDate]);
+  // Save calorie goal to Supabase when it changes
+  useEffect(() => {
+    const saveCalorieGoal = async () => {
+      if (!user) return;
+      
+      try {
+        await supabase
+          .from('profiles')
+          .update({ daily_calorie_goal: dailyCalorieGoal })
+          .eq('id', user.id);
+        console.log('✅ Calorie goal saved to Supabase:', dailyCalorieGoal);
+      } catch (error) {
+        console.error('❌ Error saving calorie goal:', error);
+      }
+    };
+    
+    // Only save if we have a user and a valid goal
+    if (user && dailyCalorieGoal > 0) {
+      saveCalorieGoal();
+    }
+  }, [dailyCalorieGoal, user]);
   useEffect(() => {
       const initAuth = async () => {
         try {
@@ -1741,9 +1809,20 @@ const App: React.FC = () => {
                       }}>📅 {isMobile ? 'Plan' : 'Meal Plan'}</button>
                       
                       {recipe.nutrition && (
-                        <button onClick={() => {
-                          setTodayCalories(prev => prev + recipe.nutrition!.calories);
-                          success(`Added ${recipe.nutrition!.calories} calories`);
+                        <button onClick={async () => {
+                          const calories = recipe.nutrition!.calories;
+                          try {
+                            // Log to Supabase
+                            await calorieService.logCalories(calories, 'meal', recipe.name);
+                            
+                            // Update local state
+                            setTodayCalories(prev => prev + calories);
+                            
+                            success(`Added ${calories} calories from ${recipe.name}`);
+                          } catch (err) {
+                            console.error('Error logging calories:', err);
+                            error('Failed to add calories');
+                          }
                         }} style={{
                           flex: isMobile ? '1' : 'initial',
                           padding: '0.75rem',
@@ -3885,11 +3964,95 @@ const App: React.FC = () => {
                 }} />
               </div>
             </div>
+            
+            {/* Manual Calorie Entry */}
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Add/Subtract Calories</label>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+              <input 
+                type="number" 
+                value={manualCalorieInput} 
+                onChange={(e) => setManualCalorieInput(e.target.value)}
+                placeholder="e.g., 100"
+                style={{ 
+                  flex: 1, 
+                  padding: '0.75rem', 
+                  border: '2px solid #e5e7eb', 
+                  borderRadius: '8px', 
+                  boxSizing: 'border-box' 
+                }} 
+              />
+              <button onClick={async () => {
+                const amount = parseInt(manualCalorieInput);
+                if (isNaN(amount) || amount === 0) return;
+                
+                try {
+                  // Log to Supabase
+                  await calorieService.logCalories(amount, 'manual', 'Manual entry');
+                  
+                  // Update local state
+                  setTodayCalories(prev => Math.max(0, prev + amount));
+                  setManualCalorieInput('');
+                  
+                  success(amount > 0 ? `Added ${amount} calories` : `Subtracted ${Math.abs(amount)} calories`);
+                } catch (err) {
+                  console.error('Error logging calories:', err);
+                  error('Failed to log calories');
+                }
+              }} style={{
+                padding: '0.75rem 1rem', 
+                background: '#3b82f6', 
+                color: 'white',
+                border: 'none', 
+                borderRadius: '8px', 
+                cursor: 'pointer', 
+                fontWeight: '600'
+              }}>+</button>
+              <button onClick={async () => {
+                const amount = parseInt(manualCalorieInput);
+                if (isNaN(amount) || amount === 0) return;
+                
+                try {
+                  // Log negative to Supabase
+                  await calorieService.logCalories(-Math.abs(amount), 'manual', 'Manual subtraction');
+                  
+                  // Update local state
+                  setTodayCalories(prev => Math.max(0, prev - Math.abs(amount)));
+                  setManualCalorieInput('');
+                  
+                  success(`Subtracted ${Math.abs(amount)} calories`);
+                } catch (err) {
+                  console.error('Error logging calories:', err);
+                  error('Failed to log calories');
+                }
+              }} style={{
+                padding: '0.75rem 1rem', 
+                background: '#f59e0b', 
+                color: 'white',
+                border: 'none', 
+                borderRadius: '8px', 
+                cursor: 'pointer', 
+                fontWeight: '600'
+              }}>−</button>
+            </div>
+            
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Daily Goal</label>
             <input type="number" value={dailyCalorieGoal} onChange={(e) => setDailyCalorieGoal(Number(e.target.value))}
               style={{ width: '100%', padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '8px', marginBottom: '1rem', boxSizing: 'border-box' }} />
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button onClick={() => setTodayCalories(0)} style={{
+              <button onClick={async () => {
+                const currentCals = todayCalories;
+                setTodayCalories(0);
+                try {
+                  // Log reset as negative entry to balance the day
+                  if (currentCals > 0) {
+                    await calorieService.logCalories(-currentCals, 'manual', 'Daily reset');
+                  }
+                  success('Calories reset to 0');
+                } catch (err) {
+                  console.error('Error resetting calories:', err);
+                  error('Failed to reset calories');
+                }
+              }} style={{
                 flex: 1, padding: '0.75rem', background: '#ef4444', color: 'white',
                 border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
               }}>Reset</button>

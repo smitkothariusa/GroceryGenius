@@ -395,3 +395,99 @@ export const donationService = {
     return data;
   },
 };
+// ============================================
+// CALORIE TRACKING
+// ============================================
+
+export const calorieService = {
+  // Get today's total calories
+  async getTodayCalories() {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error('Not authenticated');
+
+    const today = new Date().toISOString().split('T')[0];
+    const { data, error } = await supabase
+      .from('calorie_log')
+      .select('*')
+      .eq('user_id', userData.user.id)
+      .eq('date', today);
+    
+    if (error) throw error;
+    
+    const total = data?.reduce((sum, log) => sum + log.calories, 0) || 0;
+    return { total, logs: data };
+  },
+
+  // Log calories (positive for add, negative for subtract)
+  async logCalories(calories: number, mealType?: string, recipeName?: string) {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error('Not authenticated');
+
+    const today = new Date().toISOString().split('T')[0];
+    const { data, error } = await supabase
+      .from('calorie_log')
+      .insert({
+        user_id: userData.user.id,
+        date: today,
+        calories,
+        meal_type: mealType,
+        recipe_name: recipeName
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // Get calorie logs for a specific week
+  async getWeekCalories(startDate: string) {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error('Not authenticated');
+
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 7);
+    
+    const { data, error } = await supabase
+      .from('calorie_log')
+      .select('*')
+      .eq('user_id', userData.user.id)
+      .gte('date', startDate)
+      .lt('date', endDate.toISOString().split('T')[0])
+      .order('date');
+    
+    if (error) throw error;
+    return data || [];
+  },
+
+  // Get calorie goal from profile
+  async getCalorieGoal() {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('daily_calorie_goal')
+      .eq('id', userData.user.id)
+      .single();
+    
+    if (error) throw error;
+    return data?.daily_calorie_goal || 2000;
+  },
+
+  // Update calorie goal in profile
+  async updateCalorieGoal(goal: number) {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ daily_calorie_goal: goal })
+      .eq('id', userData.user.id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+};

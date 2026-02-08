@@ -137,22 +137,30 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, onAdd
   const handleDrop = async (date: string, mealType: string) => {
       if (draggedRecipe) {
         try {
-          console.log('📅 Saving meal to calendar:', { date, mealType, recipe: draggedRecipe.name });
+          console.log('📅 Saving meal to calendar');
+          console.log('Full draggedRecipe object:', draggedRecipe);
+          console.log('Recipe type:', typeof draggedRecipe);
+          console.log('Recipe.id:', draggedRecipe.id);
+          console.log('Recipe.name:', draggedRecipe.name);
+          console.log('Recipe.ingredients:', draggedRecipe.ingredients);
           
-          // Save to Supabase
+          const recipeToSave = {
+            id: draggedRecipe.id,
+            name: draggedRecipe.name,
+            ingredients: draggedRecipe.ingredients,
+            instructions: draggedRecipe.instructions,
+            prep_time: draggedRecipe.prep_time,
+            servings: draggedRecipe.servings,
+            nutrition: draggedRecipe.nutrition
+          };
+          
+          console.log('Recipe to save:', recipeToSave);
+          
           // Save to Supabase
           const savedMeal = await mealPlansService.add({
             date: date,
             meal_type: mealType,
-            recipe: {
-              id: draggedRecipe.id,
-              name: draggedRecipe.name,
-              ingredients: draggedRecipe.ingredients,
-              instructions: draggedRecipe.instructions,
-              prep_time: draggedRecipe.prep_time,
-              servings: draggedRecipe.servings,
-              nutrition: draggedRecipe.nutrition
-            },
+            recipe: recipeToSave,
             servings: draggedRecipe.servings || 2,
             completed: false
           });
@@ -208,7 +216,15 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, onAdd
         const savedMeal = await mealPlansService.add({
           date: selectedSlot.date,
           meal_type: selectedSlot.mealType,
-          recipe: recipe,
+          recipe: {
+            id: recipe.id,
+            name: recipe.name,
+            ingredients: recipe.ingredients,
+            instructions: recipe.instructions,
+            prep_time: recipe.prep_time,
+            servings: recipe.servings,
+            nutrition: recipe.nutrition
+          },
           servings: recipe.servings || 2,
           completed: false
         });

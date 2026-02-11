@@ -1220,21 +1220,81 @@ const App: React.FC = () => {
   };
   const lookupBarcode = async (barcode: string) => {
     try {
-      console.log('Looking up barcode:', barcode);
+      console.log('🔍 Looking up barcode:', barcode);
       
-      // Try Method 1: Barcode Spider (free, no API key needed)
+      // Method 1: RapidAPI Barcode Database (BEST - your paid API)
       try {
-        console.log('Trying Barcode Spider...');
-        const barcodeSpiderResponse = await fetch(`https://api.barcodespider.com/v1/lookup?upc=${barcode}`);
+        console.log('📡 Trying RapidAPI...');
+        const rapidResponse = await fetch(`https://barcodes1.p.rapidapi.com/?query=${barcode}`, {
+          method: 'GET',
+          headers: {
+            'x-rapidapi-host': 'barcodes1.p.rapidapi.com',
+            'x-rapidapi-key': '8eabcf9751msh421ed13aa6179f4p1758c5jsn85f875e9b7bf'
+          }
+        });
         
-        if (barcodeSpiderResponse.ok) {
-          const barcodeSpiderData = await barcodeSpiderResponse.json();
-          console.log('Barcode Spider response:', barcodeSpiderData);
+        if (rapidResponse.ok) {
+          const rapidData = await rapidResponse.json();
+          console.log('RapidAPI response:', rapidData);
           
-          if (barcodeSpiderData && barcodeSpiderData.item_response && barcodeSpiderData.item_response.code === 200) {
-            const item = barcodeSpiderData.item_response.item;
+          if (rapidData && rapidData.product && rapidData.product.title) {
+            console.log('✅ Found from RapidAPI:', rapidData.product.title);
+            return {
+              name: rapidData.product.title.trim(),
+              category: rapidData.product.category || 'other',
+              expiryDays: null
+            };
+          }
+        }
+      } catch (err) {
+        console.log('❌ RapidAPI failed:', err);
+      }
+      
+      // Method 2: OpenFoodFacts v2 (Great for food - FREE, no key needed)
+      try {
+        console.log('📡 Trying OpenFoodFacts...');
+        const offResponse = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}`);
+        
+        if (offResponse.ok) {
+          const offData = await offResponse.json();
+          console.log('OpenFoodFacts response:', offData);
+          
+          if (offData.status === 1 && offData.product) {
+            const product = offData.product;
+            const productName = 
+              product.product_name || 
+              product.generic_name || 
+              product.brands || 
+              product.product_name_en ||
+              null;
+            
+            if (productName && productName.trim()) {
+              console.log('✅ Found from OpenFoodFacts:', productName);
+              return {
+                name: productName.trim(),
+                category: 'food',
+                expiryDays: null
+              };
+            }
+          }
+        }
+      } catch (err) {
+        console.log('❌ OpenFoodFacts failed:', err);
+      }
+      
+      // Method 3: Barcode Spider (with your API token)
+      try {
+        console.log('📡 Trying Barcode Spider...');
+        const spiderResponse = await fetch(`https://api.barcodespider.com/v1/lookup?token=03abb14d5d130e66277e&upc=${barcode}`);
+        
+        if (spiderResponse.ok) {
+          const spiderData = await spiderResponse.json();
+          console.log('Barcode Spider response:', spiderData);
+          
+          if (spiderData && spiderData.item_response && spiderData.item_response.code === 200) {
+            const item = spiderData.item_response.item;
             if (item && item.title && item.title.trim()) {
-              console.log('Found product from Barcode Spider:', item.title);
+              console.log('✅ Found from Barcode Spider:', item.title);
               return {
                 name: item.title.trim(),
                 category: item.category || 'other',
@@ -1244,39 +1304,12 @@ const App: React.FC = () => {
           }
         }
       } catch (err) {
-        console.log('Barcode Spider failed:', err);
+        console.log('❌ Barcode Spider failed:', err);
       }
       
-      // Try Method 2: OpenFoodFacts (free, great for food items)
+      // Method 4: UPCitemdb (FREE trial - 100 per day)
       try {
-        console.log('Trying OpenFoodFacts...');
-        const offResponse = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}`);
-        
-        if (offResponse.ok) {
-          const offData = await offResponse.json();
-          console.log('OpenFoodFacts response:', offData);
-          
-          if (offData.status === 1 && offData.product) {
-            const product = offData.product;
-            const productName = product.product_name || product.generic_name || product.brands || null;
-            
-            if (productName && productName.trim()) {
-              console.log('Found product from OpenFoodFacts:', productName);
-              return {
-                name: productName.trim(),
-                category: product.categories_tags?.[0]?.replace('en:', '') || 'food',
-                expiryDays: null
-              };
-            }
-          }
-        }
-      } catch (err) {
-        console.log('OpenFoodFacts failed:', err);
-      }
-      
-      // Try Method 3: UPCitemdb (free tier available)
-      try {
-        console.log('Trying UPCitemdb...');
+        console.log('📡 Trying UPCitemdb...');
         const upcResponse = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
         
         if (upcResponse.ok) {
@@ -1288,7 +1321,7 @@ const App: React.FC = () => {
             const itemName = item.title || item.brand || null;
             
             if (itemName && itemName.trim()) {
-              console.log('Found product from UPCitemdb:', itemName);
+              console.log('✅ Found from UPCitemdb:', itemName);
               return {
                 name: itemName.trim(),
                 category: item.category || 'other',
@@ -1298,11 +1331,11 @@ const App: React.FC = () => {
           }
         }
       } catch (err) {
-        console.log('UPCitemdb failed:', err);
+        console.log('❌ UPCitemdb failed:', err);
       }
       
-      // Final fallback: Let user know product wasn't found
-      console.log('Product not found in any database');
+      // All APIs failed - return placeholder
+      console.log('⚠️ Product not found in any database');
       warning('Product not found. Please edit the item name.');
       return {
         name: `Scanned Item (${barcode.substring(0, 12)})`,
@@ -1311,7 +1344,7 @@ const App: React.FC = () => {
       };
       
     } catch (error) {
-      console.error('Barcode lookup error:', error);
+      console.error('💥 Barcode lookup error:', error);
       warning('Barcode lookup failed. Please edit the item name.');
       return {
         name: `Scanned Item (${barcode.substring(0, 12)})`,
@@ -1390,8 +1423,7 @@ const App: React.FC = () => {
             'code_39_reader'
           ]
         },
-        locate: true,
-        frequency: 10 // Reduce scan frequency to avoid duplicates
+        locate: true
       }, (err: any) => {
         if (err) {
           console.error('Quagga initialization error:', err);
@@ -1460,7 +1492,31 @@ const App: React.FC = () => {
           expiryDate: expiryDate || undefined
         };
         
+        // Add to local state first
         setPantry(prev => [...prev, newItem]);
+        
+        // If user is logged in, also save to database to prevent disappearing
+        if (user) {
+          try {
+            const dbItem = await pantryService.add({
+              name: newItem.name,
+              quantity: newItem.quantity,
+              unit: newItem.unit,
+              category: newItem.category,
+              expiryDate: newItem.expiryDate
+            });
+            console.log('✅ Saved scanned item to database:', dbItem);
+            
+            // Update the item with the database ID
+            setPantry(prev => prev.map(item => 
+              item.id === newItem.id ? { ...item, id: dbItem.id } : item
+            ));
+          } catch (dbError) {
+            console.error('⚠️ Failed to save to database:', dbError);
+            // Item still in local state, so user can see it
+          }
+        }
+        
         setRecipeLoading(false);
         
         // Show success message
@@ -1551,38 +1607,93 @@ const App: React.FC = () => {
 
           // Parse expiration date from text
           const datePatterns = [
+            // Standard numeric formats
             /(?:exp|expires?|expiry|best\s*by|use\s*by|bb)[:\s]*(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})/i,
             /(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})/,
-            /(\d{4}[\/-]\d{1,2}[\/-]\d{1,2})/
+            /(\d{4}[\/-]\d{1,2}[\/-]\d{1,2})/,
+            
+            // Handle "26 FEB 25" or "26 FEB. 25" format
+            /(\d{1,2})\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\.?\s+(\d{2,4})/i,
+            
+            // Handle "FEB 26 25" format
+            /(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\.?\s+(\d{1,2})\s+(\d{2,4})/i,
+            
+            // Handle "26-FEB-25" format with separators
+            /(\d{1,2})[\s\-\.](jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\.?[\s\-\.](\d{2,4})/i,
+            
+            // Handle "26FEB25" no spaces
+            /(\d{1,2})(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)(\d{2,4})/i
           ];
 
+          // Month name to number mapping
+          const monthMap: { [key: string]: number } = {
+            'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5,
+            'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11
+          };
+
           let foundDate = '';
+          let parsedDate: Date | null = null;
+
           for (const pattern of datePatterns) {
             const match = text.match(pattern);
             if (match) {
-              foundDate = match[1];
-              break;
+              console.log('📅 Date pattern matched:', match[0]);
+              
+              // Check if it's a month-name format
+              const hasMonth = match[0].match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i);
+              
+              if (hasMonth) {
+                // Parse month-name format (26 FEB 25)
+                const monthMatch = match[0].match(/(\d{1,2})\s*[\-\.]?(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\.?\s*[\-\.]?(\d{2,4})/i);
+                
+                if (monthMatch) {
+                  const day = parseInt(monthMatch[1]);
+                  const month = monthMap[monthMatch[2].toLowerCase()];
+                  let year = parseInt(monthMatch[3]);
+                  
+                  // Handle 2-digit year
+                  if (year < 100) {
+                    year += 2000;
+                  }
+                  
+                  parsedDate = new Date(year, month, day);
+                  console.log('✅ Parsed date with month name:', parsedDate);
+                  break;
+                }
+              } else {
+                // Standard numeric format
+                foundDate = match[1];
+                break;
+              }
             }
           }
 
-          if (foundDate) {
-            // Convert to YYYY-MM-DD format
-            let parsedDate = new Date(foundDate);
-            if (isNaN(parsedDate.getTime())) {
-              // Try different parsing
+          // If we found a date with month name, use it
+          if (parsedDate && !isNaN(parsedDate.getTime())) {
+            const formattedDate = parsedDate.toISOString().split('T')[0];
+            setDetectedExpiry(formattedDate);
+            success(`Detected expiration date: ${formattedDate}`);
+            
+            setNewPantryItem(prev => ({
+              ...prev,
+              expiryDate: formattedDate
+            }));
+            setShowAddPantry(true);
+          } else if (foundDate) {
+            // Try parsing standard numeric format
+            let dateObj = new Date(foundDate);
+            if (isNaN(dateObj.getTime())) {
               const parts = foundDate.split(/[\/-]/);
               if (parts.length === 3) {
-                // Assume MM/DD/YYYY or DD/MM/YYYY
-                parsedDate = new Date(parseInt(parts[2]), parseInt(parts[0]) - 1, parseInt(parts[1]));
+                dateObj = new Date(parseInt(parts[2]), parseInt(parts[0]) - 1, parseInt(parts[1]));
               }
             }
 
-            if (!isNaN(parsedDate.getTime())) {
-              const formattedDate = parsedDate.toISOString().split('T')[0];
+            if (!isNaN(dateObj.getTime())) {
+              const formattedDate = dateObj.toISOString().split('T')[0];
               setDetectedExpiry(formattedDate);
               success(`Detected expiration date: ${formattedDate}`);
               
-              // Show add item form with pre-filled expiry
               setNewPantryItem(prev => ({
                 ...prev,
                 expiryDate: formattedDate

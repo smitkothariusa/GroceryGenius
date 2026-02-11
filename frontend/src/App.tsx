@@ -1222,62 +1222,99 @@ const App: React.FC = () => {
     try {
       console.log('Looking up barcode:', barcode);
       
-      // First try OpenFoodFacts API (free barcode database)
-      const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-      const data = await response.json();
-      
-      console.log('OpenFoodFacts response:', data);
-      
-      if (data.status === 1 && data.product) {
-        const product = data.product;
-        const productName = product.product_name || product.generic_name || product.brands || null;
-        
-        if (productName && productName.trim()) {
-          // Successfully found product
-          console.log('Found product:', productName);
-          return {
-            name: productName.trim(),
-            category: product.categories_tags?.[0]?.replace('en:', '') || 'other',
-            expiryDays: null
-          };
-        }
-      }
-      
-      // Fallback to UPCitemdb API (another free option)
-      console.log('Trying UPCitemdb fallback...');
+      // Try Method 1: Barcode Spider (free, no API key needed)
       try {
-        const upcResponse = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
-        const upcData = await upcResponse.json();
+        console.log('Trying Barcode Spider...');
+        const barcodeSpiderResponse = await fetch(`https://api.barcodespider.com/v1/lookup?upc=${barcode}`);
         
-        if (upcData.items && upcData.items.length > 0) {
-          const item = upcData.items[0];
-          const itemName = item.title || item.brand || null;
+        if (barcodeSpiderResponse.ok) {
+          const barcodeSpiderData = await barcodeSpiderResponse.json();
+          console.log('Barcode Spider response:', barcodeSpiderData);
           
-          if (itemName && itemName.trim()) {
-            console.log('Found product from UPCitemdb:', itemName);
-            return {
-              name: itemName.trim(),
-              category: item.category || 'other',
-              expiryDays: null
-            };
+          if (barcodeSpiderData && barcodeSpiderData.item_response && barcodeSpiderData.item_response.code === 200) {
+            const item = barcodeSpiderData.item_response.item;
+            if (item && item.title && item.title.trim()) {
+              console.log('Found product from Barcode Spider:', item.title);
+              return {
+                name: item.title.trim(),
+                category: item.category || 'other',
+                expiryDays: null
+              };
+            }
           }
         }
-      } catch (upcError) {
-        console.log('UPCitemdb lookup failed:', upcError);
+      } catch (err) {
+        console.log('Barcode Spider failed:', err);
       }
       
-      // Final fallback: Ask user to name it
-      warning('Product not found in database. Please edit the name.');
+      // Try Method 2: OpenFoodFacts (free, great for food items)
+      try {
+        console.log('Trying OpenFoodFacts...');
+        const offResponse = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}`);
+        
+        if (offResponse.ok) {
+          const offData = await offResponse.json();
+          console.log('OpenFoodFacts response:', offData);
+          
+          if (offData.status === 1 && offData.product) {
+            const product = offData.product;
+            const productName = product.product_name || product.generic_name || product.brands || null;
+            
+            if (productName && productName.trim()) {
+              console.log('Found product from OpenFoodFacts:', productName);
+              return {
+                name: productName.trim(),
+                category: product.categories_tags?.[0]?.replace('en:', '') || 'food',
+                expiryDays: null
+              };
+            }
+          }
+        }
+      } catch (err) {
+        console.log('OpenFoodFacts failed:', err);
+      }
+      
+      // Try Method 3: UPCitemdb (free tier available)
+      try {
+        console.log('Trying UPCitemdb...');
+        const upcResponse = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
+        
+        if (upcResponse.ok) {
+          const upcData = await upcResponse.json();
+          console.log('UPCitemdb response:', upcData);
+          
+          if (upcData.items && upcData.items.length > 0) {
+            const item = upcData.items[0];
+            const itemName = item.title || item.brand || null;
+            
+            if (itemName && itemName.trim()) {
+              console.log('Found product from UPCitemdb:', itemName);
+              return {
+                name: itemName.trim(),
+                category: item.category || 'other',
+                expiryDays: null
+              };
+            }
+          }
+        }
+      } catch (err) {
+        console.log('UPCitemdb failed:', err);
+      }
+      
+      // Final fallback: Let user know product wasn't found
+      console.log('Product not found in any database');
+      warning('Product not found. Please edit the item name.');
       return {
-        name: `Scanned Item (${barcode.substring(0, 8)}...)`,
+        name: `Scanned Item (${barcode.substring(0, 12)})`,
         category: 'other',
         expiryDays: null
       };
+      
     } catch (error) {
       console.error('Barcode lookup error:', error);
-      warning('Barcode lookup failed. Please edit the name.');
+      warning('Barcode lookup failed. Please edit the item name.');
       return {
-        name: `Scanned Item (${barcode.substring(0, 8)}...)`,
+        name: `Scanned Item (${barcode.substring(0, 12)})`,
         category: 'other',
         expiryDays: null
       };
@@ -1289,6 +1326,10 @@ const App: React.FC = () => {
       
       // Import Quagga dynamically
       const Quagga = await import('quagga');
+      
+      // Track if we've already processed a barcode
+      let isProcessing = false;
+      let lastScannedCode = '';
       
       // Create scanner container
       const scannerDiv = document.createElement('div');
@@ -1349,7 +1390,8 @@ const App: React.FC = () => {
             'code_39_reader'
           ]
         },
-        locate: true
+        locate: true,
+        frequency: 10 // Reduce scan frequency to avoid duplicates
       }, (err: any) => {
         if (err) {
           console.error('Quagga initialization error:', err);
@@ -1365,9 +1407,18 @@ const App: React.FC = () => {
         Quagga.start();
       });
       
-      // Handle barcode detection
+      // Handle barcode detection with debounce
       Quagga.onDetected(async (result: any) => {
         const code = result.codeResult.code;
+        
+        // Prevent duplicate scans
+        if (isProcessing || code === lastScannedCode) {
+          console.log('Duplicate scan prevented:', code);
+          return;
+        }
+        
+        isProcessing = true;
+        lastScannedCode = code;
         console.log('Barcode detected:', code);
         
         // Stop scanner and cleanup
@@ -1383,7 +1434,7 @@ const App: React.FC = () => {
         }
         setBarcodeScanning(false);
         
-        // Show loading with barcode number
+        // Show loading
         setRecipeLoading(true);
         
         // Lookup product info

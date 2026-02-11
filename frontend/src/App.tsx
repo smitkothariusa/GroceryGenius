@@ -102,6 +102,7 @@ const App: React.FC = () => {
   const [favorites, setFavorites] = useState<FavoriteRecipe[]>([]);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [sortShoppingBy, setSortShoppingBy] = useState<'category' | 'alphabetical'>('category');
+  const [loadingImpact, setLoadingImpact] = useState(false);
   const [donationImpact, setDonationImpact] = useState<DonationImpact>({
     totalDonations: 0,
     totalMeals: 0,
@@ -1226,25 +1227,62 @@ const App: React.FC = () => {
         console.log('🎁 Starting donation process...');
         console.log('📦 Items to donate:', items);
         
-        let totalMeals = 0;
-        let totalPounds = 0;
+        let impactData;
+        try {
+          const impactResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/donation/calculate-impact`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              items: items.map(item => ({
+                name: item.name,
+                quantity: item.quantity,
+                unit: item.unit
+              }))
+            })
+          });
 
-        const donationItems = items.map(item => {
-          const meals = calculateMeals(item.quantity, item.unit, item.name);
-          const pounds = item.unit === 'lbs' ? item.quantity : item.quantity * 0.5;
+          if (!impactResponse.ok) {
+            throw new Error('Impact calculation failed');
+          }
+
+          impactData = await impactResponse.json();
+        } catch (error) {
+          console.error('Error calculating impact, using fallback:', error);
+          // Fallback to simple calculation
+          const totalPounds = items.reduce((sum, item) => {
+            const pounds = item.unit === 'lbs' ? item.quantity : item.quantity * 0.5;
+            return sum + pounds;
+          }, 0);
           
-          totalMeals += meals;
-          totalPounds += pounds;
+          impactData = {
+            total_meals: Math.round(totalPounds * 2),
+            total_pounds: totalPounds,
+            co2_saved_lbs: totalPounds * 3.8,
+            items_breakdown: items.map(item => ({
+              name: item.name,
+              meals: calculateMeals(item.quantity, item.unit, item.name),
+              pounds: item.unit === 'lbs' ? item.quantity : item.quantity * 0.5
+            }))
+          };
+        }
 
+        const totalMeals = impactData.total_meals;
+        const totalPounds = impactData.total_pounds;
+        const co2Saved = impactData.co2_saved_lbs;
+
+        const donationItems = items.map((item, index) => {
+          const breakdown = impactData.items_breakdown[index] || {
+            meals: calculateMeals(item.quantity, item.unit, item.name),
+            pounds: item.unit === 'lbs' ? item.quantity : item.quantity * 0.5
+          };
+          
           return {
             name: item.name,
             quantity: item.quantity,
             unit: item.unit,
-            estimatedMeals: meals
+            estimatedMeals: breakdown.meals
           };
         });
-
-        const co2Saved = totalPounds * 3.8;
 
         console.log('💾 Saving donation to Supabase...');
         
@@ -4247,7 +4285,7 @@ const App: React.FC = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
                   <div>
                     <div style={{ fontSize: '2rem', fontWeight: '700', color: '#10b981' }}>
-                      {pantry
+                      {loadingImpact ? '...' : pantry
                         .filter(item => itemsToDonate.includes(item.id))
                         .reduce((total, item) => total + calculateMeals(item.quantity, item.unit, item.name), 0)}
                     </div>

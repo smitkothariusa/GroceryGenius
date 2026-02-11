@@ -202,7 +202,9 @@ const App: React.FC = () => {
     };
 
     calculateAllItemsImpact();
-  }, [showDonationModal, pantry]);
+  }, [showDonationModal]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   const loadUserData = async () => {
     try {
       console.log('📦 Loading user data from Supabase...');

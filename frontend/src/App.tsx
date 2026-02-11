@@ -103,6 +103,16 @@ const App: React.FC = () => {
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [sortShoppingBy, setSortShoppingBy] = useState<'category' | 'alphabetical'>('category');
   const [loadingImpact, setLoadingImpact] = useState(false);
+  const [previewImpact, setPreviewImpact] = useState<{
+    total_meals: number;
+    total_pounds: number;
+    co2_saved_lbs: number;
+    items_breakdown: Array<{
+      name: string;
+      meals: number;
+      pounds: number;
+    }>;
+  } | null>(null);
   const [donationImpact, setDonationImpact] = useState<DonationImpact>({
     totalDonations: 0,
     totalMeals: 0,
@@ -141,8 +151,50 @@ const App: React.FC = () => {
   });
   const [editingPantryItem, setEditingPantryItem] = useState<PantryItem | null>(null);
   const [showEditPantry, setShowEditPantry] = useState(false);
-  // Load all user data from Supabase
-  // Load all user data from Supabase
+  useEffect(() => {
+    const calculatePreviewImpact = async () => {
+      if (itemsToDonate.length === 0) {
+        setPreviewImpact(null);
+        setLoadingImpact(false);
+        return;
+      }
+
+      setLoadingImpact(true);
+
+      try {
+        const itemsToCalculate = pantry.filter(item => 
+          itemsToDonate.includes(item.id)
+        );
+
+        const impactResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/donation/calculate-impact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            items: itemsToCalculate.map(item => ({
+              name: item.name,
+              quantity: item.quantity,
+              unit: item.unit
+            }))
+          })
+        });
+
+        if (impactResponse.ok) {
+          const data = await impactResponse.json();
+          setPreviewImpact(data);
+        } else {
+          console.error('Preview impact calculation failed');
+          setPreviewImpact(null);
+        }
+      } catch (error) {
+        console.error('Error calculating preview impact:', error);
+        setPreviewImpact(null);
+      } finally {
+        setLoadingImpact(false);
+      }
+    };
+
+    calculatePreviewImpact();
+  }, [itemsToDonate, pantry]);
   const loadUserData = async () => {
     try {
       console.log('📦 Loading user data from Supabase...');
@@ -4260,7 +4312,10 @@ const App: React.FC = () => {
                           fontSize: '0.875rem',
                           fontWeight: '600'
                         }}>
-                          ~{calculateMeals(item.quantity, item.unit, item.name)} meals
+                          ~{loadingImpact ? '...' : (
+                            previewImpact?.items_breakdown?.find(b => b.name === item.name)?.meals 
+                            || calculateMeals(item.quantity, item.unit, item.name)
+                          )} meals
                         </div>
                       </div>
                     );
@@ -4284,11 +4339,9 @@ const App: React.FC = () => {
                 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
                   <div>
-                    <div style={{ fontSize: '2rem', fontWeight: '700', color: '#10b981' }}>
-                      {loadingImpact ? '...' : pantry
-                        .filter(item => itemsToDonate.includes(item.id))
-                        .reduce((total, item) => total + calculateMeals(item.quantity, item.unit, item.name), 0)}
-                    </div>
+                      <div style={{ fontSize: '2rem', fontWeight: '700', color: '#10b981' }}>
+                        {loadingImpact ? '...' : (previewImpact?.total_meals || 0)}
+                      </div>
                     <div style={{ fontSize: '0.875rem', color: '#166534' }}>
                       Estimated Meals
                     </div>
@@ -4313,12 +4366,7 @@ const App: React.FC = () => {
                   color: '#166534'
                 }}>
                   <strong>Environmental Impact:</strong> Preventing ~
-                  {Math.round(pantry
-                    .filter(item => itemsToDonate.includes(item.id))
-                    .reduce((total, item) => {
-                      const pounds = item.unit === 'lbs' ? item.quantity : item.quantity * 0.5;
-                      return total + (pounds * 3.8);
-                    }, 0))} lbs of CO₂ emissions
+                  {loadingImpact ? '...' : Math.round(previewImpact?.co2_saved_lbs || 0)} lbs of CO₂ emissions
                 </div>
               </div>
             )}

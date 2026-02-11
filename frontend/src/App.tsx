@@ -996,7 +996,11 @@ const App: React.FC = () => {
       
       const cleanup = () => {
         stream.getTracks().forEach(track => track.stop());
-        document.body.removeChild(modal);
+        if (document.body.contains(modal)) {
+          document.body.removeChild(modal);
+        }
+        setShowImageUpload(false);
+        setScanMode('menu');
       };
 
       captureBtn.onclick = () => {
@@ -1311,9 +1315,17 @@ const App: React.FC = () => {
         const code = result.codeResult.code;
         console.log('Barcode detected:', code);
         
-        // Stop scanner
-        Quagga.stop();
-        document.body.removeChild(scannerDiv);
+        // Stop scanner and cleanup
+        try {
+          Quagga.stop();
+          Quagga.offDetected(() => {});
+        } catch (e) {
+          console.error('Error stopping Quagga:', e);
+        }
+        
+        if (document.body.contains(scannerDiv)) {
+          document.body.removeChild(scannerDiv);
+        }
         setBarcodeScanning(false);
         
         // Show loading
@@ -1349,8 +1361,15 @@ const App: React.FC = () => {
       
       // Cancel handler
       cancelBtn.onclick = () => {
-        Quagga.stop();
-        document.body.removeChild(scannerDiv);
+        try {
+          Quagga.stop();
+          Quagga.offDetected(() => {});
+        } catch (e) {
+          console.error('Error stopping Quagga:', e);
+        }
+        if (document.body.contains(scannerDiv)) {
+          document.body.removeChild(scannerDiv);
+        }
         setBarcodeScanning(false);
         setShowImageUpload(false);
         setScanMode('menu');

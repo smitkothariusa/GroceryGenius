@@ -1352,6 +1352,8 @@ const App: React.FC = () => {
         Quagga.stop();
         document.body.removeChild(scannerDiv);
         setBarcodeScanning(false);
+        setShowImageUpload(false);
+        setScanMode('menu');
       };
       
     } catch (err) {
@@ -1400,6 +1402,8 @@ const App: React.FC = () => {
         stream.getTracks().forEach(track => track.stop());
         document.body.removeChild(modal);
         setExpiryScanning(false);
+        setShowImageUpload(false);
+        setScanMode('menu');
       };
 
       captureBtn.onclick = async () => {
@@ -2822,12 +2826,17 @@ const App: React.FC = () => {
                       <button 
                           onClick={async () => {
                             try {
-                              await pantryService.delete(item.id);
+                              // Only try to delete from database if user is logged in
+                              if (user) {
+                                await pantryService.delete(item.id);
+                              }
                               setPantry(prev => prev.filter(i => i.id !== item.id));
                               success('Item removed');
                             } catch (error) {
                               console.error('Error deleting pantry item:', error);
-                              warning('Failed to remove item');
+                              // Still remove from local state even if database delete fails
+                              setPantry(prev => prev.filter(i => i.id !== item.id));
+                              warning('Item removed locally (database sync failed)');
                             }
                           }} 
                         style={{

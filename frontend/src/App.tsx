@@ -187,9 +187,13 @@ const App: React.FC = () => {
                 pounds: data.items_breakdown[index].pounds,
                 co2_lbs: data.items_breakdown[index].pounds * 3.8 // CO2 from pounds
               };
+              console.log(`✅ Mapped ${item.name} (ID: ${item.id}):`, impactMap[item.id]);
+            } else {
+              console.error(`❌ Missing breakdown for ${item.name} at index ${index}`);
             }
           });
           
+          console.log('📊 Final impact map:', impactMap);
           setAllItemsImpact(impactMap);
         } else {
           console.error('Impact calculation failed');
@@ -1288,14 +1292,18 @@ const App: React.FC = () => {
       try {
         console.log('🎁 Starting donation process...');
         console.log('📦 Items to donate:', items);
+        console.log('🎁 Starting donation process...');
+
         
         // Use pre-calculated impact data from allItemsImpact
+// Use pre-calculated impact data from allItemsImpact (NO FALLBACK)
         const donationItems = items.map(item => {
-          const impact = allItemsImpact[item.id] || {
-            meals: calculateMeals(item.quantity, item.unit, item.name),
-            pounds: item.unit === 'lbs' ? item.quantity : item.quantity * 0.5,
-            co2_lbs: (item.unit === 'lbs' ? item.quantity : item.quantity * 0.5) * 3.8
-          };
+          const impact = allItemsImpact[item.id];
+          
+          if (!impact) {
+            console.error('⚠️ Missing impact data for item:', item.id, item.name);
+            throw new Error(`Missing impact calculation for ${item.name}. Please close and reopen the modal.`);
+          }
           
           return {
             name: item.name,
@@ -1306,8 +1314,8 @@ const App: React.FC = () => {
         });
 
         const totalMeals = donationItems.reduce((sum, item) => sum + item.estimatedMeals, 0);
-        const totalPounds = items.reduce((sum, item) => sum + (allItemsImpact[item.id]?.pounds || 0), 0);
-        const co2Saved = items.reduce((sum, item) => sum + (allItemsImpact[item.id]?.co2_lbs || 0), 0);
+        const totalPounds = items.reduce((sum, item) => sum + allItemsImpact[item.id].pounds, 0);
+        const co2Saved = items.reduce((sum, item) => sum + allItemsImpact[item.id].co2_lbs, 0);
 
         console.log('💾 Saving donation to Supabase...');
         

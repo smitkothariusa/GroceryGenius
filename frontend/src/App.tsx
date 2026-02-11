@@ -151,7 +151,7 @@ const App: React.FC = () => {
   // Calculate AI impact for ALL pantry items when food bank is selected
   useEffect(() => {
     const calculateAllItemsImpact = async () => {
-      if (!selectedFoodBank || pantry.length === 0) {
+      if (!showDonationModal || pantry.length === 0) {
         setAllItemsImpact({});
         setLoadingImpact(false);
         return;
@@ -202,7 +202,7 @@ const App: React.FC = () => {
     };
 
     calculateAllItemsImpact();
-  }, [selectedFoodBank, pantry]);
+  }, [showDonationModal, pantry]);
   const loadUserData = async () => {
     try {
       console.log('📦 Loading user data from Supabase...');

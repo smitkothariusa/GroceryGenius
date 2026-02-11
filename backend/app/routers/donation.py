@@ -32,18 +32,59 @@ async def calculate_donation_impact(payload: DonationImpactRequest):
 
 {items_text}
 
-Analyze each item carefully and provide:
-1. Realistic meal estimates (consider portion sizes, nutritional value, and how the food is typically used)
-2. Weight in pounds (convert if needed)
-3. CO2 emissions prevented (use EPA food waste data: average is 3.8 lbs CO2 per lb of food waste)
+CRITICAL: You must return EXACTLY {len(payload.items)} entries in items_breakdown, one for each item listed above. Even if items are duplicates, calculate and return each one separately.
 
-RULES:
-- 1 apple (medium, ~6oz) = about 0.5 meals (it's a snack/side, not a full meal)
-- 1 lb of rice/pasta = about 8 meals
-- 1 lb of meat/protein = about 4 meals
-- 1 lb of vegetables = about 4 meals
-- Canned goods (1 can, ~15oz) = about 2 meals
-- Be realistic: don't overestimate small quantities
+CONVERSION RULES (FOLLOW EXACTLY):
+
+PROTEINS (assume typical grocery portions):
+- Chicken breast (1 pc) = 8oz = 0.5 lbs = 2 meals
+- Turkey breast (1 pc) = 8oz = 0.5 lbs = 2 meals  
+- Ground beef/turkey (1 lb) = 4 meals
+- Eggs (1 pc) = 2oz = 0.125 lbs = 0.25 meals
+- Canned tuna/chicken (1 can, 5oz) = 1.5 meals
+
+GRAINS & STARCHES:
+- Rice (1 lb dry) = 8 meals (as side dish)
+- Pasta (1 lb dry) = 8 meals (as main dish)
+- Bread (1 loaf, 20oz) = 10 meals (2 slices per meal)
+- Cereal (1 box, 18oz) = 6 meals
+
+CANNED GOODS:
+- Beans (1 can, 15oz) = 2 meals
+- Vegetables (1 can, 15oz) = 2 meals
+- Soup (1 can, 10oz) = 1 meal
+- Tomato sauce (1 can, 15oz) = 3 meals (as ingredient)
+
+FRESH PRODUCE:
+- Apple (1 pc, medium 6oz) = 0.5 meals (snack)
+- Banana (1 pc, 4oz) = 0.5 meals (snack)
+- Potato (1 pc, 8oz) = 0.5 meals (side dish)
+- Carrots (1 lb) = 4 meals (as side)
+- Lettuce (1 head, 1 lb) = 4 meals (salad)
+
+DAIRY:
+- Milk (1 gallon) = 16 meals (1 cup servings)
+- Cheese (1 lb) = 8 meals (2oz servings)
+- Yogurt (1 container, 6oz) = 1 meal
+
+WEIGHT CONVERSIONS:
+- If unit is "pc" (piece), use the specific item rules above
+- If unit is "lbs", calculate directly using meal-per-pound ratios
+- If unit is "oz", convert to pounds first (oz / 16)
+- If unit is "can", use canned goods rules above
+- If item type is unclear, estimate conservatively
+
+CALCULATION PROCESS:
+1. Identify the food item and unit
+2. Convert to pounds using rules above
+3. Calculate meals based on typical serving sizes
+4. For items not listed, use these defaults:
+   - Fruits/vegetables: 0.5 lbs = 1 meal
+   - Proteins: 0.25 lbs (4oz) = 1 meal
+   - Grains/pasta: 1 lb = 8 meals
+   - Canned goods: 1 can = 2 meals
+
+IMPORTANT: Return one breakdown entry for EACH item in the input list, even if items are identical.
 
 Return ONLY a JSON object with this exact structure:
 {{
@@ -81,8 +122,9 @@ Example for "1 pc apple":
                 {"role": "system", "content": "You are a food waste and nutrition calculation expert. Always return valid JSON."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.3,
-            max_tokens=800
+            temperature=0.0,  # Changed from 0.3 to 0.0 for consistent results
+            max_tokens=800,
+            seed=42  # Added seed for even more consistency
         )
         
         content = response.choices[0].message.content.strip()
@@ -112,17 +154,44 @@ Example for "1 pc apple":
         total_pounds = 0
         
         for item in payload.items:
-            # Simple fallback logic
+            # Improved fallback logic with food-specific estimates
+            item_name_lower = item.name.lower()
+            
+            # Convert to pounds
             if item.unit == 'lbs':
                 pounds = item.quantity
             elif item.unit == 'oz':
                 pounds = item.quantity / 16
             elif item.unit == 'g':
                 pounds = item.quantity / 453.592
-            else:  # pc, cup, etc
+            elif item.unit == 'can':
+                pounds = item.quantity * 0.9375  # Assume 15oz can
+            elif item.unit == 'pc':
+                # Estimate weight per piece based on item type
+                if any(word in item_name_lower for word in ['apple', 'orange', 'fruit']):
+                    pounds = item.quantity * 0.375  # 6oz fruit
+                elif any(word in item_name_lower for word in ['chicken', 'turkey', 'meat', 'breast']):
+                    pounds = item.quantity * 0.5  # 8oz protein
+                elif any(word in item_name_lower for word in ['egg']):
+                    pounds = item.quantity * 0.125  # 2oz egg
+                elif any(word in item_name_lower for word in ['potato', 'vegetable']):
+                    pounds = item.quantity * 0.5  # 8oz vegetable
+                else:
+                    pounds = item.quantity * 0.5  # Default 8oz
+            else:  # cup, etc
                 pounds = item.quantity * 0.5
             
-            meals = pounds * 2  # Very rough estimate
+            # Calculate meals based on food type
+            if any(word in item_name_lower for word in ['rice', 'pasta', 'grain']):
+                meals = pounds * 8  # 1 lb = 8 meals
+            elif any(word in item_name_lower for word in ['meat', 'chicken', 'turkey', 'beef', 'protein', 'fish']):
+                meals = pounds * 4  # 1 lb = 4 meals
+            elif any(word in item_name_lower for word in ['apple', 'banana', 'fruit', 'snack']):
+                meals = pounds * 1.33  # 6oz = 0.5 meals, so 1 lb ≈ 1.33 meals
+            elif any(word in item_name_lower for word in ['can', 'bean', 'soup']):
+                meals = pounds * 2  # 15oz can ≈ 2 meals
+            else:
+                meals = pounds * 2  # Default: 8oz = 1 meal
             
             total_pounds += pounds
             total_meals += meals

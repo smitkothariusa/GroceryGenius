@@ -149,16 +149,25 @@ const App: React.FC = () => {
   const [editingPantryItem, setEditingPantryItem] = useState<PantryItem | null>(null);
   const [showEditPantry, setShowEditPantry] = useState(false);
   // Calculate AI impact for ALL pantry items when food bank is selected
+// Calculate AI impact for ALL pantry items when food bank is selected
+// Calculate AI impact for ALL pantry items when food bank is selected
   useEffect(() => {
+    console.log('🔄 useEffect triggered - showDonationModal:', showDonationModal, 'pantry.length:', pantry.length);
+    
     const calculateAllItemsImpact = async () => {
       if (!showDonationModal || pantry.length === 0) {
+        console.log('⏹️ Skipping impact calculation - modal closed or empty pantry');
         setAllItemsImpact({});
         setLoadingImpact(false);
         return;
       }
+      
+      console.log('🚀 Starting AI impact calculation for', pantry.length, 'items');
 
       setLoadingImpact(true);
       setAllItemsImpact({}); // Clear old data
+      
+      console.log('📤 Sending items to API:', pantry.map(i => `${i.quantity} ${i.unit} ${i.name}`));
 
       try {
         // Calculate impact for ALL pantry items at once
@@ -176,6 +185,7 @@ const App: React.FC = () => {
 
         if (impactResponse.ok) {
           const data = await impactResponse.json();
+          console.log('📥 API Response:', data);
           
           // Map the results to item IDs for easy lookup
           const impactMap: { [itemId: string]: { meals: number; pounds: number; co2_lbs: number } } = {};
@@ -187,12 +197,13 @@ const App: React.FC = () => {
                 pounds: data.items_breakdown[index].pounds,
                 co2_lbs: data.items_breakdown[index].pounds * 3.8 // CO2 from pounds
               };
-              console.log(`✅ Mapped ${item.name} (ID: ${item.id}):`, impactMap[item.id]);
+              console.log(`✅ Mapped ${item.name} (ID: ${item.id}, index: ${index}):`, impactMap[item.id]);
             } else {
               console.error(`❌ Missing breakdown for ${item.name} at index ${index}`);
             }
           });
           
+          console.log('📊 Final impact map keys:', Object.keys(impactMap));
           console.log('📊 Final impact map:', impactMap);
           setAllItemsImpact(impactMap);
         } else {
@@ -207,8 +218,7 @@ const App: React.FC = () => {
 
     calculateAllItemsImpact();
   }, [showDonationModal]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadUserData = async () => {
     try {
       console.log('📦 Loading user data from Supabase...');
@@ -1292,13 +1302,14 @@ const App: React.FC = () => {
       try {
         console.log('🎁 Starting donation process...');
         console.log('📦 Items to donate:', items);
-        console.log('🎁 Starting donation process...');
-
+        console.log('📊 Current allItemsImpact state:', allItemsImpact);
+        console.log('📊 allItemsImpact keys:', Object.keys(allItemsImpact));
         
         // Use pre-calculated impact data from allItemsImpact
-// Use pre-calculated impact data from allItemsImpact (NO FALLBACK)
         const donationItems = items.map(item => {
+          console.log(`🔍 Looking up impact for ${item.name} (ID: ${item.id})`);
           const impact = allItemsImpact[item.id];
+          console.log(`   Found:`, impact);
           
           if (!impact) {
             console.error('⚠️ Missing impact data for item:', item.id, item.name);

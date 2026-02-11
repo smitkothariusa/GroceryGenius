@@ -1502,6 +1502,8 @@ const App: React.FC = () => {
                   <option value="vegan">Vegan</option>
                   <option value="gluten-free">Gluten-free</option>
                   <option value="keto">Keto</option>
+                  <option value="diabetic-friendly">Diabetic-Friendly</option>
+                  <option value="heart-healthy">Heart-Healthy</option>
                 </select>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

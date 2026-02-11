@@ -95,6 +95,11 @@ const App: React.FC = () => {
     category: 'other',
     expiryDate: ''
   });
+  const [scanMode, setScanMode] = useState<'menu' | 'camera' | 'barcode' | 'expiry' | 'upload'>('menu');
+  const [barcodeScanning, setBarcodeScanning] = useState(false);
+  const [expiryScanning, setExpiryScanning] = useState(false);
+  const [detectedBarcode, setDetectedBarcode] = useState<string>('');
+  const [detectedExpiry, setDetectedExpiry] = useState<string>('');
   const [showMissionPopup, setShowMissionPopup] = useState(false);
   const [showDemoConfirm, setShowDemoConfirm] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -1209,6 +1214,289 @@ const App: React.FC = () => {
     setRecipes([]);
     success('All data cleared!');
   };
+  const lookupBarcode = async (barcode: string) => {
+    try {
+      // First try OpenFoodFacts API (free barcode database)
+      const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+      const data = await response.json();
+      
+      if (data.status === 1 && data.product) {
+        const product = data.product;
+        return {
+          name: product.product_name || 'Unknown Product',
+          category: product.categories_tags?.[0]?.replace('en:', '') || 'other',
+          expiryDays: null // Most barcodes don't have expiry info
+        };
+      }
+      
+      // Fallback: return barcode number if not found
+      return {
+        name: `Product ${barcode.substring(0, 8)}`,
+        category: 'other',
+        expiryDays: null
+      };
+    } catch (error) {
+      console.error('Barcode lookup error:', error);
+      return {
+        name: `Product ${barcode.substring(0, 8)}`,
+        category: 'other',
+        expiryDays: null
+      };
+    }
+  };
+  const handleBarcodeScanner = async () => {
+    try {
+      setBarcodeScanning(true);
+      
+      // Import Quagga dynamically
+      const Quagga = await import('quagga');
+      
+      // Create scanner container
+      const scannerDiv = document.createElement('div');
+      scannerDiv.id = 'barcode-scanner';
+      scannerDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;';
+      
+      const videoContainer = document.createElement('div');
+      videoContainer.style.cssText = 'width:90%;max-width:640px;height:480px;position:relative;';
+      
+      const instructions = document.createElement('div');
+      instructions.style.cssText = 'color:white;text-align:center;margin-bottom:1rem;font-size:1.1rem;font-weight:600;';
+      instructions.textContent = '📱 Position barcode in the frame';
+      
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.style.cssText = 'margin-top:1rem;padding:0.75rem 2rem;background:#ef4444;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:1rem;';
+      
+      scannerDiv.appendChild(instructions);
+      scannerDiv.appendChild(videoContainer);
+      scannerDiv.appendChild(cancelBtn);
+      document.body.appendChild(scannerDiv);
+      
+      // Initialize Quagga
+      Quagga.init({
+        inputStream: {
+          name: 'Live',
+          type: 'LiveStream',
+          target: videoContainer,
+          constraints: {
+            facingMode: 'environment',
+            width: 640,
+            height: 480
+          }
+        },
+        decoder: {
+          readers: [
+            'ean_reader',
+            'ean_8_reader',
+            'upc_reader',
+            'upc_e_reader',
+            'code_128_reader',
+            'code_39_reader'
+          ]
+        },
+        locate: true
+      }, (err: any) => {
+        if (err) {
+          console.error('Quagga initialization error:', err);
+          error('Failed to start barcode scanner');
+          document.body.removeChild(scannerDiv);
+          setBarcodeScanning(false);
+          return;
+        }
+        Quagga.start();
+      });
+      
+      // Handle barcode detection
+      Quagga.onDetected(async (result: any) => {
+        const code = result.codeResult.code;
+        console.log('Barcode detected:', code);
+        
+        // Stop scanner
+        Quagga.stop();
+        document.body.removeChild(scannerDiv);
+        setBarcodeScanning(false);
+        
+        // Show loading
+        setRecipeLoading(true);
+        
+        // Lookup product info
+        const productInfo = await lookupBarcode(code);
+        
+        // Calculate expiry date if we have days
+        let expiryDate = '';
+        if (productInfo.expiryDays) {
+          const expiry = new Date();
+          expiry.setDate(expiry.getDate() + productInfo.expiryDays);
+          expiryDate = expiry.toISOString().split('T')[0];
+        }
+        
+        // Add to pantry with pre-filled data
+        const newItem: PantryItem = {
+          id: `${Date.now()}-${Math.random()}`,
+          name: productInfo.name,
+          quantity: 1,
+          unit: 'pc',
+          category: productInfo.category as any,
+          expiryDate: expiryDate || undefined
+        };
+        
+        setPantry(prev => [...prev, newItem]);
+        setRecipeLoading(false);
+        success(`Added ${productInfo.name} to pantry!${expiryDate ? ' (Expiry auto-set)' : ''}`);
+        setShowImageUpload(false);
+        setCurrentTab('pantry');
+      });
+      
+      // Cancel handler
+      cancelBtn.onclick = () => {
+        Quagga.stop();
+        document.body.removeChild(scannerDiv);
+        setBarcodeScanning(false);
+      };
+      
+    } catch (err) {
+      console.error('Barcode scanner error:', err);
+      error('Failed to initialize barcode scanner');
+      setBarcodeScanning(false);
+    }
+  };
+  const handleExpiryScanner = async () => {
+    try {
+      setExpiryScanning(true);
+      
+      // Request camera access
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' } 
+      });
+
+      // Create video element
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.autoplay = true;
+      video.playsInline = true;
+
+      // Create modal
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;';
+      
+      video.style.cssText = 'max-width:90%;max-height:60vh;border-radius:12px;';
+
+      const instructions = document.createElement('div');
+      instructions.style.cssText = 'color:white;text-align:center;margin-bottom:1rem;font-size:1.1rem;font-weight:600;';
+      instructions.innerHTML = '📅 Position expiration date in frame<br/><span style="font-size:0.875rem;opacity:0.8;">Look for: EXP, Best By, Use By, etc.</span>';
+
+      const buttonContainer = document.createElement('div');
+      buttonContainer.style.cssText = 'display:flex;gap:1rem;margin-top:1rem;';
+
+      const captureBtn = document.createElement('button');
+      captureBtn.textContent = '📸 Scan Date';
+      captureBtn.style.cssText = 'padding:1rem 2rem;background:#10b981;color:white;border:none;border-radius:12px;font-weight:600;cursor:pointer;font-size:1rem;';
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.style.cssText = 'padding:1rem 2rem;background:#ef4444;color:white;border:none;border-radius:12px;font-weight:600;cursor:pointer;font-size:1rem;';
+
+      const cleanup = () => {
+        stream.getTracks().forEach(track => track.stop());
+        document.body.removeChild(modal);
+        setExpiryScanning(false);
+      };
+
+      captureBtn.onclick = async () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(video, 0, 0);
+
+        cleanup();
+        setRecipeLoading(true);
+
+        try {
+          // Import Tesseract dynamically
+          const Tesseract = (await import('tesseract.js')).default;
+          
+          // Perform OCR
+          const { data: { text } } = await Tesseract.recognize(
+            canvas.toDataURL('image/jpeg'),
+            'eng',
+            {
+              logger: (m: any) => console.log(m)
+            }
+          );
+
+          console.log('OCR Result:', text);
+
+          // Parse expiration date from text
+          const datePatterns = [
+            /(?:exp|expires?|expiry|best\s*by|use\s*by|bb)[:\s]*(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})/i,
+            /(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})/,
+            /(\d{4}[\/-]\d{1,2}[\/-]\d{1,2})/
+          ];
+
+          let foundDate = '';
+          for (const pattern of datePatterns) {
+            const match = text.match(pattern);
+            if (match) {
+              foundDate = match[1];
+              break;
+            }
+          }
+
+          if (foundDate) {
+            // Convert to YYYY-MM-DD format
+            let parsedDate = new Date(foundDate);
+            if (isNaN(parsedDate.getTime())) {
+              // Try different parsing
+              const parts = foundDate.split(/[\/-]/);
+              if (parts.length === 3) {
+                // Assume MM/DD/YYYY or DD/MM/YYYY
+                parsedDate = new Date(parseInt(parts[2]), parseInt(parts[0]) - 1, parseInt(parts[1]));
+              }
+            }
+
+            if (!isNaN(parsedDate.getTime())) {
+              const formattedDate = parsedDate.toISOString().split('T')[0];
+              setDetectedExpiry(formattedDate);
+              success(`Detected expiration date: ${formattedDate}`);
+              
+              // Show add item form with pre-filled expiry
+              setNewPantryItem(prev => ({
+                ...prev,
+                expiryDate: formattedDate
+              }));
+              setShowAddPantry(true);
+            } else {
+              warning('Could not parse date. Please enter manually.');
+            }
+          } else {
+            warning('No expiration date found. Try again with better lighting.');
+          }
+
+        } catch (err) {
+          console.error('OCR error:', err);
+          error('Failed to read expiration date. Please try again.');
+        } finally {
+          setRecipeLoading(false);
+          setShowImageUpload(false);
+        }
+      };
+
+      cancelBtn.onclick = cleanup;
+
+      modal.appendChild(instructions);
+      modal.appendChild(video);
+      buttonContainer.appendChild(captureBtn);
+      buttonContainer.appendChild(cancelBtn);
+      modal.appendChild(buttonContainer);
+      document.body.appendChild(modal);
+
+    } catch (err) {
+      console.error('Camera access error:', err);
+      error('Camera access denied. Please allow camera permissions.');
+      setExpiryScanning(false);
+    }
+  };
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -2030,6 +2318,7 @@ const App: React.FC = () => {
                   <button 
                     onClick={() => {
                       setCameraSource('pantry');
+                      setScanMode('menu'); // Reset to menu
                       setShowImageUpload(true);
                     }}
                     style={{
@@ -3951,95 +4240,218 @@ const App: React.FC = () => {
       )}
 
       {showImageUpload && (
-        <div 
-          className="modal-backdrop"
-          style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', zIndex: 1000
-          }}
-        >
-          <div style={{ 
-            background: cardBg, 
-            padding: isMobile ? '1rem' : '2rem', 
-            borderRadius: isMobile ? '12px' : '16px', 
-            maxWidth: isMobile ? '95vw' : '500px', 
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', zIndex: 1000
+        }}>
+          <div style={{
+            background: cardBg,
+            padding: isMobile ? '1.5rem' : '2rem',
+            borderRadius: isMobile ? '12px' : '16px',
+            maxWidth: isMobile ? '95vw' : '500px',
             width: isMobile ? '95vw' : '90%',
             animation: 'scaleIn 0.3s ease-out'
           }}>
-            <h3 style={{ 
+            <h3 style={{
               marginTop: 0,
               fontSize: isMobile ? '1.25rem' : '1.5rem'
             }}>
-              📷 AI {cameraSource === 'pantry' ? 'Pantry' : 'Ingredient'} Scanner
+              {scanMode === 'menu' ? '📷 Scan Items' : scanMode === 'barcode' ? '📊 Barcode Scanner' : scanMode === 'expiry' ? '📅 Expiry Date Scanner' : '📷 AI Scanner'}
             </h3>
-            <p style={{ color: mutedText }}>
-              {cameraSource === 'pantry' 
-                ? 'Take a photo of items to add to your pantry'
-                : 'Take a photo or upload an image of ingredients'
-              }
+            <p style={{ color: mutedText, fontSize: isMobile ? '0.875rem' : '1rem' }}>
+              {scanMode === 'menu' && (cameraSource === 'pantry'
+                ? 'Choose how you want to add items to your pantry'
+                : 'Choose how you want to scan ingredients')}
+              {scanMode === 'camera' && 'AI will identify items from your photo'}
+              {scanMode === 'barcode' && 'Scan product barcode to auto-fill details'}
+              {scanMode === 'expiry' && 'Scan printed expiration date on packaging'}
+              {scanMode === 'upload' && 'Upload an image for AI analysis'}
             </p>
-            
+
             {recipeLoading && (
-              <div style={{ 
-                textAlign: 'center', 
+              <div style={{
+                textAlign: 'center',
                 padding: '2rem',
                 background: '#f0f9ff',
                 borderRadius: '12px',
                 marginBottom: '1rem'
               }}>
                 <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🤖</div>
-                <div style={{ fontWeight: '600', color: '#1e40af' }}>Analyzing image with AI...</div>
+                <div style={{ fontWeight: '600', color: '#1e40af' }}>
+                  {scanMode === 'barcode' ? 'Looking up product...' : 
+                  scanMode === 'expiry' ? 'Reading expiration date...' : 
+                  'Analyzing image with AI...'}
+                </div>
                 <div style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.5rem' }}>
                   This may take a few seconds
                 </div>
               </div>
             )}
 
-            {/* CAMERA BUTTON - Opens actual webcam */}
-            <button
-              onClick={handleCameraCapture}
-              disabled={recipeLoading}
-              style={{
-                display: 'block', width: '100%', padding: '1rem', background: '#8b5cf6',
-                color: 'white', borderRadius: '8px', textAlign: 'center', cursor: 'pointer',
-                fontWeight: '600', marginBottom: '0.5rem', border: 'none',
-                opacity: recipeLoading ? 0.5 : 1,
-                pointerEvents: recipeLoading ? 'none' : 'auto'
-              }}
-            >
-              📸 Use Camera
-            </button>
-                        
-            {/* FILE UPLOAD BUTTON - Opens file picker */}
-            <label style={{
-              display: 'block', width: '100%', padding: '1rem', background: '#6366f1',
-              color: 'white', borderRadius: '8px', textAlign: 'center', cursor: 'pointer', 
-              fontWeight: '600',
-              opacity: recipeLoading ? 0.5 : 1,
-              pointerEvents: recipeLoading ? 'none' : 'auto'
-            }}>
-              🖼️ Upload Image
-              <input 
-                type="file" 
-                accept="image/*"
-                onChange={handleImageUpload}
-                disabled={recipeLoading}
-                style={{ display: 'none' }} 
-              />
-            </label>
-            
-            <button 
-              onClick={() => setShowImageUpload(false)} 
-              disabled={recipeLoading}
-              style={{
-                width: '100%', padding: '0.75rem', background: '#f3f4f6', marginTop: '0.5rem',
-                border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
-                opacity: recipeLoading ? 0.5 : 1
-              }}
-            >
-              Cancel
-            </button>
+            {scanMode === 'menu' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {/* AI Camera Button */}
+                <button
+                  onClick={() => {
+                    setScanMode('camera');
+                    handleCameraCapture();
+                  }}
+                  disabled={recipeLoading}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '1rem',
+                    background: '#8b5cf6',
+                    color: 'white',
+                    borderRadius: '8px',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    border: 'none',
+                    opacity: recipeLoading ? 0.5 : 1,
+                    pointerEvents: recipeLoading ? 'none' : 'auto',
+                    fontSize: isMobile ? '0.9rem' : '1rem'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{ fontSize: '1.5rem' }}>📸</span>
+                    <div>
+                      <div style={{ fontWeight: '700' }}>AI Camera Scanner</div>
+                      <div style={{ fontSize: '0.8rem', opacity: 0.9, fontWeight: '400' }}>
+                        Identify multiple items automatically
+                      </div>
+                    </div>
+                  </div>
+                </button>
+
+                {/* Barcode Scanner Button */}
+                <button
+                  onClick={() => {
+                    setScanMode('barcode');
+                    handleBarcodeScanner();
+                  }}
+                  disabled={recipeLoading}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '1rem',
+                    background: '#10b981',
+                    color: 'white',
+                    borderRadius: '8px',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    border: 'none',
+                    opacity: recipeLoading ? 0.5 : 1,
+                    pointerEvents: recipeLoading ? 'none' : 'auto',
+                    fontSize: isMobile ? '0.9rem' : '1rem'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{ fontSize: '1.5rem' }}>📊</span>
+                    <div>
+                      <div style={{ fontWeight: '700' }}>Barcode Scanner</div>
+                      <div style={{ fontSize: '0.8rem', opacity: 0.9, fontWeight: '400' }}>
+                        Scan UPC/EAN to auto-fill product info
+                      </div>
+                    </div>
+                  </div>
+                </button>
+
+                {/* Expiry Date Scanner Button */}
+                <button
+                  onClick={() => {
+                    setScanMode('expiry');
+                    handleExpiryScanner();
+                  }}
+                  disabled={recipeLoading}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '1rem',
+                    background: '#f59e0b',
+                    color: 'white',
+                    borderRadius: '8px',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    border: 'none',
+                    opacity: recipeLoading ? 0.5 : 1,
+                    pointerEvents: recipeLoading ? 'none' : 'auto',
+                    fontSize: isMobile ? '0.9rem' : '1rem'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{ fontSize: '1.5rem' }}>📅</span>
+                    <div>
+                      <div style={{ fontWeight: '700' }}>Expiry Date Scanner</div>
+                      <div style={{ fontSize: '0.8rem', opacity: 0.9, fontWeight: '400' }}>
+                        OCR reads printed expiration dates
+                      </div>
+                    </div>
+                  </div>
+                </button>
+
+                {/* Upload Image Button */}
+                <label style={{
+                  display: 'block',
+                  width: '100%',
+                  padding: '1rem',
+                  background: '#6366f1',
+                  color: 'white',
+                  borderRadius: '8px',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  opacity: recipeLoading ? 0.5 : 1,
+                  pointerEvents: recipeLoading ? 'none' : 'auto',
+                  fontSize: isMobile ? '0.9rem' : '1rem'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{ fontSize: '1.5rem' }}>🖼️</span>
+                    <div>
+                      <div style={{ fontWeight: '700' }}>Upload Photo</div>
+                      <div style={{ fontSize: '0.8rem', opacity: 0.9, fontWeight: '400' }}>
+                        Choose from gallery for AI analysis
+                      </div>
+                    </div>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      setScanMode('upload');
+                      handleImageUpload(e);
+                    }}
+                    disabled={recipeLoading}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+
+                <button
+                  onClick={() => {
+                    setShowImageUpload(false);
+                    setScanMode('menu');
+                  }}
+                  disabled={recipeLoading}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    background: '#f3f4f6',
+                    marginTop: '0.5rem',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    opacity: recipeLoading ? 0.5 : 1,
+                    fontSize: isMobile ? '0.9rem' : '1rem'
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

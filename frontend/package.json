@@ -9,8 +9,12 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.78.0",
+    "jsbarcode": "^3.12.3",
+    "quagga": "^0.12.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-webcam": "^7.2.0",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",

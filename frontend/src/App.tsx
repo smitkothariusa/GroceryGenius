@@ -1287,62 +1287,25 @@ const App: React.FC = () => {
         console.log('🎁 Starting donation process...');
         console.log('📦 Items to donate:', items);
         
-        let impactData;
-        try {
-          const impactResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/donation/calculate-impact`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              items: items.map(item => ({
-                name: item.name,
-                quantity: item.quantity,
-                unit: item.unit
-              }))
-            })
-          });
-
-          if (!impactResponse.ok) {
-            throw new Error('Impact calculation failed');
-          }
-
-          impactData = await impactResponse.json();
-        } catch (error) {
-          console.error('Error calculating impact, using fallback:', error);
-          // Fallback to simple calculation
-          const totalPounds = items.reduce((sum, item) => {
-            const pounds = item.unit === 'lbs' ? item.quantity : item.quantity * 0.5;
-            return sum + pounds;
-          }, 0);
-          
-          impactData = {
-            total_meals: Math.round(totalPounds * 2),
-            total_pounds: totalPounds,
-            co2_saved_lbs: totalPounds * 3.8,
-            items_breakdown: items.map(item => ({
-              name: item.name,
-              meals: calculateMeals(item.quantity, item.unit, item.name),
-              pounds: item.unit === 'lbs' ? item.quantity : item.quantity * 0.5
-            }))
-          };
-        }
-
-        const totalMeals = impactData.total_meals;
-        const totalPounds = impactData.total_pounds;
-        const co2Saved = impactData.co2_saved_lbs;
-
-        const donationItems = items.map((item, index) => {
-          const breakdown = impactData.items_breakdown[index] || {
+        // Use pre-calculated impact data from allItemsImpact
+        const donationItems = items.map(item => {
+          const impact = allItemsImpact[item.id] || {
             meals: calculateMeals(item.quantity, item.unit, item.name),
-            pounds: item.unit === 'lbs' ? item.quantity : item.quantity * 0.5
+            pounds: item.unit === 'lbs' ? item.quantity : item.quantity * 0.5,
+            co2_lbs: (item.unit === 'lbs' ? item.quantity : item.quantity * 0.5) * 3.8
           };
           
           return {
             name: item.name,
             quantity: item.quantity,
             unit: item.unit,
-            estimatedMeals: breakdown.meals
+            estimatedMeals: impact.meals
           };
         });
+
+        const totalMeals = donationItems.reduce((sum, item) => sum + item.estimatedMeals, 0);
+        const totalPounds = items.reduce((sum, item) => sum + (allItemsImpact[item.id]?.pounds || 0), 0);
+        const co2Saved = items.reduce((sum, item) => sum + (allItemsImpact[item.id]?.co2_lbs || 0), 0);
 
         console.log('💾 Saving donation to Supabase...');
         

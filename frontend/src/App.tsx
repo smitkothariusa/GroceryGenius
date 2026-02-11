@@ -175,8 +175,8 @@ const App: React.FC = () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            items: pantry.map(item => ({
-              name: item.name,
+            items: pantry.map((item, idx) => ({
+              name: `${item.name} #${idx + 1}`,  // Add index to make each unique
               quantity: item.quantity,
               unit: item.unit
             }))
@@ -190,16 +190,42 @@ const App: React.FC = () => {
           // Map the results to item IDs for easy lookup
           const impactMap: { [itemId: string]: { meals: number; pounds: number; co2_lbs: number } } = {};
           
+          // Check if API consolidated duplicate items
+          if (data.items_breakdown.length < pantry.length) {
+            console.warn(`⚠️ API returned ${data.items_breakdown.length} items but we sent ${pantry.length}. Duplicates may have been consolidated.`);
+          }
+          
           pantry.forEach((item, index) => {
             if (data.items_breakdown && data.items_breakdown[index]) {
               impactMap[item.id] = {
                 meals: data.items_breakdown[index].meals,
                 pounds: data.items_breakdown[index].pounds,
-                co2_lbs: data.items_breakdown[index].pounds * 3.8 // CO2 from pounds
+                co2_lbs: data.items_breakdown[index].pounds * 3.8
               };
               console.log(`✅ Mapped ${item.name} (ID: ${item.id}, index: ${index}):`, impactMap[item.id]);
             } else {
-              console.error(`❌ Missing breakdown for ${item.name} at index ${index}`);
+              // Fallback: look for matching item by name in breakdown
+              const matchingBreakdown = data.items_breakdown.find(
+                (bd: any) => bd.name && bd.name.toLowerCase().includes(item.name.toLowerCase())
+              );
+              
+              if (matchingBreakdown) {
+                impactMap[item.id] = {
+                  meals: matchingBreakdown.meals,
+                  pounds: matchingBreakdown.pounds,
+                  co2_lbs: matchingBreakdown.pounds * 3.8
+                };
+                console.log(`✅ Mapped ${item.name} by name match (ID: ${item.id}):`, impactMap[item.id]);
+              } else {
+                console.error(`❌ Missing breakdown for ${item.name} at index ${index}`);
+                // Use simple fallback calculation
+                impactMap[item.id] = {
+                  meals: calculateMeals(item.quantity, item.unit, item.name),
+                  pounds: item.unit === 'lbs' ? item.quantity : item.quantity * 0.5,
+                  co2_lbs: (item.unit === 'lbs' ? item.quantity : item.quantity * 0.5) * 3.8
+                };
+                console.log(`⚠️ Using fallback calculation for ${item.name}:`, impactMap[item.id]);
+              }
             }
           });
           

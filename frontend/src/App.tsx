@@ -1220,29 +1220,64 @@ const App: React.FC = () => {
   };
   const lookupBarcode = async (barcode: string) => {
     try {
+      console.log('Looking up barcode:', barcode);
+      
       // First try OpenFoodFacts API (free barcode database)
       const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
       const data = await response.json();
       
+      console.log('OpenFoodFacts response:', data);
+      
       if (data.status === 1 && data.product) {
         const product = data.product;
-        return {
-          name: product.product_name || 'Unknown Product',
-          category: product.categories_tags?.[0]?.replace('en:', '') || 'other',
-          expiryDays: null // Most barcodes don't have expiry info
-        };
+        const productName = product.product_name || product.generic_name || product.brands || null;
+        
+        if (productName && productName.trim()) {
+          // Successfully found product
+          console.log('Found product:', productName);
+          return {
+            name: productName.trim(),
+            category: product.categories_tags?.[0]?.replace('en:', '') || 'other',
+            expiryDays: null
+          };
+        }
       }
       
-      // Fallback: return barcode number if not found
+      // Fallback to UPCitemdb API (another free option)
+      console.log('Trying UPCitemdb fallback...');
+      try {
+        const upcResponse = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
+        const upcData = await upcResponse.json();
+        
+        if (upcData.items && upcData.items.length > 0) {
+          const item = upcData.items[0];
+          const itemName = item.title || item.brand || null;
+          
+          if (itemName && itemName.trim()) {
+            console.log('Found product from UPCitemdb:', itemName);
+            return {
+              name: itemName.trim(),
+              category: item.category || 'other',
+              expiryDays: null
+            };
+          }
+        }
+      } catch (upcError) {
+        console.log('UPCitemdb lookup failed:', upcError);
+      }
+      
+      // Final fallback: Ask user to name it
+      warning('Product not found in database. Please edit the name.');
       return {
-        name: `Product ${barcode.substring(0, 8)}`,
+        name: `Scanned Item (${barcode.substring(0, 8)}...)`,
         category: 'other',
         expiryDays: null
       };
     } catch (error) {
       console.error('Barcode lookup error:', error);
+      warning('Barcode lookup failed. Please edit the name.');
       return {
-        name: `Product ${barcode.substring(0, 8)}`,
+        name: `Scanned Item (${barcode.substring(0, 8)}...)`,
         category: 'other',
         expiryDays: null
       };
@@ -1269,7 +1304,23 @@ const App: React.FC = () => {
       
       const cancelBtn = document.createElement('button');
       cancelBtn.textContent = 'Cancel';
-      cancelBtn.style.cssText = 'margin-top:1rem;padding:0.75rem 2rem;background:#ef4444;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:1rem;';
+      cancelBtn.style.cssText = 'margin-top:1rem;padding:0.75rem 2rem;background:#ef4444;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:1rem;position:relative;z-index:10;';
+      
+      // Attach cancel handler BEFORE adding to DOM
+      cancelBtn.onclick = () => {
+        try {
+          Quagga.stop();
+          Quagga.offDetected(() => {});
+        } catch (e) {
+          console.error('Error stopping Quagga:', e);
+        }
+        if (document.body.contains(scannerDiv)) {
+          document.body.removeChild(scannerDiv);
+        }
+        setBarcodeScanning(false);
+        setShowImageUpload(false);
+        setScanMode('menu');
+      };
       
       scannerDiv.appendChild(instructions);
       scannerDiv.appendChild(videoContainer);
@@ -1303,8 +1354,12 @@ const App: React.FC = () => {
         if (err) {
           console.error('Quagga initialization error:', err);
           error('Failed to start barcode scanner');
-          document.body.removeChild(scannerDiv);
+          if (document.body.contains(scannerDiv)) {
+            document.body.removeChild(scannerDiv);
+          }
           setBarcodeScanning(false);
+          setShowImageUpload(false);
+          setScanMode('menu');
           return;
         }
         Quagga.start();
@@ -1328,11 +1383,13 @@ const App: React.FC = () => {
         }
         setBarcodeScanning(false);
         
-        // Show loading
+        // Show loading with barcode number
         setRecipeLoading(true);
         
         // Lookup product info
         const productInfo = await lookupBarcode(code);
+        
+        console.log('Product info received:', productInfo);
         
         // Calculate expiry date if we have days
         let expiryDate = '';
@@ -1354,26 +1411,17 @@ const App: React.FC = () => {
         
         setPantry(prev => [...prev, newItem]);
         setRecipeLoading(false);
-        success(`Added ${productInfo.name} to pantry!${expiryDate ? ' (Expiry auto-set)' : ''}`);
+        
+        // Show success message
+        if (productInfo.name.includes('Scanned Item')) {
+          success(`Added "${productInfo.name}" - Please edit to add proper name`);
+        } else {
+          success(`Added ${productInfo.name} to pantry!${expiryDate ? ' (Expiry auto-set)' : ''}`);
+        }
+        
         setShowImageUpload(false);
         setCurrentTab('pantry');
       });
-      
-      // Cancel handler
-      cancelBtn.onclick = () => {
-        try {
-          Quagga.stop();
-          Quagga.offDetected(() => {});
-        } catch (e) {
-          console.error('Error stopping Quagga:', e);
-        }
-        if (document.body.contains(scannerDiv)) {
-          document.body.removeChild(scannerDiv);
-        }
-        setBarcodeScanning(false);
-        setShowImageUpload(false);
-        setScanMode('menu');
-      };
       
     } catch (err) {
       console.error('Barcode scanner error:', err);
@@ -2845,17 +2893,22 @@ const App: React.FC = () => {
                       <button 
                           onClick={async () => {
                             try {
-                              // Only try to delete from database if user is logged in
-                              if (user) {
+                              // Check if this is a local-only item (scanned items have timestamp-based IDs)
+                              const isLocalItem = item.id.includes('-') && item.id.includes('.');
+                              
+                              if (user && !isLocalItem) {
+                                // Only try database delete for items that came from database
                                 await pantryService.delete(item.id);
                               }
+                              
+                              // Always remove from local state
                               setPantry(prev => prev.filter(i => i.id !== item.id));
                               success('Item removed');
                             } catch (error) {
                               console.error('Error deleting pantry item:', error);
                               // Still remove from local state even if database delete fails
                               setPantry(prev => prev.filter(i => i.id !== item.id));
-                              warning('Item removed locally (database sync failed)');
+                              success('Item removed');
                             }
                           }} 
                         style={{

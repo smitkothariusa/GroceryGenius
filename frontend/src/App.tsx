@@ -1886,8 +1886,16 @@ const App: React.FC = () => {
   };
 
   const getSortedFoodBanks = (): FoodBank[] => {
-    // Food banks don't have lat/lng coordinates, return as-is
-    return foodBanks;
+    if (!userLocation) return foodBanks;
+    
+    return [...foodBanks].sort((a, b) => {
+      // Check if coordinates exist
+      if (!a.coordinates || !b.coordinates) return 0;
+      
+      const distA = calculateDistance(userLocation.lat, userLocation.lng, a.coordinates.lat, a.coordinates.lng);
+      const distB = calculateDistance(userLocation.lat, userLocation.lng, b.coordinates.lat, b.coordinates.lng);
+      return distA - distB;
+    });
   };
 
   const getSortedDropOffSites = (): DropOffSite[] => {
@@ -1908,59 +1916,29 @@ const App: React.FC = () => {
     setPriceComparison(prev => ({ ...prev, loading: true }));
     
     try {
-      // Format shopping list for AI
-      const itemsList = shoppingList
-        .map(item => `${item.quantity} ${item.unit} ${item.name}`)
-        .join(', ');
-
-      // Call OpenAI API for smart price estimation
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      // Call backend API for AI-powered price comparison
+      const response = await fetch(`${API_BASE}/shopping/ai-price-comparison`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a shopping price expert. Estimate realistic grocery prices for Amazon and Walmart. Respond ONLY with valid JSON in this exact format: {"amazon": number, "walmart": number}. Amazon prices are typically 10-20% higher than Walmart. Be realistic based on current 2024-2025 grocery prices.'
-            },
-            {
-              role: 'user',
-              content: `Estimate the total cost for these grocery items at Amazon and Walmart: ${itemsList}. Return ONLY a JSON object with "amazon" and "walmart" keys (numbers only, no text).`
-            }
-          ],
-          temperature: 0.3,
-          max_tokens: 100
+          items: shoppingList.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            unit: item.unit
+          }))
         })
       });
 
       if (response.ok) {
         const data = await response.json();
-        const content = data.choices[0].message.content.trim();
-        
-        // Parse JSON response
-        let prices;
-        try {
-          // Remove markdown code blocks if present
-          const cleanContent = content.replace(/```json\n?|\n?```/g, '').trim();
-          prices = JSON.parse(cleanContent);
-        } catch (parseErr) {
-          console.error('Failed to parse AI response:', content);
-          throw new Error('Invalid AI response format');
-        }
-
         setPriceComparison({
-          amazon: prices.amazon || 0,
-          walmart: prices.walmart || 0,
+          amazon: data.amazon_total || 0,
+          walmart: data.walmart_total || 0,
           loading: false
         });
-        
-        console.log('✅ AI Price Comparison:', prices);
+        console.log('✅ AI Price Comparison:', data);
       } else {
-        throw new Error('OpenAI API request failed');
+        throw new Error('Backend API request failed');
       }
     } catch (err) {
       console.error('Price comparison error:', err);
@@ -1971,7 +1949,7 @@ const App: React.FC = () => {
         walmart: itemCount * 2.8,
         loading: false
       });
-      warning('Using estimated prices. Check your OpenAI API key.');
+      info('Using estimated prices. AI pricing temporarily unavailable.');
     }
   };
 
@@ -4090,7 +4068,12 @@ const App: React.FC = () => {
                     fontSize: isMobile ? '1.25rem' : '1.75rem' 
                   }}>🏛️ Local Food Banks Near You</h3>
               <div style={{ display: 'grid', gap: '1rem' }}>
-                    {getSortedFoodBanks().map(bank => (
+                    {getSortedFoodBanks().map(bank => {
+                      const distance = userLocation && bank.coordinates
+                        ? calculateDistance(userLocation.lat, userLocation.lng, bank.coordinates.lat, bank.coordinates.lng)
+                        : null;
+                      
+                      return (
                   <div
                     key={bank.id}
                     className="card-hover"
@@ -4128,6 +4111,16 @@ const App: React.FC = () => {
                         }}>
                           📍 {bank.address}, {bank.city}, {bank.state} {bank.zipCode}
                         </div>
+                        {distance !== null && (
+                          <div style={{ 
+                            color: '#667eea', 
+                            fontSize: isMobile ? '0.75rem' : '0.875rem',
+                            fontWeight: '600',
+                            marginTop: '0.25rem'
+                          }}>
+                            📏 {distance.toFixed(1)} miles away
+                          </div>
+                        )}
                         <div style={{ 
                           color: '#6b7280', 
                           fontSize: isMobile ? '0.75rem' : '0.875rem', 
@@ -4196,8 +4189,9 @@ const App: React.FC = () => {
                       Click to record a donation
                     </div>
                   </div>
-                    ))}
-                  </div>
+                      );
+                    })}
+              </div>
                 </>
               )}
 

@@ -3,6 +3,8 @@ from fastapi import APIRouter, HTTPException
 from typing import List, Optional
 from pydantic import BaseModel
 import uuid
+import json
+from app.services.openai_client import call_chat_completion
 
 router = APIRouter()
 
@@ -74,3 +76,79 @@ def add_batch_items(items: List[ShoppingItem]):
         added_items.append(ShoppingItem(**item_dict))
     
     return {"added_items": added_items, "count": len(added_items)}
+
+# ============================================
+# NEW: AI-POWERED PRICE COMPARISON
+# ============================================
+
+class PriceComparisonRequest(BaseModel):
+    items: List[dict]  # [{name: str, quantity: int, unit: str}, ...]
+
+@router.post("/ai-price-comparison")
+async def ai_price_comparison(request: PriceComparisonRequest):
+    """
+    AI-powered price comparison for Amazon vs Walmart using GPT-4o-mini.
+    Returns estimated total prices for the shopping list.
+    """
+    items = request.items
+    
+    if not items:
+        return {"amazon_total": 0, "walmart_total": 0}
+    
+    # Format items for AI prompt
+    items_list = ", ".join([
+        f"{item['quantity']} {item['unit']} {item['name']}" 
+        for item in items
+    ])
+    
+    try:
+        # System prompt for price estimation
+        system_prompt = """You are a shopping price expert with extensive knowledge of grocery prices at Amazon and Walmart. 
+Estimate realistic total prices for grocery items based on current 2024-2025 market rates.
+Amazon prices are typically 10-20% higher than Walmart for groceries.
+Respond ONLY with valid JSON in this exact format: {"amazon": number, "walmart": number}
+Do not include any markdown, explanations, or extra text - just the JSON object."""
+
+        # User prompt with the shopping list
+        user_prompt = f"""Estimate the total cost for these grocery items at Amazon and Walmart:
+
+{items_list}
+
+Return ONLY a JSON object with "amazon" and "walmart" keys containing the total price estimates as numbers."""
+
+        # Call OpenAI API using existing client
+        response_text = await call_chat_completion(
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            max_tokens=100,
+            temperature=0.3
+        )
+        
+        # Parse the response
+        # Remove any markdown code blocks if present
+        clean_response = response_text.replace('```json', '').replace('```', '').strip()
+        
+        try:
+            prices = json.loads(clean_response)
+            amazon_total = float(prices.get("amazon", 0))
+            walmart_total = float(prices.get("walmart", 0))
+        except (json.JSONDecodeError, ValueError) as e:
+            print(f"⚠️ Failed to parse AI response: {clean_response}")
+            print(f"Error: {e}")
+            raise HTTPException(status_code=500, detail="Failed to parse price estimation")
+        
+        return {
+            "amazon_total": round(amazon_total, 2),
+            "walmart_total": round(walmart_total, 2)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error in AI price comparison: {e}")
+        # Fallback to simple estimation
+        item_count = sum(item.get('quantity', 1) for item in items)
+        return {
+            "amazon_total": round(item_count * 3.5, 2),
+            "walmart_total": round(item_count * 2.8, 2)
+        }

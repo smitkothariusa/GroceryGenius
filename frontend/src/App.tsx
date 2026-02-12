@@ -1908,27 +1908,59 @@ const App: React.FC = () => {
     setPriceComparison(prev => ({ ...prev, loading: true }));
     
     try {
-      const response = await fetch(`${API_BASE}/shopping/price-comparison`, {
+      // Format shopping list for AI
+      const itemsList = shoppingList
+        .map(item => `${item.quantity} ${item.unit} ${item.name}`)
+        .join(', ');
+
+      // Call OpenAI API for smart price estimation
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
+        },
         body: JSON.stringify({
-          items: shoppingList.map(item => ({
-            name: item.name,
-            quantity: item.quantity,
-            unit: item.unit
-          }))
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a shopping price expert. Estimate realistic grocery prices for Amazon and Walmart. Respond ONLY with valid JSON in this exact format: {"amazon": number, "walmart": number}. Amazon prices are typically 10-20% higher than Walmart. Be realistic based on current 2024-2025 grocery prices.'
+            },
+            {
+              role: 'user',
+              content: `Estimate the total cost for these grocery items at Amazon and Walmart: ${itemsList}. Return ONLY a JSON object with "amazon" and "walmart" keys (numbers only, no text).`
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 100
         })
       });
 
       if (response.ok) {
         const data = await response.json();
+        const content = data.choices[0].message.content.trim();
+        
+        // Parse JSON response
+        let prices;
+        try {
+          // Remove markdown code blocks if present
+          const cleanContent = content.replace(/```json\n?|\n?```/g, '').trim();
+          prices = JSON.parse(cleanContent);
+        } catch (parseErr) {
+          console.error('Failed to parse AI response:', content);
+          throw new Error('Invalid AI response format');
+        }
+
         setPriceComparison({
-          amazon: data.amazon_total || 0,
-          walmart: data.walmart_total || 0,
+          amazon: prices.amazon || 0,
+          walmart: prices.walmart || 0,
           loading: false
         });
+        
+        console.log('✅ AI Price Comparison:', prices);
       } else {
-        throw new Error('Failed to fetch prices');
+        throw new Error('OpenAI API request failed');
       }
     } catch (err) {
       console.error('Price comparison error:', err);
@@ -1939,6 +1971,7 @@ const App: React.FC = () => {
         walmart: itemCount * 2.8,
         loading: false
       });
+      warning('Using estimated prices. Check your OpenAI API key.');
     }
   };
 

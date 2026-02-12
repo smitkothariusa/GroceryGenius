@@ -1957,7 +1957,7 @@ const App: React.FC = () => {
     if (currentTab === 'shopping') {
       fetchPriceComparison();
     }
-  }, [shoppingList, currentTab]);
+  }, [JSON.stringify(shoppingList), currentTab]);
 
   const generateShareText = () => {
     return `I've donated ${donationImpact.totalMeals} meals and saved ${Math.round(donationImpact.totalPounds)} lbs of food using GroceryGenius! 🎉
@@ -5512,7 +5512,7 @@ const App: React.FC = () => {
             )}
 
             {/* Food Bank Selection (if not pre-selected) */}
-            {!selectedFoodBank && (
+            {!selectedFoodBank && !selectedDropOffSite && (
               <div style={{ marginBottom: '1.5rem' }}>
                 <h4 style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>
                   Select Food Bank:

@@ -502,26 +502,30 @@ const App: React.FC = () => {
           const session = await authService.getSession();
           console.log('📝 Session:', session ? 'Found' : 'None');
           setUser(session?.user || null);
-          // DON'T set loading false here - wait until data loads
-          
-          if (session?.user) {
-            console.log('👤 User authenticated, loading data...');
-            try {
-              await loadUserData();
-            } catch (loadError) {
-              console.error('⚠️ Error loading user data:', loadError);
-              // User is still authenticated, just failed to load data
-            }
-          }
         } catch (err) {
           console.error('❌ Auth error:', err);
           setUser(null);
         } finally {
           console.log('✅ Auth initialization complete');
-          setAuthLoading(false);  // ✅ Set loading false AFTER everything completes
+          setAuthLoading(false);
         }
       };
       initAuth();
+
+      // Load user data after authentication
+  useEffect(() => {
+    if (user && !authLoading) {
+      console.log('👤 User authenticated, loading data...');
+      loadUserData().catch(error => {
+        console.error('⚠️ Error loading user data:', error);
+        // Set empty defaults
+        setPantry([]);
+        setShoppingList([]);
+        setFavorites([]);
+        setDonationHistory([]);
+      });
+    }
+  }, [user, authLoading]);
 
       const { data: authListener } = authService.onAuthStateChange(async (event, session) => {
         console.log('🔄 Auth state changed:', event);

@@ -3565,15 +3565,19 @@ const App: React.FC = () => {
                       {isMobile ? 'W' : 'Walmart'}
                     </a>
                     <button onClick={async () => {
+                      console.log('🗑️ Attempting to delete item:', item.id, item.name);
+                      
+                      // Always remove from local state first (optimistic update)
+                      setShoppingList(prev => prev.filter(i => i.id !== item.id));
+                      success('Item removed!');
+                      
+                      // Then try to delete from database in background
                       try {
                         await shoppingService.delete(item.id);
-                        setShoppingList(prev => prev.filter(i => i.id !== item.id));
-                        success('Item removed!');
+                        console.log('✅ Successfully deleted from database:', item.id);
                       } catch (error) {
-                        console.error('Error deleting shopping item from Supabase:', error);
-                        // Even if Supabase delete fails, remove from local state
-                        setShoppingList(prev => prev.filter(i => i.id !== item.id));
-                        info('Item removed from list');
+                        console.error('⚠️ Failed to delete from database (item already removed from UI):', error);
+                        // Item is already removed from UI, so this is fine
                       }
                     }} style={{flex: isMobile ? '1' : 'initial',
                       background: '#fee2e2',

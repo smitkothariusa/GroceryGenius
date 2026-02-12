@@ -103,33 +103,41 @@ async def ai_price_comparison(request: PriceComparisonRequest):
     
     try:
         # System prompt for price estimation
-        system_prompt = """You are a shopping price expert with extensive knowledge of grocery prices at Amazon and Walmart. 
-Calculate realistic individual prices for each grocery item, then sum them up for the TOTAL.
-Amazon prices are typically 10-20% higher than Walmart for groceries.
+        system_prompt = """You are a grocery pricing expert with real-time knowledge of Amazon Fresh and Walmart grocery prices.
 
-IMPORTANT: Calculate each item's price individually, then add them all together for the grand total.
-Do NOT give cumulative or running totals - calculate the COMPLETE TOTAL from ALL items in the list.
+PRICING RULES:
+1. Price each item individually based on realistic 2025 market rates
+2. Consider the quantity AND unit (e.g., 2 lbs is different from 2 pieces)
+3. Amazon Fresh is typically 15-25% more expensive than Walmart
+4. Add ALL individual item prices together for the TOTAL
+5. Think step-by-step: calculate each item's price, then sum them
 
-Respond ONLY with valid JSON in this exact format: {"amazon": number, "walmart": number}
-Do not include any markdown, explanations, or extra text - just the JSON object."""
+CRITICAL: Do NOT give cumulative totals. Calculate the COMPLETE sum of ALL items every time.
+
+Respond ONLY with valid JSON: {"amazon": number, "walmart": number}
+No markdown, no explanations, just the JSON object."""
 
         # User prompt with the shopping list
-        user_prompt = f"""Calculate the COMPLETE TOTAL cost for ALL of these grocery items at Amazon and Walmart.
-Price each item individually, then sum ALL items together:
+        user_prompt = f"""Calculate the TOTAL grocery cost for these items at Amazon Fresh and Walmart.
 
+SHOPPING LIST:
 {items_list}
 
-CRITICAL: The totals must include the prices of ALL items listed above added together.
-Return ONLY a JSON object with "amazon" and "walmart" keys containing the TOTAL price estimates as numbers."""
+INSTRUCTIONS:
+1. Price each item individually at both stores
+2. Sum ALL prices for the grand total
+3. Amazon should be 15-25% higher than Walmart
+
+Return ONLY: {{"amazon": total_price, "walmart": total_price}}"""
 
         # Call OpenAI API using existing client
         response_text = await call_chat_completion(
             system_prompt=system_prompt,
             user_prompt=user_prompt,
             max_tokens=150,
-            temperature=0.7
+            temperature=0.8
         )
-        
+
         # Parse the response
         # Remove any markdown code blocks if present
         clean_response = response_text.replace('```json', '').replace('```', '').strip()

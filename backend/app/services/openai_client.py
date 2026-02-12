@@ -9,8 +9,7 @@ print(f"🔑 API Key loaded: {'✅ Found' if OPENAI_API_KEY else '❌ Missing'}"
 print(f"🔑 Key starts with: {OPENAI_API_KEY[:10]}..." if OPENAI_API_KEY else "🔑 Key is None/empty")
  
 OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions"
-MODEL = "gpt-3.5-turbo"  # change if you have access to other models
-
+MODEL = "gpt-4o-mini"  # Better at math and calculations
 async def call_chat_completion(system_prompt: str, user_prompt: str, max_tokens: int = 600, temperature: float = 0.7):
     """
     Call the OpenAI Chat Completions HTTP API and return the assistant's content as text.

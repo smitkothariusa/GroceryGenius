@@ -512,25 +512,10 @@ const App: React.FC = () => {
       };
       initAuth();
 
-      // Load user data after authentication
-  useEffect(() => {
-    if (user && !authLoading) {
-      console.log('👤 User authenticated, loading data...');
-      loadUserData().catch(error => {
-        console.error('⚠️ Error loading user data:', error);
-        // Set empty defaults
-        setPantry([]);
-        setShoppingList([]);
-        setFavorites([]);
-        setDonationHistory([]);
-      });
-    }
-  }, [user, authLoading]);
-
       const { data: authListener } = authService.onAuthStateChange(async (event, session) => {
         console.log('🔄 Auth state changed:', event);
         setUser(session?.user || null);
-        setAuthLoading(false); // ← ADD THIS LINE to fix stuck loading
+        setAuthLoading(false);
         
         if (event === 'SIGNED_IN' && session?.user) {
           // Only reload if this is a fresh sign-in, not a page refresh
@@ -564,6 +549,21 @@ const App: React.FC = () => {
         authListener?.subscription?.unsubscribe();
       };
     }, []);
+
+  // Load user data after authentication - SEPARATE useEffect
+  useEffect(() => {
+    if (user && !authLoading) {
+      console.log('👤 User authenticated, loading data...');
+      loadUserData().catch(error => {
+        console.error('⚠️ Error loading user data:', error);
+        // Set empty defaults
+        setPantry([]);
+        setShoppingList([]);
+        setFavorites([]);
+        setDonationHistory([]);
+      });
+    }
+  }, [user, authLoading]);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);

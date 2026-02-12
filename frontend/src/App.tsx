@@ -3568,9 +3568,12 @@ const App: React.FC = () => {
                       try {
                         await shoppingService.delete(item.id);
                         setShoppingList(prev => prev.filter(i => i.id !== item.id));
+                        success('Item removed!');
                       } catch (error) {
-                        console.error('Error deleting shopping item:', error);
-                        warning('Failed to remove item');
+                        console.error('Error deleting shopping item from Supabase:', error);
+                        // Even if Supabase delete fails, remove from local state
+                        setShoppingList(prev => prev.filter(i => i.id !== item.id));
+                        info('Item removed from list');
                       }
                     }} style={{flex: isMobile ? '1' : 'initial',
                       background: '#fee2e2',

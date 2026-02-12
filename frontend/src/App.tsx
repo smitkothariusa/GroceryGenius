@@ -33,7 +33,7 @@ const dropOffSites: DropOffSite[] = [
 ];
 import Toast from './components/Toast';
 import { useToast } from './hooks/useToast';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { authService, supabase } from './lib/supabase';
 import { calorieService } from './lib/database';
 import { pantryService, shoppingService, recipesService, mealPlansService, donationService } from './lib/database';
@@ -1934,7 +1934,15 @@ const App: React.FC = () => {
     });
   };
 
+  // Add a ref to track the latest API call
+  const priceComparisonAbortController = useRef<AbortController | null>(null);
+
   const fetchPriceComparison = async () => {
+    // Cancel any in-flight request
+    if (priceComparisonAbortController.current) {
+      priceComparisonAbortController.current.abort();
+    }
+
     if (shoppingList.length === 0) {
       setPriceComparison({ amazon: 0, walmart: 0, loading: false });
       return;
@@ -1942,9 +1950,14 @@ const App: React.FC = () => {
 
     setPriceComparison(prev => ({ ...prev, loading: true }));
     
+    // Create new abort controller for this request
+    const controller = new AbortController();
+    priceComparisonAbortController.current = controller;
+    
     try {
       // Call backend API for AI-powered price comparison
       const response = await fetch(`${API_BASE}/shopping/ai-price-comparison`, {
+        signal: controller.signal,
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1958,34 +1971,53 @@ const App: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setPriceComparison({
-          amazon: data.amazon_total || 0,
-          walmart: data.walmart_total || 0,
-          loading: false
-        });
-        console.log('✅ AI Price Comparison:', data);
+        
+        // Only update if this request wasn't cancelled
+        if (!controller.signal.aborted) {
+          setPriceComparison({
+            amazon: data.amazon_total || 0,
+            walmart: data.walmart_total || 0,
+            loading: false
+          });
+          console.log('✅ AI Price Comparison:', data);
+        }
       } else {
         throw new Error('Backend API request failed');
       }
     } catch (err) {
+      // Ignore abort errors (they're expected)
+      if (err instanceof Error && err.name === 'AbortError') {
+        console.log('🚫 Price comparison cancelled (newer request in progress)');
+        return;
+      }
+      
       console.error('Price comparison error:', err);
-      // Fallback to simple estimation
-      const itemCount = shoppingList.reduce((sum, item) => sum + item.quantity, 0);
-      setPriceComparison({
-        amazon: itemCount * 3.5,
-        walmart: itemCount * 2.8,
-        loading: false
-      });
-      info('Using estimated prices. AI pricing temporarily unavailable.');
+      
+      // Only update on error if not aborted
+      if (!controller.signal.aborted) {
+        const itemCount = shoppingList.reduce((sum, item) => sum + item.quantity, 0);
+        setPriceComparison({
+          amazon: itemCount * 3.5,
+          walmart: itemCount * 2.8,
+          loading: false
+        });
+        info('Using estimated prices. AI pricing temporarily unavailable.');
+      }
     }
   };
 
   useEffect(() => {
-    if (currentTab === 'shopping') {
-      fetchPriceComparison();
+    if (currentTab === 'shopping' && shoppingList.length > 0) {
+      // Debounce: wait 500ms after last change before fetching prices
+      const timer = setTimeout(() => {
+        fetchPriceComparison();
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    } else if (shoppingList.length === 0) {
+      setPriceComparison({ amazon: 0, walmart: 0, loading: false });
     }
-  }, [JSON.stringify(shoppingList), currentTab]);
-
+  }, [shoppingList.length, currentTab]);
   const generateShareText = () => {
     return `I've donated ${donationImpact.totalMeals} meals and saved ${Math.round(donationImpact.totalPounds)} lbs of food using GroceryGenius! 🎉
 

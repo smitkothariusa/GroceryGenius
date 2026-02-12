@@ -1886,12 +1886,8 @@ const App: React.FC = () => {
   };
 
   const getSortedFoodBanks = (): FoodBank[] => {
-    if (!userLocation) return foodBanks;
-    return [...foodBanks].sort((a, b) => {
-      const distA = calculateDistance(userLocation.lat, userLocation.lng, a.lat, a.lng);
-      const distB = calculateDistance(userLocation.lat, userLocation.lng, b.lat, b.lng);
-      return distA - distB;
-    });
+    // Food banks don't have lat/lng coordinates, return as-is
+    return foodBanks;
   };
 
   const getSortedDropOffSites = (): DropOffSite[] => {
@@ -1981,9 +1977,9 @@ const App: React.FC = () => {
     
     setShowShareModal(false);
   };
-  const handleDonation = async (foodBank: FoodBank, items: PantryItem[]) => {
-      if (!foodBank || items.length === 0) {
-        warning('Please select a food bank and items to donate');
+  const handleDonation = async (location: FoodBank | DropOffSite | null, items: PantryItem[]) => {
+      if (!location || items.length === 0) {
+        warning('Please select a location and items to donate');
         return;
       }
 
@@ -2021,7 +2017,7 @@ const App: React.FC = () => {
         // SAVE TO SUPABASE
         await donationService.add({
           date: new Date().toISOString(),
-          food_bank: foodBank.name,
+          food_bank: location.name,
           items: donationItems,
           total_meals: totalMeals
         });
@@ -2082,8 +2078,9 @@ const App: React.FC = () => {
 
         success(`Donation recorded! You're feeding ${totalMeals} meals! 🎉`);
         setShowDonationModal(false);
-        setItemsToDonate([]);
         setSelectedFoodBank(null);
+        setSelectedDropOffSite(null);
+        setItemsToDonate([]);
         
         // Switch to donate tab to show the impact
         setCurrentTab('donate');
@@ -3947,12 +3944,120 @@ const App: React.FC = () => {
               borderRadius: '16px', 
               marginBottom: isMobile ? '1rem' : '2rem' 
             }}>
-              <h3 style={{ 
-                margin: '0 0 1.5rem 0', 
-                fontSize: isMobile ? '1.25rem' : '1.75rem' 
-              }}>🏛️ Local Food Banks Near You</h3>
+              <h2 style={{ 
+                margin: '0 0 1rem 0', 
+                fontSize: isMobile ? '1.5rem' : '2rem' 
+              }}>🎁 Donate Food</h2>
+
+              {/* Location Request Banner */}
+              {locationPermission === 'pending' && (
+                <div style={{
+                  background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                  padding: '1rem',
+                  borderRadius: '12px',
+                  marginBottom: '1.5rem',
+                  border: '1px solid #fbbf24',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '1rem',
+                  flexWrap: 'wrap'
+                }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#92400e', marginBottom: '0.25rem' }}>
+                      📍 Enable Location for Nearby Sites
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#78350f' }}>
+                      We'll sort food banks and drop-off sites by distance from you
+                    </div>
+                  </div>
+                  <button
+                    onClick={requestUserLocation}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      background: '#f59e0b',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      fontSize: '0.875rem',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Enable Location
+                  </button>
+                </div>
+              )}
+
+              {locationPermission === 'granted' && userLocation && (
+                <div style={{
+                  background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
+                  padding: '0.75rem 1rem',
+                  borderRadius: '8px',
+                  marginBottom: '1.5rem',
+                  border: '1px solid #6ee7b7',
+                  fontSize: '0.875rem',
+                  color: '#065f46',
+                  textAlign: 'center',
+                  fontWeight: '500'
+                }}>
+                  ✅ Showing sites nearest to you
+                </div>
+              )}
+
+              {/* Sub-tabs */}
+              <div style={{ 
+                display: 'flex', 
+                gap: '0.5rem',
+                marginBottom: '1.5rem',
+                borderBottom: '2px solid #e5e7eb',
+                overflowX: 'auto'
+              }}>
+                <button
+                  onClick={() => setDonateSubTab('foodbanks')}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    background: 'transparent',
+                    border: 'none',
+                    borderBottom: donateSubTab === 'foodbanks' ? '3px solid #667eea' : '3px solid transparent',
+                    color: donateSubTab === 'foodbanks' ? '#667eea' : mutedText,
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    fontSize: '0.875rem',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  🏛️ Local Food Banks
+                </button>
+                <button
+                  onClick={() => setDonateSubTab('dropoffs')}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    background: 'transparent',
+                    border: 'none',
+                    borderBottom: donateSubTab === 'dropoffs' ? '3px solid #667eea' : '3px solid transparent',
+                    color: donateSubTab === 'dropoffs' ? '#667eea' : mutedText,
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    fontSize: '0.875rem',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  📦 Drop-Off Sites
+                </button>
+              </div>
+
+              {donateSubTab === 'foodbanks' && (
+                <>
+                  <h3 style={{ 
+                    margin: '0 0 1.5rem 0', 
+                    fontSize: isMobile ? '1.25rem' : '1.75rem' 
+                  }}>🏛️ Local Food Banks Near You</h3>
               <div style={{ display: 'grid', gap: '1rem' }}>
-                {foodBanks.map(bank => (
+                    {getSortedFoodBanks().map(bank => (
                   <div
                     key={bank.id}
                     className="card-hover"
@@ -4058,8 +4163,117 @@ const App: React.FC = () => {
                       Click to record a donation
                     </div>
                   </div>
-                ))}
-              </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {donateSubTab === 'dropoffs' && (
+                <>
+                  <h3 style={{ 
+                    margin: '0 0 1.5rem 0', 
+                    fontSize: isMobile ? '1.25rem' : '1.75rem' 
+                  }}>📦 Drop-Off Sites Near You</h3>
+                  <div style={{ display: 'grid', gap: '1rem' }}>
+                    {getSortedDropOffSites().map((site) => {
+                      const distance = userLocation 
+                        ? calculateDistance(userLocation.lat, userLocation.lng, site.lat, site.lng)
+                        : null;
+                      
+                      return (
+                        <div 
+                          key={site.id}
+                          className="card-hover"
+                          style={{
+                            padding: isMobile ? '1rem' : '1.5rem',
+                            background: '#f9fafb',
+                            border: '2px solid #e5e7eb',
+                            borderRadius: '12px',
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => {
+                            setSelectedDropOffSite(site);
+                            setShowDonationModal(true);
+                          }}
+                        >
+                          <div style={{ 
+                            display: 'flex', 
+                            flexDirection: isMobile ? 'column' : 'row',
+                            justifyContent: 'space-between', 
+                            alignItems: isMobile ? 'stretch' : 'start',
+                            marginBottom: '1rem',
+                            gap: isMobile ? '1rem' : '0'
+                          }}>
+                            <div style={{ flex: 1 }}>
+                              <h4 style={{ 
+                                margin: '0 0 0.5rem 0', 
+                                fontSize: isMobile ? '1.1rem' : '1.25rem', 
+                                color: '#1f2937' 
+                              }}>
+                                {site.name}
+                              </h4>
+                              <div style={{ 
+                                color: '#6b7280', 
+                                fontSize: isMobile ? '0.75rem' : '0.875rem' 
+                              }}>
+                                📍 {site.address}, {site.city}, VA
+                              </div>
+                              {distance !== null && (
+                                <div style={{ 
+                                  color: '#667eea', 
+                                  fontSize: isMobile ? '0.75rem' : '0.875rem',
+                                  fontWeight: '600',
+                                  marginTop: '0.25rem'
+                                }}>
+                                  📏 {distance.toFixed(1)} miles away
+                                </div>
+                              )}
+                              <div style={{ 
+                                color: '#6b7280', 
+                                fontSize: isMobile ? '0.75rem' : '0.875rem', 
+                                marginTop: '0.25rem' 
+                              }}>
+                                🕐 {site.hours}
+                              </div>
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(site.address + ', ' + site.city + ', VA')}`, '_blank');
+                              }}
+                              style={{
+                                padding: isMobile ? '0.75rem' : '0.5rem 1rem',
+                                background: '#3b82f6',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                fontWeight: '600',
+                                fontSize: isMobile ? '0.875rem' : '0.875rem',
+                                width: isMobile ? '100%' : 'auto'
+                              }}
+                            >
+                              🗺️ Directions
+                            </button>
+                          </div>
+
+                          <div style={{
+                            marginTop: '1rem',
+                            padding: '0.75rem',
+                            background: '#f0fdf4',
+                            borderRadius: '8px',
+                            textAlign: 'center',
+                            color: '#166534',
+                            fontWeight: '600'
+                          }}>
+                            Click to record a drop-off
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Donation History */}
@@ -5056,6 +5270,7 @@ const App: React.FC = () => {
           onClick={() => {
             setShowDonationModal(false);
             setSelectedFoodBank(null);
+            setSelectedDropOffSite(null);
             setItemsToDonate([]);
           }}
           style={{
@@ -5081,6 +5296,7 @@ const App: React.FC = () => {
               onClick={() => {
                 setShowDonationModal(false);
                 setSelectedFoodBank(null);
+                setSelectedDropOffSite(null);
                 setItemsToDonate([]);
               }}
               style={{
@@ -5103,7 +5319,7 @@ const App: React.FC = () => {
               🎁 Record Donation
             </h2>
 
-            {selectedFoodBank && (
+            {(selectedFoodBank || selectedDropOffSite) && (
               <div style={{
                 background: '#f0f9ff',
                 padding: '1rem',
@@ -5112,13 +5328,16 @@ const App: React.FC = () => {
                 border: '1px solid #bfdbfe'
               }}>
                 <div style={{ fontWeight: '600', color: '#1e40af', marginBottom: '0.5rem' }}>
-                  Donating to:
+                  {selectedFoodBank ? 'Donating to:' : 'Dropping off at:'}
                 </div>
                 <div style={{ fontSize: '1.1rem', fontWeight: '700', color: '#1f2937' }}>
-                  {selectedFoodBank.name}
+                  {selectedFoodBank?.name || selectedDropOffSite?.name}
                 </div>
                 <div style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.25rem' }}>
-                  {selectedFoodBank.address}, {selectedFoodBank.city}
+                  {selectedFoodBank 
+                    ? `${selectedFoodBank.address}, ${selectedFoodBank.city}`
+                    : `${selectedDropOffSite?.address}, ${selectedDropOffSite?.city}, VA`
+                  }
                 </div>
               </div>
             )}
@@ -5328,18 +5547,18 @@ const App: React.FC = () => {
                     itemsToDonate.includes(item.id)
                   );
                   
-                  await handleDonation(selectedFoodBank, itemsToDonateFull);
+                  await handleDonation(selectedFoodBank || selectedDropOffSite, itemsToDonateFull);
                 }}
-                disabled={!selectedFoodBank || itemsToDonate.length === 0}
+                disabled={(!selectedFoodBank && !selectedDropOffSite) || itemsToDonate.length === 0}
                 style={{
                   padding: '1rem',
-                  background: (!selectedFoodBank || itemsToDonate.length === 0) 
+                  background: ((!selectedFoodBank && !selectedDropOffSite) || itemsToDonate.length === 0) 
                     ? '#9ca3af' 
                     : 'linear-gradient(45deg, #ec4899, #8b5cf6)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '12px',
-                  cursor: (!selectedFoodBank || itemsToDonate.length === 0) 
+                  cursor: ((!selectedFoodBank && !selectedDropOffSite) || itemsToDonate.length === 0) 
                     ? 'not-allowed' 
                     : 'pointer',
                   fontWeight: '600',

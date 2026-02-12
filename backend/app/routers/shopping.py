@@ -104,24 +104,30 @@ async def ai_price_comparison(request: PriceComparisonRequest):
     try:
         # System prompt for price estimation
         system_prompt = """You are a shopping price expert with extensive knowledge of grocery prices at Amazon and Walmart. 
-Estimate realistic total prices for grocery items based on current 2024-2025 market rates.
+Calculate realistic individual prices for each grocery item, then sum them up for the TOTAL.
 Amazon prices are typically 10-20% higher than Walmart for groceries.
+
+IMPORTANT: Calculate each item's price individually, then add them all together for the grand total.
+Do NOT give cumulative or running totals - calculate the COMPLETE TOTAL from ALL items in the list.
+
 Respond ONLY with valid JSON in this exact format: {"amazon": number, "walmart": number}
 Do not include any markdown, explanations, or extra text - just the JSON object."""
 
         # User prompt with the shopping list
-        user_prompt = f"""Estimate the total cost for these grocery items at Amazon and Walmart:
+        user_prompt = f"""Calculate the COMPLETE TOTAL cost for ALL of these grocery items at Amazon and Walmart.
+Price each item individually, then sum ALL items together:
 
 {items_list}
 
-Return ONLY a JSON object with "amazon" and "walmart" keys containing the total price estimates as numbers."""
+CRITICAL: The totals must include the prices of ALL items listed above added together.
+Return ONLY a JSON object with "amazon" and "walmart" keys containing the TOTAL price estimates as numbers."""
 
         # Call OpenAI API using existing client
         response_text = await call_chat_completion(
             system_prompt=system_prompt,
             user_prompt=user_prompt,
-            max_tokens=100,
-            temperature=0.3
+            max_tokens=150,
+            temperature=0.7
         )
         
         # Parse the response

@@ -167,6 +167,24 @@ const App: React.FC = () => {
   const [selectedDropOffSite, setSelectedDropOffSite] = useState<DropOffSite | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'pending'>('pending');
+  // Load location from localStorage on mount
+  useEffect(() => {
+    const savedLocationPermission = localStorage.getItem('locationPermission');
+    const savedUserLocation = localStorage.getItem('userLocation');
+    
+    if (savedLocationPermission === 'granted' && savedUserLocation) {
+      try {
+        const location = JSON.parse(savedUserLocation);
+        setUserLocation(location);
+        setLocationPermission('granted');
+        console.log('✅ Restored location from localStorage:', location);
+      } catch (err) {
+        console.error('Error parsing saved location:', err);
+      }
+    } else if (savedLocationPermission === 'denied') {
+      setLocationPermission('denied');
+    }
+  }, []);
   const [priceComparison, setPriceComparison] = useState<{
     amazon: number;
     walmart: number;
@@ -1855,21 +1873,30 @@ const App: React.FC = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
+          const location = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
-          });
+          };
+          setUserLocation(location);
           setLocationPermission('granted');
+          
+          // Save to localStorage
+          localStorage.setItem('locationPermission', 'granted');
+          localStorage.setItem('userLocation', JSON.stringify(location));
+          
           success('Location access granted! Sorting by proximity.');
         },
         (error) => {
           setLocationPermission('denied');
+          localStorage.setItem('locationPermission', 'denied');
+          localStorage.removeItem('userLocation');
           warning('Location access denied. Showing all locations.');
         }
       );
     } else {
       warning('Geolocation not supported by your browser.');
       setLocationPermission('denied');
+      localStorage.setItem('locationPermission', 'denied');
     }
   };
 
@@ -3961,7 +3988,7 @@ const App: React.FC = () => {
               }}>🎁 Donate Food</h2>
 
               {/* Location Request Banner */}
-              {locationPermission === 'pending' && (
+              {locationPermission === 'pending' && currentTab === 'donate' && (
                 <div style={{
                   background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
                   padding: '1rem',
@@ -5565,8 +5592,8 @@ const App: React.FC = () => {
               
               <button 
                 onClick={async () => {
-                  if (!selectedFoodBank || itemsToDonate.length === 0) {
-                    warning('Please select a food bank and items to donate');
+                  if ((!selectedFoodBank && !selectedDropOffSite) || itemsToDonate.length === 0) {
+                    warning('Please select a location and items to donate');
                     return;
                   }
                   

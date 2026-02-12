@@ -1,5 +1,36 @@
 ﻿import { FoodBank, DonationRecord, DonationImpact } from './types/donation';
 import { foodBanks, calculateMeals } from './data/foodBanks';
+
+interface DropOffSite {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  hours: string;
+  lat: number;
+  lng: number;
+}
+
+const dropOffSites: DropOffSite[] = [
+  // Chesapeake
+  { id: 'do1', name: 'Ashley Furniture Homestore', address: '1591 Crossways Blvd.', city: 'Chesapeake', hours: 'Daily from 11 am to 7 pm', lat: 36.7682, lng: -76.2875 },
+  { id: 'do2', name: 'Chesapeake Farm Bureau', address: '552 S. Battlefield Blvd.', city: 'Chesapeake', hours: 'Monday through Friday from 8 am to 4:30 pm', lat: 36.7477, lng: -76.2394 },
+  { id: 'do3', name: 'Chesapeake Police HQ', address: '304 Albemarle Dr.', city: 'Chesapeake', hours: 'Daily from 8 am to 8 pm', lat: 36.7682, lng: -76.2875 },
+  { id: 'do4', name: 'Cinema Café – Edinburgh', address: '1864 Edinburgh Ln.', city: 'Chesapeake', hours: 'Daily from 12 to 10 pm', lat: 36.7500, lng: -76.2400 },
+  { id: 'do5', name: 'Cinema Café – Greenbrier Mall', address: '1401 Greenbrier Pkwy.', city: 'Chesapeake', hours: 'Daily from 12 to 10 pm', lat: 36.7719, lng: -76.2278 },
+  { id: 'do6', name: 'Fulton Bank', address: '217 E Hanbury Rd.', city: 'Chesapeake', hours: 'Monday through Friday from 9 am to 5 pm, Saturday from 9 am to 12 pm', lat: 36.7600, lng: -76.2500 },
+  // Norfolk
+  { id: 'do7', name: 'Afterglow Brewing', address: '2330 Bowdens Ferry Rd., Ste. 600', city: 'Norfolk', hours: 'Monday through Thursday from 3 to 9 pm, Friday through Sunday from 12 to 8 pm', lat: 36.9037, lng: -76.2050 },
+  { id: 'do8', name: 'Elation Brewing', address: '5104 Colley Ave.', city: 'Norfolk', hours: 'Daily from 12 to 9 pm', lat: 36.8879, lng: -76.3050 },
+  // Virginia Beach
+  { id: 'do9', name: 'Ashley Furniture Homestore', address: '5144 Virginia Beach Blvd.', city: 'Virginia Beach', hours: 'Daily from 11 am to 7 pm', lat: 36.8432, lng: -76.1395 },
+  { id: 'do10', name: 'Cinema Café – Kemps River', address: '1220 Fordham Dr.', city: 'Virginia Beach', hours: 'Daily from 12 to 10 pm', lat: 36.7800, lng: -76.1100 },
+  { id: 'do11', name: 'Cinema Café – Pembroke Meadows', address: '752 Independence Blvd. Ste. 4590', city: 'Virginia Beach', hours: 'Daily from 12 to 10 pm', lat: 36.8400, lng: -76.1200 },
+  { id: 'do12', name: 'DAV Thrift Store', address: '1525 General Booth Blvd.', city: 'Virginia Beach', hours: 'Monday through Saturday from 9 am to 8 pm, Sunday from 12 to 5 pm', lat: 36.8100, lng: -76.0500 },
+  { id: 'do13', name: 'Fulton Bank', address: '4424 Bonney Rd.', city: 'Virginia Beach', hours: 'Monday through Friday from 9 am to 5 pm', lat: 36.8500, lng: -76.1300 },
+  { id: 'do14', name: 'Fulton Bank', address: '3345 Dam Neck Rd.', city: 'Virginia Beach', hours: 'Monday through Friday from 9 am to 5 pm, Saturday from 9 am to 12 pm', lat: 36.8200, lng: -76.0200 },
+  { id: 'do15', name: 'PenFed Credit Union', address: '4920 Haygood Rd.', city: 'Virginia Beach', hours: 'Monday through Friday from 9 am to 5 pm', lat: 36.8350, lng: -76.1150 }
+];
 import Toast from './components/Toast';
 import { useToast } from './hooks/useToast';
 import { useState, useEffect } from 'react';
@@ -132,6 +163,15 @@ const App: React.FC = () => {
   const [todayCalories, setTodayCalories] = useState(0);
   const [lastResetDate, setLastResetDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [manualCalorieInput, setManualCalorieInput] = useState<string>('');
+  const [donateSubTab, setDonateSubTab] = useState<'foodbanks' | 'dropoffs'>('foodbanks');
+  const [selectedDropOffSite, setSelectedDropOffSite] = useState<DropOffSite | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'pending'>('pending');
+  const [priceComparison, setPriceComparison] = useState<{
+    amazon: number;
+    walmart: number;
+    loading: boolean;
+  }>({ amazon: 0, walmart: 0, loading: false });
   const { toasts, removeToast, success, error, warning, info } = useToast();
   const [isTabChanging, setIsTabChanging] = useState(false);
   const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -1811,6 +1851,107 @@ const App: React.FC = () => {
       e.target.value = '';
     }
   };
+  const requestUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+          setLocationPermission('granted');
+          success('Location access granted! Sorting by proximity.');
+        },
+        (error) => {
+          setLocationPermission('denied');
+          warning('Location access denied. Showing all locations.');
+        }
+      );
+    } else {
+      warning('Geolocation not supported by your browser.');
+      setLocationPermission('denied');
+    }
+  };
+
+  const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+    const R = 3959; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  const getSortedFoodBanks = (): FoodBank[] => {
+    if (!userLocation) return foodBanks;
+    return [...foodBanks].sort((a, b) => {
+      const distA = calculateDistance(userLocation.lat, userLocation.lng, a.lat, a.lng);
+      const distB = calculateDistance(userLocation.lat, userLocation.lng, b.lat, b.lng);
+      return distA - distB;
+    });
+  };
+
+  const getSortedDropOffSites = (): DropOffSite[] => {
+    if (!userLocation) return dropOffSites;
+    return [...dropOffSites].sort((a, b) => {
+      const distA = calculateDistance(userLocation.lat, userLocation.lng, a.lat, a.lng);
+      const distB = calculateDistance(userLocation.lat, userLocation.lng, b.lat, b.lng);
+      return distA - distB;
+    });
+  };
+
+  const fetchPriceComparison = async () => {
+    if (shoppingList.length === 0) {
+      setPriceComparison({ amazon: 0, walmart: 0, loading: false });
+      return;
+    }
+
+    setPriceComparison(prev => ({ ...prev, loading: true }));
+    
+    try {
+      const response = await fetch(`${API_BASE}/shopping/price-comparison`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: shoppingList.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            unit: item.unit
+          }))
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPriceComparison({
+          amazon: data.amazon_total || 0,
+          walmart: data.walmart_total || 0,
+          loading: false
+        });
+      } else {
+        throw new Error('Failed to fetch prices');
+      }
+    } catch (err) {
+      console.error('Price comparison error:', err);
+      // Fallback to simple estimation
+      const itemCount = shoppingList.reduce((sum, item) => sum + item.quantity, 0);
+      setPriceComparison({
+        amazon: itemCount * 3.5,
+        walmart: itemCount * 2.8,
+        loading: false
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (currentTab === 'shopping') {
+      fetchPriceComparison();
+    }
+  }, [shoppingList, currentTab]);
+
   const generateShareText = () => {
     return `I've donated ${donationImpact.totalMeals} meals and saved ${Math.round(donationImpact.totalPounds)} lbs of food using GroceryGenius! 🎉
 
@@ -3210,10 +3351,89 @@ const App: React.FC = () => {
               </div>
               
               {shoppingList.length > 0 && (
-                <div style={{ padding: '0.5rem 1rem', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #86efac' }}>
-                  <strong style={{ color: '#166534' }}>
-                    Est. Cost: ${estimateCost().toFixed(2)}
-                  </strong>
+                <div style={{ flex: 1 }}>
+                  {priceComparison.loading ? (
+                    <div style={{ 
+                      padding: '0.5rem 1rem',
+                      background: '#f0fdf4',
+                      borderRadius: '8px',
+                      border: '1px solid #86efac',
+                      fontSize: '0.875rem',
+                      color: '#166534',
+                      fontStyle: 'italic'
+                    }}>
+                      🔄 Fetching prices...
+                    </div>
+                  ) : (
+                    <div style={{ 
+                      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                      padding: '1rem',
+                      borderRadius: '12px',
+                      border: '1px solid #bae6fd'
+                    }}>
+                      <div style={{ 
+                        fontSize: '0.75rem', 
+                        color: '#0369a1',
+                        fontWeight: '600',
+                        marginBottom: '0.5rem',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}>
+                        💰 Price Comparison
+                      </div>
+                      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-around' }}>
+                        <div style={{ flex: 1, textAlign: 'center' }}>
+                          <div style={{ fontSize: '0.75rem', color: '#0369a1', marginBottom: '0.25rem' }}>
+                            Amazon
+                          </div>
+                          <div style={{ 
+                            fontSize: '1.25rem', 
+                            fontWeight: '700',
+                            color: priceComparison.amazon <= priceComparison.walmart ? '#10b981' : textColor
+                          }}>
+                            ${priceComparison.amazon.toFixed(2)}
+                          </div>
+                          {priceComparison.amazon < priceComparison.walmart && (
+                            <div style={{ fontSize: '0.7rem', color: '#10b981', marginTop: '0.25rem' }}>
+                              ✓ Best price
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ 
+                          width: '1px', 
+                          background: '#bae6fd',
+                          margin: '0.5rem 0'
+                        }} />
+                        <div style={{ flex: 1, textAlign: 'center' }}>
+                          <div style={{ fontSize: '0.75rem', color: '#0369a1', marginBottom: '0.25rem' }}>
+                            Walmart
+                          </div>
+                          <div style={{ 
+                            fontSize: '1.25rem', 
+                            fontWeight: '700',
+                            color: priceComparison.walmart < priceComparison.amazon ? '#10b981' : textColor
+                          }}>
+                            ${priceComparison.walmart.toFixed(2)}
+                          </div>
+                          {priceComparison.walmart < priceComparison.amazon && (
+                            <div style={{ fontSize: '0.7rem', color: '#10b981', marginTop: '0.25rem' }}>
+                              ✓ Best price
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div style={{ 
+                        marginTop: '0.75rem',
+                        paddingTop: '0.75rem',
+                        borderTop: '1px solid #bae6fd',
+                        fontSize: '0.75rem',
+                        color: '#0369a1',
+                        textAlign: 'center'
+                      }}>
+                        💡 Save ${Math.abs(priceComparison.amazon - priceComparison.walmart).toFixed(2)} by shopping at {priceComparison.walmart < priceComparison.amazon ? 'Walmart' : 'Amazon'}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

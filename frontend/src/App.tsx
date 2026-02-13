@@ -2023,11 +2023,16 @@ const App: React.FC = () => {
     }
   }, [shoppingList.length, currentTab]);
   const generateShareText = () => {
+    const treesEquivalent = Math.round(donationImpact.co2Saved / 48);
+    const gasSaved = Math.round(donationImpact.co2Saved / 19.6);
+    
     return `I've donated ${donationImpact.totalMeals} meals and saved ${Math.round(donationImpact.totalPounds)} lbs of food using GroceryGenius! 🎉
 
-  Together we can fight hunger and reduce food waste. Join me in making an impact! 💚
+That's equivalent to planting ${treesEquivalent} trees 🌳 and saving ${gasSaved} gallons of gas! ⛽
 
-  #FoodDonation #EndHunger #SustainableLiving #GroceryGenius`;
+Together we can fight hunger and reduce food waste. Join me in making an impact! 💚
+
+#FoodDonation #EndHunger #SustainableLiving #GroceryGenius`;
   };
 
   const shareImpact = async (platform: 'twitter' | 'facebook' | 'copy') => {
@@ -3753,6 +3758,14 @@ const App: React.FC = () => {
                 <div style={{ background: 'rgba(255,255,255,0.2)', padding: '1.5rem', borderRadius: '12px' }}>
                   <div style={{ fontSize: '3rem', fontWeight: '700' }}>{Math.round(donationImpact.co2Saved)}</div>
                   <div style={{ fontSize: '1rem', opacity: 0.9 }}>lbs CO₂ Prevented</div>
+                </div>
+                <div style={{ background: 'rgba(255,255,255,0.2)', padding: '1.5rem', borderRadius: '12px' }}>
+                  <div style={{ fontSize: '3rem', fontWeight: '700' }}>{Math.round(donationImpact.co2Saved / 48)}</div>
+                  <div style={{ fontSize: '1rem', opacity: 0.9 }}>Trees Planted Equivalent</div>
+                </div>
+                <div style={{ background: 'rgba(255,255,255,0.2)', padding: '1.5rem', borderRadius: '12px' }}>
+                  <div style={{ fontSize: '3rem', fontWeight: '700' }}>{Math.round(donationImpact.co2Saved / 19.6)}</div>
+                  <div style={{ fontSize: '1rem', opacity: 0.9 }}>Gallons of Gas Saved</div>
                 </div>
               </div>
             </div>

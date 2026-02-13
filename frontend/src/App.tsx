@@ -3752,10 +3752,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   <div style={{ fontSize: '1rem', opacity: 0.9 }}>Donations Made</div>
                 </div>
                 <div style={{ background: 'rgba(255,255,255,0.2)', padding: '1.5rem', borderRadius: '12px' }}>
-                  <div style={{ fontSize: '3rem', fontWeight: '700' }}>{Math.round(donationImpact.totalPounds)}</div>
-                  <div style={{ fontSize: '1rem', opacity: 0.9 }}>lbs Food Saved</div>
-                </div>
-                <div style={{ background: 'rgba(255,255,255,0.2)', padding: '1.5rem', borderRadius: '12px' }}>
                   <div style={{ fontSize: '3rem', fontWeight: '700' }}>{Math.round(donationImpact.co2Saved)}</div>
                   <div style={{ fontSize: '1rem', opacity: 0.9 }}>lbs CO₂ Prevented</div>
                 </div>

@@ -1292,38 +1292,10 @@ const App: React.FC = () => {
     try {
       console.log('🔍 Looking up barcode:', barcode);
       
-      // Method 1: RapidAPI Barcode Database (BEST - your paid API)
-      try {
-        console.log('📡 Trying RapidAPI...');
-        const rapidResponse = await fetch(`https://barcodes1.p.rapidapi.com/?query=${barcode}`, {
-          method: 'GET',
-          headers: {
-            'x-rapidapi-host': 'barcodes1.p.rapidapi.com',
-            'x-rapidapi-key': '8eabcf9751msh421ed13aa6179f4p1758c5jsn85f875e9b7bf'
-          }
-        });
-        
-        if (rapidResponse.ok) {
-          const rapidData = await rapidResponse.json();
-          console.log('RapidAPI response:', rapidData);
-          
-          if (rapidData && rapidData.product && rapidData.product.title) {
-            console.log('✅ Found from RapidAPI:', rapidData.product.title);
-            return {
-              name: rapidData.product.title.trim(),
-              category: rapidData.product.category || 'other',
-              expiryDays: null
-            };
-          }
-        }
-      } catch (err) {
-        console.log('❌ RapidAPI failed:', err);
-      }
-      
-      // Method 2: OpenFoodFacts v2 (Great for food - FREE, no key needed)
+      // Method 1: OpenFoodFacts (BEST for food - FREE, no key needed, huge database)
       try {
         console.log('📡 Trying OpenFoodFacts...');
-        const offResponse = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}`);
+        const offResponse = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}.json`);
         
         if (offResponse.ok) {
           const offData = await offResponse.json();
@@ -1333,16 +1305,37 @@ const App: React.FC = () => {
             const product = offData.product;
             const productName = 
               product.product_name || 
-              product.generic_name || 
-              product.brands || 
               product.product_name_en ||
+              product.generic_name || 
+              (product.brands && product.product_name ? `${product.brands} ${product.product_name}` : null) ||
+              product.brands ||
               null;
             
             if (productName && productName.trim()) {
               console.log('✅ Found from OpenFoodFacts:', productName);
+              
+              // Try to determine category from OpenFoodFacts categories
+              let category = 'other';
+              if (product.categories_tags) {
+                const cats = product.categories_tags;
+                if (cats.some((c: string) => c.includes('meat') || c.includes('poultry') || c.includes('beef') || c.includes('chicken'))) {
+                  category = 'meat';
+                } else if (cats.some((c: string) => c.includes('dairy') || c.includes('milk') || c.includes('cheese') || c.includes('yogurt'))) {
+                  category = 'dairy';
+                } else if (cats.some((c: string) => c.includes('fruit') || c.includes('vegetable') || c.includes('produce'))) {
+                  category = 'produce';
+                } else if (cats.some((c: string) => c.includes('cereal') || c.includes('grain') || c.includes('bread') || c.includes('pasta'))) {
+                  category = 'grains';
+                } else if (cats.some((c: string) => c.includes('canned') || c.includes('preserved'))) {
+                  category = 'canned';
+                } else if (cats.some((c: string) => c.includes('breakfast'))) {
+                  category = 'breakfast';
+                }
+              }
+              
               return {
                 name: productName.trim(),
-                category: 'food',
+                category: category,
                 expiryDays: null
               };
             }
@@ -1352,7 +1345,46 @@ const App: React.FC = () => {
         console.log('❌ OpenFoodFacts failed:', err);
       }
       
-      // Method 3: Barcode Spider (with your API token)
+      // Method 2: UPCitemdb (Good for general products - FREE trial - 100 per day)
+      try {
+        console.log('📡 Trying UPCitemdb...');
+        const upcResponse = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
+        
+        if (upcResponse.ok) {
+          const upcData = await upcResponse.json();
+          console.log('UPCitemdb response:', upcData);
+          
+          if (upcData.items && upcData.items.length > 0) {
+            const item = upcData.items[0];
+            const itemName = item.title || item.brand || null;
+            
+            if (itemName && itemName.trim()) {
+              console.log('✅ Found from UPCitemdb:', itemName);
+              
+              // Map category
+              let category = 'other';
+              const cat = (item.category || '').toLowerCase();
+              if (cat.includes('food') || cat.includes('grocery')) category = 'other';
+              if (cat.includes('produce') || cat.includes('fruit') || cat.includes('vegetable')) category = 'produce';
+              if (cat.includes('dairy') || cat.includes('milk') || cat.includes('cheese')) category = 'dairy';
+              if (cat.includes('meat') || cat.includes('poultry')) category = 'meat';
+              if (cat.includes('canned') || cat.includes('packaged')) category = 'canned';
+              if (cat.includes('cereal') || cat.includes('grain') || cat.includes('bread')) category = 'grains';
+              if (cat.includes('breakfast')) category = 'breakfast';
+              
+              return {
+                name: itemName.trim(),
+                category: category,
+                expiryDays: null
+              };
+            }
+          }
+        }
+      } catch (err) {
+        console.log('❌ UPCitemdb failed:', err);
+      }
+      
+      // Method 3: Barcode Spider (with your API token - good backup)
       try {
         console.log('📡 Trying Barcode Spider...');
         const spiderResponse = await fetch(`https://api.barcodespider.com/v1/lookup?token=03abb14d5d130e66277e&upc=${barcode}`);
@@ -1377,47 +1409,20 @@ const App: React.FC = () => {
         console.log('❌ Barcode Spider failed:', err);
       }
       
-      // Method 4: UPCitemdb (FREE trial - 100 per day)
-      try {
-        console.log('📡 Trying UPCitemdb...');
-        const upcResponse = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
-        
-        if (upcResponse.ok) {
-          const upcData = await upcResponse.json();
-          console.log('UPCitemdb response:', upcData);
-          
-          if (upcData.items && upcData.items.length > 0) {
-            const item = upcData.items[0];
-            const itemName = item.title || item.brand || null;
-            
-            if (itemName && itemName.trim()) {
-              console.log('✅ Found from UPCitemdb:', itemName);
-              return {
-                name: itemName.trim(),
-                category: item.category || 'other',
-                expiryDays: null
-              };
-            }
-          }
-        }
-      } catch (err) {
-        console.log('❌ UPCitemdb failed:', err);
-      }
-      
       // All APIs failed - return placeholder
       console.log('⚠️ Product not found in any database');
-      warning('Product not found. Please edit the item name.');
+      warning('Product not found in database. Please enter the name manually.');
       return {
-        name: `Scanned Item (${barcode.substring(0, 12)})`,
+        name: `Item ${barcode.substring(barcode.length - 6)}`,
         category: 'other',
         expiryDays: null
       };
       
     } catch (error) {
       console.error('💥 Barcode lookup error:', error);
-      warning('Barcode lookup failed. Please edit the item name.');
+      warning('Barcode lookup failed. Please enter the item name.');
       return {
-        name: `Scanned Item (${barcode.substring(0, 12)})`,
+        name: `Item ${barcode.substring(barcode.length - 6)}`,
         category: 'other',
         expiryDays: null
       };

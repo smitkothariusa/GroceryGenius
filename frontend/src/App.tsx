@@ -1409,6 +1409,35 @@ const App: React.FC = () => {
         console.log('❌ Barcode Spider failed:', err);
       }
       
+      // Method 4: AI Fallback - Ask OpenAI to identify the product
+      try {
+        console.log('🤖 Trying OpenAI as last resort...');
+        const aiResponse = await fetch(`${API_BASE}/barcode/ai-lookup`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ barcode })
+        });
+        
+        if (aiResponse.ok) {
+          const aiData = await aiResponse.json();
+          console.log('OpenAI response:', aiData);
+          
+          if (aiData.name && aiData.name.trim()) {
+            console.log('✅ Found from OpenAI:', aiData.name);
+            success('Product identified using AI!');
+            return {
+              name: aiData.name.trim(),
+              category: aiData.category || 'other',
+              expiryDays: null
+            };
+          }
+        }
+      } catch (err) {
+        console.log('❌ OpenAI fallback failed:', err);
+      }
+      
       // All APIs failed - return placeholder
       console.log('⚠️ Product not found in any database');
       warning('Product not found in database. Please enter the name manually.');

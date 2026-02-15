@@ -1292,9 +1292,38 @@ const App: React.FC = () => {
     try {
       console.log('🔍 Looking up barcode:', barcode);
       
-      // Method 1: OpenFoodFacts (BEST for food - FREE, no key needed, huge database)
+      // Method 1: OpenAI (FIRST - Most reliable for product identification)
       try {
-        console.log('📡 Trying OpenFoodFacts...');
+        console.log('🤖 Trying OpenAI first...');
+        const aiResponse = await fetch(`${API_BASE}/barcode/ai-lookup`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ barcode })
+        });
+        
+        if (aiResponse.ok) {
+          const aiData = await aiResponse.json();
+          console.log('OpenAI response:', aiData);
+          
+          if (aiData.name && aiData.name.trim() && !aiData.name.includes('Unknown Product')) {
+            console.log('✅ Found from OpenAI:', aiData.name);
+            success('Product identified using AI!');
+            return {
+              name: aiData.name.trim(),
+              category: aiData.category || 'other',
+              expiryDays: null
+            };
+          }
+        }
+      } catch (err) {
+        console.log('❌ OpenAI failed, trying backup APIs...', err);
+      }
+      
+      // Method 2: OpenFoodFacts (Backup - BEST for food - FREE, no key needed, huge database)
+      try {
+        console.log('📡 Trying OpenFoodFacts as backup...');
         const offResponse = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}.json`);
         
         if (offResponse.ok) {
@@ -1345,9 +1374,9 @@ const App: React.FC = () => {
         console.log('❌ OpenFoodFacts failed:', err);
       }
       
-      // Method 2: UPCitemdb (Good for general products - FREE trial - 100 per day)
+      // Method 3: UPCitemdb (Backup - Good for general products - FREE trial - 100 per day)
       try {
-        console.log('📡 Trying UPCitemdb...');
+        console.log('📡 Trying UPCitemdb as backup...');
         const upcResponse = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
         
         if (upcResponse.ok) {
@@ -1384,9 +1413,9 @@ const App: React.FC = () => {
         console.log('❌ UPCitemdb failed:', err);
       }
       
-      // Method 3: Barcode Spider (with your API token - good backup)
+      // Method 4: Barcode Spider (Last backup - with your API token)
       try {
-        console.log('📡 Trying Barcode Spider...');
+        console.log('📡 Trying Barcode Spider as last backup...');
         const spiderResponse = await fetch(`https://api.barcodespider.com/v1/lookup?token=03abb14d5d130e66277e&upc=${barcode}`);
         
         if (spiderResponse.ok) {
@@ -1407,35 +1436,6 @@ const App: React.FC = () => {
         }
       } catch (err) {
         console.log('❌ Barcode Spider failed:', err);
-      }
-      
-      // Method 4: AI Fallback - Ask OpenAI to identify the product
-      try {
-        console.log('🤖 Trying OpenAI as last resort...');
-        const aiResponse = await fetch(`${API_BASE}/barcode/ai-lookup`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ barcode })
-        });
-        
-        if (aiResponse.ok) {
-          const aiData = await aiResponse.json();
-          console.log('OpenAI response:', aiData);
-          
-          if (aiData.name && aiData.name.trim()) {
-            console.log('✅ Found from OpenAI:', aiData.name);
-            success('Product identified using AI!');
-            return {
-              name: aiData.name.trim(),
-              category: aiData.category || 'other',
-              expiryDays: null
-            };
-          }
-        }
-      } catch (err) {
-        console.log('❌ OpenAI fallback failed:', err);
       }
       
       // All APIs failed - return placeholder
@@ -1543,9 +1543,29 @@ const App: React.FC = () => {
         Quagga.start();
       });
       
-      // Handle barcode detection with debounce
+      // Handle barcode detection with validation and debounce
       Quagga.onDetected(async (result: any) => {
         const code = result.codeResult.code;
+        
+        // Validate barcode completeness and quality
+        // Standard UPC/EAN barcodes are 8, 12, 13, or 14 digits
+        const isValidLength = code.length === 8 || code.length === 12 || code.length === 13 || code.length === 14;
+        const isNumeric = /^\d+$/.test(code);
+        
+        // Check quality of the scan (Quagga provides this)
+        const quality = result.codeResult.decodedCodes
+          .filter((x: any) => x.error !== undefined)
+          .map((x: any) => x.error)
+          .reduce((a: number, b: number) => a + b, 0) / result.codeResult.decodedCodes.length;
+        
+        // Only accept high-quality scans with valid format
+        if (!isValidLength || !isNumeric || quality > 0.15) {
+          console.log('❌ Invalid or low-quality barcode scan:', { code, isValidLength, isNumeric, quality });
+          // Update instructions to help user
+          instructions.textContent = '📱 Hold steady - Getting clearer read...';
+          instructions.style.color = '#fbbf24'; // Yellow warning
+          return;
+        }
         
         // Prevent duplicate scans
         if (isProcessing || code === lastScannedCode) {
@@ -1555,7 +1575,11 @@ const App: React.FC = () => {
         
         isProcessing = true;
         lastScannedCode = code;
-        console.log('Barcode detected:', code);
+        console.log('✅ Valid barcode detected:', code, 'quality:', quality.toFixed(3));
+        
+        // Visual feedback - successful scan
+        instructions.textContent = '✅ Barcode scanned! Looking up product...';
+        instructions.style.color = '#10b981'; // Green success
         
         // Stop scanner and cleanup
         try {

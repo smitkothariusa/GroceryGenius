@@ -2348,7 +2348,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   </span>
                 ))}
               </div>
-              <input type="text" placeholder="Type ingredients and press Enter..." onKeyPress={(e) => {
+              <input type="text" placeholder={t('recipes.ingredientsPlaceholder')} onKeyPress={(e) => {
                 if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
                   const tag = (e.target as HTMLInputElement).value.trim().toLowerCase();
                   if (!ingredientTags.includes(tag)) setIngredientTags([...ingredientTags, tag]);
@@ -2356,26 +2356,26 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 }
               }} style={{ width: '100%', padding: isMobile ? '0.75rem' : '1rem', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: isMobile ? '0.875rem' : '1rem', marginBottom: '1rem', boxSizing: 'border-box' }} />
 
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>🔍 Or search for a specific recipe:</label>
-              <input type="text" placeholder="e.g., apple pie, chicken pasta, orange glazed salmon..." value={recipeSearchQuery}
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>🔍 {t('recipes.searchLabel')}</label>
+              <input type="text" placeholder={t('recipes.searchPlaceholder')} value={recipeSearchQuery}
                 onChange={(e) => setRecipeSearchQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && !recipeLoading && handleGetRecipes()}
                 style={{ width: '100%', padding: isMobile ? '0.75rem' : '1rem', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: isMobile ? '0.875rem' : '1rem', marginBottom: '1rem', boxSizing: 'border-box' }} />
 
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
                 <select value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
                   style={{ padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '8px', minWidth: '200px' }}>
-                  <option value="">Any dietary preference</option>
-                  <option value="vegetarian">Vegetarian</option>
-                  <option value="vegan">Vegan</option>
-                  <option value="gluten-free">Gluten-free</option>
-                  <option value="keto">Keto</option>
-                  <option value="diabetic-friendly">Diabetic-Friendly</option>
-                  <option value="heart-healthy">Heart-Healthy</option>
+                  <option value="">{t('recipes.dietary.all')}</option>
+                  <option value="vegetarian">{t('recipes.dietary.vegetarian')}</option>
+                  <option value="vegan">{t('recipes.dietary.vegan')}</option>
+                  <option value="gluten-free">{t('recipes.dietary.glutenFree')}</option>
+                  <option value="keto">{t('recipes.dietary.keto')}</option>
+                  <option value="diabetic-friendly">{t('recipes.dietary.diabeticFriendly')}</option>
+                  <option value="heart-healthy">{t('recipes.dietary.heartHealthy')}</option>
                 </select>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <span>⚖️</span>
-                  <label style={{ fontWeight: '600' }}>Servings:</label>
+                  <label style={{ fontWeight: '600' }}>{t('recipes.servings')}:</label>
                   <input type="number" min="1" max="12" value={recipeServings}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -2397,12 +2397,12 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   <button onClick={addPantryToIngredients} style={{
                     padding: '0.75rem 1rem', background: '#8b5cf6', color: 'white',
                     border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
-                  }}>📦 Add Pantry Items</button>
+                  }}>📦 {t('recipes.addPantryItems')}</button>
                 )}
 
                 <button onClick={() => { setRecipes([]); setIngredientTags([]); setRecipeSearchQuery(''); setErrorMsg(''); }}
                   style={{ padding: '0.75rem 1rem', background: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: '8px', cursor: 'pointer' }}>
-                  Clear All
+                  {t('common.clearAll')}
                 </button>
                 <button onClick={() => {
                   setCameraSource('recipes');
@@ -2412,14 +2412,14 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
                   display: 'flex', alignItems: 'center', gap: '0.5rem'
                 }}>
-                  📷 Scan Ingredients
+                  📷 {t('recipes.scanIngredients')}
                 </button>
                 <button onClick={handleGetRecipes} disabled={recipeLoading}
                   style={{
                     padding: '0.75rem 2rem', background: recipeLoading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)',
                     color: 'white', border: 'none', borderRadius: '12px', fontWeight: '600', cursor: recipeLoading ? 'not-allowed' : 'pointer'
                   }}>
-                  {recipeLoading ? '⏳ Generating...' : '🍳 Get Recipes'}
+                  {recipeLoading ? `⏳ ${t('recipes.generating')}` : `🍳 ${t('recipes.getRecipes')}`}
                 </button>
               </div>
 
@@ -2907,7 +2907,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     {/* Item Name */}
                     <div>
                       <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
-                        Item Name
+                        {t('pantry.itemName')}
                       </label>
                       <input 
                         type="text" 
@@ -2929,7 +2929,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                       <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
-                          Quantity
+                          {t('pantry.quantity')}
                         </label>
                         <input 
                           type="number" 
@@ -2949,7 +2949,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
                       <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
-                          Unit
+                          {t('pantry.unit')}
                         </label>
                         <select 
                           value={newPantryItem.unit} 
@@ -2964,12 +2964,12 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                             boxSizing: 'border-box'
                           }}
                         >
-                          <option value="pc">pieces</option>
-                          <option value="lbs">lbs</option>
-                          <option value="kg">kg</option>
-                          <option value="cups">cups</option>
-                          <option value="oz">oz</option>
-                          <option value="g">grams</option>
+                          <option value="pc">{t('pantry.units.pieces')}</option>
+                          <option value="lbs">{t('pantry.units.lbs')}</option>
+                          <option value="kg">{t('pantry.units.kg')}</option>
+                          <option value="cups">{t('pantry.units.cups')}</option>
+                          <option value="oz">{t('pantry.units.oz')}</option>
+                          <option value="g">{t('pantry.units.grams')}</option>
                         </select>
                       </div>
                     </div>
@@ -2977,7 +2977,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     {/* Category */}
                     <div>
                       <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
-                        Category
+                        {t('pantry.category')}
                       </label>
                       <select 
                         value={newPantryItem.category} 
@@ -2992,20 +2992,20 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           boxSizing: 'border-box'
                         }}
                       >
-                        <option value="produce">🥬 Produce</option>
-                        <option value="dairy">🥛 Dairy</option>
-                        <option value="meat">🍖 Meat</option>
-                        <option value="canned">🥫 Canned</option>
-                        <option value="grains">🌾 Grains</option>
-                        <option value="breakfast">🥞 Breakfast</option>
-                        <option value="other">📦 Other</option>
+                        <option value="produce">🥬 {t('pantry.categories.produce')}</option>
+                        <option value="dairy">🥛 {t('pantry.categories.dairy')}</option>
+                        <option value="meat">🍖 {t('pantry.categories.meat')}</option>
+                        <option value="canned">🥫 {t('pantry.categories.canned')}</option>
+                        <option value="grains">🌾 {t('pantry.categories.grains')}</option>
+                        <option value="breakfast">🥞 {t('pantry.categories.breakfast')}</option>
+                        <option value="other">📦 {t('pantry.categories.other')}</option>
                       </select>
                     </div>
 
                     {/* Expiry Date */}
                     <div>
                       <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
-                        Expiry Date (Optional)
+                        {t('pantry.expiryDate')}
                       </label>
                       <input 
                         type="date" 
@@ -3042,7 +3042,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         fontSize: '1rem'
                       }}
                     >
-                      Cancel
+                      {t('common.cancel')}
                     </button>
 
                     <button
@@ -3288,7 +3288,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           flex: isMobile ? '1' : 'initial'
                         }}
                       >
-                        ✏️ {isMobile ? '' : 'Edit'}
+                        ✏️ {isMobile ? '' : t('common.edit')}
                       </button>
                       <button 
                           onClick={async () => {
@@ -4547,7 +4547,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               {/* Item Name */}
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
-                  Item Name
+                  {t('pantry.itemName')}
                 </label>
                 <input 
                   type="text" 
@@ -4591,7 +4591,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
-                    Quantity
+                    {t('pantry.quantity')}
                   </label>
                   <input 
                     type="number" 
@@ -4623,7 +4623,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
-                    Unit
+                    {t('pantry.unit')}
                   </label>
                   <select 
                     value={newShoppingItem.unit} 
@@ -4654,7 +4654,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               {/* Category */}
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
-                  Category
+                  {t('pantry.category')}
                 </label>
                 <select 
                   value={newShoppingItem.category} 
@@ -4700,7 +4700,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   fontSize: '1rem'
                 }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
 
               <button
@@ -5252,7 +5252,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     fontSize: isMobile ? '0.9rem' : '1rem'
                   }}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
               </div>
             )}
@@ -5660,7 +5660,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   fontSize: '1rem'
                 }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               
               <button 
@@ -6045,7 +6045,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   fontWeight: '600'
                 }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 onClick={loadDemoData}

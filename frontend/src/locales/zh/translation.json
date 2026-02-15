@@ -1,14 +1,14 @@
 {
   "app": {
-    "name": "食材天才",
-    "shortName": "食材"
+    "name": "GroceryGenius",
+    "shortName": "GG"
   },
   "header": {
-    "calorieTracker": "卡路里追踪",
-    "signOut": "退出登录"
+    "calorieTracker": "卡路里追踪器",
+    "signOut": "登出"
   },
   "tabs": {
-    "pantry": "食材库",
+    "pantry": "储藏室",
     "recipes": "食谱",
     "mealPlan": "膳食计划",
     "shopping": "购物清单",
@@ -16,36 +16,43 @@
     "favorites": "收藏"
   },
   "pantry": {
-    "title": "我的食材库",
-    "addItem": "添加食材",
-    "scanBarcode": "扫描条形码",
+    "title": "我的储藏室",
+    "addItem": "添加物品",
+    "scanBarcode": "扫描物品",
     "scanExpiry": "扫描保质期",
     "uploadReceipt": "上传收据",
-    "itemName": "食材名称",
+    "itemName": "物品名称",
     "quantity": "数量",
     "unit": "单位",
     "category": "类别",
-    "expiryDate": "保质期",
+    "expiryDate": "保质期（可选）",
     "save": "保存",
     "cancel": "取消",
     "expiringIn": "{{days}}天后过期",
     "expired": "已过期",
     "delete": "删除",
     "categories": {
-      "vegetables": "蔬菜",
-      "fruits": "水果",
+      "produce": "农产品",
       "dairy": "乳制品",
       "meat": "肉类",
+      "canned": "罐头食品",
       "grains": "谷物",
-      "spices": "调味料",
-      "other": "其他"
+      "breakfast": "早餐",
+      "other": "其他",
+      "vegetables": "蔬菜",
+      "fruits": "水果",
+      "spices": "香料"
     },
     "units": {
-      "piece": "个",
+      "pieces": "个",
+      "lbs": "磅",
       "kg": "公斤",
+      "cups": "杯",
+      "oz": "盎司",
+      "grams": "克",
+      "piece": "个",
       "g": "克",
       "lb": "磅",
-      "oz": "盎司",
       "l": "升",
       "ml": "毫升",
       "cup": "杯",
@@ -55,23 +62,31 @@
   },
   "recipes": {
     "title": "食谱生成器",
-    "searchPlaceholder": "搜索特定食谱（例如：'鸡肉意面'）...",
+    "ingredientsPlaceholder": "输入食材并按回车...",
+    "searchLabel": "或搜索特定食谱：",
+    "searchPlaceholder": "例如：苹果派、鸡肉意面、橙汁三文鱼...",
     "addIngredient": "添加食材标签",
     "servings": "份数",
     "dietaryPreferences": "饮食偏好",
     "generateRecipes": "生成食谱",
+    "getRecipes": "获取食谱",
+    "generating": "生成中...",
+    "addPantryItems": "添加储藏室物品",
+    "scanIngredients": "扫描食材",
     "dietary": {
-      "all": "全部",
+      "all": "任何饮食偏好",
       "vegetarian": "素食",
       "vegan": "纯素",
       "keto": "生酮",
-      "glutenFree": "无麸质"
+      "glutenFree": "无麸质",
+      "diabeticFriendly": "适合糖尿病患者",
+      "heartHealthy": "心脏健康"
     },
     "healthGrade": "健康评级",
-    "prepTime": "准备时间",
-    "cookTime": "烹饪时间",
+    "prepTime": "准备",
+    "cookTime": "烹饪",
     "difficulty": "难度",
-    "servings_count": "{{count}}人份",
+    "servings_count": "{{count}}份",
     "calories": "卡路里",
     "protein": "蛋白质",
     "carbs": "碳水化合物",
@@ -82,8 +97,8 @@
     "instructions": "步骤",
     "healthBenefits": "健康益处",
     "budgetTip": "省钱小贴士",
-    "addToShopping": "加入购物清单",
-    "addToFavorites": "加入收藏",
+    "addToShopping": "添加到购物清单",
+    "addToFavorites": "收藏",
     "closeRecipe": "关闭食谱",
     "substitutions": "替代品",
     "findSubstitute": "查找替代品",
@@ -97,13 +112,13 @@
     "snacks": "零食",
     "addMeal": "添加餐食",
     "days": {
-      "monday": "星期一",
-      "tuesday": "星期二",
-      "wednesday": "星期三",
-      "thursday": "星期四",
-      "friday": "星期五",
-      "saturday": "星期六",
-      "sunday": "星期日"
+      "monday": "周一",
+      "tuesday": "周二",
+      "wednesday": "周三",
+      "thursday": "周四",
+      "friday": "周五",
+      "saturday": "周六",
+      "sunday": "周日"
     }
   },
   "shopping": {
@@ -133,14 +148,14 @@
     "submit": "提交捐赠"
   },
   "favorites": {
-    "title": "收藏食谱",
+    "title": "收藏的食谱",
     "savedOn": "保存于",
     "viewRecipe": "查看食谱",
     "remove": "移除",
-    "noFavorites": "还没有收藏的食谱"
+    "noFavorites": "暂无收藏的食谱"
   },
   "calorieTracker": {
-    "title": "每日卡路里追踪",
+    "title": "每日卡路里追踪器",
     "goal": "目标",
     "consumed": "已摄入",
     "remaining": "剩余",
@@ -155,14 +170,15 @@
     "delete": "删除",
     "edit": "编辑",
     "save": "保存",
-    "close": "关闭"
+    "close": "关闭",
+    "clearAll": "全部清除"
   },
   "notifications": {
-    "itemAdded": "物品已添加到{{list}}！",
-    "itemRemoved": "物品已移除！",
+    "itemAdded": "已将物品添加到{{list}}！",
+    "itemRemoved": "物品已删除！",
     "recipeSaved": "食谱已保存到收藏！",
     "recipeRemoved": "食谱已从收藏中移除！",
     "donationRecorded": "捐赠已记录！您正在提供{{count}}份餐食！🎉",
-    "error": "出错了，请重试。"
+    "error": "出错了。请重试。"
   }
 }

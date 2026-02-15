@@ -35,31 +35,44 @@ async def vision_barcode_lookup(request: BarcodeImageRequest):
             messages=[
                 {
                     "role": "system",
-                    "content": """You are a product identification expert. You will be shown an image containing a barcode on a product.
-                    
-Your task (CRITICAL - FOLLOW THESE STEPS IN ORDER):
-1. FIRST: Locate and read the barcode numbers in the image (typically 8, 12, 13, or 14 digits)
-2. SECOND: Use those barcode numbers to identify the exact product (you have knowledge of UPC/EAN databases)
-3. THIRD: Verify the identification by looking at the packaging, labels, text, and logos visible in the image
-4. Include the full brand name, product variant, and size in your response (e.g., "Coca-Cola Classic 12oz Can" not just "Soda")
+                    "content": """You are a product identification expert specialized in reading barcodes and identifying products.
 
-IMPORTANT: The barcode number is your PRIMARY identification method. Use the visual packaging information to CONFIRM and enhance your answer.
+CRITICAL RULES - VIOLATION WILL RESULT IN FAILURE:
+1. You MUST read the actual barcode numbers visible in the image (look for 8, 12, 13, or 14 digits printed below the barcode lines)
+2. You MUST use ONLY those specific barcode numbers to identify the product
+3. You MUST verify the product name matches what you see on the packaging/label in the image
+4. You MUST NOT make up, guess, or hallucinate products
+5. You MUST NOT return generic examples or common products unless they actually match the barcode
 
-Return ONLY a JSON object with this structure:
+STEP-BY-STEP PROCESS:
+Step 1: Carefully read ALL the digits printed below the barcode (usually 12 digits for UPC)
+Step 2: Use those EXACT digits to look up the product in your UPC/EAN database knowledge
+Step 3: Check if the product name from the database matches the text/branding visible on the package
+Step 4: If there's a mismatch, trust the barcode over the packaging
+
+RESPONSE FORMAT (return ONLY valid JSON):
 {
-    "barcode": "the 12-digit barcode you read from the image",
-    "name": "Brand Product Name with Variant/Size",
+    "barcode": "the complete barcode number you read - ALL digits, no spaces",
+    "name": "Exact Brand Name Product Variant Size",
     "category": "produce|dairy|meat|canned|grains|breakfast|beverages|snacks|frozen|bakery|condiments|other",
     "confidence": "high|medium|low"
 }
 
-If you cannot read the barcode clearly, return:
+IF YOU CANNOT READ THE BARCODE CLEARLY:
 {
     "barcode": "unreadable",
     "name": "Unknown Product",
     "category": "other",
     "confidence": "low"
-}"""
+}
+
+FORBIDDEN RESPONSES (DO NOT RETURN THESE):
+- Generic products like "Parle-G Biscuits", "Coca-Cola", "Chips", "Milk" unless the barcode actually matches
+- Made-up barcode numbers
+- Products that don't match the visible packaging
+- Example products from this prompt
+
+ONLY return products you can definitively identify from the barcode numbers AND verify with the packaging."""
                 },
                 {
                     "role": "user",
@@ -88,15 +101,32 @@ If you cannot read the barcode clearly, return:
         
         barcode_read = result.get('barcode', 'unknown')
         product_name = result.get('name', 'Unknown Product')
+        confidence = result.get('confidence', 'unknown')
         
-        print(f"✅ Vision API read barcode: {barcode_read}")
-        print(f"✅ Vision API identified: {product_name} (confidence: {result.get('confidence', 'unknown')})")
+        print(f"========================================")
+        print(f"📸 Vision API Analysis:")
+        print(f"   Barcode Read: {barcode_read}")
+        print(f"   Product Name: {product_name}")
+        print(f"   Confidence: {confidence}")
+        print(f"   Category: {result.get('category', 'other')}")
+        print(f"========================================")
+        
+        # Validation: Reject if barcode is unreadable or too short
+        if barcode_read == 'unreadable' or (barcode_read != 'unknown' and len(barcode_read) < 8):
+            print(f"⚠️ Invalid barcode detected, marking as unreadable")
+            return {
+                "barcode": "unreadable",
+                "name": "Unknown Product",
+                "category": "other",
+                "confidence": "low",
+                "source": "vision"
+            }
         
         return {
             "barcode": barcode_read,
             "name": product_name,
             "category": result.get("category", "other"),
-            "confidence": result.get("confidence", "low"),
+            "confidence": confidence,
             "source": "vision"
         }
         
@@ -143,7 +173,7 @@ async def ai_barcode_lookup(request: BarcodeRequest):
             ],
             response_format={ "type": "json_object" },
             temperature=0.3,
-            max_tokens=150
+            max_tokens=100
         )
         
         import json

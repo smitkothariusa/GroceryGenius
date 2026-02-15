@@ -1307,8 +1307,27 @@ const App: React.FC = () => {
           const visionData = await visionResponse.json();
           console.log('Vision API response:', visionData);
           
-          if (visionData.name && visionData.name.trim() && !visionData.name.includes('Unknown Product')) {
+          // List of example/placeholder products to reject
+          const placeholders = [
+            'coca-cola classic',
+            'kraft macaroni',
+            'horizon organic',
+            "lay's classic",
+            'parle g biscuit',
+            'parle-g biscuit',
+            'parle g gold',
+            'unknown product',
+            'example product',
+            'sample product'
+          ];
+          
+          const productNameLower = (visionData.name || '').toLowerCase();
+          const isPlaceholder = placeholders.some(p => productNameLower.includes(p));
+          const hasValidBarcode = visionData.barcode && visionData.barcode !== 'unreadable' && visionData.barcode.length >= 8;
+          
+          if (visionData.name && visionData.name.trim() && !isPlaceholder && hasValidBarcode) {
             console.log('✅ Found from Vision AI:', visionData.name);
+            console.log('📊 Barcode read:', visionData.barcode);
             const confidenceEmoji = visionData.confidence === 'high' ? '💯' : visionData.confidence === 'medium' ? '✅' : '⚠️';
             success(`${confidenceEmoji} Product identified: ${visionData.name}!`);
             return {
@@ -1316,6 +1335,10 @@ const App: React.FC = () => {
               category: visionData.category || 'other',
               expiryDays: null
             };
+          } else if (isPlaceholder) {
+            console.log('⚠️ Vision API returned placeholder/example, rejecting...');
+          } else if (!hasValidBarcode) {
+            console.log('⚠️ Vision API could not read barcode clearly');
           }
         }
       } catch (err) {

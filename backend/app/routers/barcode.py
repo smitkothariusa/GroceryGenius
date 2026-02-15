@@ -1,4 +1,6 @@
-# backend/routes/barcode.py
+# backend/app/routers/barcode.py
+# Put this file in: backend/app/routers/barcode.py
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import os

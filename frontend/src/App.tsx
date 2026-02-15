@@ -95,6 +95,12 @@ interface FavoriteRecipe extends Recipe {
 
 const App: React.FC = () => {
   const { t, i18n } = useTranslation();
+  
+  // Force English language
+  useEffect(() => {
+    i18n.changeLanguage('en');
+  }, []);
+  
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [recipeLoading, setRecipeLoading] = useState(false);

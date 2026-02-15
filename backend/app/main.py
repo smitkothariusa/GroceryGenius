@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import recipes, pantry, shopping, vision, donation
 # Add this import at the top
-from routers.barcode import router as barcode_router
+from app.routers.barcode import router as barcode_router
 # Add this route registration with your other routers
 app = FastAPI(
     title="GroceryGenius API",

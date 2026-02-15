@@ -2555,7 +2555,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                               color: recipe.difficulty.toLowerCase().includes('easy') ? '#166534' : '#92400e'
                             }}>{recipe.difficulty}</span>
                           )}
-                          <span style={{ color: mutedText, fontSize: '0.875rem' }}>👥 {recipe.servings} servings</span>
+                          <span style={{ color: mutedText, fontSize: '0.875rem' }}>👥 {recipe.servings} {t('recipes.servings')}</span>
                         </div>
 
                         {ingredients.length > 0 && (
@@ -2594,15 +2594,15 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', fontSize: '0.85rem' }}>
                               <div style={{ textAlign: 'center' }}>
                                 <div style={{ fontWeight: '600', color: '#059669' }}>{recipe.nutrition.calories}</div>
-                                <div style={{ color: mutedText }}>Calories</div>
+                                <div style={{ color: mutedText }}>{t('recipes.calories')}</div>
                               </div>
                               <div style={{ textAlign: 'center' }}>
                                 <div style={{ fontWeight: '600', color: '#7c3aed' }}>{recipe.nutrition.protein}g</div>
-                                <div style={{ color: mutedText }}>Protein</div>
+                                <div style={{ color: mutedText }}>{t('recipes.protein')}</div>
                               </div>
                               <div style={{ textAlign: 'center' }}>
                                 <div style={{ fontWeight: '600', color: '#10b981' }}>{recipe.nutrition.fiber}g</div>
-                                <div style={{ color: mutedText }}>Fiber</div>
+                                <div style={{ color: mutedText }}>{t('recipes.fiber')}</div>
                               </div>
                             </div>
                           </div>
@@ -2911,7 +2911,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       </label>
                       <input 
                         type="text" 
-                        placeholder="e.g., Rice, Chicken, Tomatoes" 
+                        placeholder={t('pantry.itemPlaceholder')} 
                         value={newPantryItem.name}
                         onChange={(e) => setNewPantryItem({...newPantryItem, name: e.target.value})}
                         style={{ 
@@ -3077,7 +3077,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               }}>
                 <input 
                   type="text" 
-                  placeholder="Item name" 
+                  placeholder={t('pantry.itemName')} 
                   value={newPantryItem.name}
                   onChange={(e) => setNewPantryItem({...newPantryItem, name: e.target.value})}
                   style={{ 
@@ -3098,7 +3098,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   <input 
                     type="number" 
                     min="1" 
-                    placeholder="Quantity"
+                    placeholder={t('pantry.quantity')}
                     value={newPantryItem.quantity}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -3323,7 +3323,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           flex: isMobile ? '1' : 'initial'
                         }}
                       >
-                        {isMobile ? '🗑️' : 'Remove'}
+                        {isMobile ? '🗑️' : t('common.delete')}
                       </button>
                     </div>
                   </div>
@@ -3357,7 +3357,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 margin: 0,
                 fontSize: isMobile ? '1.5rem' : '2rem'
               }}>
-                🛒 Shopping List ({shoppingList.filter(i => !i.checked).length} items)
+                🛒 {t('shopping.title')} ({shoppingList.filter(i => !i.checked).length} items)
               </h2>
               <div style={{ 
                 display: 'flex', 
@@ -3383,7 +3383,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     fontSize: isMobile ? '0.875rem' : '1rem'
                   }}
                 >
-                  ➕ {isMobile ? 'Add' : 'Add Item'}
+                  {isMobile ? t('shopping.addItem') : t('shopping.addItem')}
                 </button>
                 <button onClick={() => setShowExportMenu(!showExportMenu)} style={{
                   padding: isMobile ? '0.75rem' : '0.75rem 1.5rem',
@@ -3395,43 +3395,43 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   fontWeight: '600',
                   flex: isMobile ? '1' : 'initial',
                   fontSize: isMobile ? '0.875rem' : '1rem'
-                }}>📤 {isMobile ? 'Export' : 'Export & Share'}</button>
+                }}>📤 {isMobile ? t('shopping.export') : t('shopping.exportAndShare')}</button>
               </div>
             </div>
 
             {showExportMenu && (
               <div style={{ background: '#f0f9ff', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem', border: '2px solid #3b82f6' }}>
-                <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>Export Options</h3>
+                <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>{t('shopping.exportOptions')}</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
                   <button onClick={exportAsText} style={{
                     padding: '0.75rem', background: 'white', border: '2px solid #e5e7eb',
                     borderRadius: '8px', cursor: 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem'
                   }}>
-                    📄 Export as Text
+                    📄 {t('shopping.exportText')}
                   </button>
                   <button onClick={exportAsCSV} style={{
                     padding: '0.75rem', background: 'white', border: '2px solid #e5e7eb',
                     borderRadius: '8px', cursor: 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem'
                   }}>
-                    📊 Export as CSV
+                    📊 {t('shopping.exportCSV')}
                   </button>
                   <button onClick={shareList} style={{
                     padding: '0.75rem', background: 'white', border: '2px solid #e5e7eb',
                     borderRadius: '8px', cursor: 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem'
                   }}>
-                    📱 Share List
+                    📱 {t('shopping.shareList')}
                   </button>
                   <button onClick={emailList} style={{
                     padding: '0.75rem', background: 'white', border: '2px solid #e5e7eb',
                     borderRadius: '8px', cursor: 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem'
                   }}>
-                    ✉️ Email List
+                    ✉️ {t('shopping.emailList')}
                   </button>
                   <button onClick={printList} style={{
                     padding: '0.75rem', background: 'white', border: '2px solid #e5e7eb',
                     borderRadius: '8px', cursor: 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem'
                   }}>
-                    🖨️ Print List
+                    🖨️ {t('shopping.printList')}
                   </button>
                 </div>
               </div>
@@ -3439,11 +3439,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontWeight: '600' }}>Sort by:</span>
+                <span style={{ fontWeight: '600' }}>{t('shopping.sortBy')}:</span>
                 <select value={sortShoppingBy} onChange={(e) => setSortShoppingBy(e.target.value as any)}
                   style={{ padding: '0.5rem', border: '2px solid #e5e7eb', borderRadius: '8px' }}>
-                  <option value="category">Category</option>
-                  <option value="alphabetical">Alphabetical</option>
+                  <option value="category">{t('shopping.sortCategory')}</option>
+                  <option value="alphabetical">{t('shopping.sortAlphabetical')}</option>
                 </select>
               </div>
               
@@ -3459,7 +3459,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       color: '#166534',
                       fontStyle: 'italic'
                     }}>
-                      🔄 Fetching prices...
+                      🔄 {t('shopping.fetchingPrices')}
                     </div>
                   ) : (
                     <div style={{ 
@@ -3476,7 +3476,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px'
                       }}>
-                        💰 Price Comparison
+                        💰 {t('shopping.priceComparison')}
                       </div>
                       <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-around' }}>
                         <div style={{ flex: 1, textAlign: 'center' }}>
@@ -3649,7 +3649,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       borderRadius: '6px',
                       cursor: 'pointer',
                       fontSize: isMobile ? '0.75rem' : '0.875rem'}}>
-                      {isMobile ? '🗑️ Remove' : 'Remove'}
+                      {isMobile ? `🗑️ ${t('common.delete')}` : t('common.delete')}
                     </button>
                   </div>
                 </div>
@@ -3692,7 +3692,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             <h2 style={{ 
               margin: '0 0 2rem 0',
               fontSize: isMobile ? '1.5rem' : '2rem'
-            }}>⭐ Favorite Recipes ({favorites.length})</h2>
+            }}>⭐ {t('favorites.title')} ({favorites.length})</h2>
             <div style={{ display: 'grid', gap: '1rem' }}>
               {favorites.map(recipe => (
                 <div 
@@ -3715,7 +3715,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         {recipe.nutrition && ` • ${recipe.nutrition.calories} cal`}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: mutedText, marginTop: '0.5rem' }}>
-                        Saved: {new Date(recipe.savedDate).toLocaleDateString()}
+                        {t('favorites.savedOn')}: {new Date(recipe.savedDate).toLocaleDateString()}
                       </div>
                     </div>
                     <button onClick={async (e) => {
@@ -3731,14 +3731,14 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     }} style={{
                       background: '#fee2e2', color: '#dc2626', border: 'none',
                       padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', height: 'fit-content'
-                    }}>Remove</button>
+                    }}>{t('favorites.remove')}</button>
                   </div>
                 </div>
               ))}
               {favorites.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '3rem', color: mutedText }}>
                   <div style={{ fontSize: '3rem' }}>⭐</div>
-                  <p>No favorites yet. Start saving recipes you love!</p>
+                  <p>{t('favorites.noFavoritesMessage')}</p>
                 </div>
               )}
             </div>
@@ -4551,7 +4551,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 </label>
                 <input 
                   type="text" 
-                  placeholder="e.g., Milk, Bread, Apples" 
+                  placeholder={t('shopping.itemPlaceholder')} 
                   value={newShoppingItem.name}
                   onChange={(e) => setNewShoppingItem({...newShoppingItem, name: e.target.value})}
                   onKeyPress={(e) => {
@@ -4809,9 +4809,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
             <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
               {selectedRecipe.difficulty && <span style={{ fontSize: '1.1rem' }}>⚡ {selectedRecipe.difficulty}</span>}
-              {selectedRecipe.servings && <span style={{ fontSize: '1.1rem' }}>👥 {selectedRecipe.servings} servings</span>}
-              {selectedRecipe.prep_time && <span style={{ fontSize: '1.1rem' }}>⏱️ Prep: {selectedRecipe.prep_time}</span>}
-              {selectedRecipe.cook_time && <span style={{ fontSize: '1.1rem' }}>🔥 Cook: {selectedRecipe.cook_time}</span>}
+              {selectedRecipe.servings && <span style={{ fontSize: '1.1rem' }}>👥 {selectedRecipe.servings} {t('recipes.servings')}</span>}
+              {selectedRecipe.prep_time && <span style={{ fontSize: '1.1rem' }}>⏱️ {t('recipes.prepTime')}: {selectedRecipe.prep_time}</span>}
+              {selectedRecipe.cook_time && <span style={{ fontSize: '1.1rem' }}>🔥 {t('recipes.cookTime')}: {selectedRecipe.cook_time}</span>}
             </div>
 
             {selectedRecipe.nutrition && (
@@ -5037,7 +5037,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               <button onClick={() => setShowDetailedView(false)} style={{
                 padding: '1rem 2rem', background: '#f3f4f6', border: '1px solid #d1d5db',
                 borderRadius: '12px', cursor: 'pointer', fontWeight: '600', fontSize: '1.1rem'
-              }}>Close</button>
+              }}>{t('common.close')}</button>
             </div>
           </div>
         </div>
@@ -5292,13 +5292,13 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             </div>
             
             {/* Manual Calorie Entry */}
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Add/Subtract Calories</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('calorieTracker.addSubtractLabel')}</label>
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
               <input 
                 type="number" 
                 value={manualCalorieInput} 
                 onChange={(e) => setManualCalorieInput(e.target.value)}
-                placeholder="e.g., 100"
+                placeholder={t('calorieTracker.placeholder')}
                 style={{ 
                   flex: 1, 
                   padding: '0.75rem', 
@@ -5385,7 +5385,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               <button onClick={() => setShowCalorieTracker(false)} style={{
                 flex: 1, padding: '0.75rem', background: '#10b981', color: 'white',
                 border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
-              }}>Close</button>
+              }}>{t('common.close')}</button>
             </div>
           </div>
         </div>

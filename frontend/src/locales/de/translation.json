@@ -22,6 +22,7 @@
     "scanExpiry": "Ablaufdatum Scannen",
     "uploadReceipt": "Quittung Hochladen",
     "itemName": "Artikelname",
+    "itemPlaceholder": "z.B. Reis, Hähnchen, Tomaten",
     "quantity": "Menge",
     "unit": "Einheit",
     "category": "Kategorie",
@@ -125,11 +126,23 @@
     "title": "Einkaufsliste",
     "addItem": "Artikel Hinzufügen",
     "itemName": "Artikelname",
+    "itemPlaceholder": "z.B. Milch, Brot, Äpfel",
+    "export": "Exportieren",
+    "exportAndShare": "Exportieren & Teilen",
+    "exportOptions": "Exportoptionen",
     "exportText": "Als Text Exportieren",
     "exportCSV": "Als CSV Exportieren",
+    "shareList": "Liste Teilen",
+    "emailList": "Per Email Senden",
+    "printList": "Liste Drucken",
     "share": "Teilen",
     "print": "Drucken",
     "clearChecked": "Markierte Löschen",
+    "sortBy": "Sortieren nach",
+    "sortCategory": "Kategorie",
+    "sortAlphabetical": "Alphabetisch",
+    "fetchingPrices": "Preise werden abgerufen...",
+    "priceComparison": "Preisvergleich",
     "estimatedCost": "Geschätzte Kosten",
     "priority": {
       "high": "Hoch",
@@ -149,17 +162,20 @@
   },
   "favorites": {
     "title": "Lieblingsrezepte",
-    "savedOn": "Gespeichert am",
+    "savedOn": "Gespeichert",
     "viewRecipe": "Rezept Ansehen",
     "remove": "Entfernen",
-    "noFavorites": "Noch keine Lieblingsrezepte"
+    "noFavorites": "Noch keine Lieblingsrezepte",
+    "noFavoritesMessage": "Noch keine Favoriten. Beginnen Sie, Rezepte zu speichern, die Sie lieben!"
   },
   "calorieTracker": {
     "title": "Täglicher Kalorienzähler",
     "goal": "Ziel",
     "consumed": "Verbraucht",
     "remaining": "Verbleibend",
-    "close": "Schließen"
+    "close": "Schließen",
+    "addSubtractLabel": "Kalorien Hinzufügen/Abziehen",
+    "placeholder": "z.B. 100"
   },
   "common": {
     "loading": "Lädt...",

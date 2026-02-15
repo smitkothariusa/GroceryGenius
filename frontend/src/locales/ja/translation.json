@@ -22,6 +22,7 @@
     "scanExpiry": "賞味期限をスキャン",
     "uploadReceipt": "レシートをアップロード",
     "itemName": "アイテム名",
+    "itemPlaceholder": "例：米、鶏肉、トマト",
     "quantity": "数量",
     "unit": "単位",
     "category": "カテゴリ",
@@ -125,11 +126,23 @@
     "title": "買い物リスト",
     "addItem": "アイテムを追加",
     "itemName": "アイテム名",
+    "itemPlaceholder": "例：牛乳、パン、りんご",
+    "export": "エクスポート",
+    "exportAndShare": "エクスポートと共有",
+    "exportOptions": "エクスポートオプション",
     "exportText": "テキストで書き出し",
     "exportCSV": "CSVで書き出し",
+    "shareList": "リストを共有",
+    "emailList": "メールで送信",
+    "printList": "リストを印刷",
     "share": "共有",
     "print": "印刷",
     "clearChecked": "チェック済みを削除",
+    "sortBy": "並び替え",
+    "sortCategory": "カテゴリ",
+    "sortAlphabetical": "アルファベット順",
+    "fetchingPrices": "価格を取得中...",
+    "priceComparison": "価格比較",
     "estimatedCost": "推定費用",
     "priority": {
       "high": "高",
@@ -152,14 +165,17 @@
     "savedOn": "保存日",
     "viewRecipe": "レシピを見る",
     "remove": "削除",
-    "noFavorites": "お気に入りレシピはまだありません"
+    "noFavorites": "お気に入りレシピはまだありません",
+    "noFavoritesMessage": "お気に入りはまだありません。好きなレシピを保存してください！"
   },
   "calorieTracker": {
     "title": "毎日のカロリートラッカー",
     "goal": "目標",
     "consumed": "摂取済み",
     "remaining": "残り",
-    "close": "閉じる"
+    "close": "閉じる",
+    "addSubtractLabel": "カロリーを追加/減算",
+    "placeholder": "例：100"
   },
   "common": {
     "loading": "読み込み中...",

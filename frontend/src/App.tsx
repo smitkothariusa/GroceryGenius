@@ -2216,26 +2216,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               {isMobile ? t('app.shortName') : t('app.name')}
             </h1>
           </div>
-          <select
-            value={i18n.language}
-            onChange={(e) => i18n.changeLanguage(e.target.value)}
-            style={{
-              padding: '0.5rem',
-              borderRadius: '8px',
-              border: '1px solid #e5e7eb',
-              background: cardBg,
-              color: textColor,
-              cursor: 'pointer',
-              fontSize: '0.875rem'
-            }}
-          >
-            <option value="en">🇺🇸 English</option>
-            <option value="es">🇪🇸 Español</option>
-            <option value="fr">🇫🇷 Français</option>
-            <option value="de">🇩🇪 Deutsch</option>
-            <option value="zh">🇨🇳 中文</option>
-            <option value="ja">🇯🇵 日本語</option>
-          </select>
           <div style={{ display: 'flex', gap: isMobile ? '0.5rem' : '0.75rem', alignItems: 'center' }}>
             <button onClick={() => setShowCalorieTracker(!showCalorieTracker)} style={{
               padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 1rem',

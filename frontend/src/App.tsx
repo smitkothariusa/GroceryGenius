@@ -1,5 +1,6 @@
 ﻿import { FoodBank, DonationRecord, DonationImpact } from './types/donation';
 import { foodBanks, calculateMeals } from './data/foodBanks';
+import { useTranslation } from 'react-i18next';
 
 interface DropOffSite {
   id: string;
@@ -93,6 +94,7 @@ interface FavoriteRecipe extends Recipe {
 }
 
 const App: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [recipeLoading, setRecipeLoading] = useState(false);
@@ -2211,10 +2213,29 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>👨‍🍳</span>
             <h1 style={{ margin: 0, color: '#10b981', fontSize: isMobile ? '1.25rem' : '1.8rem', fontWeight: '700' }}>
-              {isMobile ? 'GG' : 'GroceryGenius'}
+              {isMobile ? t('app.shortName') : t('app.name')}
             </h1>
           </div>
-
+          <select
+            value={i18n.language}
+            onChange={(e) => i18n.changeLanguage(e.target.value)}
+            style={{
+              padding: '0.5rem',
+              borderRadius: '8px',
+              border: '1px solid #e5e7eb',
+              background: cardBg,
+              color: textColor,
+              cursor: 'pointer',
+              fontSize: '0.875rem'
+            }}
+          >
+            <option value="en">🇺🇸 English</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="zh">🇨🇳 中文</option>
+            <option value="ja">🇯🇵 日本語</option>
+          </select>
           <div style={{ display: 'flex', gap: isMobile ? '0.5rem' : '0.75rem', alignItems: 'center' }}>
             <button onClick={() => setShowCalorieTracker(!showCalorieTracker)} style={{
               padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 1rem',
@@ -2296,12 +2317,12 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             whiteSpace: 'nowrap',
             flex: isMobile ? '0 0 auto' : 'initial'
           }}>
-            {tab === 'recipes' && '🍳 Recipes'}
-            {tab === 'mealplan' && (isMobile ? '📅 Plan' : '📅 Meal Plan')}
-            {tab === 'pantry' && (isMobile ? `📦 ${pantry.length}` : `📦 Pantry (${pantry.length})`)}
-            {tab === 'shopping' && (isMobile ? `🛒 ${shoppingList.filter(i => !i.checked).length}` : `🛒 Shopping (${shoppingList.filter(i => !i.checked).length})`)}
-            {tab === 'donate' && (isMobile ? `❤️ ${getExpiringItems().length}` : `❤️ Donate (${getExpiringItems().length})`)}
-            {tab === 'favorites' && (isMobile ? `⭐ ${favorites.length}` : `⭐ Favorites (${favorites.length})`)}
+            {tab === 'recipes' && `🍳 ${t('tabs.recipes')}`}
+            {tab === 'mealplan' && (isMobile ? `📅 ${t('tabs.mealPlan')}` : `📅 ${t('tabs.mealPlan')}`)}
+            {tab === 'pantry' && (isMobile ? `📦 ${pantry.length}` : `📦 ${t('tabs.pantry')} (${pantry.length})`)}
+            {tab === 'shopping' && (isMobile ? `🛒 ${shoppingList.filter(i => !i.checked).length}` : `🛒 ${t('tabs.shopping')} (${shoppingList.filter(i => !i.checked).length})`)}
+            {tab === 'donate' && (isMobile ? `❤️ ${getExpiringItems().length}` : `❤️ ${t('tabs.donate')} (${getExpiringItems().length})`)}
+            {tab === 'favorites' && (isMobile ? `⭐ ${favorites.length}` : `⭐ ${t('tabs.favorites')} (${favorites.length})`)}
           </button>
         ))}
       </nav>
@@ -2602,7 +2623,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         fontSize: isMobile ? '0.875rem' : '1rem',
                         color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600',
                         minWidth: isMobile ? 'auto' : '120px'
-                      }}>🛒 {isMobile ? 'Add to Shopping' : 'Shopping'}</button>
+                      }}>🛒 {t('recipes.addToShopping')}</button>
                       
                       <button onClick={async () => {
                         const exists = favorites.some(f => f.name === recipe.name);
@@ -2641,7 +2662,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer',
                         fontSize: isMobile ? '0.875rem' : '1rem',
                         minWidth: isMobile ? 'auto' : '50px'
-                      }}>💖 {isMobile && 'Favorite'}</button>
+                      }}>💖 {isMobile && t('recipes.addToFavorites')}</button>
 
                       <button onClick={() => {
                         setCurrentTab('mealplan');
@@ -2654,7 +2675,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600',
                         fontSize: isMobile ? '0.875rem' : '1rem',
                         minWidth: isMobile ? 'auto' : '120px'
-                      }}>📅 {isMobile ? 'Plan' : 'Meal Plan'}</button>
+                      }}>📅 {t('tabs.mealPlan')}</button>
                       
                       {recipe.nutrition && (
                         <button onClick={async () => {
@@ -2758,7 +2779,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               <h2 style={{ 
                 margin: 0,
                 fontSize: isMobile ? '1.5rem' : '2rem'
-              }}>📦 My Pantry</h2>
+              }}>📦 {t('pantry.title')}</h2>
               <div style={{ 
                 display: 'flex', 
                 gap: '0.75rem', 
@@ -2787,7 +2808,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       fontSize: isMobile ? '0.875rem' : '1rem'
                     }}
                   >
-                    📷 {isMobile ? 'Scan' : 'Scan Items'}
+                    📷 {t('pantry.scanBarcode')}
                   </button>
 
                   {getExpiringItems().length > 0 && (
@@ -2808,7 +2829,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         fontSize: isMobile ? '0.875rem' : '1rem'
                       }}
                     >
-                      🎁 {isMobile ? `Donate (${getExpiringItems().length})` : `Donate Expiring (${getExpiringItems().length})`}
+                      🎁 {isMobile ? `${t('tabs.donate')} (${getExpiringItems().length})` : `${t('tabs.donate')} (${getExpiringItems().length})`}
                     </button>
                   )}
                   <button 
@@ -2825,7 +2846,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       fontSize: isMobile ? '0.875rem' : '1rem'
                     }}
                   >
-                    {showAddPantry ? '✕ Cancel' : (isMobile ? '+ Add' : '+ Add Item')}
+                    {showAddPantry ? `✕ ${t('common.cancel')}` : `+ ${t('pantry.addItem')}`}
                   </button>
               </div>
             </div>

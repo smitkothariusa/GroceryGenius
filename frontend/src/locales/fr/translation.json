@@ -1,0 +1,168 @@
+{
+  "app": {
+    "name": "GroceryGenius",
+    "shortName": "GG"
+  },
+  "header": {
+    "calorieTracker": "Compteur de Calories",
+    "signOut": "Se Déconnecter"
+  },
+  "tabs": {
+    "pantry": "Garde-manger",
+    "recipes": "Recettes",
+    "mealPlan": "Plan de Repas",
+    "shopping": "Courses",
+    "donate": "Donner",
+    "favorites": "Favoris"
+  },
+  "pantry": {
+    "title": "Mon Garde-manger",
+    "addItem": "Ajouter un Article",
+    "scanBarcode": "Scanner le Code-barres",
+    "scanExpiry": "Scanner l'Expiration",
+    "uploadReceipt": "Télécharger le Reçu",
+    "itemName": "Nom de l'article",
+    "quantity": "Quantité",
+    "unit": "Unité",
+    "category": "Catégorie",
+    "expiryDate": "Date d'Expiration",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "expiringIn": "Expire dans {{days}} jours",
+    "expired": "Expiré",
+    "delete": "Supprimer",
+    "categories": {
+      "vegetables": "Légumes",
+      "fruits": "Fruits",
+      "dairy": "Produits Laitiers",
+      "meat": "Viande",
+      "grains": "Céréales",
+      "spices": "Épices",
+      "other": "Autre"
+    },
+    "units": {
+      "piece": "pièce",
+      "kg": "kg",
+      "g": "g",
+      "lb": "lb",
+      "oz": "oz",
+      "l": "l",
+      "ml": "ml",
+      "cup": "tasse",
+      "tbsp": "càs",
+      "tsp": "càc"
+    }
+  },
+  "recipes": {
+    "title": "Générateur de Recettes",
+    "searchPlaceholder": "Rechercher une recette spécifique (ex. 'pâtes au poulet')...",
+    "addIngredient": "Ajouter une étiquette d'ingrédient",
+    "servings": "Portions",
+    "dietaryPreferences": "Préférences Alimentaires",
+    "generateRecipes": "Générer des Recettes",
+    "dietary": {
+      "all": "Toutes",
+      "vegetarian": "Végétarien",
+      "vegan": "Végétalien",
+      "keto": "Keto",
+      "glutenFree": "Sans Gluten"
+    },
+    "healthGrade": "Note Santé",
+    "prepTime": "Préparation",
+    "cookTime": "Cuisson",
+    "difficulty": "Difficulté",
+    "servings_count": "{{count}} portions",
+    "calories": "Calories",
+    "protein": "Protéines",
+    "carbs": "Glucides",
+    "fat": "Lipides",
+    "fiber": "Fibres",
+    "sodium": "Sodium",
+    "ingredients": "Ingrédients",
+    "instructions": "Instructions",
+    "healthBenefits": "Bienfaits pour la Santé",
+    "budgetTip": "Astuce Budget",
+    "addToShopping": "Ajouter aux Courses",
+    "addToFavorites": "Ajouter aux Favoris",
+    "closeRecipe": "Fermer la Recette",
+    "substitutions": "Substitutions",
+    "findSubstitute": "Trouver un Substitut",
+    "loading": "Génération de délicieuses recettes..."
+  },
+  "mealPlan": {
+    "title": "Plan de Repas Hebdomadaire",
+    "breakfast": "Petit-déjeuner",
+    "lunch": "Déjeuner",
+    "dinner": "Dîner",
+    "snacks": "Collations",
+    "addMeal": "Ajouter un repas",
+    "days": {
+      "monday": "Lundi",
+      "tuesday": "Mardi",
+      "wednesday": "Mercredi",
+      "thursday": "Jeudi",
+      "friday": "Vendredi",
+      "saturday": "Samedi",
+      "sunday": "Dimanche"
+    }
+  },
+  "shopping": {
+    "title": "Liste de Courses",
+    "addItem": "Ajouter un Article",
+    "itemName": "Nom de l'article",
+    "exportText": "Exporter en Texte",
+    "exportCSV": "Exporter en CSV",
+    "share": "Partager",
+    "print": "Imprimer",
+    "clearChecked": "Effacer les Cochés",
+    "estimatedCost": "Coût Estimé",
+    "priority": {
+      "high": "Haute",
+      "medium": "Moyenne",
+      "low": "Basse"
+    }
+  },
+  "donate": {
+    "title": "Impact de Don Alimentaire",
+    "mealsProvided": "Repas Fournis",
+    "totalDonations": "Dons Totaux",
+    "recordDonation": "Enregistrer un Don",
+    "selectFoodBank": "Sélectionner une Banque Alimentaire",
+    "selectDropOff": "Sélectionner un Point de Dépôt",
+    "donateItems": "Articles à Donner",
+    "submit": "Soumettre le Don"
+  },
+  "favorites": {
+    "title": "Recettes Favorites",
+    "savedOn": "Enregistré le",
+    "viewRecipe": "Voir la Recette",
+    "remove": "Retirer",
+    "noFavorites": "Pas encore de recettes favorites"
+  },
+  "calorieTracker": {
+    "title": "Compteur de Calories Quotidien",
+    "goal": "Objectif",
+    "consumed": "Consommé",
+    "remaining": "Restant",
+    "close": "Fermer"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "close": "Fermer"
+  },
+  "notifications": {
+    "itemAdded": "Article ajouté à {{list}}!",
+    "itemRemoved": "Article supprimé!",
+    "recipeSaved": "Recette enregistrée dans les favoris!",
+    "recipeRemoved": "Recette retirée des favoris!",
+    "donationRecorded": "Don enregistré! Vous nourrissez {{count}} repas! 🎉",
+    "error": "Une erreur s'est produite. Veuillez réessayer."
+  }
+}

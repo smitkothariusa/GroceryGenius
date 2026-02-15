@@ -1,0 +1,168 @@
+{
+  "app": {
+    "name": "GroceryGenius",
+    "shortName": "GG"
+  },
+  "header": {
+    "calorieTracker": "Kalorienzähler",
+    "signOut": "Abmelden"
+  },
+  "tabs": {
+    "pantry": "Vorrat",
+    "recipes": "Rezepte",
+    "mealPlan": "Essensplan",
+    "shopping": "Einkaufen",
+    "donate": "Spenden",
+    "favorites": "Favoriten"
+  },
+  "pantry": {
+    "title": "Mein Vorrat",
+    "addItem": "Artikel hinzufügen",
+    "scanBarcode": "Barcode scannen",
+    "scanExpiry": "Ablaufdatum scannen",
+    "uploadReceipt": "Quittung hochladen",
+    "itemName": "Artikelname",
+    "quantity": "Menge",
+    "unit": "Einheit",
+    "category": "Kategorie",
+    "expiryDate": "Ablaufdatum",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "expiringIn": "Läuft in {{days}} Tagen ab",
+    "expired": "Abgelaufen",
+    "delete": "Löschen",
+    "categories": {
+      "vegetables": "Gemüse",
+      "fruits": "Obst",
+      "dairy": "Milchprodukte",
+      "meat": "Fleisch",
+      "grains": "Getreide",
+      "spices": "Gewürze",
+      "other": "Sonstiges"
+    },
+    "units": {
+      "piece": "Stück",
+      "kg": "kg",
+      "g": "g",
+      "lb": "lb",
+      "oz": "oz",
+      "l": "l",
+      "ml": "ml",
+      "cup": "Tasse",
+      "tbsp": "EL",
+      "tsp": "TL"
+    }
+  },
+  "recipes": {
+    "title": "Rezeptgenerator",
+    "searchPlaceholder": "Nach bestimmtem Rezept suchen (z.B. 'Hähnchenpasta')...",
+    "addIngredient": "Zutat hinzufügen",
+    "servings": "Portionen",
+    "dietaryPreferences": "Ernährungspräferenzen",
+    "generateRecipes": "Rezepte generieren",
+    "dietary": {
+      "all": "Alle",
+      "vegetarian": "Vegetarisch",
+      "vegan": "Vegan",
+      "keto": "Keto",
+      "glutenFree": "Glutenfrei"
+    },
+    "healthGrade": "Gesundheitsnote",
+    "prepTime": "Vorbereitung",
+    "cookTime": "Kochzeit",
+    "difficulty": "Schwierigkeit",
+    "servings_count": "{{count}} Portionen",
+    "calories": "Kalorien",
+    "protein": "Protein",
+    "carbs": "Kohlenhydrate",
+    "fat": "Fett",
+    "fiber": "Ballaststoffe",
+    "sodium": "Natrium",
+    "ingredients": "Zutaten",
+    "instructions": "Anleitung",
+    "healthBenefits": "Gesundheitsvorteile",
+    "budgetTip": "Spartipp",
+    "addToShopping": "Zur Einkaufsliste",
+    "addToFavorites": "Zu Favoriten",
+    "closeRecipe": "Rezept schließen",
+    "substitutions": "Ersatz",
+    "findSubstitute": "Ersatz finden",
+    "loading": "Köstliche Rezepte werden erstellt..."
+  },
+  "mealPlan": {
+    "title": "Wöchentlicher Essensplan",
+    "breakfast": "Frühstück",
+    "lunch": "Mittagessen",
+    "dinner": "Abendessen",
+    "snacks": "Snacks",
+    "addMeal": "Mahlzeit hinzufügen",
+    "days": {
+      "monday": "Montag",
+      "tuesday": "Dienstag",
+      "wednesday": "Mittwoch",
+      "thursday": "Donnerstag",
+      "friday": "Freitag",
+      "saturday": "Samstag",
+      "sunday": "Sonntag"
+    }
+  },
+  "shopping": {
+    "title": "Einkaufsliste",
+    "addItem": "Artikel hinzufügen",
+    "itemName": "Artikelname",
+    "exportText": "Als Text exportieren",
+    "exportCSV": "Als CSV exportieren",
+    "share": "Teilen",
+    "print": "Drucken",
+    "clearChecked": "Erledigte löschen",
+    "estimatedCost": "Geschätzte Kosten",
+    "priority": {
+      "high": "Hoch",
+      "medium": "Mittel",
+      "low": "Niedrig"
+    }
+  },
+  "donate": {
+    "title": "Lebensmittelspenden-Impact",
+    "mealsProvided": "Bereitgestellte Mahlzeiten",
+    "totalDonations": "Gesamtspenden",
+    "recordDonation": "Spende erfassen",
+    "selectFoodBank": "Tafel auswählen",
+    "selectDropOff": "Abgabestelle auswählen",
+    "donateItems": "Artikel spenden",
+    "submit": "Spende abschicken"
+  },
+  "favorites": {
+    "title": "Lieblingsrezepte",
+    "savedOn": "Gespeichert am",
+    "viewRecipe": "Rezept anzeigen",
+    "remove": "Entfernen",
+    "noFavorites": "Noch keine Lieblingsrezepte"
+  },
+  "calorieTracker": {
+    "title": "Täglicher Kalorienzähler",
+    "goal": "Ziel",
+    "consumed": "Verbraucht",
+    "remaining": "Verbleibend",
+    "close": "Schließen"
+  },
+  "common": {
+    "loading": "Lädt...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "confirm": "Bestätigen",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "save": "Speichern",
+    "close": "Schließen"
+  },
+  "notifications": {
+    "itemAdded": "Artikel zu {{list}} hinzugefügt!",
+    "itemRemoved": "Artikel entfernt!",
+    "recipeSaved": "Rezept zu Favoriten hinzugefügt!",
+    "recipeRemoved": "Rezept aus Favoriten entfernt!",
+    "donationRecorded": "Spende erfasst! Sie spenden {{count}} Mahlzeiten! 🎉",
+    "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+  }
+}

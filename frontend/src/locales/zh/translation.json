@@ -1,0 +1,168 @@
+{
+  "app": {
+    "name": "食材天才",
+    "shortName": "食材"
+  },
+  "header": {
+    "calorieTracker": "卡路里追踪",
+    "signOut": "退出登录"
+  },
+  "tabs": {
+    "pantry": "食材库",
+    "recipes": "食谱",
+    "mealPlan": "膳食计划",
+    "shopping": "购物清单",
+    "donate": "捐赠",
+    "favorites": "收藏"
+  },
+  "pantry": {
+    "title": "我的食材库",
+    "addItem": "添加食材",
+    "scanBarcode": "扫描条形码",
+    "scanExpiry": "扫描保质期",
+    "uploadReceipt": "上传收据",
+    "itemName": "食材名称",
+    "quantity": "数量",
+    "unit": "单位",
+    "category": "类别",
+    "expiryDate": "保质期",
+    "save": "保存",
+    "cancel": "取消",
+    "expiringIn": "{{days}}天后过期",
+    "expired": "已过期",
+    "delete": "删除",
+    "categories": {
+      "vegetables": "蔬菜",
+      "fruits": "水果",
+      "dairy": "乳制品",
+      "meat": "肉类",
+      "grains": "谷物",
+      "spices": "调味料",
+      "other": "其他"
+    },
+    "units": {
+      "piece": "个",
+      "kg": "公斤",
+      "g": "克",
+      "lb": "磅",
+      "oz": "盎司",
+      "l": "升",
+      "ml": "毫升",
+      "cup": "杯",
+      "tbsp": "汤匙",
+      "tsp": "茶匙"
+    }
+  },
+  "recipes": {
+    "title": "食谱生成器",
+    "searchPlaceholder": "搜索特定食谱（例如：'鸡肉意面'）...",
+    "addIngredient": "添加食材标签",
+    "servings": "份数",
+    "dietaryPreferences": "饮食偏好",
+    "generateRecipes": "生成食谱",
+    "dietary": {
+      "all": "全部",
+      "vegetarian": "素食",
+      "vegan": "纯素",
+      "keto": "生酮",
+      "glutenFree": "无麸质"
+    },
+    "healthGrade": "健康评级",
+    "prepTime": "准备时间",
+    "cookTime": "烹饪时间",
+    "difficulty": "难度",
+    "servings_count": "{{count}}人份",
+    "calories": "卡路里",
+    "protein": "蛋白质",
+    "carbs": "碳水化合物",
+    "fat": "脂肪",
+    "fiber": "纤维",
+    "sodium": "钠",
+    "ingredients": "食材",
+    "instructions": "步骤",
+    "healthBenefits": "健康益处",
+    "budgetTip": "省钱小贴士",
+    "addToShopping": "加入购物清单",
+    "addToFavorites": "加入收藏",
+    "closeRecipe": "关闭食谱",
+    "substitutions": "替代品",
+    "findSubstitute": "查找替代品",
+    "loading": "正在生成美味食谱..."
+  },
+  "mealPlan": {
+    "title": "每周膳食计划",
+    "breakfast": "早餐",
+    "lunch": "午餐",
+    "dinner": "晚餐",
+    "snacks": "零食",
+    "addMeal": "添加餐食",
+    "days": {
+      "monday": "星期一",
+      "tuesday": "星期二",
+      "wednesday": "星期三",
+      "thursday": "星期四",
+      "friday": "星期五",
+      "saturday": "星期六",
+      "sunday": "星期日"
+    }
+  },
+  "shopping": {
+    "title": "购物清单",
+    "addItem": "添加物品",
+    "itemName": "物品名称",
+    "exportText": "导出为文本",
+    "exportCSV": "导出为CSV",
+    "share": "分享",
+    "print": "打印",
+    "clearChecked": "清除已勾选",
+    "estimatedCost": "预估费用",
+    "priority": {
+      "high": "高",
+      "medium": "中",
+      "low": "低"
+    }
+  },
+  "donate": {
+    "title": "食物捐赠影响",
+    "mealsProvided": "提供的餐食",
+    "totalDonations": "总捐赠数",
+    "recordDonation": "记录捐赠",
+    "selectFoodBank": "选择食物银行",
+    "selectDropOff": "选择投放点",
+    "donateItems": "捐赠物品",
+    "submit": "提交捐赠"
+  },
+  "favorites": {
+    "title": "收藏食谱",
+    "savedOn": "保存于",
+    "viewRecipe": "查看食谱",
+    "remove": "移除",
+    "noFavorites": "还没有收藏的食谱"
+  },
+  "calorieTracker": {
+    "title": "每日卡路里追踪",
+    "goal": "目标",
+    "consumed": "已摄入",
+    "remaining": "剩余",
+    "close": "关闭"
+  },
+  "common": {
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "confirm": "确认",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "save": "保存",
+    "close": "关闭"
+  },
+  "notifications": {
+    "itemAdded": "物品已添加到{{list}}！",
+    "itemRemoved": "物品已移除！",
+    "recipeSaved": "食谱已保存到收藏！",
+    "recipeRemoved": "食谱已从收藏中移除！",
+    "donationRecorded": "捐赠已记录！您正在提供{{count}}份餐食！🎉",
+    "error": "出错了，请重试。"
+  }
+}

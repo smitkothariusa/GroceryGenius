@@ -1,0 +1,168 @@
+{
+  "app": {
+    "name": "GroceryGenius",
+    "shortName": "GG"
+  },
+  "header": {
+    "calorieTracker": "Calorie Tracker",
+    "signOut": "Sign Out"
+  },
+  "tabs": {
+    "pantry": "Pantry",
+    "recipes": "Recipes",
+    "mealPlan": "Meal Plan",
+    "shopping": "Shopping",
+    "donate": "Donate",
+    "favorites": "Favorites"
+  },
+  "pantry": {
+    "title": "My Pantry",
+    "addItem": "Add Item",
+    "scanBarcode": "Scan Barcode",
+    "scanExpiry": "Scan Expiry",
+    "uploadReceipt": "Upload Receipt",
+    "itemName": "Item name",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "category": "Category",
+    "expiryDate": "Expiry Date",
+    "save": "Save",
+    "cancel": "Cancel",
+    "expiringIn": "Expiring in {{days}} days",
+    "expired": "Expired",
+    "delete": "Delete",
+    "categories": {
+      "vegetables": "Vegetables",
+      "fruits": "Fruits",
+      "dairy": "Dairy",
+      "meat": "Meat",
+      "grains": "Grains",
+      "spices": "Spices",
+      "other": "Other"
+    },
+    "units": {
+      "piece": "piece",
+      "kg": "kg",
+      "g": "g",
+      "lb": "lb",
+      "oz": "oz",
+      "l": "l",
+      "ml": "ml",
+      "cup": "cup",
+      "tbsp": "tbsp",
+      "tsp": "tsp"
+    }
+  },
+  "recipes": {
+    "title": "Recipe Generator",
+    "searchPlaceholder": "Search for specific recipe (e.g., 'chicken pasta')...",
+    "addIngredient": "Add ingredient tag",
+    "servings": "Servings",
+    "dietaryPreferences": "Dietary Preferences",
+    "generateRecipes": "Generate Recipes",
+    "dietary": {
+      "all": "All",
+      "vegetarian": "Vegetarian",
+      "vegan": "Vegan",
+      "keto": "Keto",
+      "glutenFree": "Gluten-Free"
+    },
+    "healthGrade": "Health Grade",
+    "prepTime": "Prep",
+    "cookTime": "Cook",
+    "difficulty": "Difficulty",
+    "servings_count": "{{count}} servings",
+    "calories": "Calories",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Fat",
+    "fiber": "Fiber",
+    "sodium": "Sodium",
+    "ingredients": "Ingredients",
+    "instructions": "Instructions",
+    "healthBenefits": "Health Benefits",
+    "budgetTip": "Budget Tip",
+    "addToShopping": "Add to Shopping",
+    "addToFavorites": "Add to Favorites",
+    "closeRecipe": "Close Recipe",
+    "substitutions": "Substitutions",
+    "findSubstitute": "Find Substitute",
+    "loading": "Generating delicious recipes..."
+  },
+  "mealPlan": {
+    "title": "Weekly Meal Plan",
+    "breakfast": "Breakfast",
+    "lunch": "Lunch",
+    "dinner": "Dinner",
+    "snacks": "Snacks",
+    "addMeal": "Add meal",
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    }
+  },
+  "shopping": {
+    "title": "Shopping List",
+    "addItem": "Add Item",
+    "itemName": "Item name",
+    "exportText": "Export as Text",
+    "exportCSV": "Export as CSV",
+    "share": "Share",
+    "print": "Print",
+    "clearChecked": "Clear Checked Items",
+    "estimatedCost": "Estimated Cost",
+    "priority": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    }
+  },
+  "donate": {
+    "title": "Food Donation Impact",
+    "mealsProvided": "Meals Provided",
+    "totalDonations": "Total Donations",
+    "recordDonation": "Record Donation",
+    "selectFoodBank": "Select Food Bank",
+    "selectDropOff": "Select Drop-off Site",
+    "donateItems": "Items to Donate",
+    "submit": "Submit Donation"
+  },
+  "favorites": {
+    "title": "Favorite Recipes",
+    "savedOn": "Saved on",
+    "viewRecipe": "View Recipe",
+    "remove": "Remove",
+    "noFavorites": "No favorite recipes yet"
+  },
+  "calorieTracker": {
+    "title": "Daily Calorie Tracker",
+    "goal": "Goal",
+    "consumed": "Consumed",
+    "remaining": "Remaining",
+    "close": "Close"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "close": "Close"
+  },
+  "notifications": {
+    "itemAdded": "Item added to {{list}}!",
+    "itemRemoved": "Item removed!",
+    "recipeSaved": "Recipe saved to favorites!",
+    "recipeRemoved": "Recipe removed from favorites!",
+    "donationRecorded": "Donation recorded! You're feeding {{count}} meals! 🎉",
+    "error": "Something went wrong. Please try again."
+  }
+}

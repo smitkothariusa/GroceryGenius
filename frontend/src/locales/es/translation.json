@@ -1,0 +1,168 @@
+{
+  "app": {
+    "name": "GroceryGenius",
+    "shortName": "GG"
+  },
+  "header": {
+    "calorieTracker": "Contador de Calorías",
+    "signOut": "Cerrar Sesión"
+  },
+  "tabs": {
+    "pantry": "Despensa",
+    "recipes": "Recetas",
+    "mealPlan": "Plan de Comidas",
+    "shopping": "Compras",
+    "donate": "Donar",
+    "favorites": "Favoritos"
+  },
+  "pantry": {
+    "title": "Mi Despensa",
+    "addItem": "Añadir Artículo",
+    "scanBarcode": "Escanear Código",
+    "scanExpiry": "Escanear Caducidad",
+    "uploadReceipt": "Subir Recibo",
+    "itemName": "Nombre del artículo",
+    "quantity": "Cantidad",
+    "unit": "Unidad",
+    "category": "Categoría",
+    "expiryDate": "Fecha de Caducidad",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "expiringIn": "Caduca en {{days}} días",
+    "expired": "Caducado",
+    "delete": "Eliminar",
+    "categories": {
+      "vegetables": "Verduras",
+      "fruits": "Frutas",
+      "dairy": "Lácteos",
+      "meat": "Carne",
+      "grains": "Granos",
+      "spices": "Especias",
+      "other": "Otro"
+    },
+    "units": {
+      "piece": "pieza",
+      "kg": "kg",
+      "g": "g",
+      "lb": "lb",
+      "oz": "oz",
+      "l": "l",
+      "ml": "ml",
+      "cup": "taza",
+      "tbsp": "cda",
+      "tsp": "cdta"
+    }
+  },
+  "recipes": {
+    "title": "Generador de Recetas",
+    "searchPlaceholder": "Buscar receta específica (ej. 'pasta de pollo')...",
+    "addIngredient": "Añadir etiqueta de ingrediente",
+    "servings": "Porciones",
+    "dietaryPreferences": "Preferencias Dietéticas",
+    "generateRecipes": "Generar Recetas",
+    "dietary": {
+      "all": "Todas",
+      "vegetarian": "Vegetariana",
+      "vegan": "Vegana",
+      "keto": "Keto",
+      "glutenFree": "Sin Gluten"
+    },
+    "healthGrade": "Calificación de Salud",
+    "prepTime": "Preparación",
+    "cookTime": "Cocción",
+    "difficulty": "Dificultad",
+    "servings_count": "{{count}} porciones",
+    "calories": "Calorías",
+    "protein": "Proteína",
+    "carbs": "Carbohidratos",
+    "fat": "Grasa",
+    "fiber": "Fibra",
+    "sodium": "Sodio",
+    "ingredients": "Ingredientes",
+    "instructions": "Instrucciones",
+    "healthBenefits": "Beneficios para la Salud",
+    "budgetTip": "Consejo de Presupuesto",
+    "addToShopping": "Añadir a Compras",
+    "addToFavorites": "Añadir a Favoritos",
+    "closeRecipe": "Cerrar Receta",
+    "substitutions": "Sustituciones",
+    "findSubstitute": "Encontrar Sustituto",
+    "loading": "Generando recetas deliciosas..."
+  },
+  "mealPlan": {
+    "title": "Plan de Comidas Semanal",
+    "breakfast": "Desayuno",
+    "lunch": "Almuerzo",
+    "dinner": "Cena",
+    "snacks": "Bocadillos",
+    "addMeal": "Añadir comida",
+    "days": {
+      "monday": "Lunes",
+      "tuesday": "Martes",
+      "wednesday": "Miércoles",
+      "thursday": "Jueves",
+      "friday": "Viernes",
+      "saturday": "Sábado",
+      "sunday": "Domingo"
+    }
+  },
+  "shopping": {
+    "title": "Lista de Compras",
+    "addItem": "Añadir Artículo",
+    "itemName": "Nombre del artículo",
+    "exportText": "Exportar como Texto",
+    "exportCSV": "Exportar como CSV",
+    "share": "Compartir",
+    "print": "Imprimir",
+    "clearChecked": "Limpiar Marcados",
+    "estimatedCost": "Costo Estimado",
+    "priority": {
+      "high": "Alta",
+      "medium": "Media",
+      "low": "Baja"
+    }
+  },
+  "donate": {
+    "title": "Impacto de Donación de Alimentos",
+    "mealsProvided": "Comidas Proporcionadas",
+    "totalDonations": "Donaciones Totales",
+    "recordDonation": "Registrar Donación",
+    "selectFoodBank": "Seleccionar Banco de Alimentos",
+    "selectDropOff": "Seleccionar Punto de Entrega",
+    "donateItems": "Artículos a Donar",
+    "submit": "Enviar Donación"
+  },
+  "favorites": {
+    "title": "Recetas Favoritas",
+    "savedOn": "Guardado el",
+    "viewRecipe": "Ver Receta",
+    "remove": "Eliminar",
+    "noFavorites": "Aún no hay recetas favoritas"
+  },
+  "calorieTracker": {
+    "title": "Contador de Calorías Diarias",
+    "goal": "Objetivo",
+    "consumed": "Consumido",
+    "remaining": "Restante",
+    "close": "Cerrar"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "save": "Guardar",
+    "close": "Cerrar"
+  },
+  "notifications": {
+    "itemAdded": "¡Artículo añadido a {{list}}!",
+    "itemRemoved": "¡Artículo eliminado!",
+    "recipeSaved": "¡Receta guardada en favoritos!",
+    "recipeRemoved": "¡Receta eliminada de favoritos!",
+    "donationRecorded": "¡Donación registrada! ¡Estás alimentando {{count}} comidas! 🎉",
+    "error": "Algo salió mal. Por favor, inténtalo de nuevo."
+  }
+}

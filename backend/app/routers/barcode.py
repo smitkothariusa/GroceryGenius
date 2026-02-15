@@ -37,21 +37,25 @@ async def vision_barcode_lookup(request: BarcodeImageRequest):
                     "role": "system",
                     "content": """You are a product identification expert. You will be shown an image containing a barcode on a product.
                     
-Your task:
-1. Look at the ENTIRE product - packaging, labels, text, logos, barcode
-2. Identify the specific product name and brand
-3. Be as accurate as possible using all visible information
-4. Include brand name in the product name (e.g., "Coca-Cola Classic 12oz Can" not just "Soda")
+Your task (CRITICAL - FOLLOW THESE STEPS IN ORDER):
+1. FIRST: Locate and read the barcode numbers in the image (typically 8, 12, 13, or 14 digits)
+2. SECOND: Use those barcode numbers to identify the exact product (you have knowledge of UPC/EAN databases)
+3. THIRD: Verify the identification by looking at the packaging, labels, text, and logos visible in the image
+4. Include the full brand name, product variant, and size in your response (e.g., "Coca-Cola Classic 12oz Can" not just "Soda")
+
+IMPORTANT: The barcode number is your PRIMARY identification method. Use the visual packaging information to CONFIRM and enhance your answer.
 
 Return ONLY a JSON object with this structure:
 {
+    "barcode": "the 12-digit barcode you read from the image",
     "name": "Brand Product Name with Variant/Size",
     "category": "produce|dairy|meat|canned|grains|breakfast|beverages|snacks|frozen|bakery|condiments|other",
     "confidence": "high|medium|low"
 }
 
-If you cannot identify the product clearly, return:
+If you cannot read the barcode clearly, return:
 {
+    "barcode": "unreadable",
     "name": "Unknown Product",
     "category": "other",
     "confidence": "low"
@@ -62,7 +66,7 @@ If you cannot identify the product clearly, return:
                     "content": [
                         {
                             "type": "text",
-                            "text": "What product is this? Identify it using the barcode, packaging, labels, and any visible text."
+                            "text": "Read the barcode numbers from this image, then identify the product using those numbers. Verify your identification using any visible packaging, labels, or text."
                         },
                         {
                             "type": "image_url",
@@ -82,10 +86,15 @@ If you cannot identify the product clearly, return:
         import json
         result = json.loads(response.choices[0].message.content)
         
-        print(f"✅ Vision API identified: {result.get('name')} (confidence: {result.get('confidence', 'unknown')})")
+        barcode_read = result.get('barcode', 'unknown')
+        product_name = result.get('name', 'Unknown Product')
+        
+        print(f"✅ Vision API read barcode: {barcode_read}")
+        print(f"✅ Vision API identified: {product_name} (confidence: {result.get('confidence', 'unknown')})")
         
         return {
-            "name": result.get("name", "Unknown Product"),
+            "barcode": barcode_read,
+            "name": product_name,
             "category": result.get("category", "other"),
             "confidence": result.get("confidence", "low"),
             "source": "vision"
@@ -134,7 +143,7 @@ async def ai_barcode_lookup(request: BarcodeRequest):
             ],
             response_format={ "type": "json_object" },
             temperature=0.3,
-            max_tokens=100
+            max_tokens=150
         )
         
         import json

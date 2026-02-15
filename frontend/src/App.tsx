@@ -1288,6 +1288,49 @@ const App: React.FC = () => {
     setRecipes([]);
     success('All data cleared!');
   };
+  const lookupBarcodeWithImage = async (imageData: string) => {
+    try {
+      console.log('🔍 Looking up product using vision AI...');
+      
+      // Vision AI (FIRST - Most accurate with actual product image)
+      try {
+        console.log('👁️ Using GPT-4 Vision to identify product...');
+        const visionResponse = await fetch(`${API_BASE}/barcode/vision-lookup`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ image: imageData })
+        });
+        
+        if (visionResponse.ok) {
+          const visionData = await visionResponse.json();
+          console.log('Vision API response:', visionData);
+          
+          if (visionData.name && visionData.name.trim() && !visionData.name.includes('Unknown Product')) {
+            console.log('✅ Found from Vision AI:', visionData.name);
+            const confidenceEmoji = visionData.confidence === 'high' ? '💯' : visionData.confidence === 'medium' ? '✅' : '⚠️';
+            success(`${confidenceEmoji} Product identified: ${visionData.name}!`);
+            return {
+              name: visionData.name.trim(),
+              category: visionData.category || 'other',
+              expiryDays: null
+            };
+          }
+        }
+      } catch (err) {
+        console.log('❌ Vision AI failed:', err);
+      }
+      
+      // If vision fails, return null to trigger fallback
+      return null;
+      
+    } catch (error) {
+      console.error('💥 Vision lookup error:', error);
+      return null;
+    }
+  };
+
   const lookupBarcode = async (barcode: string) => {
     try {
       console.log('🔍 Looking up barcode:', barcode);
@@ -1543,7 +1586,7 @@ const App: React.FC = () => {
         Quagga.start();
       });
       
-      // Handle barcode detection with validation and debounce
+      // Handle barcode detection with validation and image capture
       Quagga.onDetected(async (result: any) => {
         const code = result.codeResult.code;
         
@@ -1578,8 +1621,24 @@ const App: React.FC = () => {
         console.log('✅ Valid barcode detected:', code, 'quality:', quality.toFixed(3));
         
         // Visual feedback - successful scan
-        instructions.textContent = '✅ Barcode scanned! Looking up product...';
+        instructions.textContent = '📸 Capturing image for AI analysis...';
         instructions.style.color = '#10b981'; // Green success
+        
+        // CAPTURE THE CAMERA IMAGE
+        let capturedImage: string | null = null;
+        try {
+          // Get the canvas that Quagga is using
+          const canvas = videoContainer.querySelector('canvas');
+          if (canvas) {
+            // Convert canvas to base64 image
+            capturedImage = canvas.toDataURL('image/jpeg', 0.8);
+            console.log('📸 Image captured from camera');
+          } else {
+            console.warn('⚠️ Could not find canvas to capture image');
+          }
+        } catch (imgErr) {
+          console.error('Failed to capture image:', imgErr);
+        }
         
         // Stop scanner and cleanup
         try {
@@ -1597,8 +1656,19 @@ const App: React.FC = () => {
         // Show loading
         setRecipeLoading(true);
         
-        // Lookup product info
-        const productInfo = await lookupBarcode(code);
+        // Try vision API first if we captured an image
+        let productInfo = null;
+        if (capturedImage) {
+          productInfo = await lookupBarcodeWithImage(capturedImage);
+        }
+        
+        // If vision failed or no image, fallback to barcode number lookup
+        if (!productInfo) {
+          if (capturedImage) {
+            console.log('⚠️ Vision lookup failed, trying barcode number...');
+          }
+          productInfo = await lookupBarcode(code);
+        }
         
         console.log('Product info received:', productInfo);
         

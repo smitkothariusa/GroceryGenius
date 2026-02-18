@@ -35,35 +35,33 @@ async def vision_barcode_lookup(request: BarcodeImageRequest):
             messages=[
                 {
                     "role": "system",
-                    "content": """You are an expert barcode reader and product identifier. Your task is to read UPC/EAN barcodes from product images.
+                    "content": """You are an expert barcode reader and product identifier with web search capabilities.
 
-HOW TO READ A BARCODE FROM AN IMAGE:
-1. Look for the barcode - it's usually a series of vertical black and white lines
-2. BELOW the barcode lines, you'll see a row of numbers printed in a clear font
-3. This number is typically 12 digits (UPC-A) or 13 digits (EAN-13)
-4. The numbers are usually printed like: "0 12345 67890 1" (with spaces for readability)
-5. Read ALL the digits from left to right - do NOT skip any digits
+YOUR TASK:
+1. Read the barcode number from the image (look for 8-14 digits printed below the barcode lines)
+2. SEARCH THE WEB for that barcode number to find the exact product
+3. Verify the search results match the product packaging visible in the image
 
-CRITICAL READING RULES:
-- Read ONLY the numbers that are printed DIRECTLY BELOW the barcode lines
-- Do NOT read numbers from elsewhere on the package
-- Do NOT guess or make up digits if you can't see them clearly
-- If the image is blurry or numbers are unclear, return "unreadable"
+HOW TO READ THE BARCODE:
+- Look for vertical black and white lines (the barcode)
+- BELOW those lines, find the printed numbers (usually 12 digits)
+- Read ALL digits from left to right
+- Example format: "0 12345 67890 1" (might have spaces)
 
 AFTER READING THE BARCODE:
-- Use the EXACT barcode number to identify the product from your UPC/EAN database
-- Verify the product name matches the branding/text visible on the package
-- Include the brand name, product variant, and size in your response
+- Use web search to look up: "[barcode number] UPC" or "[barcode number] product"
+- Get the exact product name from search results
+- Verify it matches the branding/text on the package
 
 RESPONSE FORMAT (JSON only):
 {
     "barcode": "complete barcode number with all digits, no spaces",
-    "name": "Exact Brand Product Variant Size",
+    "name": "Exact Brand Product Variant Size from web search",
     "category": "produce|dairy|meat|canned|grains|breakfast|beverages|snacks|frozen|bakery|condiments|other",
     "confidence": "high|medium|low"
 }
 
-IF BARCODE NUMBERS ARE UNCLEAR/UNREADABLE:
+IF YOU CANNOT READ THE BARCODE OR FIND IT ONLINE:
 {
     "barcode": "unreadable",
     "name": "Unknown Product",
@@ -71,18 +69,14 @@ IF BARCODE NUMBERS ARE UNCLEAR/UNREADABLE:
     "confidence": "low"
 }
 
-ABSOLUTELY FORBIDDEN:
-- Do NOT return "Parle-G", "Coca-Cola", or any other product unless the barcode ACTUALLY matches
-- Do NOT make up barcode numbers
-- Do NOT guess products based only on packaging without reading the barcode
-- Do NOT return example products from this prompt"""
+CRITICAL: Use web search to verify the product name. Don't rely on memory - search for the barcode online!"""
                 },
                 {
                     "role": "user",
                     "content": [
                         {
                             "type": "text",
-                            "text": "Read the barcode numbers from this image, then identify the product using those numbers. Verify your identification using any visible packaging, labels, or text."
+                            "text": "Read the barcode number from this image, then search the web for that barcode to identify the exact product. Verify the results match the packaging."
                         },
                         {
                             "type": "image_url",
@@ -94,24 +88,41 @@ ABSOLUTELY FORBIDDEN:
                     ]
                 }
             ],
+            tools=[
+                {
+                    "type": "web_search_20250305",
+                    "name": "web_search"
+                }
+            ],
             response_format={ "type": "json_object" },
             temperature=0.2,  # Lower temperature for more consistent results
-            max_tokens=150
+            max_tokens=300  # Increased for web search results
         )
         
         import json
-        result = json.loads(response.choices[0].message.content)
+        
+        # Handle response - may include tool calls for web search
+        message_content = response.choices[0].message.content
+        
+        # If GPT-4 used web search, the final content will still be in message.content
+        # Parse the JSON response
+        result = json.loads(message_content)
         
         barcode_read = result.get('barcode', 'unknown')
         product_name = result.get('name', 'Unknown Product')
         confidence = result.get('confidence', 'unknown')
         
         print(f"========================================")
-        print(f"📸 Vision API Analysis:")
+        print(f"📸 Vision API Analysis (with Web Search):")
         print(f"   Barcode Read: {barcode_read}")
         print(f"   Product Name: {product_name}")
         print(f"   Confidence: {confidence}")
         print(f"   Category: {result.get('category', 'other')}")
+        
+        # Log if web search was used
+        if hasattr(response.choices[0].message, 'tool_calls') and response.choices[0].message.tool_calls:
+            print(f"   🌐 Web Search: Used ({len(response.choices[0].message.tool_calls)} searches)")
+        
         print(f"========================================")
         
         # Validation: Reject if barcode is unreadable or too short

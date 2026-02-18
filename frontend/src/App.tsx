@@ -1609,6 +1609,10 @@ const App: React.FC = () => {
         Quagga.start();
       });
       
+      // Track consecutive high-quality scans for the same barcode
+      let consecutiveScans = 0;
+      let currentBestQuality = 1.0;
+      
       // Handle barcode detection with validation and image capture
       Quagga.onDetected(async (result: any) => {
         const code = result.codeResult.code;
@@ -1624,38 +1628,70 @@ const App: React.FC = () => {
           .map((x: any) => x.error)
           .reduce((a: number, b: number) => a + b, 0) / result.codeResult.decodedCodes.length;
         
-        // Only accept high-quality scans with valid format
-        if (!isValidLength || !isNumeric || quality > 0.15) {
-          console.log('❌ Invalid or low-quality barcode scan:', { code, isValidLength, isNumeric, quality });
+        // STRICT quality threshold - only accept very clear reads
+        if (!isValidLength || !isNumeric || quality > 0.08) {
+          console.log('❌ Invalid or low-quality barcode scan:', { code, isValidLength, isNumeric, quality: quality.toFixed(3) });
           // Update instructions to help user
           instructions.textContent = '📱 Hold steady - Getting clearer read...';
           instructions.style.color = '#fbbf24'; // Yellow warning
+          
+          // Reset consecutive scan counter
+          consecutiveScans = 0;
+          currentBestQuality = 1.0;
           return;
         }
         
-        // Prevent duplicate scans
-        if (isProcessing || code === lastScannedCode) {
-          console.log('Duplicate scan prevented:', code);
+        // Track if we're getting the same barcode repeatedly (stability check)
+        if (code === lastScannedCode) {
+          consecutiveScans++;
+          currentBestQuality = Math.min(currentBestQuality, quality);
+          
+          // Update UI to show progress
+          instructions.textContent = `📊 Stabilizing... (${consecutiveScans}/3 reads)`;
+          instructions.style.color = '#3b82f6'; // Blue - in progress
+          
+          // Wait for 3 consecutive high-quality reads of the same barcode
+          if (consecutiveScans < 3) {
+            console.log(`📊 Consecutive scan ${consecutiveScans}/3, quality: ${quality.toFixed(3)}`);
+            return;
+          }
+        } else {
+          // Different barcode detected, reset counter
+          consecutiveScans = 1;
+          currentBestQuality = quality;
+          lastScannedCode = code;
+          instructions.textContent = '📊 Stabilizing... (1/3 reads)';
+          instructions.style.color = '#3b82f6';
+          return;
+        }
+        
+        // Prevent duplicate processing
+        if (isProcessing) {
+          console.log('Already processing, skipping...');
           return;
         }
         
         isProcessing = true;
-        lastScannedCode = code;
-        console.log('✅ Valid barcode detected:', code, 'quality:', quality.toFixed(3));
+        console.log('✅ STABLE barcode detected:', code, 'best quality:', currentBestQuality.toFixed(3), 'consecutive reads:', consecutiveScans);
         
         // Visual feedback - successful scan
-        instructions.textContent = '📸 Capturing image for AI analysis...';
+        instructions.textContent = '✅ Barcode locked! Capturing high-quality image...';
         instructions.style.color = '#10b981'; // Green success
         
-        // CAPTURE THE CAMERA IMAGE
+        // WAIT A MOMENT for camera to stabilize, then capture
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // CAPTURE HIGH-QUALITY IMAGE
         let capturedImage: string | null = null;
         try {
           // Get the canvas that Quagga is using
           const canvas = videoContainer.querySelector('canvas');
           if (canvas) {
-            // Convert canvas to base64 image
-            capturedImage = canvas.toDataURL('image/jpeg', 0.8);
-            console.log('📸 Image captured from camera');
+            // Create a higher quality version of the image
+            // Use JPEG quality 0.95 for better text/number readability
+            capturedImage = canvas.toDataURL('image/jpeg', 0.95);
+            console.log('📸 High-quality image captured from camera');
+            console.log(`📐 Image size: ${canvas.width}x${canvas.height}`);
           } else {
             console.warn('⚠️ Could not find canvas to capture image');
           }

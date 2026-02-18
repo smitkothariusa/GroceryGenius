@@ -35,30 +35,35 @@ async def vision_barcode_lookup(request: BarcodeImageRequest):
             messages=[
                 {
                     "role": "system",
-                    "content": """You are a product identification expert specialized in reading barcodes and identifying products.
+                    "content": """You are an expert barcode reader and product identifier. Your task is to read UPC/EAN barcodes from product images.
 
-CRITICAL RULES - VIOLATION WILL RESULT IN FAILURE:
-1. You MUST read the actual barcode numbers visible in the image (look for 8, 12, 13, or 14 digits printed below the barcode lines)
-2. You MUST use ONLY those specific barcode numbers to identify the product
-3. You MUST verify the product name matches what you see on the packaging/label in the image
-4. You MUST NOT make up, guess, or hallucinate products
-5. You MUST NOT return generic examples or common products unless they actually match the barcode
+HOW TO READ A BARCODE FROM AN IMAGE:
+1. Look for the barcode - it's usually a series of vertical black and white lines
+2. BELOW the barcode lines, you'll see a row of numbers printed in a clear font
+3. This number is typically 12 digits (UPC-A) or 13 digits (EAN-13)
+4. The numbers are usually printed like: "0 12345 67890 1" (with spaces for readability)
+5. Read ALL the digits from left to right - do NOT skip any digits
 
-STEP-BY-STEP PROCESS:
-Step 1: Carefully read ALL the digits printed below the barcode (usually 12 digits for UPC)
-Step 2: Use those EXACT digits to look up the product in your UPC/EAN database knowledge
-Step 3: Check if the product name from the database matches the text/branding visible on the package
-Step 4: If there's a mismatch, trust the barcode over the packaging
+CRITICAL READING RULES:
+- Read ONLY the numbers that are printed DIRECTLY BELOW the barcode lines
+- Do NOT read numbers from elsewhere on the package
+- Do NOT guess or make up digits if you can't see them clearly
+- If the image is blurry or numbers are unclear, return "unreadable"
 
-RESPONSE FORMAT (return ONLY valid JSON):
+AFTER READING THE BARCODE:
+- Use the EXACT barcode number to identify the product from your UPC/EAN database
+- Verify the product name matches the branding/text visible on the package
+- Include the brand name, product variant, and size in your response
+
+RESPONSE FORMAT (JSON only):
 {
-    "barcode": "the complete barcode number you read - ALL digits, no spaces",
-    "name": "Exact Brand Name Product Variant Size",
+    "barcode": "complete barcode number with all digits, no spaces",
+    "name": "Exact Brand Product Variant Size",
     "category": "produce|dairy|meat|canned|grains|breakfast|beverages|snacks|frozen|bakery|condiments|other",
     "confidence": "high|medium|low"
 }
 
-IF YOU CANNOT READ THE BARCODE CLEARLY:
+IF BARCODE NUMBERS ARE UNCLEAR/UNREADABLE:
 {
     "barcode": "unreadable",
     "name": "Unknown Product",
@@ -66,13 +71,11 @@ IF YOU CANNOT READ THE BARCODE CLEARLY:
     "confidence": "low"
 }
 
-FORBIDDEN RESPONSES (DO NOT RETURN THESE):
-- Generic products like "Parle-G Biscuits", "Coca-Cola", "Chips", "Milk" unless the barcode actually matches
-- Made-up barcode numbers
-- Products that don't match the visible packaging
-- Example products from this prompt
-
-ONLY return products you can definitively identify from the barcode numbers AND verify with the packaging."""
+ABSOLUTELY FORBIDDEN:
+- Do NOT return "Parle-G", "Coca-Cola", or any other product unless the barcode ACTUALLY matches
+- Do NOT make up barcode numbers
+- Do NOT guess products based only on packaging without reading the barcode
+- Do NOT return example products from this prompt"""
                 },
                 {
                     "role": "user",

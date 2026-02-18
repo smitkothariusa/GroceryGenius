@@ -1311,6 +1311,8 @@ const App: React.FC = () => {
           const placeholders = [
             'coca-cola classic',
             'kraft macaroni',
+            'kraft singles',
+            'american cheese slices',
             'horizon organic',
             "lay's classic",
             'parle g biscuit',
@@ -1325,7 +1327,11 @@ const App: React.FC = () => {
           const isPlaceholder = placeholders.some(p => productNameLower.includes(p));
           const hasValidBarcode = visionData.barcode && visionData.barcode !== 'unreadable' && visionData.barcode.length >= 8;
           
-          if (visionData.name && visionData.name.trim() && !isPlaceholder && hasValidBarcode) {
+          // Check if this is a suspiciously generic response
+          const isGeneric = productNameLower === 'pasta' || productNameLower === 'sauce' || 
+                           productNameLower === 'cheese' || productNameLower === 'tomatoes';
+          
+          if (visionData.name && visionData.name.trim() && !isPlaceholder && !isGeneric && hasValidBarcode) {
             console.log('✅ Found from Vision AI:', visionData.name);
             console.log('📊 Barcode read:', visionData.barcode);
             const confidenceEmoji = visionData.confidence === 'high' ? '💯' : visionData.confidence === 'medium' ? '✅' : '⚠️';

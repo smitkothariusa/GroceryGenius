@@ -5,7 +5,8 @@
   },
   "header": {
     "calorieTracker": "Calorie Tracker",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "language": "Language"
   },
   "tabs": {
     "pantry": "Pantry",
@@ -103,7 +104,18 @@
     "closeRecipe": "Close Recipe",
     "substitutions": "Substitutions",
     "findSubstitute": "Find Substitute",
-    "loading": "Generating delicious recipes..."
+    "loading": "Generating delicious recipes...",
+    "smartSubstitution": "Smart Substitution",
+    "findAlternativesFor": "Find alternatives for",
+    "filterByDietary": "Filter by dietary preference:",
+    "allOptions": "All Options",
+    "meatBased": "Meat-based",
+    "findingSubstitutions": "Finding substitutions...",
+    "noSubstitutionsFound": "No substitutions found for this ingredient with the selected filters.",
+    "adjustFilters": "Try adjusting your dietary filters or searching for a different ingredient.",
+    "useAmount": "Use {{quantity}} {{unit}}",
+    "tipLabel": "Tip:",
+    "clickToUse": "Click to use this substitution"
   },
   "mealPlan": {
     "title": "Weekly Meal Plan",
@@ -112,6 +124,24 @@
     "dinner": "Dinner",
     "snacks": "Snacks",
     "addMeal": "Add meal",
+    "prevWeek": "Previous Week",
+    "nextWeek": "Next Week",
+    "prev": "Prev",
+    "next": "Next",
+    "mealsPlanned": "Meals Planned",
+    "totalCalories": "Total Calories",
+    "avgCalDay": "Avg Cal/Day",
+    "totalProtein": "Total Protein",
+    "generateShoppingList": "Generate Shopping List for This Week",
+    "mobileTip": "Mobile Tip",
+    "mobileTipMessage": "Tap empty calendar slots to add recipes, then select from your saved recipes list",
+    "savedRecipes": "Saved Recipes",
+    "dragHint": "Drag recipes onto the calendar",
+    "noSavedRecipes": "No Saved Recipes",
+    "favoriteHint": "Favorite recipes from the Recipes tab to add them here!",
+    "mealType": "Meal Type",
+    "mealTypeShort": "Type",
+    "selectRecipe": "Select a Recipe",
     "days": {
       "monday": "Monday",
       "tuesday": "Tuesday",

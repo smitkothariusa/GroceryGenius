@@ -5,7 +5,8 @@
   },
   "header": {
     "calorieTracker": "Compteur de Calories",
-    "signOut": "Se Déconnecter"
+    "signOut": "Se Déconnecter",
+    "language": "Langue"
   },
   "tabs": {
     "pantry": "Garde-Manger",
@@ -103,7 +104,18 @@
     "closeRecipe": "Fermer la Recette",
     "substitutions": "Substitutions",
     "findSubstitute": "Trouver un Substitut",
-    "loading": "Génération de délicieuses recettes..."
+    "loading": "Génération de délicieuses recettes...",
+    "smartSubstitution": "Substitution Intelligente",
+    "findAlternativesFor": "Trouver des alternatives pour",
+    "filterByDietary": "Filtrer par préférence alimentaire :",
+    "allOptions": "Toutes les Options",
+    "meatBased": "À base de viande",
+    "findingSubstitutions": "Recherche de substitutions...",
+    "noSubstitutionsFound": "Aucune substitution trouvée pour cet ingrédient avec les filtres sélectionnés.",
+    "adjustFilters": "Essayez d'ajuster vos filtres alimentaires ou cherchez un autre ingrédient.",
+    "useAmount": "Utiliser {{quantity}} {{unit}}",
+    "tipLabel": "Conseil :",
+    "clickToUse": "Cliquez pour utiliser cette substitution"
   },
   "mealPlan": {
     "title": "Plan de Repas Hebdomadaire",
@@ -112,6 +124,24 @@
     "dinner": "Dîner",
     "snacks": "Collations",
     "addMeal": "Ajouter un repas",
+    "prevWeek": "Semaine Précédente",
+    "nextWeek": "Semaine Suivante",
+    "prev": "Préc",
+    "next": "Suiv",
+    "mealsPlanned": "Repas Planifiés",
+    "totalCalories": "Calories Totales",
+    "avgCalDay": "Moy Cal/Jour",
+    "totalProtein": "Protéines Totales",
+    "generateShoppingList": "Générer la Liste de Courses pour Cette Semaine",
+    "mobileTip": "Conseil Mobile",
+    "mobileTipMessage": "Appuyez sur les créneaux vides pour ajouter des recettes, puis sélectionnez dans votre liste sauvegardée",
+    "savedRecipes": "Recettes Sauvegardées",
+    "dragHint": "Glissez les recettes sur le calendrier",
+    "noSavedRecipes": "Aucune Recette Sauvegardée",
+    "favoriteHint": "Marquez des recettes comme favorites dans l'onglet Recettes pour les ajouter ici !",
+    "mealType": "Type de Repas",
+    "mealTypeShort": "Type",
+    "selectRecipe": "Sélectionner une Recette",
     "days": {
       "monday": "Lundi",
       "tuesday": "Mardi",

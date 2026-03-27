@@ -5,7 +5,8 @@
   },
   "header": {
     "calorieTracker": "Kalorienzähler",
-    "signOut": "Abmelden"
+    "signOut": "Abmelden",
+    "language": "Sprache"
   },
   "tabs": {
     "pantry": "Vorratskammer",
@@ -103,7 +104,18 @@
     "closeRecipe": "Rezept Schließen",
     "substitutions": "Ersatzstoffe",
     "findSubstitute": "Ersatz Finden",
-    "loading": "Generiere leckere Rezepte..."
+    "loading": "Generiere leckere Rezepte...",
+    "smartSubstitution": "Intelligente Substitution",
+    "findAlternativesFor": "Alternativen finden für",
+    "filterByDietary": "Nach Ernährungsweise filtern:",
+    "allOptions": "Alle Optionen",
+    "meatBased": "Fleischbasiert",
+    "findingSubstitutions": "Suche nach Substitutionen...",
+    "noSubstitutionsFound": "Keine Substitutionen für diese Zutat mit den ausgewählten Filtern gefunden.",
+    "adjustFilters": "Passe deine Ernährungsfilter an oder suche nach einer anderen Zutat.",
+    "useAmount": "{{quantity}} {{unit}} verwenden",
+    "tipLabel": "Tipp:",
+    "clickToUse": "Klicken, um diese Substitution zu verwenden"
   },
   "mealPlan": {
     "title": "Wöchentlicher Essensplan",
@@ -112,6 +124,24 @@
     "dinner": "Abendessen",
     "snacks": "Snacks",
     "addMeal": "Mahlzeit hinzufügen",
+    "prevWeek": "Vorherige Woche",
+    "nextWeek": "Nächste Woche",
+    "prev": "Vor",
+    "next": "Nach",
+    "mealsPlanned": "Geplante Mahlzeiten",
+    "totalCalories": "Kalorien Gesamt",
+    "avgCalDay": "Ø Kal/Tag",
+    "totalProtein": "Protein Gesamt",
+    "generateShoppingList": "Einkaufsliste für diese Woche erstellen",
+    "mobileTip": "Mobile Tipp",
+    "mobileTipMessage": "Tippe auf leere Kalenderfelder, um Rezepte hinzuzufügen, dann aus deiner Liste wählen",
+    "savedRecipes": "Gespeicherte Rezepte",
+    "dragHint": "Rezepte auf den Kalender ziehen",
+    "noSavedRecipes": "Keine gespeicherten Rezepte",
+    "favoriteHint": "Markiere Rezepte im Rezepte-Tab als Favoriten, um sie hier hinzuzufügen!",
+    "mealType": "Mahlzeitstyp",
+    "mealTypeShort": "Typ",
+    "selectRecipe": "Rezept auswählen",
     "days": {
       "monday": "Montag",
       "tuesday": "Dienstag",

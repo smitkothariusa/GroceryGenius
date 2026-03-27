@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Substitution {
   id: string;
@@ -24,6 +25,7 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
   onSubstitute,
   onClose
 }) => {
+  const { t } = useTranslation();
   const [substitutions, setSubstitutions] = useState<Substitution[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDietaryFilter, setSelectedDietaryFilter] = useState<string>('all');
@@ -191,12 +193,12 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
   };
 
   const dietaryFilters = [
-    { value: 'all', label: 'All Options', icon: '🍽️' },
-    { value: 'vegan', label: 'Vegan', icon: '🌱' },
-    { value: 'vegetarian', label: 'Vegetarian', icon: '🥗' },
-    { value: 'meat', label: 'Meat-based', icon: '🍖' },
-    { value: 'gluten-free', label: 'Gluten-Free', icon: '🌾' },
-    { value: 'keto', label: 'Keto', icon: '🥑' }
+    { value: 'all', label: t('recipes.allOptions'), icon: '🍽️' },
+    { value: 'vegan', label: t('recipes.dietary.vegan'), icon: '🌱' },
+    { value: 'vegetarian', label: t('recipes.dietary.vegetarian'), icon: '🥗' },
+    { value: 'meat', label: t('recipes.meatBased'), icon: '🍖' },
+    { value: 'gluten-free', label: t('recipes.dietary.glutenFree'), icon: '🌾' },
+    { value: 'keto', label: t('recipes.dietary.keto'), icon: '🥑' }
   ];
 
   return (
@@ -217,16 +219,16 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
         }}>×</button>
 
         <h2 style={{ marginBottom: '0.5rem', fontSize: '1.75rem', fontWeight: '700' }}>
-          🔄 Smart Substitution
+          🔄 {t('recipes.smartSubstitution')}
         </h2>
         <p style={{ color: '#6b7280', marginBottom: '2rem' }}>
-          Find alternatives for <strong>{quantity} {unit} {ingredientName}</strong>
+          {t('recipes.findAlternativesFor')} <strong>{quantity} {unit} {ingredientName}</strong>
         </p>
 
         {/* Dietary Filters */}
         <div style={{ marginBottom: '2rem' }}>
           <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: '600' }}>
-            Filter by dietary preference:
+            {t('recipes.filterByDietary')}
           </label>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
             {dietaryFilters.map(filter => (
@@ -259,7 +261,7 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
         {loading && (
           <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
             <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔍</div>
-            Finding substitutions...
+            {t('recipes.findingSubstitutions')}
           </div>
         )}
 
@@ -268,10 +270,10 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
           <div style={{ textAlign: 'center', padding: '3rem' }}>
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>😕</div>
             <p style={{ color: '#6b7280', fontSize: '1.1rem' }}>
-              No substitutions found for this ingredient with the selected filters.
+              {t('recipes.noSubstitutionsFound')}
             </p>
             <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginTop: '0.5rem' }}>
-              Try adjusting your dietary filters or searching for a different ingredient.
+              {t('recipes.adjustFilters')}
             </p>
           </div>
         )}
@@ -314,7 +316,7 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
                         {sub.substitute_name}
                       </h3>
                       <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                        Use {newQuantity} {unit}
+                        {t('recipes.useAmount', { quantity: newQuantity, unit })}
                         {quantityChanged && (
                           <span style={{ 
                             marginLeft: '0.5rem',
@@ -352,7 +354,7 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
                       color: '#92400e',
                       lineHeight: '1.5'
                     }}>
-                      <strong>💡 Tip:</strong> {sub.notes}
+                      <strong>💡 {t('recipes.tipLabel')}</strong> {sub.notes}
                     </div>
                   )}
 
@@ -366,7 +368,7 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
                     fontWeight: '600',
                     fontSize: '0.875rem'
                   }}>
-                    Click to use this substitution
+                    {t('recipes.clickToUse')}
                   </div>
                 </div>
               );

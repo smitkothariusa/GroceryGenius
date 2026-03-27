@@ -41,6 +41,7 @@ import { pantryService, shoppingService, recipesService, mealPlansService, donat
 import Auth from './components/Auth';
 import MealPlanCalendar from './components/MealPlanCalendar';
 import IngredientSubstitution from './components/IngredientSubstitution';
+import LanguageSwitcher from './components/LanguageSwitcher';
 
 
 interface PantryItem {
@@ -94,12 +95,7 @@ interface FavoriteRecipe extends Recipe {
 }
 
 const App: React.FC = () => {
-  const { t, i18n } = useTranslation();
-  
-  // Force English language
-  useEffect(() => {
-    i18n.changeLanguage('en');
-  }, []);
+  const { t } = useTranslation();
   
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -2443,6 +2439,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               </button>
             )}
             
+            <LanguageSwitcher />
             <button onClick={async () => {
               await authService.signOut();
               setUser(null);
@@ -2456,7 +2453,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               fontWeight: '600',
               fontSize: isMobile ? '0.75rem' : '1rem'
             }}>
-              {isMobile ? '🚪' : 'Sign Out'}
+              {isMobile ? '🚪' : t('header.signOut')}
             </button>
           </div>
         </div>

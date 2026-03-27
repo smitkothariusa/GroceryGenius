@@ -5,7 +5,8 @@
   },
   "header": {
     "calorieTracker": "Contador de Calorías",
-    "signOut": "Cerrar Sesión"
+    "signOut": "Cerrar Sesión",
+    "language": "Idioma"
   },
   "tabs": {
     "pantry": "Despensa",
@@ -103,7 +104,18 @@
     "closeRecipe": "Cerrar Receta",
     "substitutions": "Sustituciones",
     "findSubstitute": "Encontrar Sustituto",
-    "loading": "Generando deliciosas recetas..."
+    "loading": "Generando deliciosas recetas...",
+    "smartSubstitution": "Sustitución Inteligente",
+    "findAlternativesFor": "Encontrar alternativas para",
+    "filterByDietary": "Filtrar por preferencia dietética:",
+    "allOptions": "Todas las Opciones",
+    "meatBased": "Con Carne",
+    "findingSubstitutions": "Buscando sustituciones...",
+    "noSubstitutionsFound": "No se encontraron sustituciones para este ingrediente con los filtros seleccionados.",
+    "adjustFilters": "Intenta ajustar los filtros dietéticos o busca un ingrediente diferente.",
+    "useAmount": "Usar {{quantity}} {{unit}}",
+    "tipLabel": "Consejo:",
+    "clickToUse": "Haz clic para usar esta sustitución"
   },
   "mealPlan": {
     "title": "Plan Semanal de Comidas",
@@ -112,6 +124,24 @@
     "dinner": "Cena",
     "snacks": "Bocadillos",
     "addMeal": "Agregar comida",
+    "prevWeek": "Semana Anterior",
+    "nextWeek": "Semana Siguiente",
+    "prev": "Ant",
+    "next": "Sig",
+    "mealsPlanned": "Comidas Planificadas",
+    "totalCalories": "Calorías Totales",
+    "avgCalDay": "Prom Cal/Día",
+    "totalProtein": "Proteína Total",
+    "generateShoppingList": "Generar Lista de Compras para Esta Semana",
+    "mobileTip": "Consejo Móvil",
+    "mobileTipMessage": "Toca las casillas vacías del calendario para agregar recetas, luego selecciona de tu lista de recetas guardadas",
+    "savedRecipes": "Recetas Guardadas",
+    "dragHint": "Arrastra recetas al calendario",
+    "noSavedRecipes": "Sin Recetas Guardadas",
+    "favoriteHint": "¡Marca como favoritas las recetas de la pestaña Recetas para agregarlas aquí!",
+    "mealType": "Tipo de Comida",
+    "mealTypeShort": "Tipo",
+    "selectRecipe": "Seleccionar una Receta",
     "days": {
       "monday": "Lunes",
       "tuesday": "Martes",

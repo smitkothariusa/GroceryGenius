@@ -5,7 +5,8 @@
   },
   "header": {
     "calorieTracker": "卡路里追踪器",
-    "signOut": "登出"
+    "signOut": "登出",
+    "language": "语言"
   },
   "tabs": {
     "pantry": "储藏室",
@@ -103,7 +104,18 @@
     "closeRecipe": "关闭食谱",
     "substitutions": "替代品",
     "findSubstitute": "查找替代品",
-    "loading": "正在生成美味食谱..."
+    "loading": "正在生成美味食谱...",
+    "smartSubstitution": "智能替代",
+    "findAlternativesFor": "查找替代品：",
+    "filterByDietary": "按饮食偏好筛选：",
+    "allOptions": "所有选项",
+    "meatBased": "荤食",
+    "findingSubstitutions": "正在查找替代品...",
+    "noSubstitutionsFound": "未找到符合所选筛选条件的替代品。",
+    "adjustFilters": "请尝试调整饮食筛选器或搜索其他食材。",
+    "useAmount": "使用 {{quantity}} {{unit}}",
+    "tipLabel": "提示：",
+    "clickToUse": "点击使用此替代品"
   },
   "mealPlan": {
     "title": "每周膳食计划",
@@ -112,6 +124,24 @@
     "dinner": "晚餐",
     "snacks": "零食",
     "addMeal": "添加餐食",
+    "prevWeek": "上一周",
+    "nextWeek": "下一周",
+    "prev": "上周",
+    "next": "下周",
+    "mealsPlanned": "已计划餐次",
+    "totalCalories": "总卡路里",
+    "avgCalDay": "平均卡/天",
+    "totalProtein": "总蛋白质",
+    "generateShoppingList": "生成本周购物清单",
+    "mobileTip": "移动端提示",
+    "mobileTipMessage": "点击日历空白格添加食谱，然后从已保存的食谱列表中选择",
+    "savedRecipes": "已保存食谱",
+    "dragHint": "将食谱拖到日历上",
+    "noSavedRecipes": "暂无保存的食谱",
+    "favoriteHint": "在食谱标签中收藏食谱以在此处添加！",
+    "mealType": "餐次类型",
+    "mealTypeShort": "类型",
+    "selectRecipe": "选择食谱",
     "days": {
       "monday": "周一",
       "tuesday": "周二",

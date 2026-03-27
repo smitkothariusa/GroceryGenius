@@ -5,7 +5,8 @@
   },
   "header": {
     "calorieTracker": "カロリートラッカー",
-    "signOut": "サインアウト"
+    "signOut": "サインアウト",
+    "language": "言語"
   },
   "tabs": {
     "pantry": "パントリー",
@@ -103,7 +104,18 @@
     "closeRecipe": "レシピを閉じる",
     "substitutions": "代用品",
     "findSubstitute": "代用品を探す",
-    "loading": "美味しいレシピを生成中..."
+    "loading": "美味しいレシピを生成中...",
+    "smartSubstitution": "スマート代替",
+    "findAlternativesFor": "代替品を探す：",
+    "filterByDietary": "食事制限でフィルター：",
+    "allOptions": "すべてのオプション",
+    "meatBased": "肉ベース",
+    "findingSubstitutions": "代替品を検索中...",
+    "noSubstitutionsFound": "選択したフィルターでこの食材の代替品が見つかりませんでした。",
+    "adjustFilters": "食事フィルターを調整するか、別の食材を検索してみてください。",
+    "useAmount": "{{quantity}} {{unit}} を使用",
+    "tipLabel": "ヒント：",
+    "clickToUse": "クリックしてこの代替品を使用"
   },
   "mealPlan": {
     "title": "週間食事プラン",
@@ -112,6 +124,24 @@
     "dinner": "夕食",
     "snacks": "おやつ",
     "addMeal": "食事を追加",
+    "prevWeek": "前の週",
+    "nextWeek": "次の週",
+    "prev": "前週",
+    "next": "次週",
+    "mealsPlanned": "計画済みの食事",
+    "totalCalories": "総カロリー",
+    "avgCalDay": "平均カロリー/日",
+    "totalProtein": "総タンパク質",
+    "generateShoppingList": "今週の買い物リストを生成",
+    "mobileTip": "モバイルのヒント",
+    "mobileTipMessage": "カレンダーの空きスロットをタップしてレシピを追加し、保存済みレシピリストから選択してください",
+    "savedRecipes": "保存済みレシピ",
+    "dragHint": "レシピをカレンダーにドラッグ",
+    "noSavedRecipes": "保存済みレシピなし",
+    "favoriteHint": "レシピタブのレシピをお気に入りに追加してここに表示させましょう！",
+    "mealType": "食事タイプ",
+    "mealTypeShort": "タイプ",
+    "selectRecipe": "レシピを選択",
     "days": {
       "monday": "月曜日",
       "tuesday": "火曜日",

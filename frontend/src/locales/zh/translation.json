@@ -142,7 +142,8 @@
     "step": "第{{n}}步",
     "clearRecipes": "清除食谱",
     "quickPreview": "快速预览",
-    "clickForFullRecipe": "点击获取带有详细食材和用量的完整食谱"
+    "clickForFullRecipe": "点击获取带有详细食材和用量的完整食谱",
+    "whatIngredientsLabel": "您有哪些食材？"
   },
   "mealPlan": {
     "title": "每周膳食计划",

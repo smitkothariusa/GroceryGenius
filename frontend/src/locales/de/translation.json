@@ -142,7 +142,8 @@
     "step": "Schritt {{n}}",
     "clearRecipes": "Rezepte löschen",
     "quickPreview": "Schnellvorschau",
-    "clickForFullRecipe": "Klicken Sie für das vollständige Rezept mit detaillierten Zutaten und Maßen"
+    "clickForFullRecipe": "Klicken Sie für das vollständige Rezept mit detaillierten Zutaten und Maßen",
+    "whatIngredientsLabel": "Welche Zutaten haben Sie?"
   },
   "mealPlan": {
     "title": "Wöchentlicher Essensplan",

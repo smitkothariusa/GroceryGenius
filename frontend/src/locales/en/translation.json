@@ -142,7 +142,8 @@
     "step": "Step {{n}}",
     "clearRecipes": "Clear Recipes",
     "quickPreview": "Quick Preview",
-    "clickForFullRecipe": "Click for full recipe with detailed ingredients & measurements"
+    "clickForFullRecipe": "Click for full recipe with detailed ingredients & measurements",
+    "whatIngredientsLabel": "What ingredients do you have?"
   },
   "mealPlan": {
     "title": "Weekly Meal Plan",

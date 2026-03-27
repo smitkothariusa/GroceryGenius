@@ -95,7 +95,7 @@ interface FavoriteRecipe extends Recipe {
 }
 
 const App: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -743,8 +743,9 @@ const App: React.FC = () => {
     try {
       const params = new URLSearchParams();
       if (dietaryFilter) params.append('dietary', dietaryFilter);
+      params.append('language', i18n.language || 'en');
 
-      const allIngredients = recipeSearchQuery.trim() 
+      const allIngredients = recipeSearchQuery.trim()
         ? [recipeSearchQuery, ...ingredientTags]
         : ingredientTags;
 
@@ -2513,7 +2514,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
         {currentTab === 'recipes' && (
           <>
             <div style={{ background: cardBg, padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>🥘 What ingredients do you have?</label>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>🥘 {t('recipes.whatIngredientsLabel')}</label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
                 {ingredientTags.map(tag => (
                   <span key={tag} style={{

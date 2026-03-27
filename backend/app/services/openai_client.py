@@ -30,7 +30,7 @@ async def call_chat_completion(system_prompt: str, user_prompt: str, max_tokens:
         "n": 1
     }
 
-    async with httpx.AsyncClient(timeout=30.0) as client:
+    async with httpx.AsyncClient(timeout=90.0) as client:
         r = await client.post(OPENAI_CHAT_URL, headers=headers, json=payload)
         r.raise_for_status()
         resp = r.json()

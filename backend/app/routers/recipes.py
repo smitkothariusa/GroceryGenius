@@ -10,8 +10,13 @@ router = APIRouter()
 class Ingredients(BaseModel):
     ingredients: List[str]
 
+LANGUAGE_NAMES = {
+    "en": "English", "es": "Spanish", "fr": "French",
+    "de": "German", "zh": "Chinese", "ja": "Japanese",
+}
+
 @router.post("/", response_model=List[dict])
-async def generate_recipes(payload: Ingredients, dietary: Optional[str] = Query(None)):
+async def generate_recipes(payload: Ingredients, dietary: Optional[str] = Query(None), language: Optional[str] = Query(None)):
     ingredients = [i.strip() for i in payload.ingredients if i.strip()]
     if not ingredients:
         return [{"name": "No ingredients provided", "instructions": "Please provide at least one ingredient."}]
@@ -24,8 +29,13 @@ async def generate_recipes(payload: Ingredients, dietary: Optional[str] = Query(
         specific_recipe = ingredients[0]
         ingredient_list = ingredients[1:] if len(ingredients) > 1 else []
 
+    # Resolve language name for the prompt
+    lang_code = (language or "en").split("-")[0].lower()
+    lang_name = LANGUAGE_NAMES.get(lang_code, "English")
+
     # Enhanced system message for health and budget focus
-    system_prompt = """You are a professional nutritionist and chef assistant. You create detailed recipes with exact measurements and nutritional information. 
+    system_prompt = f"""You are a professional nutritionist and chef assistant. You create detailed recipes with exact measurements and nutritional information.
+IMPORTANT: You MUST write ALL recipe text (name, ingredients, instructions, health_benefits, budget_tip, difficulty) in {lang_name}.
 
 Key requirements:
 1. Provide ONE normal recipe and TWO healthy, budget-friendly recipes
@@ -44,49 +54,45 @@ Output structured JSON format for easy parsing."""
             recipe_request += f"\nIncorporate these ingredients when possible: {', '.join(ingredient_list)}"
     else:
         recipe_request = f"Using these ingredients: {', '.join(ingredient_list)}"
-    
+
     dietary_text = f"\nDietary preference: {dietary}" if dietary else ""
-    
+
     user_prompt = f"""{recipe_request}{dietary_text}
 
-Create EXACTLY 3 different recipes (DO NOT number the recipe names):
-- First recipe: A normal, delicious recipe
-- Second recipe: A healthy, budget-friendly alternative  
-- Third recipe: Another healthy, budget-friendly variation
+Create EXACTLY 3 different recipes (DO NOT number the recipe names).
+Write ALL text in {lang_name}.
 
 For EACH recipe provide:
 - Recipe name (WITHOUT numbering like "1.", "Recipe 1:", etc.)
 - Complete ingredient list with exact measurements (format: "quantity unit ingredient")
 - Step-by-step cooking instructions (numbered steps)
 - Prep time and cook time
-- Difficulty level (Easy/Medium/Hard)
+- Difficulty level (in {lang_name})
 - Serving size (default 2 servings)
-- Nutrition per serving (calories, protein, carbs, fat, fiber, sodium)
-- Health benefits
-- Budget-saving tip
+- Nutrition per serving (calories, protein, carbs, fat, fiber, sodium — numbers only)
+- Health benefits (in {lang_name})
+- Budget-saving tip (in {lang_name})
 
-CRITICAL: Return as JSON array with this exact structure. DO NOT include numbers in recipe names:
+CRITICAL: Return ONLY a valid JSON array with this exact structure:
 [
   {{
-    "name": "Creamy Garlic Pasta",
-    "ingredients": "2 cups rice\\n1 tbsp olive oil\\n3 cloves garlic\\n...",
-    "instructions": "1. First step...\\n2. Second step...\\n3. Third step...",
+    "name": "Recipe Name in {lang_name}",
+    "ingredients": "2 cups rice\\n1 tbsp olive oil\\n...",
+    "instructions": "1. First step...\\n2. Second step...",
     "prep_time": "15 min",
-    "cook_time": "20 min", 
+    "cook_time": "20 min",
     "difficulty": "Easy",
     "servings": 2,
     "nutrition": {{"calories": 350, "protein": 20, "carbs": 45, "fat": 10, "fiber": 6, "sodium": 400}},
-    "health_benefits": "Rich in...",
-    "budget_tip": "Buy in bulk..."
+    "health_benefits": "Benefits in {lang_name}...",
+    "budget_tip": "Tip in {lang_name}..."
   }},
   {{second recipe}},
   {{third recipe}}
-]
-
-Make sure ALL ingredients mentioned in instructions are listed in the ingredients field with measurements."""
+]"""
 
     try:
-        raw = await call_chat_completion(system_prompt, user_prompt, max_tokens=1500, temperature=0.7)
+        raw = await call_chat_completion(system_prompt, user_prompt, max_tokens=4000, temperature=0.7)
         recipes = parse_recipes_text(raw, expected=3)
         
         # Ensure we have exactly 3 recipes

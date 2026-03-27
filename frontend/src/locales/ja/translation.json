@@ -142,7 +142,8 @@
     "step": "ステップ{{n}}",
     "clearRecipes": "レシピをクリア",
     "quickPreview": "クイックプレビュー",
-    "clickForFullRecipe": "詳細な材料と分量を含む完全なレシピはクリックしてください"
+    "clickForFullRecipe": "詳細な材料と分量を含む完全なレシピはクリックしてください",
+    "whatIngredientsLabel": "どんな食材をお持ちですか？"
   },
   "mealPlan": {
     "title": "週間食事プラン",

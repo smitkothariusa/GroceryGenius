@@ -147,7 +147,9 @@
     "whatIngredientsLabel": "您有哪些食材？",
     "generatingRecipe": "正在生成第{{n}}个食谱...",
     "emptyStatePrompt": "添加食材或搜索特定食谱以开始！",
-    "emptyStateTip": "试试：\u201c苹果派\u201d、\u201c鸡肉意面\u201d，或添加食材如\u201c西红柿\u201d、\u201c鸡肉\u201d"
+    "emptyStateTip": "试试：\u201c苹果派\u201d、\u201c鸡肉意面\u201d，或添加食材如\u201c西红柿\u201d、\u201c鸡肉\u201d",
+    "keyIngredients": "主要食材",
+    "moreIngredients": "更多..."
   },
   "mealPlan": {
     "title": "每周膳食计划",
@@ -280,7 +282,29 @@
     "chooseFoodBank": "选择一个食物银行...",
     "recordDonationBtn": "记录捐赠",
     "taxTip": "税务提示：",
-    "taxTipMessage": "向注册非营利机构捐赠食物可能享有税收减免。请保留此记录用于报税！"
+    "taxTipMessage": "向注册非营利机构捐赠食物可能享有税收减免。请保留此记录用于报税！",
+    "foodItems": {
+      "canned_goods": "罐头食品",
+      "dry_goods": "干货",
+      "pasta": "意大利面",
+      "rice": "大米",
+      "cereal": "谷物",
+      "peanut_butter": "花生酱",
+      "canned_proteins": "罐头蛋白质",
+      "non_perishables": "非易腐食品",
+      "canned_vegetables": "蔬菜罐头",
+      "canned_fruit": "水果罐头",
+      "boxed_meals": "盒装餐食",
+      "beans": "豆类",
+      "shelf_stable_milk": "常温牛奶",
+      "all_non_perishables": "所有非易腐食品",
+      "baby_food": "婴儿食品",
+      "diapers": "尿布",
+      "personal_care_items": "个人护理用品",
+      "cooking_oil": "食用油",
+      "spices": "香料",
+      "hygiene_products": "卫生用品"
+    }
   },
   "favorites": {
     "title": "收藏的食谱",

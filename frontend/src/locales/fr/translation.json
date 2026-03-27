@@ -147,7 +147,9 @@
     "whatIngredientsLabel": "Quels ingrédients avez-vous ?",
     "generatingRecipe": "Génération de la recette {{n}}...",
     "emptyStatePrompt": "Ajoutez des ingrédients ou recherchez une recette spécifique pour commencer !",
-    "emptyStateTip": "Essayez : \"tarte aux pommes\", \"pâtes au poulet\", ou ajoutez des ingrédients comme \"tomates\", \"poulet\""
+    "emptyStateTip": "Essayez : \"tarte aux pommes\", \"pâtes au poulet\", ou ajoutez des ingrédients comme \"tomates\", \"poulet\"",
+    "keyIngredients": "Ingrédients Clés",
+    "moreIngredients": "de plus..."
   },
   "mealPlan": {
     "title": "Plan de Repas Hebdomadaire",
@@ -280,7 +282,29 @@
     "chooseFoodBank": "Choisissez une banque alimentaire...",
     "recordDonationBtn": "Enregistrer le Don",
     "taxTip": "Conseil Fiscal:",
-    "taxTipMessage": "Les dons alimentaires aux organisations à but non lucratif peuvent être déductibles des impôts."
+    "taxTipMessage": "Les dons alimentaires aux organisations à but non lucratif peuvent être déductibles des impôts.",
+    "foodItems": {
+      "canned_goods": "conserves",
+      "dry_goods": "produits secs",
+      "pasta": "pâtes",
+      "rice": "riz",
+      "cereal": "céréales",
+      "peanut_butter": "beurre de cacahuète",
+      "canned_proteins": "protéines en conserve",
+      "non_perishables": "non-périssables",
+      "canned_vegetables": "légumes en conserve",
+      "canned_fruit": "fruits en conserve",
+      "boxed_meals": "repas en boîte",
+      "beans": "haricots",
+      "shelf_stable_milk": "lait longue conservation",
+      "all_non_perishables": "tous les non-périssables",
+      "baby_food": "nourriture pour bébé",
+      "diapers": "couches",
+      "personal_care_items": "articles de soins personnels",
+      "cooking_oil": "huile de cuisson",
+      "spices": "épices",
+      "hygiene_products": "produits d'hygiène"
+    }
   },
   "favorites": {
     "title": "Recettes Favorites",

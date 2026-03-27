@@ -147,7 +147,9 @@
     "whatIngredientsLabel": "¿Qué ingredientes tienes?",
     "generatingRecipe": "Generando receta {{n}}...",
     "emptyStatePrompt": "¡Agrega ingredientes o busca una receta específica para comenzar!",
-    "emptyStateTip": "Prueba: \"tarta de manzana\", \"pasta con pollo\", o agrega ingredientes como \"tomates\", \"pollo\""
+    "emptyStateTip": "Prueba: \"tarta de manzana\", \"pasta con pollo\", o agrega ingredientes como \"tomates\", \"pollo\"",
+    "keyIngredients": "Ingredientes Clave",
+    "moreIngredients": "más..."
   },
   "mealPlan": {
     "title": "Plan Semanal de Comidas",
@@ -280,7 +282,29 @@
     "chooseFoodBank": "Elige un banco de alimentos...",
     "recordDonationBtn": "Registrar Donación",
     "taxTip": "Consejo Fiscal:",
-    "taxTipMessage": "Las donaciones de alimentos a organizaciones sin fines de lucro pueden ser deducibles de impuestos."
+    "taxTipMessage": "Las donaciones de alimentos a organizaciones sin fines de lucro pueden ser deducibles de impuestos.",
+    "foodItems": {
+      "canned_goods": "conservas",
+      "dry_goods": "productos secos",
+      "pasta": "pasta",
+      "rice": "arroz",
+      "cereal": "cereal",
+      "peanut_butter": "mantequilla de maní",
+      "canned_proteins": "proteínas enlatadas",
+      "non_perishables": "no perecederos",
+      "canned_vegetables": "verduras enlatadas",
+      "canned_fruit": "fruta enlatada",
+      "boxed_meals": "comidas en caja",
+      "beans": "frijoles",
+      "shelf_stable_milk": "leche larga vida",
+      "all_non_perishables": "todos los no perecederos",
+      "baby_food": "comida para bebé",
+      "diapers": "pañales",
+      "personal_care_items": "artículos de cuidado personal",
+      "cooking_oil": "aceite de cocina",
+      "spices": "especias",
+      "hygiene_products": "productos de higiene"
+    }
   },
   "favorites": {
     "title": "Recetas Favoritas",

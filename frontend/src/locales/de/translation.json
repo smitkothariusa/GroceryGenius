@@ -147,7 +147,9 @@
     "whatIngredientsLabel": "Welche Zutaten haben Sie?",
     "generatingRecipe": "Rezept {{n}} wird generiert...",
     "emptyStatePrompt": "Füge Zutaten hinzu oder suche nach einem bestimmten Rezept um loszulegen!",
-    "emptyStateTip": "Versuche: \"Apfelkuchen\", \"Hühnernudeln\", oder füge Zutaten wie \"Tomaten\", \"Hühnchen\" hinzu"
+    "emptyStateTip": "Versuche: \"Apfelkuchen\", \"Hühnernudeln\", oder füge Zutaten wie \"Tomaten\", \"Hühnchen\" hinzu",
+    "keyIngredients": "Hauptzutaten",
+    "moreIngredients": "weitere..."
   },
   "mealPlan": {
     "title": "Wöchentlicher Essensplan",
@@ -280,7 +282,29 @@
     "chooseFoodBank": "Wählen Sie eine Tafel...",
     "recordDonationBtn": "Spende erfassen",
     "taxTip": "Steuertipp:",
-    "taxTipMessage": "Lebensmittelspenden an gemeinnützige Organisationen können steuerlich absetzbar sein."
+    "taxTipMessage": "Lebensmittelspenden an gemeinnützige Organisationen können steuerlich absetzbar sein.",
+    "foodItems": {
+      "canned_goods": "Konserven",
+      "dry_goods": "Trockenware",
+      "pasta": "Nudeln",
+      "rice": "Reis",
+      "cereal": "Müsli",
+      "peanut_butter": "Erdnussbutter",
+      "canned_proteins": "Protein-Konserven",
+      "non_perishables": "Haltbare Lebensmittel",
+      "canned_vegetables": "Gemüsekonserven",
+      "canned_fruit": "Obstkonserven",
+      "boxed_meals": "Fertiggerichte",
+      "beans": "Bohnen",
+      "shelf_stable_milk": "H-Milch",
+      "all_non_perishables": "Alle Haltbaren",
+      "baby_food": "Babynahrung",
+      "diapers": "Windeln",
+      "personal_care_items": "Körperpflegeartikel",
+      "cooking_oil": "Speiseöl",
+      "spices": "Gewürze",
+      "hygiene_products": "Hygieneartikel"
+    }
   },
   "favorites": {
     "title": "Lieblingsrezepte",

@@ -140,6 +140,7 @@ const App: React.FC = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([]);
   const [favorites, setFavorites] = useState<FavoriteRecipe[]>([]);
+  const [translatedFavoriteNames, setTranslatedFavoriteNames] = useState<Record<string, string>>({});
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [sortShoppingBy, setSortShoppingBy] = useState<'category' | 'alphabetical'>('category');
   const [loadingImpact, setLoadingImpact] = useState(false);
@@ -574,10 +575,29 @@ const App: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Clear cached recipes when language changes so they are regenerated in the new language
+  // Clear cached recipes and translate saved recipe names when language changes
   useEffect(() => {
     setRecipes([]);
-  }, [i18n.language]);
+    if (favorites.length === 0) return;
+    const lang = i18n.language.split('-')[0];
+    if (lang === 'en') {
+      setTranslatedFavoriteNames({});
+      return;
+    }
+    const names = favorites.map(f => f.name);
+    fetch(`${API_BASE}/recipes/translate-names`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ names, language: lang }),
+    })
+      .then(r => r.json())
+      .then((translated: string[]) => {
+        const map: Record<string, string> = {};
+        favorites.forEach((f, i) => { map[f.id] = translated[i] ?? f.name; });
+        setTranslatedFavoriteNames(map);
+      })
+      .catch(() => setTranslatedFavoriteNames({}));
+  }, [i18n.language, favorites]);
 
   const handleTabChange = (tab: typeof currentTab) => {
     setIsTabChanging(true);
@@ -2722,11 +2742,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                               minWidth: isMobile ? '45px' : '55px', 
                               textAlign: 'center'
                             }}>{grade}</div>
-                            <span style={{ 
-                              fontSize: isMobile ? '0.65rem' : '0.7rem', 
-                              color: mutedText, 
-                              fontWeight: '600' 
-                            }}>Health</span>
+                            <span style={{
+                              fontSize: isMobile ? '0.65rem' : '0.7rem',
+                              color: mutedText,
+                              fontWeight: '600'
+                            }}>{t('recipes.healthGrade')}</span>
                           </div>
                         </div>
 
@@ -2755,19 +2775,19 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                               color: '#166534', 
                               marginBottom: '0.5rem', 
                               fontSize: isMobile ? '0.75rem' : '0.875rem' 
-                            }}>📝 Key Ingredients:</div>
-                            <div style={{ 
-                              display: 'grid', 
-                              gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', 
-                              gap: isMobile ? '0.25rem' : '0.5rem', 
-                              fontSize: isMobile ? '0.7rem' : '0.8rem', 
-                              color: '#047857' 
+                            }}>📝 {t('recipes.keyIngredients')}:</div>
+                            <div style={{
+                              display: 'grid',
+                              gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+                              gap: isMobile ? '0.25rem' : '0.5rem',
+                              fontSize: isMobile ? '0.7rem' : '0.8rem',
+                              color: '#047857'
                             }}>
                               {ingredients.slice(0, isMobile ? 4 : 8).map((ing, i) => (
                                 <div key={i}>• {Math.round(ing.quantity * 10) / 10} {ing.unit} {ing.name}</div>
                               ))}
                               {ingredients.length > (isMobile ? 4 : 8) && (
-                                <div style={{ fontStyle: 'italic' }}>+ {ingredients.length - (isMobile ? 4 : 8)} more...</div>
+                                <div style={{ fontStyle: 'italic' }}>+ {ingredients.length - (isMobile ? 4 : 8)} {t('recipes.moreIngredients')}</div>
                               )}
                             </div>
                           </div>
@@ -2795,7 +2815,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         <div style={{
                           color: '#10b981', fontWeight: '600', fontSize: '0.9rem', padding: '0.75rem',
                           background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0', textAlign: 'center'
-                        }}>Click for full recipe with all details</div>
+                        }}>{t('recipes.clickForFullRecipe')}</div>
                       </div>
                     </div>
 
@@ -2901,8 +2921,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           </>
         )}
         {currentTab === 'mealplan' && (
-        <MealPlanCalendar 
+        <MealPlanCalendar
           savedRecipes={favorites}
+          translatedNames={translatedFavoriteNames}
           onAddToShoppingList={async (items) => {
             try {
               // Save to Supabase
@@ -3893,7 +3914,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <div style={{ flex: 1 }}>
-                      <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem' }}>{recipe.name}</h3>
+                      <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem' }}>{translatedFavoriteNames[recipe.id] || recipe.name}</h3>
                       <div style={{ fontSize: '0.875rem', color: mutedText }}>
                         {recipe.prep_time && `⏱ ${recipe.prep_time}`}
                         {recipe.nutrition && ` • ${recipe.nutrition.calories} cal`}
@@ -4446,18 +4467,22 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         {t('donate.acceptedItems')}
                       </div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                        {bank.acceptedItems.map((item, idx) => (
-                          <span key={idx} style={{
-                            padding: '0.25rem 0.75rem',
-                            background: '#dcfce7',
-                            color: '#166534',
-                            borderRadius: '12px',
-                            fontSize: '0.75rem',
-                            fontWeight: '600'
-                          }}>
-                            {item}
-                          </span>
-                        ))}
+                        {bank.acceptedItems.map((item, idx) => {
+                          const key = item.replace(/[^a-z0-9]/gi, '_').replace(/_+/g, '_').toLowerCase();
+                          const translated = t(`donate.foodItems.${key}`, { defaultValue: item });
+                          return (
+                            <span key={idx} style={{
+                              padding: '0.25rem 0.75rem',
+                              background: '#dcfce7',
+                              color: '#166534',
+                              borderRadius: '12px',
+                              fontSize: '0.75rem',
+                              fontWeight: '600'
+                            }}>
+                              {translated}
+                            </span>
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -5003,14 +5028,16 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   📊 {t('recipes.nutritionFacts')}
                 </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
-                  {Object.entries(selectedRecipe.nutrition).map(([key, val]) => (
-                    <div key={key} style={{ textAlign: 'center', padding: '1rem', background: '#f0fdf4', borderRadius: '12px' }}>
-                      <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#10b981' }}>
-                        {val}{key !== 'calories' && key !== 'sodium' ? 'g' : key === 'sodium' ? 'mg' : ''}
+                  {(Object.entries(selectedRecipe.nutrition) as [string, number][]).map(([key, val]) => {
+                    const unit = key === 'sodium' ? 'mg' : key === 'calories' ? '' : 'g';
+                    const labelKey = `recipes.${key}` as const;
+                    return (
+                      <div key={key} style={{ textAlign: 'center', padding: '1rem', background: '#f0fdf4', borderRadius: '12px' }}>
+                        <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#10b981' }}>{val}{unit}</div>
+                        <div style={{ fontSize: '0.875rem', color: mutedText }}>{t(labelKey)}</div>
                       </div>
-                      <div style={{ fontSize: '0.875rem', color: mutedText, textTransform: 'capitalize' }}>{key}</div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}

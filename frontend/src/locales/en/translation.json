@@ -147,7 +147,9 @@
     "whatIngredientsLabel": "What ingredients do you have?",
     "generatingRecipe": "Generating recipe {{n}}...",
     "emptyStatePrompt": "Add ingredients or search for a specific recipe to get started!",
-    "emptyStateTip": "Try: \"apple pie\", \"chicken pasta\", or add ingredients like \"tomatoes\", \"chicken\""
+    "emptyStateTip": "Try: \"apple pie\", \"chicken pasta\", or add ingredients like \"tomatoes\", \"chicken\"",
+    "keyIngredients": "Key Ingredients",
+    "moreIngredients": "more..."
   },
   "mealPlan": {
     "title": "Weekly Meal Plan",
@@ -280,7 +282,29 @@
     "chooseFoodBank": "Choose a food bank...",
     "recordDonationBtn": "Record Donation",
     "taxTip": "Tax Tip:",
-    "taxTipMessage": "Food donations to registered nonprofits may be tax-deductible. Keep this record for your taxes!"
+    "taxTipMessage": "Food donations to registered nonprofits may be tax-deductible. Keep this record for your taxes!",
+    "foodItems": {
+      "canned_goods": "canned goods",
+      "dry_goods": "dry goods",
+      "pasta": "pasta",
+      "rice": "rice",
+      "cereal": "cereal",
+      "peanut_butter": "peanut butter",
+      "canned_proteins": "canned proteins",
+      "non_perishables": "non-perishables",
+      "canned_vegetables": "canned vegetables",
+      "canned_fruit": "canned fruit",
+      "boxed_meals": "boxed meals",
+      "beans": "beans",
+      "shelf_stable_milk": "shelf-stable milk",
+      "all_non_perishables": "all non-perishables",
+      "baby_food": "baby food",
+      "diapers": "diapers",
+      "personal_care_items": "personal care items",
+      "cooking_oil": "cooking oil",
+      "spices": "spices",
+      "hygiene_products": "hygiene products"
+    }
   },
   "favorites": {
     "title": "Favorite Recipes",

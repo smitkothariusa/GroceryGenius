@@ -147,7 +147,9 @@
     "whatIngredientsLabel": "どんな食材をお持ちですか？",
     "generatingRecipe": "レシピ{{n}}を生成中...",
     "emptyStatePrompt": "食材を追加するか特定のレシピを検索して始めましょう！",
-    "emptyStateTip": "試してみてください：「アップルパイ」、「チキンパスタ」、または「トマト」「鶏肉」などの食材を追加"
+    "emptyStateTip": "試してみてください：「アップルパイ」、「チキンパスタ」、または「トマト」「鶏肉」などの食材を追加",
+    "keyIngredients": "主な食材",
+    "moreIngredients": "他..."
   },
   "mealPlan": {
     "title": "週間食事プラン",
@@ -280,7 +282,29 @@
     "chooseFoodBank": "フードバンクを選んでください...",
     "recordDonationBtn": "寄付を記録",
     "taxTip": "税務のヒント：",
-    "taxTipMessage": "登録された非営利団体への食品寄付は税額控除の対象となる場合があります。確定申告のためにこの記録を保管してください！"
+    "taxTipMessage": "登録された非営利団体への食品寄付は税額控除の対象となる場合があります。確定申告のためにこの記録を保管してください！",
+    "foodItems": {
+      "canned_goods": "缶詰食品",
+      "dry_goods": "乾物",
+      "pasta": "パスタ",
+      "rice": "米",
+      "cereal": "シリアル",
+      "peanut_butter": "ピーナッツバター",
+      "canned_proteins": "缶詰タンパク質",
+      "non_perishables": "保存食",
+      "canned_vegetables": "野菜の缶詰",
+      "canned_fruit": "フルーツ缶詰",
+      "boxed_meals": "ボックスミール",
+      "beans": "豆類",
+      "shelf_stable_milk": "常温保存ミルク",
+      "all_non_perishables": "すべての保存食",
+      "baby_food": "離乳食",
+      "diapers": "おむつ",
+      "personal_care_items": "パーソナルケア用品",
+      "cooking_oil": "食用油",
+      "spices": "スパイス",
+      "hygiene_products": "衛生用品"
+    }
   },
   "favorites": {
     "title": "お気に入りレシピ",

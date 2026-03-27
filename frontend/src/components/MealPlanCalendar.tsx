@@ -34,10 +34,11 @@ interface ParsedIngredient {
 
 interface MealPlanCalendarProps {
   savedRecipes: Recipe[];
+  translatedNames?: Record<string, string>;
   onAddToShoppingList?: (items: ParsedIngredient[]) => void;
 }
 
-const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, onAddToShoppingList }) => {
+const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, translatedNames = {}, onAddToShoppingList }) => {
   const { t, i18n } = useTranslation();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(getWeekStart(new Date()));
@@ -543,7 +544,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, onAdd
                   onMouseDown={(e) => !isMobile && (e.currentTarget.style.cursor = 'grabbing')}
                   onMouseUp={(e) => !isMobile && (e.currentTarget.style.cursor = 'grab')}
                 >
-                  <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>{recipe.name}</div>
+                  <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>{translatedNames[recipe.id] || recipe.name}</div>
                   <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
                     {recipe.prep_time} • {recipe.nutrition?.calories || 0} cal
                   </div>
@@ -723,7 +724,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, onAdd
                     e.currentTarget.style.background = 'white';
                   }}
                 >
-                  <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>{recipe.name}</div>
+                  <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>{translatedNames[recipe.id] || recipe.name}</div>
                   <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
                     {recipe.prep_time} • {recipe.nutrition?.calories || 0} cal • {recipe.servings} {t('recipes.servings')}
                   </div>

@@ -116,3 +116,38 @@ CRITICAL: Return ONLY a valid JSON array with this exact structure:
     except Exception as e:
         print("OpenAI call or parsing error:", e)
         raise HTTPException(status_code=500, detail=f"Failed to generate recipes: {str(e)}")
+
+
+class TranslateNamesRequest(BaseModel):
+    names: List[str]
+    language: str
+
+@router.post("/translate-names", response_model=List[str])
+async def translate_recipe_names(payload: TranslateNamesRequest):
+    """Translate a list of recipe names to the target language using OpenAI."""
+    if not payload.names:
+        return []
+    lang_code = payload.language.split("-")[0].lower()
+    lang_name = LANGUAGE_NAMES.get(lang_code, "English")
+    if lang_name == "English":
+        return payload.names  # No translation needed
+
+    names_list = "\n".join(f"{i+1}. {name}" for i, name in enumerate(payload.names))
+    system = f"You are a translator. Translate recipe names to {lang_name}. Keep them as proper recipe names (not literal translations if that sounds unnatural). Return ONLY a numbered list in the same order, one name per line, with no extra text."
+    user = f"Translate these recipe names to {lang_name}:\n{names_list}"
+    try:
+        raw = await call_chat_completion(system, user, max_tokens=500, temperature=0.3)
+        lines = [l.strip() for l in raw.strip().splitlines() if l.strip()]
+        # Strip numbering from lines like "1. Nombre"
+        translated = []
+        for line in lines:
+            clean = line.lstrip("0123456789. ").strip()
+            if clean:
+                translated.append(clean)
+        # Pad with originals if count mismatch
+        while len(translated) < len(payload.names):
+            translated.append(payload.names[len(translated)])
+        return translated[:len(payload.names)]
+    except Exception as e:
+        print("Translation error:", e)
+        return payload.names

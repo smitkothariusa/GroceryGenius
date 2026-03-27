@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Recipe } from '../services/recipeService';
 
 interface Props {
@@ -7,6 +8,7 @@ interface Props {
 }
 
 const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
+  const { t } = useTranslation();
   const cleanName = (() => {
     let name = recipe.name;
     
@@ -178,7 +180,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
             color: '#6b7280',
             fontWeight: '500'
           }}>
-            Health Grade
+            {t('recipes.healthGrade')}
           </span>
         </div>
       </div>
@@ -188,7 +190,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             <span style={{ fontSize: '1rem' }}>⏱</span>
             <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>
-              <strong>Prep:</strong> {recipe.prep_time}
+              <strong>{t('recipes.prepTime')}:</strong> {recipe.prep_time}
             </span>
           </div>
         )}
@@ -197,7 +199,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             <span style={{ fontSize: '1rem' }}>🔥</span>
             <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>
-              <strong>Cook:</strong> {recipe.cook_time}
+              <strong>{t('recipes.cookTime')}:</strong> {recipe.cook_time}
             </span>
           </div>
         )}
@@ -223,7 +225,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             <span style={{ fontSize: '1rem' }}>👥</span>
             <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>
-              <strong>Servings:</strong> {recipe.servings}
+              <strong>{t('recipes.servings')}:</strong> {recipe.servings}
             </span>
           </div>
         )}
@@ -238,32 +240,32 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
           border: '1px solid #e2e8f0'
         }}>
           <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.9rem', fontWeight: '600', color: '#374151' }}>
-            Nutrition per serving
+            {t('recipes.nutritionFacts')}
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', fontSize: '0.85rem' }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontWeight: '600', color: '#059669' }}>{recipe.nutrition.calories}</div>
-              <div style={{ color: '#6b7280' }}>Calories</div>
+              <div style={{ color: '#6b7280' }}>{t('recipes.calories')}</div>
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontWeight: '600', color: '#7c3aed' }}>{recipe.nutrition.protein}g</div>
-              <div style={{ color: '#6b7280' }}>Protein</div>
+              <div style={{ color: '#6b7280' }}>{t('recipes.protein')}</div>
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontWeight: '600', color: '#dc2626' }}>{recipe.nutrition.carbs}g</div>
-              <div style={{ color: '#6b7280' }}>Carbs</div>
+              <div style={{ color: '#6b7280' }}>{t('recipes.carbs')}</div>
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontWeight: '600', color: '#f59e0b' }}>{recipe.nutrition.fat}g</div>
-              <div style={{ color: '#6b7280' }}>Fat</div>
+              <div style={{ color: '#6b7280' }}>{t('recipes.fat')}</div>
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontWeight: '600', color: '#10b981' }}>{recipe.nutrition.fiber}g</div>
-              <div style={{ color: '#6b7280' }}>Fiber</div>
+              <div style={{ color: '#6b7280' }}>{t('recipes.fiber')}</div>
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontWeight: '600', color: '#ef4444' }}>{recipe.nutrition.sodium}mg</div>
-              <div style={{ color: '#6b7280' }}>Sodium</div>
+              <div style={{ color: '#6b7280' }}>{t('recipes.sodium')}</div>
             </div>
           </div>
         </div>
@@ -278,7 +280,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
           border: '1px solid #bbf7d0'
         }}>
           <div style={{ fontSize: '0.85rem', color: '#166534', fontWeight: '500', marginBottom: '0.25rem' }}>
-            Health Benefits:
+            {t('recipes.healthBenefitsHeading')}
           </div>
           <div style={{ fontSize: '0.8rem', color: '#047857', lineHeight: '1.4' }}>
             {recipe.health_benefits}
@@ -295,7 +297,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
           border: '1px solid #fbbf24'
         }}>
           <div style={{ fontSize: '0.85rem', color: '#92400e', fontWeight: '500', marginBottom: '0.25rem' }}>
-            Money-Saving Tip:
+            {t('recipes.moneySavingHeading')}
           </div>
           <div style={{ fontSize: '0.8rem', color: '#a16207', lineHeight: '1.4' }}>
             {recipe.budget_tip}
@@ -311,7 +313,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
         border: '1px solid #e5e7eb'
       }}>
         <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', fontWeight: '600', color: '#374151' }}>
-          Quick Preview:
+          {t('recipes.quickPreview')}
         </h4>
         <p style={{ 
           color: '#4b5563', 
@@ -336,7 +338,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
         borderRadius: '8px',
         border: '1px solid #bbf7d0'
       }}>
-        Click for full recipe with detailed ingredients & measurements
+        {t('recipes.clickForFullRecipe')}
       </div>
     </div>
   );

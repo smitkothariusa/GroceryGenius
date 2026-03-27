@@ -1,5 +1,6 @@
 // frontend/src/components/RecipeList.tsx
 import React from "react";
+import { useTranslation } from "react-i18next";
 import type { Recipe } from "../services/recipeService";
 
 interface Props {
@@ -8,12 +9,13 @@ interface Props {
 }
 
 const RecipeList: React.FC<Props> = ({ recipes, onClear }) => {
+  const { t } = useTranslation();
   if (!recipes || recipes.length === 0) return null;
 
   return (
     <div style={{ marginTop: "1rem" }}>
       <div style={{ marginBottom: 8 }}>
-        <button onClick={onClear} style={{ padding: "6px 10px" }}>Clear Recipes</button>
+        <button onClick={onClear} style={{ padding: "6px 10px" }}>{t('recipes.clearRecipes')}</button>
       </div>
       {recipes.map((r, idx) => (
         <div key={idx} style={{

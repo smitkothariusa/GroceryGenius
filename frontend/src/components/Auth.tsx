@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { authService, supabase } from '../lib/supabase';
 
 interface AuthProps {
@@ -6,6 +7,7 @@ interface AuthProps {
 }
 
 const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
+  const { t } = useTranslation();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -46,14 +48,14 @@ useEffect(() => {
         
         if (error) {
           console.error('Verification error:', error);
-          setError('Email confirmation failed. Please try again.');
+          setError(t('auth.emailConfirmFailed'));
         } else if (data.session) {
           console.log('Email verified successfully!');
           onAuthSuccess();
         }
       } catch (err) {
         console.error('Verification exception:', err);
-        setError('Email confirmation failed. Please try again.');
+        setError(t('auth.emailConfirmFailed'));
       }
     }
   };
@@ -70,7 +72,7 @@ useEffect(() => {
       if (isSignUp) {
         const { error } = await authService.signUp(email, password, fullName);
         if (error) throw error;
-        alert('Check your email for confirmation link!');
+        alert(t('auth.checkEmail'));
       } else {
         const { error } = await authService.signIn(email, password);
         if (error) throw error;
@@ -104,7 +106,7 @@ useEffect(() => {
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👨‍🍳</div>
           <h1 style={{ margin: 0, color: '#10b981', fontSize: '2rem' }}>GroceryGenius</h1>
           <p style={{ color: '#6b7280', marginTop: '0.5rem' }}>
-            AI-Powered Meal Planning
+            {t('auth.aiPoweredMealPlanning')}
           </p>
         </div>
 
@@ -112,7 +114,7 @@ useEffect(() => {
           {isSignUp && (
             <div style={{ marginBottom: '1rem' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
-                Full Name
+                {t('auth.fullName')}
               </label>
               <input
                 type="text"
@@ -133,7 +135,7 @@ useEffect(() => {
 
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
-              Email
+              {t('auth.email')}
             </label>
             <input
               type="email"
@@ -153,7 +155,7 @@ useEffect(() => {
 
           <div style={{ marginBottom: '1.5rem' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
-              Password
+              {t('auth.password')}
             </label>
             <input
               type="password"
@@ -201,7 +203,7 @@ useEffect(() => {
               marginBottom: '1rem'
             }}
           >
-            {loading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In')}
+            {loading ? t('auth.loading') : (isSignUp ? t('auth.signUp') : t('auth.signIn'))}
           </button>
 
           <button
@@ -220,7 +222,7 @@ useEffect(() => {
               fontSize: '0.875rem'
             }}
           >
-            {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+            {isSignUp ? t('auth.alreadyHaveAccount') : t('auth.dontHaveAccount')}
           </button>
         </form>
       </div>

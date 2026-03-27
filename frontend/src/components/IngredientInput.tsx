@@ -1,4 +1,5 @@
 ﻿import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   tags: string[];
@@ -8,6 +9,7 @@ interface Props {
 }
 
 const IngredientInput: React.FC<Props> = ({ tags, onTagsChange, onSubmit, loading }) => {
+  const { t } = useTranslation();
   const [input, setInput] = useState('');
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -63,7 +65,7 @@ const IngredientInput: React.FC<Props> = ({ tags, onTagsChange, onSubmit, loadin
       
       <input
         type="text"
-        placeholder="Type ingredients and press Enter..."
+        placeholder={t('recipes.ingredientsPlaceholder')}
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyPress={handleKeyPress}
@@ -93,7 +95,7 @@ const IngredientInput: React.FC<Props> = ({ tags, onTagsChange, onSubmit, loadin
           fontSize: '1rem'
         }}
       >
-        {loading ? 'Generating...' : 'Get Recipes'}
+        {loading ? t('recipes.generating') : t('recipes.getRecipes')}
       </button>
     </div>
   );

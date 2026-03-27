@@ -36,6 +36,7 @@
     "editItem": "Editar artículo de despensa",
     "saveChanges": "Guardar cambios",
     "emptyPantry": "Tu despensa está vacía. ¡Agrega algunos artículos para comenzar!",
+    "addToPantry": "Añadir al despensa",
     "categories": {
       "produce": "Productos Frescos",
       "dairy": "Lácteos",
@@ -143,7 +144,10 @@
     "clearRecipes": "Limpiar recetas",
     "quickPreview": "Vista previa rápida",
     "clickForFullRecipe": "Haz clic para la receta completa con ingredientes y medidas detalladas",
-    "whatIngredientsLabel": "¿Qué ingredientes tienes?"
+    "whatIngredientsLabel": "¿Qué ingredientes tienes?",
+    "generatingRecipe": "Generando receta {{n}}...",
+    "emptyStatePrompt": "¡Agrega ingredientes o busca una receta específica para comenzar!",
+    "emptyStateTip": "Prueba: \"tarta de manzana\", \"pasta con pollo\", o agrega ingredientes como \"tomates\", \"pollo\""
   },
   "mealPlan": {
     "title": "Plan Semanal de Comidas",
@@ -208,6 +212,10 @@
     "proTip": "Consejo profesional",
     "proTipMessage": "Los artículos agregados aquí se guardan en tu cuenta y se sincronizan",
     "emptyList": "Aún no hay artículos en tu lista de compras",
+    "bestPrice": "Mejor precio",
+    "saveByShopping": "Ahorra ${{amount}} comprando en {{store}}",
+    "itemsChecked": "{{checked}} de {{total}} artículos marcados",
+    "itemsRemaining": "{{count}} artículos restantes",
     "priority": {
       "high": "Alta",
       "medium": "Media",

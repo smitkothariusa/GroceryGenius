@@ -36,6 +36,7 @@
     "editItem": "Modifier l'article du garde-manger",
     "saveChanges": "Enregistrer les modifications",
     "emptyPantry": "Votre garde-manger est vide. Ajoutez des articles pour commencer!",
+    "addToPantry": "Ajouter au garde-manger",
     "categories": {
       "produce": "Produits Frais",
       "dairy": "Produits Laitiers",
@@ -143,7 +144,10 @@
     "clearRecipes": "Effacer les recettes",
     "quickPreview": "Aperçu rapide",
     "clickForFullRecipe": "Cliquez pour la recette complète avec ingrédients et mesures détaillées",
-    "whatIngredientsLabel": "Quels ingrédients avez-vous ?"
+    "whatIngredientsLabel": "Quels ingrédients avez-vous ?",
+    "generatingRecipe": "Génération de la recette {{n}}...",
+    "emptyStatePrompt": "Ajoutez des ingrédients ou recherchez une recette spécifique pour commencer !",
+    "emptyStateTip": "Essayez : \"tarte aux pommes\", \"pâtes au poulet\", ou ajoutez des ingrédients comme \"tomates\", \"poulet\""
   },
   "mealPlan": {
     "title": "Plan de Repas Hebdomadaire",
@@ -208,6 +212,10 @@
     "proTip": "Conseil pro",
     "proTipMessage": "Les articles ajoutés ici sont sauvegardés sur votre compte et synchronisés",
     "emptyList": "Pas encore d'articles dans votre liste de courses",
+    "bestPrice": "Meilleur prix",
+    "saveByShopping": "Économisez {{amount}}$ en achetant chez {{store}}",
+    "itemsChecked": "{{checked}} sur {{total}} articles cochés",
+    "itemsRemaining": "{{count}} articles restants",
     "priority": {
       "high": "Haute",
       "medium": "Moyenne",

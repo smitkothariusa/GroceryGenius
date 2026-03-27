@@ -36,6 +36,7 @@
     "editItem": "Speisekammer-Artikel bearbeiten",
     "saveChanges": "Änderungen speichern",
     "emptyPantry": "Ihre Speisekammer ist leer. Fügen Sie Artikel hinzu um zu beginnen!",
+    "addToPantry": "Zur Speisekammer hinzufügen",
     "categories": {
       "produce": "Frischprodukte",
       "dairy": "Milchprodukte",
@@ -143,7 +144,10 @@
     "clearRecipes": "Rezepte löschen",
     "quickPreview": "Schnellvorschau",
     "clickForFullRecipe": "Klicken Sie für das vollständige Rezept mit detaillierten Zutaten und Maßen",
-    "whatIngredientsLabel": "Welche Zutaten haben Sie?"
+    "whatIngredientsLabel": "Welche Zutaten haben Sie?",
+    "generatingRecipe": "Rezept {{n}} wird generiert...",
+    "emptyStatePrompt": "Füge Zutaten hinzu oder suche nach einem bestimmten Rezept um loszulegen!",
+    "emptyStateTip": "Versuche: \"Apfelkuchen\", \"Hühnernudeln\", oder füge Zutaten wie \"Tomaten\", \"Hühnchen\" hinzu"
   },
   "mealPlan": {
     "title": "Wöchentlicher Essensplan",
@@ -208,6 +212,10 @@
     "proTip": "Profi-Tipp",
     "proTipMessage": "Hier hinzugefügte Artikel werden in Ihrem Konto gespeichert und synchronisiert",
     "emptyList": "Noch keine Artikel in Ihrer Einkaufsliste",
+    "bestPrice": "Bester Preis",
+    "saveByShopping": "Sparen Sie ${{amount}} beim Einkauf bei {{store}}",
+    "itemsChecked": "{{checked}} von {{total}} Artikeln abgehakt",
+    "itemsRemaining": "{{count}} Artikel verbleibend",
     "priority": {
       "high": "Hoch",
       "medium": "Mittel",

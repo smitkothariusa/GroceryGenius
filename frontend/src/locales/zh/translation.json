@@ -36,6 +36,7 @@
     "editItem": "编辑储藏室物品",
     "saveChanges": "保存更改",
     "emptyPantry": "您的储藏室是空的。添加一些物品开始吧！",
+    "addToPantry": "添加到储藏室",
     "categories": {
       "produce": "农产品",
       "dairy": "乳制品",
@@ -143,7 +144,10 @@
     "clearRecipes": "清除食谱",
     "quickPreview": "快速预览",
     "clickForFullRecipe": "点击获取带有详细食材和用量的完整食谱",
-    "whatIngredientsLabel": "您有哪些食材？"
+    "whatIngredientsLabel": "您有哪些食材？",
+    "generatingRecipe": "正在生成第{{n}}个食谱...",
+    "emptyStatePrompt": "添加食材或搜索特定食谱以开始！",
+    "emptyStateTip": "试试：\u201c苹果派\u201d、\u201c鸡肉意面\u201d，或添加食材如\u201c西红柿\u201d、\u201c鸡肉\u201d"
   },
   "mealPlan": {
     "title": "每周膳食计划",
@@ -208,6 +212,10 @@
     "proTip": "专业提示",
     "proTipMessage": "在此处添加的物品将保存到您的账户并跨设备同步",
     "emptyList": "您的购物清单中还没有物品",
+    "bestPrice": "最优价格",
+    "saveByShopping": "在{{store}}购物可省${{amount}}",
+    "itemsChecked": "已勾选{{checked}}个，共{{total}}个",
+    "itemsRemaining": "还剩{{count}}个",
     "priority": {
       "high": "高",
       "medium": "中",

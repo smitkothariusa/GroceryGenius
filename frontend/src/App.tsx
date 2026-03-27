@@ -574,6 +574,11 @@ const App: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Clear cached recipes when language changes so they are regenerated in the new language
+  useEffect(() => {
+    setRecipes([]);
+  }, [i18n.language]);
+
   const handleTabChange = (tab: typeof currentTab) => {
     setIsTabChanging(true);
     setTimeout(() => {
@@ -2662,7 +2667,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       color: '#10b981',
                       fontWeight: '600'
                     }}>
-                      🤖 Generating recipe {i}...
+                      🤖 {t('recipes.generatingRecipe', { n: i })}
                     </div>
                   </div>
                 ))}
@@ -2889,8 +2894,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             {recipes.length === 0 && !recipeLoading && (
               <div style={{ textAlign: 'center', padding: '3rem', color: 'white' }}>
                 <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🍳</div>
-                <p>Add ingredients or search for a specific recipe to get started!</p>
-                <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>Try: "apple pie", "chicken pasta", or add ingredients like "tomatoes", "chicken"</p>
+                <p>{t('recipes.emptyStatePrompt')}</p>
+                <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>{t('recipes.emptyStateTip')}</p>
               </div>
             )}
           </>
@@ -3312,10 +3317,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       boxSizing: 'border-box'
                     }}
                   >
-                    <option value="pc">pieces</option>
+                    <option value="pc">{t('pantry.units.pieces')}</option>
                     <option value="kg">kg</option>
                     <option value="lbs">lbs</option>
-                    <option value="cups">cups</option>
+                    <option value="cups">{t('pantry.units.cups')}</option>
                   </select>
                 </div>
                 
@@ -3375,7 +3380,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     fontWeight: '600'
                   }}
                 >
-                  Add to Pantry
+                  {t('pantry.addToPantry')}
                 </button>
               </div>
             )}
@@ -3671,7 +3676,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           </div>
                           {priceComparison.amazon < priceComparison.walmart && (
                             <div style={{ fontSize: '0.7rem', color: '#10b981', marginTop: '0.25rem' }}>
-                              ✓ Best price
+                              ✓ {t('shopping.bestPrice')}
                             </div>
                           )}
                         </div>
@@ -3693,7 +3698,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           </div>
                           {priceComparison.walmart < priceComparison.amazon && (
                             <div style={{ fontSize: '0.7rem', color: '#10b981', marginTop: '0.25rem' }}>
-                              ✓ Best price
+                              ✓ {t('shopping.bestPrice')}
                             </div>
                           )}
                         </div>
@@ -3706,7 +3711,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         color: '#0369a1',
                         textAlign: 'center'
                       }}>
-                        💡 Save ${Math.abs(priceComparison.amazon - priceComparison.walmart).toFixed(2)} by shopping at {priceComparison.walmart < priceComparison.amazon ? 'Walmart' : 'Amazon'}
+                        💡 {t('shopping.saveByShopping', { amount: Math.abs(priceComparison.amazon - priceComparison.walmart).toFixed(2), store: priceComparison.walmart < priceComparison.amazon ? 'Walmart' : 'Amazon' })}
                       </div>
                     </div>
                   )}
@@ -3846,16 +3851,16 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                   <div>
                     <strong style={{ color: '#166534', fontSize: '1.1rem' }}>
-                      📊 {shoppingList.filter(i => i.checked).length} of {shoppingList.length} items checked
+                      📊 {t('shopping.itemsChecked', { checked: shoppingList.filter(i => i.checked).length, total: shoppingList.length })}
                     </strong>
                     <div style={{ fontSize: '0.875rem', color: '#047857', marginTop: '0.25rem' }}>
-                      {shoppingList.filter(i => !i.checked).length} items remaining
+                      {t('shopping.itemsRemaining', { count: shoppingList.filter(i => !i.checked).length })}
                     </div>
                   </div>
                   <button onClick={() => setShoppingList(prev => prev.filter(i => !i.checked))} style={{
                     padding: '0.75rem 1.5rem', background: '#ef4444', color: 'white',
                     border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
-                  }}>🗑️ Clear Checked Items</button>
+                  }}>🗑️ {t('shopping.clearChecked')}</button>
                 </div>
               </div>
             )}

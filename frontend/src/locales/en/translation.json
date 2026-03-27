@@ -35,6 +35,7 @@
     "delete": "Delete",
     "editItem": "Edit Pantry Item",
     "saveChanges": "Save Changes",
+    "addToPantry": "Add to Pantry",
     "emptyPantry": "Your pantry is empty. Add some items to get started!",
     "categories": {
       "produce": "Produce",
@@ -143,7 +144,10 @@
     "clearRecipes": "Clear Recipes",
     "quickPreview": "Quick Preview",
     "clickForFullRecipe": "Click for full recipe with detailed ingredients & measurements",
-    "whatIngredientsLabel": "What ingredients do you have?"
+    "whatIngredientsLabel": "What ingredients do you have?",
+    "generatingRecipe": "Generating recipe {{n}}...",
+    "emptyStatePrompt": "Add ingredients or search for a specific recipe to get started!",
+    "emptyStateTip": "Try: \"apple pie\", \"chicken pasta\", or add ingredients like \"tomatoes\", \"chicken\""
   },
   "mealPlan": {
     "title": "Weekly Meal Plan",
@@ -208,6 +212,10 @@
     "proTip": "Pro Tip",
     "proTipMessage": "Items added here are saved to your account and synced across devices",
     "emptyList": "No items in your shopping list yet",
+    "bestPrice": "Best price",
+    "saveByShopping": "Save ${{amount}} by shopping at {{store}}",
+    "itemsChecked": "{{checked}} of {{total}} items checked",
+    "itemsRemaining": "{{count}} items remaining",
     "priority": {
       "high": "High",
       "medium": "Medium",

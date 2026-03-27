@@ -2424,22 +2424,24 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               </span>
             </button>
             
+            {isMobile && <LanguageSwitcher compact />}
             {!isMobile && (
-              <button onClick={() => setShowDemoConfirm(true)} style={{
-                padding: '0.5rem 1rem',
-                background: 'linear-gradient(45deg, #8b5cf6, #6366f1)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontWeight: '600',
-                fontSize: '0.875rem'
-              }}>
-                🎬 Demo
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button onClick={() => setShowDemoConfirm(true)} style={{
+                  padding: '0.5rem 1rem',
+                  background: 'linear-gradient(45deg, #8b5cf6, #6366f1)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '0.875rem'
+                }}>
+                  🎬 Demo
+                </button>
+                <LanguageSwitcher />
+              </div>
             )}
-            
-            <LanguageSwitcher />
             <button onClick={async () => {
               await authService.signOut();
               setUser(null);

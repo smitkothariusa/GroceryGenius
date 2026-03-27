@@ -10,7 +10,11 @@ const LANGUAGES = [
   { code: 'ja', label: '日本語', flag: '🇯🇵' },
 ];
 
-const LanguageSwitcher: React.FC = () => {
+interface LanguageSwitcherProps {
+  compact?: boolean;
+}
+
+const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ compact = false }) => {
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -38,7 +42,7 @@ const LanguageSwitcher: React.FC = () => {
         onClick={() => setOpen(o => !o)}
         title="Change language"
         style={{
-          padding: '0.4rem 0.65rem',
+          padding: compact ? '0.4rem 0.5rem' : '0.4rem 0.65rem',
           background: '#f3f4f6',
           border: '1px solid #e5e7eb',
           borderRadius: '8px',
@@ -51,9 +55,9 @@ const LanguageSwitcher: React.FC = () => {
           whiteSpace: 'nowrap',
         }}
       >
-        <span style={{ fontSize: '1rem' }}>{current.flag}</span>
-        <span>{current.code.toUpperCase()}</span>
-        <span style={{ fontSize: '0.6rem', opacity: 0.6 }}>{open ? '▲' : '▼'}</span>
+        <span style={{ fontSize: compact ? '1.1rem' : '1rem' }}>🌐</span>
+        {!compact && <span>{current.code.toUpperCase()}</span>}
+        {!compact && <span style={{ fontSize: '0.6rem', opacity: 0.6 }}>{open ? '▲' : '▼'}</span>}
       </button>
 
       {open && (

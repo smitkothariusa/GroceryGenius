@@ -2,154 +2,6 @@
 import { foodBanks, calculateMeals } from './data/foodBanks';
 import { useTranslation } from 'react-i18next';
 
-// ─── Design tokens injected into :root at runtime ────────────────────────────
-const GLOBAL_STYLE = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-  :root {
-    --color-brand:           #ed8b00;
-    --color-brand-light:     #fff3e0;
-    --color-brand-dark:      #c67600;
-    --color-surface:         #fafaf8;
-    --color-surface-raised:  #ffffff;
-    --color-surface-overlay: #f5f3ef;
-    --color-text-primary:    #1a1a18;
-    --color-text-secondary:  #6b6b63;
-    --color-text-muted:      #9c9c94;
-    --color-border:          #e8e6e0;
-    --color-border-light:    #f0ede8;
-    --radius-sm:  8px;
-    --radius-md:  12px;
-    --radius-lg:  16px;
-    --radius-xl:  24px;
-    --shadow-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-md:  0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
-    --shadow-lg:  0 12px 32px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06);
-    --sidebar-width:      240px;
-    --header-height:      56px;
-    --bottom-nav-height:  64px;
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    margin: 0;
-    font-family: var(--font-sans);
-    background: var(--color-surface);
-    color: var(--color-text-primary);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    /* reset the Vite default centering */
-    display: block;
-    place-items: unset;
-  }
-
-  /* ── Scrollbar ─────────────────────────────────────────────────── */
-  ::-webkit-scrollbar              { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track        { background: transparent; }
-  ::-webkit-scrollbar-thumb        { background: #d4d0c8; border-radius: 99px; }
-  ::-webkit-scrollbar-thumb:hover  { background: var(--color-brand); }
-  @media (max-width: 767px) {
-    ::-webkit-scrollbar { display: none; }
-  }
-
-  /* ── Input focus ───────────────────────────────────────────────── */
-  input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: var(--color-brand) !important;
-    box-shadow: 0 0 0 3px rgba(237,139,0,0.12);
-    transition: all 0.15s ease;
-  }
-
-  /* ── Tab content transitions ───────────────────────────────────── */
-  .tab-content-enter {
-    animation: tabFadeIn 0.2s ease-out both;
-  }
-  @keyframes tabFadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0);   }
-  }
-
-  /* ── Card hover ────────────────────────────────────────────────── */
-  @media (min-width: 768px) {
-    .card-hover {
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-    .card-hover:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md) !important;
-    }
-  }
-
-  /* ── Skeleton shimmer ──────────────────────────────────────────── */
-  .skeleton {
-    background: linear-gradient(90deg, #f0ede8 25%, #e8e5de 50%, #f0ede8 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-  }
-  @keyframes shimmer {
-    0%   { background-position: -1000px 0; }
-    100% { background-position:  1000px 0; }
-  }
-
-  /* ── Progress bar ──────────────────────────────────────────────── */
-  @keyframes progressBar {
-    from { width: 0%; }
-    to   { width: 85%; }
-  }
-  @keyframes progressBarFade {
-    from { opacity: 1; }
-    to   { opacity: 0; }
-  }
-
-  /* ── Modal backdrop ────────────────────────────────────────────── */
-  .modal-backdrop { animation: fadeIn 0.2s ease-out; }
-  @keyframes fadeIn  { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-20px); } }
-  @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-  /* ── Recipe card stagger ───────────────────────────────────────── */
-  .recipe-card { animation: scaleIn 0.35s ease-out both; }
-  .recipe-card:nth-child(1) { animation-delay: 0.05s; }
-  .recipe-card:nth-child(2) { animation-delay: 0.10s; }
-  .recipe-card:nth-child(3) { animation-delay: 0.15s; }
-
-  /* ── Slide animations ──────────────────────────────────────────── */
-  @keyframes slideInRight  { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-  @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
-  @keyframes slideInUp     { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  @keyframes bounce        { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-  @keyframes pulse         { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-
-  /* ── Bottom tab indicator ──────────────────────────────────────── */
-  .bottom-tab-indicator {
-    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1), width 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* ── Sidebar nav item ──────────────────────────────────────────── */
-  .sidebar-nav-item {
-    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
-  }
-  .sidebar-nav-item:hover {
-    background: var(--color-surface-overlay) !important;
-    transform: translateX(2px);
-  }
-
-  /* ── Button hover micro ────────────────────────────────────────── */
-  button { transition: all 0.15s ease; }
-  button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-  button:active:not(:disabled) { transform: translateY(0); }
-
-  /* ── Desktop content scale ─────────────────────────────────────── */
-  @media (min-width: 768px) {
-    .tab-button-desktop:hover { transform: scale(1.02); }
-  }
-`;
-
-
 interface DropOffSite {
   id: string;
   name: string;
@@ -244,18 +96,7 @@ interface FavoriteRecipe extends Recipe {
 
 const App: React.FC = () => {
   const { t, i18n } = useTranslation();
-
-  // Inject global design tokens + animations once on mount
-  useEffect(() => {
-    const id = '__gg_global_style__';
-    if (!document.getElementById(id)) {
-      const el = document.createElement('style');
-      el.id = id;
-      el.textContent = GLOBAL_STYLE;
-      document.head.appendChild(el);
-    }
-  }, []);
-
+  
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [recipeLoading, setRecipeLoading] = useState(false);
@@ -359,11 +200,10 @@ const App: React.FC = () => {
   const { toasts, removeToast, success, error, warning, info } = useToast();
   const [isTabChanging, setIsTabChanging] = useState(false);
   const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-  // ── Unified design tokens (CSS variables are the source of truth) ──────────
-  const bgColor  = 'var(--color-surface)';
-  const cardBg   = 'var(--color-surface-raised)';
-  const textColor = 'var(--color-text-primary)';
-  const mutedText = 'var(--color-text-secondary)';
+  const bgColor = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+  const cardBg = 'rgba(255, 255, 255, 0.95)';
+  const textColor = '#1f2937';
+  const mutedText = '#6b7280';
   const [showAddShopping, setShowAddShopping] = useState(false);
   const [newShoppingItem, setNewShoppingItem] = useState<{
     name: string;
@@ -2579,57 +2419,16 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
         }
       }
     };
-  if (authLoading) {
+  if (authLoading) {  // ← Changed from loading
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
+      <div style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
         justifyContent: 'center',
-        background: 'var(--color-surface)',
-        gap: '1.25rem'
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
       }}>
-        {/* Branded top progress bar */}
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, height: '3px',
-          background: 'var(--color-brand-light)',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            height: '100%',
-            background: 'var(--color-brand)',
-            animation: 'progressBar 1.8s ease-in-out forwards'
-          }} />
-        </div>
-        {/* Logo mark */}
-        <div style={{
-          width: 64, height: 64,
-          background: 'var(--color-brand)',
-          borderRadius: 20,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '2rem',
-          boxShadow: '0 8px 24px rgba(237,139,0,0.25)',
-          animation: 'pulse 1.6s ease-in-out infinite'
-        }}>
-          🧺
-        </div>
-        <div style={{
-          fontFamily: 'var(--font-sans)',
-          fontSize: '1.125rem',
-          fontWeight: 700,
-          color: 'var(--color-brand)',
-          letterSpacing: '-0.02em'
-        }}>
-          GroceryGenius
-        </div>
-        <div style={{
-          fontSize: '0.8125rem',
-          color: 'var(--color-text-muted)',
-          fontFamily: 'var(--font-sans)'
-        }}>
-          Loading your kitchen…
-        </div>
+        <div style={{ fontSize: '3rem' }}>👨‍🍳</div>
       </div>
     );
   }
@@ -2637,341 +2436,122 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
   if (!user) {
     return <Auth onAuthSuccess={() => {}} />;
   }
-  // ─── Tab config ──────────────────────────────────────────────────────────
-  const TABS = [
-    { id: 'pantry',    icon: '📦', labelKey: 'tabs.pantry',   badge: () => pantry.length },
-    { id: 'recipes',   icon: '🍳', labelKey: 'tabs.recipes',  badge: () => null },
-    { id: 'mealplan',  icon: '📅', labelKey: 'tabs.mealPlan', badge: () => null },
-    { id: 'shopping',  icon: '🛒', labelKey: 'tabs.shopping', badge: () => shoppingList.filter(i => !i.checked).length },
-    { id: 'donate',    icon: '❤️', labelKey: 'tabs.donate',   badge: () => getExpiringItems().length },
-    { id: 'favorites', icon: '⭐', labelKey: 'tabs.favorites',badge: () => favorites.length },
-  ] as const;
-
-  const activeTabIdx = TABS.findIndex(t => t.id === currentTab);
-
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-surface)', fontFamily: 'var(--font-sans)' }}>
-
-      {/* ══════════════ MOBILE HEADER ══════════════ */}
-      {isMobile && (
-        <header style={{
-          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
-          height: 'var(--header-height)',
-          background: 'var(--color-brand)',
-          display: 'flex', alignItems: 'center',
-          padding: '0 1rem',
-          justifyContent: 'space-between',
-          boxShadow: '0 2px 8px rgba(237,139,0,0.25)'
-        }}>
-          {/* Brand */}
+    <div style={{ minHeight: '100vh', background: bgColor }}>
+      <header style={{
+        background: cardBg,
+        padding: isMobile ? '0.75rem 1rem' : '1rem',
+        boxShadow: '0 2px 20px rgba(0,0,0,0.1)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{
-              width: 32, height: 32,
-              background: 'rgba(255,255,255,0.2)',
-              borderRadius: 10,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '1.125rem'
-            }}>🧺</div>
-            <span style={{ color: '#ffffff', fontWeight: 800, fontSize: '1.0625rem', letterSpacing: '-0.02em' }}>
-              {t('app.shortName')}
-            </span>
+            <span style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>👨‍🍳</span>
+            <h1 style={{ margin: 0, color: '#10b981', fontSize: isMobile ? '1.25rem' : '1.8rem', fontWeight: '700' }}>
+              {isMobile ? t('app.shortName') : t('app.name')}
+            </h1>
           </div>
-          {/* Right actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: isMobile ? '0.5rem' : '0.75rem', alignItems: 'center' }}>
             <button onClick={() => setShowCalorieTracker(!showCalorieTracker)} style={{
-              display: 'flex', alignItems: 'center', gap: '0.25rem',
-              background: todayCalories > dailyCalorieGoal ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)',
-              border: 'none', borderRadius: 8, padding: '0.35rem 0.6rem',
-              cursor: 'pointer', color: '#ffffff', fontSize: '0.75rem', fontWeight: 700
+              padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 1rem',
+              background: todayCalories > dailyCalorieGoal ? '#fee2e2' : '#f0fdf4',
+              border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem',
+              fontSize: isMobile ? '0.7rem' : '0.875rem'
             }}>
-              <span style={{ fontSize: '0.875rem' }}>📊</span>
-              {todayCalories}/{dailyCalorieGoal}
+              <span style={{ fontSize: isMobile ? '0.9rem' : '1.1rem' }}>📊</span>
+              <span style={{ fontWeight: '600', color: textColor }}>
+                {isMobile ? `${todayCalories}/${dailyCalorieGoal}` : `${todayCalories}/${dailyCalorieGoal} Cal`}
+              </span>
             </button>
-            <div style={{ color: '#ffffff' }}><LanguageSwitcher compact /></div>
-            <button onClick={async () => { await authService.signOut(); setUser(null); }} style={{
-              background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: 8,
-              padding: '0.35rem 0.6rem', cursor: 'pointer', color: '#ffffff', fontSize: '1rem'
-            }}>🚪</button>
-          </div>
-        </header>
-      )}
-
-      {/* ══════════════ DESKTOP HEADER ══════════════ */}
-      {!isMobile && (
-        <header style={{
-          position: 'fixed', top: 0, left: 'var(--sidebar-width)', right: 0, zIndex: 200,
-          height: 'var(--header-height)',
-          background: 'var(--color-surface-raised)',
-          borderBottom: '1px solid var(--color-border)',
-          display: 'flex', alignItems: 'center',
-          padding: '0 2rem',
-          justifyContent: 'space-between',
-          boxShadow: 'var(--shadow-sm)'
-        }}>
-          {/* Brand name (desktop — sidebar has the full logo) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-            <span style={{
-              fontWeight: 800, fontSize: '1.0625rem',
-              color: 'var(--color-brand)', letterSpacing: '-0.025em'
-            }}>GroceryGenius</span>
-          </div>
-          {/* Right actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            {/* Calorie tracker */}
-            <button onClick={() => setShowCalorieTracker(!showCalorieTracker)} style={{
-              display: 'flex', alignItems: 'center', gap: '0.375rem',
-              background: todayCalories > dailyCalorieGoal ? '#fff1f0' : 'var(--color-brand-light)',
-              border: `1px solid ${todayCalories > dailyCalorieGoal ? '#ffc5bf' : '#ffd9a0'}`,
-              borderRadius: 'var(--radius-sm)', padding: '0.375rem 0.75rem',
-              cursor: 'pointer',
-              color: todayCalories > dailyCalorieGoal ? '#c0392b' : 'var(--color-brand-dark)',
-              fontSize: '0.8125rem', fontWeight: 700
-            }}>
-              <span>📊</span>
-              {todayCalories}/{dailyCalorieGoal} Cal
-            </button>
-            {/* Demo */}
-            <button onClick={() => setShowDemoConfirm(true)} style={{
-              padding: '0.375rem 0.875rem',
-              background: 'var(--color-surface-overlay)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-sm)',
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '0.8125rem',
-              color: 'var(--color-text-secondary)'
-            }}>🎬 Demo</button>
-            <LanguageSwitcher />
-            <button onClick={async () => { await authService.signOut(); setUser(null); }} style={{
-              padding: '0.375rem 0.875rem',
-              background: '#fff1f0',
-              color: '#c0392b',
-              border: '1px solid #ffc5bf',
-              borderRadius: 'var(--radius-sm)',
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '0.8125rem'
-            }}>{t('header.signOut')}</button>
-          </div>
-        </header>
-      )}
-
-      {/* ══════════════ DESKTOP SIDEBAR ══════════════ */}
-      {!isMobile && (
-        <aside style={{
-          position: 'fixed', top: 0, left: 0, bottom: 0,
-          width: 'var(--sidebar-width)',
-          background: 'var(--color-surface-raised)',
-          borderRight: '1px solid var(--color-border)',
-          zIndex: 300,
-          display: 'flex', flexDirection: 'column',
-          overflow: 'hidden'
-        }}>
-          {/* Logo area */}
-          <div style={{
-            padding: '1.25rem 1rem 1rem',
-            borderBottom: '1px solid var(--color-border-light)',
-            background: 'var(--color-brand-light)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.125rem' }}>
-              <div style={{
-                width: 40, height: 40,
-                background: 'var(--color-brand)',
-                borderRadius: 12,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '1.25rem',
-                boxShadow: '0 2px 8px rgba(237,139,0,0.3)',
-                flexShrink: 0
-              }}>🧺</div>
-              <div>
-                <div style={{
-                  fontWeight: 800, fontSize: '0.9375rem',
-                  color: 'var(--color-brand-dark)', letterSpacing: '-0.025em',
-                  lineHeight: 1.2
-                }}>GroceryGenius</div>
-                <div style={{ fontSize: '0.6875rem', color: 'var(--color-brand)', fontWeight: 600, opacity: 0.8 }}>
-                  Smart kitchen assistant
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Nav items */}
-          <nav style={{ flex: 1, padding: '0.5rem 0', overflowY: 'auto' }}>
-            {TABS.map((tab) => {
-              const isActive = currentTab === tab.id;
-              const badge = tab.badge();
-              return (
-                <button
-                  key={tab.id}
-                  className="sidebar-nav-item tab-button-desktop"
-                  onClick={() => handleTabChange(tab.id as typeof currentTab)}
-                  style={{
-                    width: '100%',
-                    display: 'flex', alignItems: 'center', gap: '0.625rem',
-                    padding: '0 0.75rem',
-                    height: 48,
-                    background: isActive ? 'var(--color-brand-light)' : 'transparent',
-                    borderLeft: isActive ? '3px solid var(--color-brand)' : '3px solid transparent',
-                    border: 'none', borderTop: 'none', borderBottom: 'none', borderRight: 'none',
-                    borderLeftWidth: '3px',
-                    borderLeftStyle: 'solid',
-                    borderLeftColor: isActive ? 'var(--color-brand)' : 'transparent',
-                    cursor: 'pointer',
-                    color: isActive ? 'var(--color-brand)' : 'var(--color-text-secondary)',
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: '0.875rem',
-                    fontWeight: isActive ? 700 : 500,
-                    textAlign: 'left'
-                  }}
-                >
-                  <span style={{ fontSize: '1.125rem', width: 24, textAlign: 'center', flexShrink: 0 }}>{tab.icon}</span>
-                  <span style={{ flex: 1 }}>{t(tab.labelKey)}</span>
-                  {badge !== null && badge > 0 && (
-                    <span style={{
-                      background: isActive ? 'var(--color-brand)' : 'var(--color-surface-overlay)',
-                      color: isActive ? '#ffffff' : 'var(--color-text-secondary)',
-                      fontSize: '0.6875rem',
-                      fontWeight: 700,
-                      padding: '0.125rem 0.4375rem',
-                      borderRadius: 99,
-                      minWidth: 20,
-                      textAlign: 'center'
-                    }}>
-                      {badge}
-                    </span>
-                  )}
+            
+            {isMobile && <LanguageSwitcher compact />}
+            {!isMobile && (
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button onClick={() => setShowDemoConfirm(true)} style={{
+                  padding: '0.5rem 1rem',
+                  background: 'linear-gradient(45deg, #8b5cf6, #6366f1)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '0.875rem'
+                }}>
+                  🎬 Demo
                 </button>
-              );
-            })}
-          </nav>
-
-          {/* Sidebar footer */}
-          <div style={{
-            padding: '0.75rem 1rem',
-            borderTop: '1px solid var(--color-border-light)',
-            display: 'flex', flexDirection: 'column', gap: '0.5rem'
-          }}>
-            <div style={{ fontSize: '0.6875rem', color: 'var(--color-text-muted)', marginBottom: '0.25rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Account
-            </div>
-            <button onClick={async () => { await authService.signOut(); setUser(null); }} style={{
-              width: '100%', display: 'flex', alignItems: 'center', gap: '0.5rem',
-              padding: '0.5rem 0.75rem', background: 'transparent',
-              border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)',
-              cursor: 'pointer', color: 'var(--color-text-secondary)',
-              fontSize: '0.8125rem', fontWeight: 600, fontFamily: 'var(--font-sans)'
+                <LanguageSwitcher />
+              </div>
+            )}
+            <button onClick={async () => {
+              await authService.signOut();
+              setUser(null);
+            }} style={{
+              padding: isMobile ? '0.4rem 0.8rem' : '0.5rem 1rem',
+              background: '#ef4444',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              fontSize: isMobile ? '0.75rem' : '1rem'
             }}>
-              <span>🚪</span> {t('header.signOut')}
+              {isMobile ? '🚪' : t('header.signOut')}
             </button>
           </div>
-        </aside>
-      )}
+        </div>
+      </header>
 
-      {/* ══════════════ EXPIRY BANNER ══════════════ */}
       {getExpiringItems().length > 0 && (
-        <div style={{
-          position: 'fixed',
-          top: 'var(--header-height)',
-          left: isMobile ? 0 : 'var(--sidebar-width)',
-          right: 0,
-          zIndex: 150,
-          background: '#fff8ed',
-          borderBottom: '1px solid #ffd28a',
-          padding: '0.5rem 1.25rem',
-          display: 'flex', alignItems: 'center', gap: '0.5rem',
-          fontSize: '0.8125rem', color: '#8a4e00', fontWeight: 600
-        }}>
-          <span>⚠️</span>
-          {t('donate.itemsExpiring', { count: getExpiringItems().length })} — {getExpiringItems().map(i => i.name).join(', ')}
+        <div style={{ background: '#fee2e2', borderBottom: '2px solid #dc2626', padding: '0.75rem' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', color: '#dc2626', fontWeight: '600' }}>
+            ⚠️ {t('donate.itemsExpiring', { count: getExpiringItems().length })} {getExpiringItems().map(i => i.name).join(', ')}
+          </div>
         </div>
       )}
-
-      {/* ══════════════ MOBILE BOTTOM TAB BAR ══════════════ */}
-      {isMobile && (
-        <nav style={{
-          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200,
-          height: 'var(--bottom-nav-height)',
-          background: 'var(--color-surface-raised)',
-          borderTop: '1px solid var(--color-border)',
-          boxShadow: '0 -2px 12px rgba(0,0,0,0.06)',
-          display: 'flex', alignItems: 'stretch',
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)'
-        }}>
-          {/* Sliding indicator pill */}
-          <div
-            className="bottom-tab-indicator"
-            style={{
-              position: 'absolute',
-              top: 0, height: 3,
-              background: 'var(--color-brand)',
-              borderRadius: '0 0 3px 3px',
-              width: `${100 / TABS.length}%`,
-              transform: `translateX(${activeTabIdx * 100}%)`,
-              transition: 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1)'
-            }}
-          />
-          {TABS.map((tab, idx) => {
-            const isActive = currentTab === tab.id;
-            const badge = tab.badge();
-            return (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id as typeof currentTab)}
-                style={{
-                  flex: 1,
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  gap: '0.1875rem',
-                  background: 'transparent', border: 'none', cursor: 'pointer',
-                  color: isActive ? 'var(--color-brand)' : 'var(--color-text-muted)',
-                  transition: 'color 0.15s ease',
-                  position: 'relative',
-                  padding: '0.25rem 0'
-                }}
-              >
-                <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>{tab.icon}</span>
-                <span style={{
-                  fontSize: '0.625rem', fontWeight: 600, lineHeight: 1,
-                  fontFamily: 'var(--font-sans)'
-                }}>
-                  {t(tab.labelKey)}
-                </span>
-                {badge !== null && badge > 0 && (
-                  <span style={{
-                    position: 'absolute', top: 3, right: '50%',
-                    transform: 'translateX(200%)',
-                    background: 'var(--color-brand)',
-                    color: '#ffffff',
-                    fontSize: '0.5625rem', fontWeight: 700,
-                    padding: '1px 4px', borderRadius: 99,
-                    lineHeight: 1.4,
-                    minWidth: 14, textAlign: 'center'
-                  }}>{badge}</span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-      )}
-
-      {/* ══════════════ MAIN CONTENT AREA ══════════════ */}
-      <main style={{
-        marginLeft: isMobile ? 0 : 'var(--sidebar-width)',
-        marginTop: isMobile
-          ? `calc(var(--header-height) + ${getExpiringItems().length > 0 ? '36px' : '0px'})`
-          : `calc(var(--header-height) + ${getExpiringItems().length > 0 ? '36px' : '0px'})`,
-        marginBottom: isMobile ? 'calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px))' : 0,
-        minHeight: isMobile
-          ? `calc(100vh - var(--header-height) - var(--bottom-nav-height))`
-          : `calc(100vh - var(--header-height))`,
-        background: 'var(--color-surface)'
+      <nav style={{
+        background: cardBg, 
+        display: 'flex', 
+        justifyContent: isMobile ? 'flex-start' : 'center', 
+        padding: '0.5rem', 
+        gap: '0.5rem',
+        position: 'sticky', 
+        top: isMobile ? '56px' : '72px', 
+        zIndex: 99,
+        overflowX: 'auto',
+        flexWrap: isMobile ? 'nowrap' : 'wrap'
       }}>
-        <div style={{
-          maxWidth: 1280,
-          margin: '0 auto',
-          padding: isMobile ? '1.25rem 1rem' : '1.5rem 2rem',
-          animation: isTabChanging ? 'fadeOut 0.15s ease-out' : 'tabFadeIn 0.2s ease-out'
-        }} key={currentTab} className="tab-content-enter">
+        {(['pantry', 'recipes', 'mealplan', 'shopping', 'donate', 'favorites'] as const).map((tab) => (
+
+          <button key={tab} onClick={() => handleTabChange(tab)} style={{
+            padding: isMobile ? '0.5rem 1rem' : '0.75rem 1.5rem', 
+            border: 'none',
+            background: currentTab === tab ? '#10b981' : 'transparent',
+            color: currentTab === tab ? 'white' : mutedText,
+            borderRadius: '12px', 
+            cursor: 'pointer', 
+            fontWeight: '600',
+            transition: 'all 0.3s ease',
+            fontSize: isMobile ? '0.875rem' : '1rem',
+            whiteSpace: 'nowrap',
+            flex: isMobile ? '0 0 auto' : 'initial'
+          }}>
+            {tab === 'recipes' && `🍳 ${t('tabs.recipes')}`}
+            {tab === 'mealplan' && (isMobile ? `📅 ${t('tabs.mealPlan')}` : `📅 ${t('tabs.mealPlan')}`)}
+            {tab === 'pantry' && (isMobile ? `📦 ${pantry.length}` : `📦 ${t('tabs.pantry')} (${pantry.length})`)}
+            {tab === 'shopping' && (isMobile ? `🛒 ${shoppingList.filter(i => !i.checked).length}` : `🛒 ${t('tabs.shopping')} (${shoppingList.filter(i => !i.checked).length})`)}
+            {tab === 'donate' && (isMobile ? `❤️ ${getExpiringItems().length}` : `❤️ ${t('tabs.donate')} (${getExpiringItems().length})`)}
+            {tab === 'favorites' && (isMobile ? `⭐ ${favorites.length}` : `⭐ ${t('tabs.favorites')} (${favorites.length})`)}
+          </button>
+        ))}
+      </nav>
+      <main style={{ 
+        maxWidth: '1200px', 
+        margin: '0 auto', 
+        padding: isMobile ? '1rem' : '2rem',
+        animation: isTabChanging ? 'fadeOut 0.15s ease-out' : 'fadeIn 0.3s ease-out'
+      }}>
         {currentTab === 'recipes' && (
           <>
             <div style={{ background: cardBg, padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
@@ -5130,7 +4710,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             )}
           </div>
         )}
-        </div>{/* end maxWidth content wrapper */}
       </main>
       {showAddShopping && (
         <div 

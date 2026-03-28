@@ -47,7 +47,12 @@
       "other": "Otro",
       "vegetables": "Verduras",
       "fruits": "Frutas",
-      "spices": "Especias"
+      "spices": "Especias",
+      "frozen": "Congelados",
+      "pantryItems": "Artículos de Despensa",
+      "beverages": "Bebidas",
+      "snacks": "Aperitivos",
+      "bakery": "Panadería"
     },
     "units": {
       "pieces": "piezas",
@@ -63,7 +68,10 @@
       "ml": "ml",
       "cup": "taza",
       "tbsp": "cda",
-      "tsp": "cdta"
+      "tsp": "cdta",
+      "bottles": "botellas",
+      "cans": "latas",
+      "boxes": "cajas"
     }
   },
   "auth": {
@@ -304,7 +312,8 @@
       "cooking_oil": "aceite de cocina",
       "spices": "especias",
       "hygiene_products": "productos de higiene"
-    }
+    },
+    "hoursLabel": "Horario"
   },
   "favorites": {
     "title": "Recetas Favoritas",
@@ -387,5 +396,54 @@
     "step4Desc": "Dona artículos por vencer a bancos de alimentos locales y rastrea tu impacto",
     "letsGetStarted": "¡Comencemos!",
     "viewAgain": "Ver Misión de Nuevo"
+  },
+  "toasts": {
+    "addedIngredientsToShopping": "¡Se agregaron {{count}} ingredientes a la lista de compras!",
+    "shoppingListCopied": "¡Lista de compras copiada al portapapeles!",
+    "pantryItemUpdated": "¡Artículo de despensa actualizado!",
+    "addedItemsToPantry": "¡Se agregaron {{count}} artículos a la despensa!",
+    "foundIngredients": "¡Se encontraron {{count}} ingredientes!",
+    "noItemsDetected": "No se detectaron artículos. Intenta con una foto más clara y mejor iluminación.",
+    "failedAnalyzeImage": "Error al analizar la imagen. Por favor, intenta de nuevo.",
+    "cameraAccessDenied": "Acceso a la cámara denegado. Por favor, permite el acceso a la cámara.",
+    "demoLoaded": "¡Datos de demostración cargados! Mostrando 427 comidas donadas en 23 donaciones! 🎉",
+    "allDataCleared": "¡Todos los datos han sido borrados!",
+    "productIdentified": "{{emoji}} ¡Producto identificado: {{name}}!",
+    "productIdentifiedAI": "¡Producto identificado usando IA!",
+    "productNotFound": "Producto no encontrado en la base de datos. Por favor, ingresa el nombre manualmente.",
+    "barcodeLookupFailed": "Error al buscar el código de barras. Por favor, ingresa el nombre del artículo.",
+    "failedStartBarcode": "Error al iniciar el escáner de código de barras",
+    "addedWithEdit": "Artículo agregado - Por favor edita para agregar el nombre correcto",
+    "addedToPantry": "¡{{name}} agregado a la despensa!",
+    "failedInitBarcode": "Error al inicializar el escáner de código de barras",
+    "detectedExpiry": "Fecha de caducidad detectada: {{date}}",
+    "couldNotParseDate": "No se pudo analizar la fecha. Por favor, ingrésala manualmente.",
+    "noExpiryFound": "No se encontró fecha de caducidad. Intenta de nuevo con mejor iluminación.",
+    "failedReadExpiry": "Error al leer la fecha de caducidad. Por favor, intenta de nuevo.",
+    "pleaseUploadImage": "Por favor, sube un archivo de imagen",
+    "imageTooLarge": "Imagen demasiado grande. Por favor, usa una imagen de menos de 10 MB.",
+    "locationGranted": "¡Acceso a ubicación concedido! Ordenando por proximidad.",
+    "locationDenied": "Acceso a ubicación denegado. Mostrando todas las ubicaciones.",
+    "geolocationUnsupported": "Geolocalización no soportada por tu navegador.",
+    "estimatedPrices": "Usando precios estimados. Los precios de IA no están disponibles temporalmente.",
+    "impactCopied": "¡Mensaje de impacto copiado al portapapeles!",
+    "pleaseSelectDonate": "Por favor, selecciona una ubicación y artículos para donar",
+    "donationRecorded": "¡Donación registrada! ¡Estás alimentando a {{count}} comidas! 🎉",
+    "databaseSyncError": "Error de sincronización de base de datos. Por favor, actualiza la página e intenta de nuevo.",
+    "failedRecordDonation": "Error al registrar la donación: {{message}}",
+    "addedToFavorites": "¡Agregado a favoritos y planificador de comidas!",
+    "failedSaveRecipe": "Error al guardar la receta",
+    "alreadyInFavorites": "¡Ya está en favoritos!",
+    "switchedToMealPlan": "¡Cambiado al Plan de Comidas! Arrastra esta receta a tu calendario.",
+    "addedCalories": "Se agregaron {{calories}} calorías de {{name}}",
+    "failedAddCalories": "Error al agregar calorías",
+    "itemAddedToPantry": "¡Artículo agregado a la despensa!",
+    "failedAddItem": "Error al agregar el artículo. Por favor, intenta de nuevo.",
+    "itemRemoved": "Artículo eliminado",
+    "pleaseEnterItemName": "Por favor, ingresa un nombre para el artículo",
+    "addedToShoppingList": "¡{{name}} agregado a la lista de compras!",
+    "failedAddItemSimple": "Error al agregar el artículo",
+    "failedAddSomeItems": "Error al agregar algunos artículos",
+    "alreadyHaveIngredients": "¡Ya tienes todos los ingredientes!"
   }
 }

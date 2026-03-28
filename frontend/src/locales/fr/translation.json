@@ -47,7 +47,12 @@
       "other": "Autre",
       "vegetables": "Légumes",
       "fruits": "Fruits",
-      "spices": "Épices"
+      "spices": "Épices",
+      "frozen": "Surgelés",
+      "pantryItems": "Articles de Garde-manger",
+      "beverages": "Boissons",
+      "snacks": "Snacks",
+      "bakery": "Boulangerie"
     },
     "units": {
       "pieces": "pièces",
@@ -63,7 +68,10 @@
       "ml": "ml",
       "cup": "tasse",
       "tbsp": "c. à soupe",
-      "tsp": "c. à thé"
+      "tsp": "c. à thé",
+      "bottles": "bouteilles",
+      "cans": "boîtes de conserve",
+      "boxes": "boîtes"
     }
   },
   "auth": {
@@ -304,7 +312,8 @@
       "cooking_oil": "huile de cuisson",
       "spices": "épices",
       "hygiene_products": "produits d'hygiène"
-    }
+    },
+    "hoursLabel": "Horaires"
   },
   "favorites": {
     "title": "Recettes Favorites",
@@ -387,5 +396,54 @@
     "step4Desc": "Faites don des articles périmés aux banques alimentaires locales et suivez votre impact",
     "letsGetStarted": "Commençons!",
     "viewAgain": "Voir la Mission à Nouveau"
+  },
+  "toasts": {
+    "addedIngredientsToShopping": "{{count}} ingrédients ajoutés à la liste de courses !",
+    "shoppingListCopied": "Liste de courses copiée dans le presse-papiers !",
+    "pantryItemUpdated": "Article du garde-manger mis à jour !",
+    "addedItemsToPantry": "{{count}} articles ajoutés au garde-manger !",
+    "foundIngredients": "{{count}} ingrédients trouvés !",
+    "noItemsDetected": "Aucun article détecté. Essayez avec une photo plus nette et mieux éclairée.",
+    "failedAnalyzeImage": "Échec de l'analyse de l'image. Veuillez réessayer.",
+    "cameraAccessDenied": "Accès à la caméra refusé. Veuillez autoriser l'accès à la caméra.",
+    "demoLoaded": "Données de démonstration chargées ! Affichage de 427 repas donnés sur 23 dons ! 🎉",
+    "allDataCleared": "Toutes les données ont été effacées !",
+    "productIdentified": "{{emoji}} Produit identifié : {{name}} !",
+    "productIdentifiedAI": "Produit identifié grâce à l'IA !",
+    "productNotFound": "Produit introuvable dans la base de données. Veuillez entrer le nom manuellement.",
+    "barcodeLookupFailed": "Échec de la recherche du code-barres. Veuillez entrer le nom de l'article.",
+    "failedStartBarcode": "Échec du démarrage du scanner de code-barres",
+    "addedWithEdit": "Article ajouté - Veuillez modifier pour ajouter le nom correct",
+    "addedToPantry": "{{name}} ajouté au garde-manger !",
+    "failedInitBarcode": "Échec de l'initialisation du scanner de code-barres",
+    "detectedExpiry": "Date de péremption détectée : {{date}}",
+    "couldNotParseDate": "Impossible d'analyser la date. Veuillez la saisir manuellement.",
+    "noExpiryFound": "Aucune date de péremption trouvée. Réessayez avec un meilleur éclairage.",
+    "failedReadExpiry": "Échec de la lecture de la date de péremption. Veuillez réessayer.",
+    "pleaseUploadImage": "Veuillez télécharger un fichier image",
+    "imageTooLarge": "Image trop grande. Veuillez utiliser une image de moins de 10 Mo.",
+    "locationGranted": "Accès à la localisation accordé ! Tri par proximité.",
+    "locationDenied": "Accès à la localisation refusé. Affichage de tous les emplacements.",
+    "geolocationUnsupported": "La géolocalisation n'est pas prise en charge par votre navigateur.",
+    "estimatedPrices": "Utilisation de prix estimés. La tarification IA est temporairement indisponible.",
+    "impactCopied": "Message d'impact copié dans le presse-papiers !",
+    "pleaseSelectDonate": "Veuillez sélectionner un emplacement et des articles à donner",
+    "donationRecorded": "Don enregistré ! Vous nourrissez {{count}} repas ! 🎉",
+    "databaseSyncError": "Erreur de synchronisation de la base de données. Veuillez actualiser la page et réessayer.",
+    "failedRecordDonation": "Échec de l'enregistrement du don : {{message}}",
+    "addedToFavorites": "Ajouté aux favoris et au planificateur de repas !",
+    "failedSaveRecipe": "Échec de l'enregistrement de la recette",
+    "alreadyInFavorites": "Déjà dans les favoris !",
+    "switchedToMealPlan": "Passé au Plan de Repas ! Faites glisser cette recette sur votre calendrier.",
+    "addedCalories": "{{calories}} calories ajoutées de {{name}}",
+    "failedAddCalories": "Échec de l'ajout des calories",
+    "itemAddedToPantry": "Article ajouté au garde-manger !",
+    "failedAddItem": "Échec de l'ajout de l'article. Veuillez réessayer.",
+    "itemRemoved": "Article supprimé",
+    "pleaseEnterItemName": "Veuillez entrer un nom pour l'article",
+    "addedToShoppingList": "{{name}} ajouté à la liste de courses !",
+    "failedAddItemSimple": "Échec de l'ajout de l'article",
+    "failedAddSomeItems": "Échec de l'ajout de certains articles",
+    "alreadyHaveIngredients": "Vous avez déjà tous les ingrédients !"
   }
 }

@@ -47,7 +47,12 @@
       "other": "その他",
       "vegetables": "野菜",
       "fruits": "果物",
-      "spices": "香辛料"
+      "spices": "香辛料",
+      "frozen": "冷凍食品",
+      "pantryItems": "パントリー品",
+      "beverages": "飲料",
+      "snacks": "スナック",
+      "bakery": "ベーカリー"
     },
     "units": {
       "pieces": "個",
@@ -63,7 +68,10 @@
       "ml": "ml",
       "cup": "カップ",
       "tbsp": "大さじ",
-      "tsp": "小さじ"
+      "tsp": "小さじ",
+      "bottles": "本",
+      "cans": "缶",
+      "boxes": "箱"
     }
   },
   "auth": {
@@ -304,7 +312,8 @@
       "cooking_oil": "食用油",
       "spices": "スパイス",
       "hygiene_products": "衛生用品"
-    }
+    },
+    "hoursLabel": "営業時間"
   },
   "favorites": {
     "title": "お気に入りレシピ",
@@ -387,5 +396,54 @@
     "step4Desc": "期限切れ間近のアイテムを地域のフードバンクに寄付して影響を追跡",
     "letsGetStarted": "始めましょう！",
     "viewAgain": "ミッションを再度見る"
+  },
+  "toasts": {
+    "addedIngredientsToShopping": "{{count}} 個の食材をショッピングリストに追加しました！",
+    "shoppingListCopied": "ショッピングリストをクリップボードにコピーしました！",
+    "pantryItemUpdated": "パントリーアイテムを更新しました！",
+    "addedItemsToPantry": "{{count}} 個のアイテムをパントリーに追加しました！",
+    "foundIngredients": "{{count}} 個の食材が見つかりました！",
+    "noItemsDetected": "アイテムが検出されませんでした。より明るい環境でより鮮明な写真を撮ってみてください。",
+    "failedAnalyzeImage": "画像の分析に失敗しました。もう一度お試しください。",
+    "cameraAccessDenied": "カメラへのアクセスが拒否されました。カメラの許可を許可してください。",
+    "demoLoaded": "デモデータを読み込みました！23回の寄付で427食を表示中！🎉",
+    "allDataCleared": "すべてのデータが削除されました！",
+    "productIdentified": "{{emoji}} 商品が識別されました：{{name}}！",
+    "productIdentifiedAI": "AIを使用して商品が識別されました！",
+    "productNotFound": "データベースに商品が見つかりませんでした。名前を手動で入力してください。",
+    "barcodeLookupFailed": "バーコードの検索に失敗しました。アイテム名を入力してください。",
+    "failedStartBarcode": "バーコードスキャナーを起動できませんでした",
+    "addedWithEdit": "アイテムが追加されました - 正しい名前を追加するために編集してください",
+    "addedToPantry": "{{name}} をパントリーに追加しました！",
+    "failedInitBarcode": "バーコードスキャナーを初期化できませんでした",
+    "detectedExpiry": "有効期限を検出しました：{{date}}",
+    "couldNotParseDate": "日付を解析できませんでした。手動で入力してください。",
+    "noExpiryFound": "有効期限が見つかりませんでした。より良い照明でもう一度お試しください。",
+    "failedReadExpiry": "有効期限の読み取りに失敗しました。もう一度お試しください。",
+    "pleaseUploadImage": "画像ファイルをアップロードしてください",
+    "imageTooLarge": "画像が大きすぎます。10MB未満の画像を使用してください。",
+    "locationGranted": "位置情報へのアクセスが許可されました！近さでソート中。",
+    "locationDenied": "位置情報へのアクセスが拒否されました。すべての場所を表示します。",
+    "geolocationUnsupported": "お使いのブラウザは位置情報をサポートしていません。",
+    "estimatedPrices": "推定価格を使用しています。AI価格設定は一時的に利用できません。",
+    "impactCopied": "インパクトメッセージをクリップボードにコピーしました！",
+    "pleaseSelectDonate": "場所と寄付するアイテムを選択してください",
+    "donationRecorded": "寄付が記録されました！{{count}} 食を提供しています！🎉",
+    "databaseSyncError": "データベース同期エラー。ページを更新してもう一度お試しください。",
+    "failedRecordDonation": "寄付の記録に失敗しました：{{message}}",
+    "addedToFavorites": "お気に入りとミールプランナーに追加しました！",
+    "failedSaveRecipe": "レシピの保存に失敗しました",
+    "alreadyInFavorites": "すでにお気に入りに入っています！",
+    "switchedToMealPlan": "ミールプランに切り替えました！このレシピをカレンダーにドラッグしてください。",
+    "addedCalories": "{{name}} から {{calories}} カロリーを追加しました",
+    "failedAddCalories": "カロリーの追加に失敗しました",
+    "itemAddedToPantry": "アイテムをパントリーに追加しました！",
+    "failedAddItem": "アイテムの追加に失敗しました。もう一度お試しください。",
+    "itemRemoved": "アイテムが削除されました",
+    "pleaseEnterItemName": "アイテム名を入力してください",
+    "addedToShoppingList": "{{name}} をショッピングリストに追加しました！",
+    "failedAddItemSimple": "アイテムの追加に失敗しました",
+    "failedAddSomeItems": "一部のアイテムの追加に失敗しました",
+    "alreadyHaveIngredients": "すべての食材がすでにあります！"
   }
 }

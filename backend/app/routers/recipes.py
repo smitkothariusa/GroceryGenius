@@ -1,4 +1,5 @@
 ﻿# backend/app/routers/recipes.py
+import json
 from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional
 from pydantic import BaseModel
@@ -129,8 +130,6 @@ async def translate_recipe_names(payload: TranslateNamesRequest):
         return []
     lang_code = payload.language.split("-")[0].lower()
     lang_name = LANGUAGE_NAMES.get(lang_code, "English")
-    if lang_name == "English":
-        return payload.names  # No translation needed
 
     names_list = "\n".join(f"{i+1}. {name}" for i, name in enumerate(payload.names))
     system = f"You are a translator. Translate recipe names to {lang_name}. Keep them as proper recipe names (not literal translations if that sounds unnatural). Return ONLY a numbered list in the same order, one name per line, with no extra text."
@@ -151,3 +150,46 @@ async def translate_recipe_names(payload: TranslateNamesRequest):
     except Exception as e:
         print("Translation error:", e)
         return payload.names
+
+
+class TranslateFullRecipesRequest(BaseModel):
+    recipes: List[dict]
+    language: str
+
+@router.post("/translate-full")
+async def translate_full_recipes(payload: TranslateFullRecipesRequest):
+    """Translate all text fields of recipe objects to the target language."""
+    if not payload.recipes:
+        return []
+    lang_code = payload.language.split("-")[0].lower()
+    lang_name = LANGUAGE_NAMES.get(lang_code, "English")
+
+    translated_recipes = []
+    for recipe in payload.recipes:
+        fields_to_translate = {
+            k: v for k, v in recipe.items()
+            if k in ("name", "ingredients", "instructions", "difficulty", "health_benefits", "budget_tip")
+            and isinstance(v, str) and v.strip()
+        }
+        if not fields_to_translate:
+            translated_recipes.append(recipe)
+            continue
+        system = (
+            f"You are a professional translator. Translate ONLY the provided JSON field values to {lang_name}. "
+            "Return ONLY valid JSON with exactly the same keys. Do not add or remove keys. "
+            "Preserve numbers, units, and formatting (newlines, numbering in steps)."
+        )
+        user = f"Translate these recipe fields to {lang_name}:\n{json.dumps(fields_to_translate, ensure_ascii=False)}"
+        try:
+            raw = await call_chat_completion(system, user, max_tokens=2000, temperature=0.3)
+            raw = raw.strip()
+            if raw.startswith("```"):
+                raw = raw.split("```")[1]
+                if raw.startswith("json"):
+                    raw = raw[4:]
+            translated_fields = json.loads(raw)
+            translated_recipes.append({**recipe, **translated_fields})
+        except Exception as e:
+            print("Full recipe translation error:", e)
+            translated_recipes.append(recipe)
+    return translated_recipes

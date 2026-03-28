@@ -47,7 +47,12 @@
       "other": "其他",
       "vegetables": "蔬菜",
       "fruits": "水果",
-      "spices": "香料"
+      "spices": "香料",
+      "frozen": "冷冻食品",
+      "pantryItems": "储藏室物品",
+      "beverages": "饮料",
+      "snacks": "零食",
+      "bakery": "烘焙食品"
     },
     "units": {
       "pieces": "个",
@@ -63,7 +68,10 @@
       "ml": "毫升",
       "cup": "杯",
       "tbsp": "汤匙",
-      "tsp": "茶匙"
+      "tsp": "茶匙",
+      "bottles": "瓶",
+      "cans": "罐",
+      "boxes": "盒"
     }
   },
   "auth": {
@@ -304,7 +312,8 @@
       "cooking_oil": "食用油",
       "spices": "香料",
       "hygiene_products": "卫生用品"
-    }
+    },
+    "hoursLabel": "营业时间"
   },
   "favorites": {
     "title": "收藏的食谱",
@@ -387,5 +396,54 @@
     "step4Desc": "将即将过期的物品捐赠给当地食物银行并追踪您的影响",
     "letsGetStarted": "让我们开始吧！",
     "viewAgain": "再次查看使命"
+  },
+  "toasts": {
+    "addedIngredientsToShopping": "已将 {{count}} 种食材添加到购物清单！",
+    "shoppingListCopied": "购物清单已复制到剪贴板！",
+    "pantryItemUpdated": "储藏室物品已更新！",
+    "addedItemsToPantry": "已将 {{count}} 件物品添加到储藏室！",
+    "foundIngredients": "找到 {{count}} 种食材！",
+    "noItemsDetected": "未检测到物品。请尝试拍摄更清晰、光线更好的照片。",
+    "failedAnalyzeImage": "图像分析失败。请重试。",
+    "cameraAccessDenied": "摄像头访问被拒绝。请允许摄像头权限。",
+    "demoLoaded": "演示数据已加载！显示 23 次捐赠中的 427 顿餐食！🎉",
+    "allDataCleared": "所有数据已清除！",
+    "productIdentified": "{{emoji}} 产品已识别：{{name}}！",
+    "productIdentifiedAI": "已通过 AI 识别产品！",
+    "productNotFound": "数据库中未找到该产品。请手动输入名称。",
+    "barcodeLookupFailed": "条形码查找失败。请输入物品名称。",
+    "failedStartBarcode": "无法启动条形码扫描仪",
+    "addedWithEdit": "物品已添加 - 请编辑以添加正确名称",
+    "addedToPantry": "{{name}} 已添加到储藏室！",
+    "failedInitBarcode": "无法初始化条形码扫描仪",
+    "detectedExpiry": "已检测到过期日期：{{date}}",
+    "couldNotParseDate": "无法解析日期。请手动输入。",
+    "noExpiryFound": "未找到过期日期。请在更好的光线下重试。",
+    "failedReadExpiry": "无法读取过期日期。请重试。",
+    "pleaseUploadImage": "请上传图片文件",
+    "imageTooLarge": "图片太大。请使用 10MB 以下的图片。",
+    "locationGranted": "位置权限已授予！按距离排序。",
+    "locationDenied": "位置权限被拒绝。显示所有地点。",
+    "geolocationUnsupported": "您的浏览器不支持地理定位。",
+    "estimatedPrices": "正在使用估算价格。AI 定价暂时不可用。",
+    "impactCopied": "影响消息已复制到剪贴板！",
+    "pleaseSelectDonate": "请选择地点和要捐赠的物品",
+    "donationRecorded": "捐赠已记录！您正在提供 {{count}} 顿餐食！🎉",
+    "databaseSyncError": "数据库同步错误。请刷新页面后重试。",
+    "failedRecordDonation": "捐赠记录失败：{{message}}",
+    "addedToFavorites": "已添加到收藏夹和餐食计划器！",
+    "failedSaveRecipe": "食谱保存失败",
+    "alreadyInFavorites": "已在收藏夹中！",
+    "switchedToMealPlan": "已切换到餐食计划！将此食谱拖到您的日历上。",
+    "addedCalories": "已从 {{name}} 添加 {{calories}} 卡路里",
+    "failedAddCalories": "添加卡路里失败",
+    "itemAddedToPantry": "物品已添加到储藏室！",
+    "failedAddItem": "添加物品失败。请重试。",
+    "itemRemoved": "物品已删除",
+    "pleaseEnterItemName": "请输入物品名称",
+    "addedToShoppingList": "{{name}} 已添加到购物清单！",
+    "failedAddItemSimple": "添加物品失败",
+    "failedAddSomeItems": "部分物品添加失败",
+    "alreadyHaveIngredients": "您已拥有所有食材！"
   }
 }

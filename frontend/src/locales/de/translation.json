@@ -47,7 +47,12 @@
       "other": "Sonstiges",
       "vegetables": "Gemüse",
       "fruits": "Obst",
-      "spices": "Gewürze"
+      "spices": "Gewürze",
+      "frozen": "Tiefkühlkost",
+      "pantryItems": "Vorratsartikel",
+      "beverages": "Getränke",
+      "snacks": "Snacks",
+      "bakery": "Bäckerei"
     },
     "units": {
       "pieces": "Stücke",
@@ -63,7 +68,10 @@
       "ml": "ml",
       "cup": "Tasse",
       "tbsp": "EL",
-      "tsp": "TL"
+      "tsp": "TL",
+      "bottles": "Flaschen",
+      "cans": "Dosen",
+      "boxes": "Schachteln"
     }
   },
   "auth": {
@@ -304,7 +312,8 @@
       "cooking_oil": "Speiseöl",
       "spices": "Gewürze",
       "hygiene_products": "Hygieneartikel"
-    }
+    },
+    "hoursLabel": "Öffnungszeiten"
   },
   "favorites": {
     "title": "Lieblingsrezepte",
@@ -387,5 +396,54 @@
     "step4Desc": "Spenden Sie ablaufende Artikel an lokale Tafeln und verfolgen Sie Ihren Einfluss",
     "letsGetStarted": "Los geht's!",
     "viewAgain": "Mission erneut ansehen"
+  },
+  "toasts": {
+    "addedIngredientsToShopping": "{{count}} Zutaten zur Einkaufsliste hinzugefügt!",
+    "shoppingListCopied": "Einkaufsliste in die Zwischenablage kopiert!",
+    "pantryItemUpdated": "Vorratskammerartikel aktualisiert!",
+    "addedItemsToPantry": "{{count}} Artikel zur Vorratskammer hinzugefügt!",
+    "foundIngredients": "{{count}} Zutaten gefunden!",
+    "noItemsDetected": "Keine Artikel erkannt. Versuche ein klareres Foto mit besserer Beleuchtung.",
+    "failedAnalyzeImage": "Bild konnte nicht analysiert werden. Bitte versuche es erneut.",
+    "cameraAccessDenied": "Kamerazugriff verweigert. Bitte erlaube den Kamerazugriff.",
+    "demoLoaded": "Demodaten geladen! Zeige 427 gespendete Mahlzeiten aus 23 Spenden! 🎉",
+    "allDataCleared": "Alle Daten wurden gelöscht!",
+    "productIdentified": "{{emoji}} Produkt identifiziert: {{name}}!",
+    "productIdentifiedAI": "Produkt mit KI identifiziert!",
+    "productNotFound": "Produkt nicht in der Datenbank gefunden. Bitte gib den Namen manuell ein.",
+    "barcodeLookupFailed": "Barcode-Suche fehlgeschlagen. Bitte gib den Artikelnamen ein.",
+    "failedStartBarcode": "Barcode-Scanner konnte nicht gestartet werden",
+    "addedWithEdit": "Artikel hinzugefügt – Bitte bearbeite, um den richtigen Namen hinzuzufügen",
+    "addedToPantry": "{{name}} zur Vorratskammer hinzugefügt!",
+    "failedInitBarcode": "Barcode-Scanner konnte nicht initialisiert werden",
+    "detectedExpiry": "Ablaufdatum erkannt: {{date}}",
+    "couldNotParseDate": "Datum konnte nicht analysiert werden. Bitte manuell eingeben.",
+    "noExpiryFound": "Kein Ablaufdatum gefunden. Versuche es erneut mit besserer Beleuchtung.",
+    "failedReadExpiry": "Ablaufdatum konnte nicht gelesen werden. Bitte versuche es erneut.",
+    "pleaseUploadImage": "Bitte lade eine Bilddatei hoch",
+    "imageTooLarge": "Bild zu groß. Bitte verwende ein Bild unter 10 MB.",
+    "locationGranted": "Standortzugriff gewährt! Sortierung nach Entfernung.",
+    "locationDenied": "Standortzugriff verweigert. Zeige alle Standorte.",
+    "geolocationUnsupported": "Geolokalisierung wird von deinem Browser nicht unterstützt.",
+    "estimatedPrices": "Schätzpreise werden verwendet. KI-Preise vorübergehend nicht verfügbar.",
+    "impactCopied": "Impact-Nachricht in die Zwischenablage kopiert!",
+    "pleaseSelectDonate": "Bitte wähle einen Standort und Artikel zum Spenden aus",
+    "donationRecorded": "Spende erfasst! Du ernährst {{count}} Mahlzeiten! 🎉",
+    "databaseSyncError": "Datenbank-Synchronisierungsfehler. Bitte lade die Seite neu und versuche es erneut.",
+    "failedRecordDonation": "Spende konnte nicht erfasst werden: {{message}}",
+    "addedToFavorites": "Zu Favoriten und Mahlzeitenplaner hinzugefügt!",
+    "failedSaveRecipe": "Rezept konnte nicht gespeichert werden",
+    "alreadyInFavorites": "Bereits in den Favoriten!",
+    "switchedToMealPlan": "Zum Mahlzeitenplan gewechselt! Ziehe dieses Rezept auf deinen Kalender.",
+    "addedCalories": "{{calories}} Kalorien von {{name}} hinzugefügt",
+    "failedAddCalories": "Kalorien konnten nicht hinzugefügt werden",
+    "itemAddedToPantry": "Artikel zur Vorratskammer hinzugefügt!",
+    "failedAddItem": "Artikel konnte nicht hinzugefügt werden. Bitte versuche es erneut.",
+    "itemRemoved": "Artikel entfernt",
+    "pleaseEnterItemName": "Bitte gib einen Artikelnamen ein",
+    "addedToShoppingList": "{{name}} zur Einkaufsliste hinzugefügt!",
+    "failedAddItemSimple": "Artikel konnte nicht hinzugefügt werden",
+    "failedAddSomeItems": "Einige Artikel konnten nicht hinzugefügt werden",
+    "alreadyHaveIngredients": "Du hast bereits alle Zutaten!"
   }
 }

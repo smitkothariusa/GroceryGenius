@@ -575,15 +575,37 @@ const App: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Clear cached recipes and translate saved recipe names when language changes
+  // When language changes: translate existing recipe cards in-place, or clear if none
   useEffect(() => {
-    setRecipes([]);
-    if (favorites.length === 0) return;
+    setSelectedRecipe(null);
+    setShowDetailedView(false);
+    setRecipes(current => {
+      if (current.length === 0) return current;
+      // Kick off translation asynchronously; show loading while it runs
+      setRecipeLoading(true);
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      fetch(`${API_BASE_URL}/recipes/translate-full`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipes: current, language: i18n.language }),
+      })
+        .then(r => r.json())
+        .then((translated: Recipe[]) => {
+          setRecipes(translated);
+        })
+        .catch(() => {
+          setRecipes([]);
+        })
+        .finally(() => setRecipeLoading(false));
+      return current; // keep showing old recipes until translation resolves
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [i18n.language]);
+
+  // Translate saved recipe names whenever language OR favorites change
+  useEffect(() => {
+    if (favorites.length === 0) { setTranslatedFavoriteNames({}); return; }
     const lang = i18n.language.split('-')[0];
-    if (lang === 'en') {
-      setTranslatedFavoriteNames({});
-      return;
-    }
     const names = favorites.map(f => f.name);
     fetch(`${API_BASE}/recipes/translate-names`, {
       method: 'POST',
@@ -888,13 +910,13 @@ const App: React.FC = () => {
         }));
 
         setShoppingList(prev => [...prev, ...newItems]);
-        success(`Added ${newItems.length} ingredients to shopping list!`);
+        success(t('toasts.addedIngredientsToShopping', { count: newItems.length }));
       } catch (error) {
         console.error('Error adding shopping items:', error);
-        warning('Failed to add some items');
+        warning(t('toasts.failedAddSomeItems'));
       }
     } else {
-      info('You already have all ingredients!');
+      info(t('toasts.alreadyHaveIngredients'));
     }
   };
 
@@ -947,7 +969,7 @@ const App: React.FC = () => {
       }
     } else {
       navigator.clipboard.writeText(text);
-      success('Shopping list copied to clipboard!');
+      success(t('toasts.shoppingListCopied'));
     }
   };
 
@@ -1027,7 +1049,7 @@ const App: React.FC = () => {
           : item
       ));
     
-    success('Pantry item updated!');
+    success(t('toasts.pantryItemUpdated'));
     setShowEditPantry(false);
     setEditingPantryItem(null);
     setNewPantryItem({ name: '', quantity: 1, unit: 'pc', category: 'other', expiryDate: '' });
@@ -1135,8 +1157,8 @@ const App: React.FC = () => {
                   }));
                   
                   setPantry(prev => [...prev, ...newPantryItems]);
-                  success(`Added ${data.ingredients.length} items to pantry: ${data.ingredients.join(', ')}`);
-                  
+                  success(t('toasts.addedItemsToPantry', { count: data.ingredients.length }));
+
                   // Switch to pantry tab
                   setCurrentTab('pantry');
                 } else {
@@ -1144,21 +1166,21 @@ const App: React.FC = () => {
                   const newIngredients = data.ingredients.filter(
                     (ing: string) => !ingredientTags.includes(ing.toLowerCase())
                   );
-                  
+
                   setIngredientTags(prev => [...prev, ...newIngredients]);
-                  success(`Found ${data.ingredients.length} ingredients: ${data.ingredients.join(', ')}`);
-                  
+                  success(t('toasts.foundIngredients', { count: data.ingredients.length }));
+
                   // Switch to recipes tab
                   setCurrentTab('recipes');
                 }
-                
+
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               } else {
-                warning('No items detected. Try a clearer photo with better lighting.');
+                warning(t('toasts.noItemsDetected'));
               }
             } catch (err) {
               console.error('Image analysis error:', err);
-              error('Failed to analyze image. Please try again.');
+              error(t('toasts.failedAnalyzeImage'));
             } finally {
               setRecipeLoading(false);
             }
@@ -1176,7 +1198,7 @@ const App: React.FC = () => {
 
     } catch (err) {
       console.error('Camera access error:', err);
-      error('Camera access denied. Please allow camera permissions.');
+      error(t('toasts.cameraAccessDenied'));
     }
   };
   const loadDemoData = () => {
@@ -1285,14 +1307,14 @@ const App: React.FC = () => {
     setDonationImpact(demoImpact);
     setFavorites(demoFavorites);
     
-    success('Demo data loaded! Showing 427 meals donated across 23 donations! 🎉');
+    success(t('toasts.demoLoaded'));
     setShowDemoConfirm(false);
     setPantry(demoPantry);
     setDonationHistory(demoDonations);
     setDonationImpact(demoImpact);
     setFavorites(demoFavorites);
     
-    success('Demo data loaded! Showing 427 meals donated across 23 donations! 🎉');
+    success(t('toasts.demoLoaded'));
     setShowDemoConfirm(false);
     
     // Show mission popup after demo loads
@@ -1308,7 +1330,7 @@ const App: React.FC = () => {
     setFavorites([]);
     setShoppingList([]);
     setRecipes([]);
-    success('All data cleared!');
+    success(t('toasts.allDataCleared'));
   };
   const lookupBarcodeWithImage = async (imageData: string) => {
     try {
@@ -1357,7 +1379,7 @@ const App: React.FC = () => {
             console.log('✅ Found from Vision AI:', visionData.name);
             console.log('📊 Barcode read:', visionData.barcode);
             const confidenceEmoji = visionData.confidence === 'high' ? '💯' : visionData.confidence === 'medium' ? '✅' : '⚠️';
-            success(`${confidenceEmoji} Product identified: ${visionData.name}!`);
+            success(t('toasts.productIdentified', { emoji: confidenceEmoji, name: visionData.name }));
             return {
               name: visionData.name.trim(),
               category: visionData.category || 'other',
@@ -1403,7 +1425,7 @@ const App: React.FC = () => {
           
           if (aiData.name && aiData.name.trim() && !aiData.name.includes('Unknown Product')) {
             console.log('✅ Found from OpenAI:', aiData.name);
-            success('Product identified using AI!');
+            success(t('toasts.productIdentifiedAI'));
             return {
               name: aiData.name.trim(),
               category: aiData.category || 'other',
@@ -1534,7 +1556,7 @@ const App: React.FC = () => {
       
       // All APIs failed - return placeholder
       console.log('⚠️ Product not found in any database');
-      warning('Product not found in database. Please enter the name manually.');
+      warning(t('toasts.productNotFound'));
       return {
         name: `Item ${barcode.substring(barcode.length - 6)}`,
         category: 'other',
@@ -1543,7 +1565,7 @@ const App: React.FC = () => {
       
     } catch (error) {
       console.error('💥 Barcode lookup error:', error);
-      warning('Barcode lookup failed. Please enter the item name.');
+      warning(t('toasts.barcodeLookupFailed'));
       return {
         name: `Item ${barcode.substring(barcode.length - 6)}`,
         category: 'other',
@@ -1625,7 +1647,7 @@ const App: React.FC = () => {
       }, (err: any) => {
         if (err) {
           console.error('Quagga initialization error:', err);
-          error('Failed to start barcode scanner');
+          error(t('toasts.failedStartBarcode'));
           if (document.body.contains(scannerDiv)) {
             document.body.removeChild(scannerDiv);
           }
@@ -1806,9 +1828,9 @@ const App: React.FC = () => {
         
         // Show success message
         if (productInfo.name.includes('Scanned Item')) {
-          success(`Added "${productInfo.name}" - Please edit to add proper name`);
+          success(t('toasts.addedWithEdit'));
         } else {
-          success(`Added ${productInfo.name} to pantry!${expiryDate ? ' (Expiry auto-set)' : ''}`);
+          success(t('toasts.addedToPantry', { name: productInfo.name }));
         }
         
         setShowImageUpload(false);
@@ -1817,7 +1839,7 @@ const App: React.FC = () => {
       
     } catch (err) {
       console.error('Barcode scanner error:', err);
-      error('Failed to initialize barcode scanner');
+      error(t('toasts.failedInitBarcode'));
       setBarcodeScanning(false);
     }
   };
@@ -1957,8 +1979,8 @@ const App: React.FC = () => {
           if (parsedDate && !isNaN(parsedDate.getTime())) {
             const formattedDate = parsedDate.toISOString().split('T')[0];
             setDetectedExpiry(formattedDate);
-            success(`Detected expiration date: ${formattedDate}`);
-            
+            success(t('toasts.detectedExpiry', { date: formattedDate }));
+
             setNewPantryItem(prev => ({
               ...prev,
               expiryDate: formattedDate
@@ -1977,23 +1999,23 @@ const App: React.FC = () => {
             if (!isNaN(dateObj.getTime())) {
               const formattedDate = dateObj.toISOString().split('T')[0];
               setDetectedExpiry(formattedDate);
-              success(`Detected expiration date: ${formattedDate}`);
-              
+              success(t('toasts.detectedExpiry', { date: formattedDate }));
+
               setNewPantryItem(prev => ({
                 ...prev,
                 expiryDate: formattedDate
               }));
               setShowAddPantry(true);
             } else {
-              warning('Could not parse date. Please enter manually.');
+              warning(t('toasts.couldNotParseDate'));
             }
           } else {
-            warning('No expiration date found. Try again with better lighting.');
+            warning(t('toasts.noExpiryFound'));
           }
 
         } catch (err) {
           console.error('OCR error:', err);
-          error('Failed to read expiration date. Please try again.');
+          error(t('toasts.failedReadExpiry'));
         } finally {
           setRecipeLoading(false);
           setShowImageUpload(false);
@@ -2011,7 +2033,7 @@ const App: React.FC = () => {
 
     } catch (err) {
       console.error('Camera access error:', err);
-      error('Camera access denied. Please allow camera permissions.');
+      error(t('toasts.cameraAccessDenied'));
       setExpiryScanning(false);
     }
   };
@@ -2021,13 +2043,13 @@ const App: React.FC = () => {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      error('Please upload an image file');
+      error(t('toasts.pleaseUploadImage'));
       return;
     }
 
     // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      error('Image too large. Please use an image under 10MB');
+      error(t('toasts.imageTooLarge'));
       return;
     }
 
@@ -2062,8 +2084,8 @@ const App: React.FC = () => {
           }));
           
           setPantry(prev => [...prev, ...newPantryItems]);
-          success(`Added ${data.ingredients.length} items to pantry: ${data.ingredients.join(', ')}`);
-          
+          success(t('toasts.addedItemsToPantry', { count: data.ingredients.length }));
+
           // Close modal and switch to pantry tab
           setShowImageUpload(false);
           setCurrentTab('pantry');
@@ -2072,24 +2094,24 @@ const App: React.FC = () => {
           const newIngredients = data.ingredients.filter(
             (ing: string) => !ingredientTags.includes(ing.toLowerCase())
           );
-          
+
           setIngredientTags(prev => [...prev, ...newIngredients]);
-          success(`Found ${data.ingredients.length} ingredients: ${data.ingredients.join(', ')}`);
-          
+          success(t('toasts.foundIngredients', { count: data.ingredients.length }));
+
           // Close modal and switch to recipes tab
           setShowImageUpload(false);
           setCurrentTab('recipes');
         }
-        
+
         // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        warning('No items detected. Try a clearer photo with better lighting.');
+        warning(t('toasts.noItemsDetected'));
       }
 
     } catch (err) {
       console.error('Image analysis error:', err);
-      error('Failed to analyze image. Please try again.');
+      error(t('toasts.failedAnalyzeImage'));
     } finally {
       setRecipeLoading(false);
       // Reset file input
@@ -2111,17 +2133,17 @@ const App: React.FC = () => {
           localStorage.setItem('locationPermission', 'granted');
           localStorage.setItem('userLocation', JSON.stringify(location));
           
-          success('Location access granted! Sorting by proximity.');
+          success(t('toasts.locationGranted'));
         },
         (error) => {
           setLocationPermission('denied');
           localStorage.setItem('locationPermission', 'denied');
           localStorage.removeItem('userLocation');
-          warning('Location access denied. Showing all locations.');
+          warning(t('toasts.locationDenied'));
         }
       );
     } else {
-      warning('Geolocation not supported by your browser.');
+      warning(t('toasts.geolocationUnsupported'));
       setLocationPermission('denied');
       localStorage.setItem('locationPermission', 'denied');
     }
@@ -2228,7 +2250,7 @@ const App: React.FC = () => {
           walmart: itemCount * 2.8,
           loading: false
         });
-        info('Using estimated prices. AI pricing temporarily unavailable.');
+        info(t('toasts.estimatedPrices'));
       }
     }
   };
@@ -2274,14 +2296,14 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
       );
     } else if (platform === 'copy') {
       navigator.clipboard.writeText(text + '\n\n' + url);
-      success('Impact message copied to clipboard!');
+      success(t('toasts.impactCopied'));
     }
     
     setShowShareModal(false);
   };
   const handleDonation = async (location: FoodBank | DropOffSite | null, items: PantryItem[]) => {
       if (!location || items.length === 0) {
-        warning('Please select a location and items to donate');
+        warning(t('toasts.pleaseSelectDonate'));
         return;
       }
 
@@ -2378,7 +2400,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
         console.log('✅ Donation complete!');
 
-        success(`Donation recorded! You're feeding ${totalMeals} meals! 🎉`);
+        success(t('toasts.donationRecorded', { count: totalMeals }));
         setShowDonationModal(false);
         setSelectedFoodBank(null);
         setSelectedDropOffSite(null);
@@ -2397,9 +2419,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
         
         // Show specific error message
         if (err.code === '23505') {
-          error('Database sync error. Please refresh the page and try again.');
+          error(t('toasts.databaseSyncError'));
         } else {
-          error(`Failed to record donation: ${err.message || 'Please try again.'}`);
+          error(t('toasts.failedRecordDonation', { message: err.message || t('common.error') }));
         }
       }
     };
@@ -2851,13 +2873,13 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                               id: savedRecipe.id,
                               savedDate: savedRecipe.created_at,
                             }]);
-                            success('Added to favorites & meal planner!');
+                            success(t('toasts.addedToFavorites'));
                           } catch (error) {
                             console.error('Error saving recipe:', error);
-                            warning('Failed to save recipe');
+                            warning(t('toasts.failedSaveRecipe'));
                           }
                         } else {
-                          info('Already in favorites!');
+                          info(t('toasts.alreadyInFavorites'));
                         }
                       }} style={{
                         flex: isMobile ? '1' : 'initial',
@@ -2871,7 +2893,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       <button onClick={() => {
                         setCurrentTab('mealplan');
                         window.scrollTo({ top: 0, behavior: 'smooth' });
-                        info('Switched to Meal Plan! Drag this recipe onto your calendar.');
+                        info(t('toasts.switchedToMealPlan'));
                       }} style={{
                         flex: isMobile ? '1' : 'initial',
                         padding: '0.75rem',
@@ -2891,10 +2913,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                             // Update local state
                             setTodayCalories(prev => prev + calories);
                             
-                            success(`Added ${calories} calories from ${recipe.name}`);
+                            success(t('toasts.addedCalories', { calories, name: recipe.name }));
                           } catch (err) {
                             console.error('Error logging calories:', err);
-                            error('Failed to add calories');
+                            error(t('toasts.failedAddCalories'));
                           }
                         }} style={{
                           flex: isMobile ? '1' : 'initial',
@@ -2959,11 +2981,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               
               // Show success message AFTER with a small delay
               setTimeout(() => {
-                success(`Added ${newItems.length} ingredients to shopping list!`);
+                success(t('toasts.addedIngredientsToShopping', { count: newItems.length }));
               }, 300);
             } catch (error) {
               console.error('Error adding to shopping list:', error);
-              warning('Failed to add some items to shopping list');
+              warning(t('toasts.failedAddSomeItems'));
             }
           }}
         />
@@ -3339,8 +3361,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     }}
                   >
                     <option value="pc">{t('pantry.units.pieces')}</option>
-                    <option value="kg">kg</option>
-                    <option value="lbs">lbs</option>
+                    <option value="kg">{t('pantry.units.kg')}</option>
+                    <option value="lbs">{t('pantry.units.lbs')}</option>
                     <option value="cups">{t('pantry.units.cups')}</option>
                   </select>
                 </div>
@@ -3384,10 +3406,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
                       setNewPantryItem({ name: '', quantity: 1, unit: 'pc', category: 'other', expiryDate: '' });
                       setShowAddPantry(false);
-                      success('Item added to pantry!');
+                      success(t('toasts.itemAddedToPantry'));
                     } catch (error) {
                       console.error('Error adding pantry item:', error);
-                      warning('Failed to add item. Please try again.');
+                      warning(t('toasts.failedAddItem'));
                     }
                   }}
                   style={{
@@ -3508,12 +3530,12 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                               
                               // Always remove from local state
                               setPantry(prev => prev.filter(i => i.id !== item.id));
-                              success('Item removed');
+                              success(t('toasts.itemRemoved'));
                             } catch (error) {
                               console.error('Error deleting pantry item:', error);
                               // Still remove from local state even if database delete fails
                               setPantry(prev => prev.filter(i => i.id !== item.id));
-                              success('Item removed');
+                              success(t('toasts.itemRemoved'));
                             }
                           }} 
                         style={{
@@ -4438,7 +4460,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           fontSize: isMobile ? '0.75rem' : '0.875rem', 
                           marginTop: '0.25rem' 
                         }}>
-                          🕐 {bank.hours}
+                          🕐 {t('donate.hoursLabel')}: {bank.hours}
                         </div>
                       </div>
                       <button
@@ -4569,7 +4591,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                                 fontSize: isMobile ? '0.75rem' : '0.875rem',
                                 marginTop: '0.25rem'
                               }}>
-                                🕐 {site.hours}
+                                🕐 {t('donate.hoursLabel')}: {site.hours}
                               </div>
                             </div>
                             <button
@@ -4846,15 +4868,15 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       boxSizing: 'border-box'
                     }}
                   >
-                    <option value="pc">pieces</option>
-                    <option value="lbs">lbs</option>
-                    <option value="kg">kg</option>
-                    <option value="cups">cups</option>
-                    <option value="oz">oz</option>
-                    <option value="g">grams</option>
-                    <option value="bottles">bottles</option>
-                    <option value="cans">cans</option>
-                    <option value="boxes">boxes</option>
+                    <option value="pc">{t('pantry.units.pieces')}</option>
+                    <option value="lbs">{t('pantry.units.lbs')}</option>
+                    <option value="kg">{t('pantry.units.kg')}</option>
+                    <option value="cups">{t('pantry.units.cups')}</option>
+                    <option value="oz">{t('pantry.units.oz')}</option>
+                    <option value="g">{t('pantry.units.grams')}</option>
+                    <option value="bottles">{t('pantry.units.bottles')}</option>
+                    <option value="cans">{t('pantry.units.cans')}</option>
+                    <option value="boxes">{t('pantry.units.boxes')}</option>
                   </select>
                 </div>
               </div>
@@ -4877,15 +4899,15 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     boxSizing: 'border-box'
                   }}
                 >
-                  <option value="produce">🥬 Produce</option>
-                  <option value="dairy">🥛 Dairy</option>
-                  <option value="meat">🍖 Meat</option>
-                  <option value="frozen">🧊 Frozen</option>
-                  <option value="pantry">🏺 Pantry</option>
-                  <option value="beverages">🥤 Beverages</option>
-                  <option value="snacks">🍿 Snacks</option>
-                  <option value="bakery">🥖 Bakery</option>
-                  <option value="other">📦 Other</option>
+                  <option value="produce">🥬 {t('pantry.categories.produce')}</option>
+                  <option value="dairy">🥛 {t('pantry.categories.dairy')}</option>
+                  <option value="meat">🍖 {t('pantry.categories.meat')}</option>
+                  <option value="frozen">🧊 {t('pantry.categories.frozen')}</option>
+                  <option value="pantry">🏺 {t('pantry.categories.pantryItems')}</option>
+                  <option value="beverages">🥤 {t('pantry.categories.beverages')}</option>
+                  <option value="snacks">🍿 {t('pantry.categories.snacks')}</option>
+                  <option value="bakery">🥖 {t('pantry.categories.bakery')}</option>
+                  <option value="other">📦 {t('pantry.categories.other')}</option>
                 </select>
               </div>
             </div>
@@ -4914,7 +4936,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               <button
                 onClick={async () => {
                   if (!newShoppingItem.name.trim()) {
-                    warning('Please enter an item name');
+                    warning(t('toasts.pleaseEnterItemName'));
                     return;
                   }
 
@@ -4939,10 +4961,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       priority: savedItem.priority as 'high' | 'medium' | 'low'
                     }]);
 
-                    success(`Added ${newShoppingItem.name} to shopping list!`);
+                    success(t('toasts.addedToShoppingList', { name: newShoppingItem.name }));
                   } catch (error) {
                     console.error('Error adding shopping item:', error);
-                    warning('Failed to add item');
+                    warning(t('toasts.failedAddItemSimple'));
                   }
                   setNewShoppingItem({ name: '', quantity: 1, unit: 'pc', category: 'other' });
                   setShowAddShopping(false);
@@ -5876,7 +5898,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               <button 
                 onClick={async () => {
                   if ((!selectedFoodBank && !selectedDropOffSite) || itemsToDonate.length === 0) {
-                    warning('Please select a location and items to donate');
+                    warning(t('toasts.pleaseSelectDonate'));
                     return;
                   }
                   

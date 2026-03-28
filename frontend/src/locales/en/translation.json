@@ -47,7 +47,12 @@
       "other": "Other",
       "vegetables": "Vegetables",
       "fruits": "Fruits",
-      "spices": "Spices"
+      "spices": "Spices",
+      "frozen": "Frozen",
+      "pantryItems": "Pantry Items",
+      "beverages": "Beverages",
+      "snacks": "Snacks",
+      "bakery": "Bakery"
     },
     "units": {
       "pieces": "pieces",
@@ -63,7 +68,10 @@
       "ml": "ml",
       "cup": "cup",
       "tbsp": "tbsp",
-      "tsp": "tsp"
+      "tsp": "tsp",
+      "bottles": "bottles",
+      "cans": "cans",
+      "boxes": "boxes"
     }
   },
   "auth": {
@@ -304,7 +312,8 @@
       "cooking_oil": "cooking oil",
       "spices": "spices",
       "hygiene_products": "hygiene products"
-    }
+    },
+    "hoursLabel": "Hours"
   },
   "favorites": {
     "title": "Favorite Recipes",
@@ -387,5 +396,54 @@
     "step4Desc": "Donate expiring items to local food banks and track your impact",
     "letsGetStarted": "Let's Get Started!",
     "viewAgain": "View Mission Again"
+  },
+  "toasts": {
+    "addedIngredientsToShopping": "Added {{count}} ingredients to shopping list!",
+    "shoppingListCopied": "Shopping list copied to clipboard!",
+    "pantryItemUpdated": "Pantry item updated!",
+    "addedItemsToPantry": "Added {{count}} items to pantry!",
+    "foundIngredients": "Found {{count}} ingredients!",
+    "noItemsDetected": "No items detected. Try a clearer photo with better lighting.",
+    "failedAnalyzeImage": "Failed to analyze image. Please try again.",
+    "cameraAccessDenied": "Camera access denied. Please allow camera permissions.",
+    "demoLoaded": "Demo data loaded! Showing 427 meals donated across 23 donations! 🎉",
+    "allDataCleared": "All data cleared!",
+    "productIdentified": "{{emoji}} Product identified: {{name}}!",
+    "productIdentifiedAI": "Product identified using AI!",
+    "productNotFound": "Product not found in database. Please enter the name manually.",
+    "barcodeLookupFailed": "Barcode lookup failed. Please enter the item name.",
+    "failedStartBarcode": "Failed to start barcode scanner",
+    "addedWithEdit": "Item added - Please edit to add the proper name",
+    "addedToPantry": "Added {{name}} to pantry!",
+    "failedInitBarcode": "Failed to initialize barcode scanner",
+    "detectedExpiry": "Detected expiration date: {{date}}",
+    "couldNotParseDate": "Could not parse date. Please enter manually.",
+    "noExpiryFound": "No expiration date found. Try again with better lighting.",
+    "failedReadExpiry": "Failed to read expiration date. Please try again.",
+    "pleaseUploadImage": "Please upload an image file",
+    "imageTooLarge": "Image too large. Please use an image under 10MB",
+    "locationGranted": "Location access granted! Sorting by proximity.",
+    "locationDenied": "Location access denied. Showing all locations.",
+    "geolocationUnsupported": "Geolocation not supported by your browser.",
+    "estimatedPrices": "Using estimated prices. AI pricing temporarily unavailable.",
+    "impactCopied": "Impact message copied to clipboard!",
+    "pleaseSelectDonate": "Please select a location and items to donate",
+    "donationRecorded": "Donation recorded! You're feeding {{count}} meals! 🎉",
+    "databaseSyncError": "Database sync error. Please refresh the page and try again.",
+    "failedRecordDonation": "Failed to record donation: {{message}}",
+    "addedToFavorites": "Added to favorites & meal planner!",
+    "failedSaveRecipe": "Failed to save recipe",
+    "alreadyInFavorites": "Already in favorites!",
+    "switchedToMealPlan": "Switched to Meal Plan! Drag this recipe onto your calendar.",
+    "addedCalories": "Added {{calories}} calories from {{name}}",
+    "failedAddCalories": "Failed to add calories",
+    "itemAddedToPantry": "Item added to pantry!",
+    "failedAddItem": "Failed to add item. Please try again.",
+    "itemRemoved": "Item removed",
+    "pleaseEnterItemName": "Please enter an item name",
+    "addedToShoppingList": "Added {{name}} to shopping list!",
+    "failedAddItemSimple": "Failed to add item",
+    "failedAddSomeItems": "Failed to add some items",
+    "alreadyHaveIngredients": "You already have all ingredients!"
   }
 }

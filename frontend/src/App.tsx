@@ -112,6 +112,8 @@ const App: React.FC = () => {
   const [recipeServings, setRecipeServings] = useState<number | ''>(2);  
   const [ingredientTags, setIngredientTags] = useState<string[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const recipesRef = useRef<Recipe[]>([]);
+  recipesRef.current = recipes;
   const [errorMsg, setErrorMsg] = useState('');
   const [dietaryFilter, setDietaryFilter] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -575,31 +577,23 @@ const App: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // When language changes: translate existing recipe cards in-place, or clear if none
+  // When language changes: translate existing recipe cards in-place
   useEffect(() => {
     setSelectedRecipe(null);
     setShowDetailedView(false);
-    setRecipes(current => {
-      if (current.length === 0) return current;
-      // Kick off translation asynchronously; show loading while it runs
-      setRecipeLoading(true);
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      fetch(`${API_BASE_URL}/recipes/translate-full`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipes: current, language: i18n.language }),
-      })
-        .then(r => r.json())
-        .then((translated: Recipe[]) => {
-          setRecipes(translated);
-        })
-        .catch(() => {
-          setRecipes([]);
-        })
-        .finally(() => setRecipeLoading(false));
-      return current; // keep showing old recipes until translation resolves
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    const currentRecipes = recipesRef.current;
+    if (currentRecipes.length === 0) return;
+    setRecipeLoading(true);
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    fetch(`${API_BASE_URL}/recipes/translate-full`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recipes: currentRecipes, language: i18n.language }),
+    })
+      .then(r => r.json())
+      .then((translated: Recipe[]) => { setRecipes(translated); })
+      .catch(() => { /* keep existing recipes on error */ })
+      .finally(() => setRecipeLoading(false));
   }, [i18n.language]);
 
   // Translate saved recipe names whenever language OR favorites change
@@ -3858,7 +3852,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       
                       // Always remove from local state first (optimistic update)
                       setShoppingList(prev => prev.filter(i => i.id !== item.id));
-                      success('Item removed!');
+                      success(t('notifications.itemRemoved'));
                       
                       // Then try to delete from database in background
                       try {
@@ -3950,10 +3944,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       try {
                         await recipesService.delete(recipe.id);
                         setFavorites(prev => prev.filter(f => f.id !== recipe.id));
-                        success('Recipe removed');
+                        success(t('notifications.recipeRemoved'));
                       } catch (error) {
                         console.error('Error deleting recipe:', error);
-                        warning('Failed to remove recipe');
+                        warning(t('notifications.error'));
                       }
                     }} style={{
                       background: '#fee2e2', color: '#dc2626', border: 'none',
@@ -4797,7 +4791,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         priority: 'medium'
                       };
                       setShoppingList(prev => [...prev, item]);
-                      success(`Added ${newShoppingItem.name} to shopping list!`);
+                      success(t('toasts.addedToShoppingList', { name: newShoppingItem.name }));
                       setNewShoppingItem({ name: '', quantity: 1, unit: 'pc', category: 'other' });
                       setShowAddShopping(false);
                     }
@@ -5551,36 +5545,36 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   setTodayCalories(prev => Math.max(0, prev + amount));
                   setManualCalorieInput('');
                   
-                  success(amount > 0 ? `Added ${amount} calories` : `Subtracted ${Math.abs(amount)} calories`);
+                  success(t('toasts.addedCalories', { name: 'Manual', calories: amount }));
                 } catch (err) {
                   console.error('Error logging calories:', err);
-                  error('Failed to log calories');
+                  error(t('toasts.failedAddCalories'));
                 }
               }} style={{
-                padding: '0.75rem 1rem', 
-                background: '#3b82f6', 
+                padding: '0.75rem 1rem',
+                background: '#3b82f6',
                 color: 'white',
-                border: 'none', 
-                borderRadius: '8px', 
-                cursor: 'pointer', 
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
                 fontWeight: '600'
               }}>+</button>
               <button onClick={async () => {
                 const amount = parseInt(manualCalorieInput);
                 if (isNaN(amount) || amount === 0) return;
-                
+
                 try {
                   // Log negative to Supabase
                   await calorieService.logCalories(-Math.abs(amount), 'manual', 'Manual subtraction');
-                  
+
                   // Update local state
                   setTodayCalories(prev => Math.max(0, prev - Math.abs(amount)));
                   setManualCalorieInput('');
-                  
-                  success(`Subtracted ${Math.abs(amount)} calories`);
+
+                  success(t('toasts.addedCalories', { name: 'Manual', calories: -Math.abs(amount) }));
                 } catch (err) {
                   console.error('Error logging calories:', err);
-                  error('Failed to log calories');
+                  error(t('toasts.failedAddCalories'));
                 }
               }} style={{
                 padding: '0.75rem 1rem', 
@@ -5608,7 +5602,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   success(t('calorieTracker.caloriesReset'));
                 } catch (err) {
                   console.error('Error resetting calories:', err);
-                  error('Failed to reset calories');
+                  error(t('notifications.error'));
                 }
               }} style={{
                 flex: 1, padding: '0.75rem', background: '#ef4444', color: 'white',

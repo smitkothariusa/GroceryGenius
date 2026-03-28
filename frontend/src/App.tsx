@@ -2646,7 +2646,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               {errorMsg && <div style={{ background: '#fee2e2', color: '#dc2626', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #dc2626' }}>{errorMsg}</div>}
             </div>
 
-            {recipeLoading && (
+            {recipeLoading && recipes.length === 0 && (
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
                 {[1, 2, 3].map(i => (
                   <div key={i} style={{
@@ -5028,7 +5028,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             }}>×</button>
 
             <h2 style={{ marginBottom: '1.5rem', fontSize: '2rem', fontWeight: '700', paddingRight: '3rem' }}>
-              {selectedRecipe.name}
+              {(selectedRecipe as FavoriteRecipe).id && translatedFavoriteNames[(selectedRecipe as FavoriteRecipe).id]
+                ? translatedFavoriteNames[(selectedRecipe as FavoriteRecipe).id]
+                : selectedRecipe.name}
             </h2>
 
             <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', flexWrap: 'wrap' }}>

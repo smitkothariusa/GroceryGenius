@@ -438,15 +438,15 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
           gap: isMobile ? '0.75rem' : '1rem',
           marginBottom: isMobile ? '1rem' : '1.5rem'
         }}>
-          <div style={{ background: 'linear-gradient(135deg, #ED8B00 0%, #c67600 100%)', padding: '1rem', borderRadius: '12px', color: 'white' }}>
+          <div style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '1rem', borderRadius: '12px', color: 'white' }}>
             <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>{t('mealPlan.mealsPlanned')}</div>
             <div style={{ fontSize: '2rem', fontWeight: '700' }}>{stats.mealsPlanned}/21</div>
           </div>
-          <div style={{ background: '#789A01', padding: '1rem', borderRadius: '12px', color: 'white' }}>
+          <div style={{ background: '#10b981', padding: '1rem', borderRadius: '12px', color: 'white' }}>
             <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>{t('mealPlan.totalCalories')}</div>
             <div style={{ fontSize: '2rem', fontWeight: '700' }}>{stats.totalCalories.toLocaleString()}</div>
           </div>
-          <div style={{ background: '#ED8B00', padding: '1rem', borderRadius: '12px', color: 'white' }}>
+          <div style={{ background: '#3b82f6', padding: '1rem', borderRadius: '12px', color: 'white' }}>
             <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>{t('mealPlan.avgCalDay')}</div>
             <div style={{ fontSize: '2rem', fontWeight: '700' }}>{stats.avgCaloriesPerDay}</div>
           </div>
@@ -457,7 +457,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
         </div>
 
         <button onClick={generateWeekShoppingList} style={{
-          padding: '0.75rem 1.5rem', background: 'linear-gradient(45deg, #789A01, #5c7300)',
+          padding: '0.75rem 1.5rem', background: 'linear-gradient(45deg, #10b981, #059669)',
           color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer',
           fontWeight: '600', fontSize: '1rem', width: '100%'
         }}>
@@ -466,13 +466,13 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
       </div>
       {isMobile && savedRecipes.length > 0 && (
         <div style={{
-          background: '#fff9f0',
+          background: '#eff6ff',
           padding: '0.75rem',
           borderRadius: '8px',
           marginTop: '1rem',
-          border: '1px solid #ffd9a0',
+          border: '1px solid #bfdbfe',
           fontSize: '0.75rem',
-          color: '#c67600',
+          color: '#1e40af',
           textAlign: 'center'
         }}>
           💡 <strong>{t('mealPlan.mobileTip')}:</strong> {t('mealPlan.mobileTipMessage')}
@@ -532,11 +532,11 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
                   }}
                   style={{
                     padding: isMobile ? '0.65rem' : '0.75rem',
-                    background: isMobile && draggedRecipe?.id === recipe.id ? '#fff3e0' : 'white',
+                    background: isMobile && draggedRecipe?.id === recipe.id ? '#dbeafe' : 'white',
                     marginBottom: '0.5rem',
                     borderRadius: '8px',
                     border: isMobile && draggedRecipe?.id === recipe.id 
-                      ? '2px solid #ED8B00' 
+                      ? '2px solid #3b82f6' 
                       : '2px solid #e5e7eb',
                     cursor: isMobile ? 'pointer' : 'grab',
                     transition: 'all 0.2s'
@@ -637,7 +637,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
                     >
                       {meal ? (
                         <div style={{
-                          background: meal.completed ? '#f4f8e6' : 'linear-gradient(135deg, #ED8B00 0%, #c67600 100%)',
+                          background: meal.completed ? '#f0fdf4' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                           color: meal.completed ? '#166534' : 'white',
                           padding: isMobile ? '0.5rem' : '0.75rem',
                           borderRadius: '8px',
@@ -716,8 +716,8 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
                     transition: 'all 0.2s'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#789A01';
-                    e.currentTarget.style.background = '#f4f8e6';
+                    e.currentTarget.style.borderColor = '#10b981';
+                    e.currentTarget.style.background = '#f0fdf4';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderColor = '#e5e7eb';

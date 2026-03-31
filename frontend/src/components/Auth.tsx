@@ -86,35 +86,25 @@ useEffect(() => {
   };
 
   return (
-    <>
-    <style>{`
-      @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-    `}</style>
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(160deg, #1a1a18 0%, #2d2a24 50%, #3d3520 100%)',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '2rem'
     }}>
       <div style={{
-        background: 'rgba(255,255,255,0.96)',
-        borderRadius: '24px',
-        padding: '2.5rem',
-        maxWidth: '420px',
+        background: 'white',
+        borderRadius: '20px',
+        padding: '3rem',
+        maxWidth: '450px',
         width: '100%',
-        boxShadow: '0 24px 80px rgba(0,0,0,0.18), 0 8px 24px rgba(0,0,0,0.08)',
-        border: '1px solid rgba(255,255,255,0.8)',
-        animation: 'fadeInUp 0.5s ease-out both',
-        backdropFilter: 'blur(20px)',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👨‍🍳</div>
-          <h1 style={{ margin: 0, color: '#ED8B00', fontSize: '2rem' }}>GroceryGenius</h1>
+          <h1 style={{ margin: 0, color: '#10b981', fontSize: '2rem' }}>GroceryGenius</h1>
           <p style={{ color: '#6b7280', marginTop: '0.5rem' }}>
             {t('auth.aiPoweredMealPlanning')}
           </p>
@@ -203,17 +193,14 @@ useEffect(() => {
             style={{
               width: '100%',
               padding: '1rem',
-              background: loading ? '#9ca3af' : '#ED8B00',
+              background: loading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)',
               color: 'white',
               border: 'none',
               borderRadius: '12px',
               fontWeight: '600',
               fontSize: '1rem',
               cursor: loading ? 'not-allowed' : 'pointer',
-              marginBottom: '1rem',
-              boxShadow: loading ? 'none' : '0 4px 16px rgba(237,139,0,0.35)',
-              letterSpacing: '-0.01em',
-              fontFamily: "'Outfit', sans-serif",
+              marginBottom: '1rem'
             }}
           >
             {loading ? t('auth.loading') : (isSignUp ? t('auth.signUp') : t('auth.signIn'))}
@@ -240,7 +227,6 @@ useEffect(() => {
         </form>
       </div>
     </div>
-    </>
   );
 };
 

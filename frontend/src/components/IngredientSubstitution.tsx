@@ -361,7 +361,7 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
                   <div style={{
                     marginTop: '0.75rem',
                     padding: '0.5rem',
-                    background: '#f0fdf4',
+                    background: '#f4f8e6',
                     borderRadius: '8px',
                     textAlign: 'center',
                     color: '#166534',

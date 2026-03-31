@@ -80,7 +80,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ compact = false }) 
               style={{
                 width: '100%',
                 padding: '0.6rem 1rem',
-                background: lang.code === i18n.language ? '#f0fdf4' : 'white',
+                background: lang.code === i18n.language ? '#f4f8e6' : 'white',
                 border: 'none',
                 cursor: 'pointer',
                 display: 'flex',

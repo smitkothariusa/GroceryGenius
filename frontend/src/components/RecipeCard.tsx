@@ -273,7 +273,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
 
       {recipe.health_benefits && (
         <div style={{
-          background: '#f0fdf4',
+          background: '#f4f8e6',
           padding: '0.75rem',
           borderRadius: '8px',
           marginBottom: '1rem',
@@ -336,7 +336,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
         padding: '0.75rem',
         background: '#f4f8e6',
         borderRadius: '8px',
-        border: '1px solid #bbf7d0'
+        border: '1px solid #c5d97a'
       }}>
         {t('recipes.clickForFullRecipe')}
       </div>

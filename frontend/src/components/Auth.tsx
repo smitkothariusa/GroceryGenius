@@ -88,7 +88,7 @@ useEffect(() => {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'linear-gradient(135deg, #ED8B00 0%, #c67600 100%)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -104,7 +104,7 @@ useEffect(() => {
       }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👨‍🍳</div>
-          <h1 style={{ margin: 0, color: '#10b981', fontSize: '2rem' }}>GroceryGenius</h1>
+          <h1 style={{ margin: 0, color: '#ED8B00', fontSize: '2rem' }}>GroceryGenius</h1>
           <p style={{ color: '#6b7280', marginTop: '0.5rem' }}>
             {t('auth.aiPoweredMealPlanning')}
           </p>
@@ -193,7 +193,7 @@ useEffect(() => {
             style={{
               width: '100%',
               padding: '1rem',
-              background: loading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)',
+              background: loading ? '#9ca3af' : 'linear-gradient(45deg, #ED8B00, #059669)',
               color: 'white',
               border: 'none',
               borderRadius: '12px',

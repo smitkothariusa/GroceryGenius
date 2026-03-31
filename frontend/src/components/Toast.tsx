@@ -17,7 +17,7 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 3000 }
     switch (type) {
       case 'success':
         return {
-          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+          background: 'linear-gradient(135deg, #789A01 0%, #5c7300 100%)',
           icon: '✅'
         };
       case 'error':

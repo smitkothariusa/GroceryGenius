@@ -298,10 +298,10 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
                     background: 'white'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#10b981';
-                    e.currentTarget.style.background = '#f0fdf4';
+                    e.currentTarget.style.borderColor = '#789A01';
+                    e.currentTarget.style.background = '#f4f8e6';
                     e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.15)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(120, 154, 1, 0.15)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderColor = '#e5e7eb';

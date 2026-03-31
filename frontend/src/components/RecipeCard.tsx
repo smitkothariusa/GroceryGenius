@@ -102,7 +102,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
   const healthRating = calculateHealthRating();
   
   const getRatingColor = (rating: string): string => {
-    if (rating.startsWith('A')) return '#10b981';
+    if (rating.startsWith('A')) return '#789A01';
     if (rating.startsWith('B')) return '#3b82f6';
     if (rating.startsWith('C')) return '#f59e0b';
     return '#ef4444';
@@ -244,11 +244,11 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', fontSize: '0.85rem' }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: '600', color: '#059669' }}>{recipe.nutrition.calories}</div>
+              <div style={{ fontWeight: '600', color: '#5c7300' }}>{recipe.nutrition.calories}</div>
               <div style={{ color: '#6b7280' }}>{t('recipes.calories')}</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: '600', color: '#7c3aed' }}>{recipe.nutrition.protein}g</div>
+              <div style={{ fontWeight: '600', color: '#c67600' }}>{recipe.nutrition.protein}g</div>
               <div style={{ color: '#6b7280' }}>{t('recipes.protein')}</div>
             </div>
             <div style={{ textAlign: 'center' }}>
@@ -260,7 +260,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
               <div style={{ color: '#6b7280' }}>{t('recipes.fat')}</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: '600', color: '#10b981' }}>{recipe.nutrition.fiber}g</div>
+              <div style={{ fontWeight: '600', color: '#789A01' }}>{recipe.nutrition.fiber}g</div>
               <div style={{ color: '#6b7280' }}>{t('recipes.fiber')}</div>
             </div>
             <div style={{ textAlign: 'center' }}>
@@ -277,12 +277,12 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
           padding: '0.75rem',
           borderRadius: '8px',
           marginBottom: '1rem',
-          border: '1px solid #bbf7d0'
+          border: '1px solid #c5d97a'
         }}>
-          <div style={{ fontSize: '0.85rem', color: '#166534', fontWeight: '500', marginBottom: '0.25rem' }}>
+          <div style={{ fontSize: '0.85rem', color: '#4a5c00', fontWeight: '500', marginBottom: '0.25rem' }}>
             {t('recipes.healthBenefitsHeading')}
           </div>
-          <div style={{ fontSize: '0.8rem', color: '#047857', lineHeight: '1.4' }}>
+          <div style={{ fontSize: '0.8rem', color: '#4a5c00', lineHeight: '1.4' }}>
             {recipe.health_benefits}
           </div>
         </div>
@@ -330,11 +330,11 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
         alignItems: 'center',
         justifyContent: 'center',
         gap: '0.5rem',
-        color: '#10b981',
+        color: '#789A01',
         fontWeight: '600',
         fontSize: '0.9rem',
         padding: '0.75rem',
-        background: '#f0fdf4',
+        background: '#f4f8e6',
         borderRadius: '8px',
         border: '1px solid #bbf7d0'
       }}>

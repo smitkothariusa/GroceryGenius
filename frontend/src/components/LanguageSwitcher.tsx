@@ -88,7 +88,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ compact = false }) 
                 gap: '0.6rem',
                 fontSize: '0.875rem',
                 fontWeight: lang.code === i18n.language ? '700' : '400',
-                color: lang.code === i18n.language ? '#059669' : '#1f2937',
+                color: lang.code === i18n.language ? '#789A01' : '#1f2937',
                 textAlign: 'left',
                 transition: 'background 0.15s',
               }}

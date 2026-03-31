@@ -34,7 +34,7 @@ const IngredientInput: React.FC<Props> = ({ tags, onTagsChange, onSubmit, loadin
           <span 
             key={tag} 
             style={{
-              background: 'linear-gradient(45deg, #10b981, #059669)',
+              background: 'linear-gradient(45deg, #789A01, #5c7300)',
               color: 'white',
               padding: '0.5rem 1rem',
               borderRadius: '20px',
@@ -85,7 +85,7 @@ const IngredientInput: React.FC<Props> = ({ tags, onTagsChange, onSubmit, loadin
         onClick={onSubmit} 
         disabled={loading || tags.length === 0}
         style={{
-          background: loading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)',
+          background: loading ? '#9ca3af' : 'linear-gradient(45deg, #789A01, #5c7300)',
           color: 'white',
           border: 'none',
           padding: '0.75rem 2rem',

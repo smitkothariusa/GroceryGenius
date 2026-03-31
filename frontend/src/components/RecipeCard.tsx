@@ -103,7 +103,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
   
   const getRatingColor = (rating: string): string => {
     if (rating.startsWith('A')) return '#789A01';
-    if (rating.startsWith('B')) return '#3b82f6';
+    if (rating.startsWith('B')) return '#ED8B00';
     if (rating.startsWith('C')) return '#f59e0b';
     return '#ef4444';
   };

@@ -446,7 +446,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
             <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>{t('mealPlan.totalCalories')}</div>
             <div style={{ fontSize: '2rem', fontWeight: '700' }}>{stats.totalCalories.toLocaleString()}</div>
           </div>
-          <div style={{ background: '#3b82f6', padding: '1rem', borderRadius: '12px', color: 'white' }}>
+          <div style={{ background: '#ED8B00', padding: '1rem', borderRadius: '12px', color: 'white' }}>
             <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>{t('mealPlan.avgCalDay')}</div>
             <div style={{ fontSize: '2rem', fontWeight: '700' }}>{stats.avgCaloriesPerDay}</div>
           </div>
@@ -457,7 +457,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
         </div>
 
         <button onClick={generateWeekShoppingList} style={{
-          padding: '0.75rem 1.5rem', background: 'linear-gradient(45deg, #789A01, #059669)',
+          padding: '0.75rem 1.5rem', background: 'linear-gradient(45deg, #789A01, #5c7300)',
           color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer',
           fontWeight: '600', fontSize: '1rem', width: '100%'
         }}>
@@ -466,13 +466,13 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
       </div>
       {isMobile && savedRecipes.length > 0 && (
         <div style={{
-          background: '#eff6ff',
+          background: '#fff9f0',
           padding: '0.75rem',
           borderRadius: '8px',
           marginTop: '1rem',
-          border: '1px solid #bfdbfe',
+          border: '1px solid #ffd9a0',
           fontSize: '0.75rem',
-          color: '#1e40af',
+          color: '#c67600',
           textAlign: 'center'
         }}>
           💡 <strong>{t('mealPlan.mobileTip')}:</strong> {t('mealPlan.mobileTipMessage')}
@@ -532,11 +532,11 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
                   }}
                   style={{
                     padding: isMobile ? '0.65rem' : '0.75rem',
-                    background: isMobile && draggedRecipe?.id === recipe.id ? '#dbeafe' : 'white',
+                    background: isMobile && draggedRecipe?.id === recipe.id ? '#fff3e0' : 'white',
                     marginBottom: '0.5rem',
                     borderRadius: '8px',
                     border: isMobile && draggedRecipe?.id === recipe.id 
-                      ? '2px solid #3b82f6' 
+                      ? '2px solid #ED8B00' 
                       : '2px solid #e5e7eb',
                     cursor: isMobile ? 'pointer' : 'grab',
                     transition: 'all 0.2s'

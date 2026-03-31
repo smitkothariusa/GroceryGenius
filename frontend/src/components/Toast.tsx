@@ -32,7 +32,7 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 3000 }
         };
       case 'info':
         return {
-          background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+          background: 'linear-gradient(135deg, #789A01 0%, #5c7300 100%)',
           icon: 'ℹ️'
         };
     }

@@ -43,6 +43,8 @@ import MealPlanCalendar from './components/MealPlanCalendar';
 import IngredientSubstitution from './components/IngredientSubstitution';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import MouseEffectCard from './components/MouseEffectCard';
+import SmoothTab from './components/SmoothTab';
+import ParticleButton from './components/ParticleButton';
 
 
 interface PantryItem {
@@ -2472,7 +2474,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                 <button onClick={() => setShowDemoConfirm(true)} style={{
                   padding: '0.5rem 1rem',
-                  background: 'linear-gradient(45deg, #ED8B00, #c67600)',
+                  background: '#ED8B00',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
@@ -2511,42 +2513,27 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           </div>
         </div>
       )}
-      <nav style={{
-        background: cardBg, 
-        display: 'flex', 
-        justifyContent: isMobile ? 'flex-start' : 'center', 
-        padding: '0.5rem', 
-        gap: '0.5rem',
-        position: 'sticky', 
-        top: isMobile ? '56px' : '72px', 
+      <div style={{
+        position: 'sticky',
+        top: isMobile ? '56px' : '72px',
         zIndex: 99,
-        overflowX: 'auto',
-        flexWrap: isMobile ? 'nowrap' : 'wrap'
+        padding: isMobile ? '0.5rem 0.75rem' : '0.75rem 1rem',
+        background: 'transparent',
       }}>
-        {(['pantry', 'recipes', 'mealplan', 'shopping', 'donate', 'favorites'] as const).map((tab) => (
-
-          <button key={tab} onClick={() => handleTabChange(tab)} style={{
-            padding: isMobile ? '0.5rem 1rem' : '0.75rem 1.5rem', 
-            border: 'none',
-            background: currentTab === tab ? '#ED8B00' : 'transparent',
-            color: currentTab === tab ? 'white' : mutedText,
-            borderRadius: '12px', 
-            cursor: 'pointer', 
-            fontWeight: '600',
-            transition: 'all 0.3s ease',
-            fontSize: isMobile ? '0.875rem' : '1rem',
-            whiteSpace: 'nowrap',
-            flex: isMobile ? '0 0 auto' : 'initial'
-          }}>
-            {tab === 'recipes' && `🍳 ${t('tabs.recipes')}`}
-            {tab === 'mealplan' && (isMobile ? `📅 ${t('tabs.mealPlan')}` : `📅 ${t('tabs.mealPlan')}`)}
-            {tab === 'pantry' && (isMobile ? `📦 ${pantry.length}` : `📦 ${t('tabs.pantry')} (${pantry.length})`)}
-            {tab === 'shopping' && (isMobile ? `🛒 ${shoppingList.filter(i => !i.checked).length}` : `🛒 ${t('tabs.shopping')} (${shoppingList.filter(i => !i.checked).length})`)}
-            {tab === 'donate' && (isMobile ? `❤️ ${getExpiringItems().length}` : `❤️ ${t('tabs.donate')} (${getExpiringItems().length})`)}
-            {tab === 'favorites' && (isMobile ? `⭐ ${favorites.length}` : `⭐ ${t('tabs.favorites')} (${favorites.length})`)}
-          </button>
-        ))}
-      </nav>
+        <SmoothTab
+          activeTab={currentTab}
+          onChange={handleTabChange}
+          isMobile={isMobile}
+          tabs={[
+            { id: 'pantry', icon: '📦', label: t('tabs.pantry'), badge: pantry.length > 0 ? `(${pantry.length})` : '' },
+            { id: 'recipes', icon: '🍳', label: t('tabs.recipes'), badge: '' },
+            { id: 'mealplan', icon: '📅', label: t('tabs.mealPlan'), badge: '' },
+            { id: 'shopping', icon: '🛒', label: t('tabs.shopping'), badge: shoppingList.filter(i => !i.checked).length > 0 ? `(${shoppingList.filter(i => !i.checked).length})` : '' },
+            { id: 'donate', icon: '❤️', label: t('tabs.donate'), badge: getExpiringItems().length > 0 ? `(${getExpiringItems().length})` : '' },
+            { id: 'favorites', icon: '⭐', label: t('tabs.favorites'), badge: favorites.length > 0 ? `(${favorites.length})` : '' },
+          ]}
+        />
+      </div>
       <main style={{ 
         maxWidth: '1200px', 
         margin: '0 auto', 
@@ -2635,13 +2622,26 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 }}>
                   📷 {t('recipes.scanIngredients')}
                 </button>
-                <button onClick={handleGetRecipes} disabled={recipeLoading}
-                  style={{
-                    padding: '0.75rem 2rem', background: recipeLoading ? '#9ca3af' : 'linear-gradient(45deg, #789A01, #5c7300)',
-                    color: 'white', border: 'none', borderRadius: '12px', fontWeight: '600', cursor: recipeLoading ? 'not-allowed' : 'pointer'
-                  }}>
+                <ParticleButton
+                  onClick={handleGetRecipes}
+                  disabled={recipeLoading}
+                  buttonStyle={{
+                    padding: '0.75rem 2rem',
+                    background: recipeLoading ? '#9ca3af' : '#ED8B00',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '12px',
+                    fontWeight: '600',
+                    cursor: recipeLoading ? 'not-allowed' : 'pointer',
+                    fontSize: '1rem',
+                    fontFamily: "'Outfit', sans-serif",
+                    letterSpacing: '-0.01em',
+                    boxShadow: recipeLoading ? 'none' : '0 4px 16px rgba(237,139,0,0.35)',
+                    width: isMobile ? '100%' : 'auto',
+                  }}
+                >
                   {recipeLoading ? `⏳ ${t('recipes.generating')}` : `🍳 ${t('recipes.getRecipes')}`}
-                </button>
+                </ParticleButton>
               </div>
 
               {errorMsg && <div style={{ background: '#fee2e2', color: '#dc2626', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #dc2626' }}>{errorMsg}</div>}
@@ -2701,7 +2701,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     <div style={{
                       textAlign: 'center',
                       marginTop: '1rem',
-                      color: '#789A01',
+                      color: '#ED8B00',
                       fontWeight: '600'
                     }}>
                       🤖 {t('recipes.generatingRecipe', { n: i })}
@@ -2842,7 +2842,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       <button onClick={() => addMissingToShopping(recipe)} style={{
                         flex: isMobile ? '1 1 100%' : '1',
                         padding: isMobile ? '0.75rem' : '0.75rem',
-                        background: 'linear-gradient(45deg, #EF3340, #ED8B00)',
+                        background: '#789A01',
                         fontSize: isMobile ? '0.875rem' : '1rem',
                         color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600',
                         minWidth: isMobile ? 'auto' : '120px'
@@ -2881,7 +2881,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       }} style={{
                         flex: isMobile ? '1' : 'initial',
                         padding: '0.75rem',
-                        background: 'linear-gradient(45deg, #f59e0b, #d97706)',
+                        background: '#EF3340',
                         color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer',
                         fontSize: isMobile ? '0.875rem' : '1rem',
                         minWidth: isMobile ? 'auto' : '50px'
@@ -2894,7 +2894,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       }} style={{
                         flex: isMobile ? '1' : 'initial',
                         padding: '0.75rem',
-                        background: 'linear-gradient(45deg, #ED8B00, #c67600)',
+                        background: '#ED8B00',
                         color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600',
                         fontSize: isMobile ? '0.875rem' : '1rem',
                         minWidth: isMobile ? 'auto' : '120px'
@@ -2931,7 +2931,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             </div>
 
             {recipes.length === 0 && !recipeLoading && (
-              <div style={{ textAlign: 'center', padding: '3rem', color: 'white' }}>
+              <div style={{ textAlign: 'center', padding: '3rem', color: mutedText }}>
                 <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🍳</div>
                 <p>{t('recipes.emptyStatePrompt')}</p>
                 <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>{t('recipes.emptyStateTip')}</p>
@@ -3837,7 +3837,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       style={{
                         flex: isMobile ? '1' : 'initial',
                         padding: isMobile ? '0.5rem' : '0.5rem 0.75rem',
-                        background: '#0071ce',
+                        background: '#789A01',
                         color: 'white',
                         borderRadius: '6px',
                         textDecoration: 'none',
@@ -6283,7 +6283,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 style={{
                   flex: 1,
                   padding: '1rem',
-                  background: 'linear-gradient(45deg, #ED8B00, #c67600)',
+                  background: '#ED8B00',
                   color: 'white',
                   border: 'none',
                   borderRadius: '12px',

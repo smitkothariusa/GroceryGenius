@@ -86,21 +86,31 @@ useEffect(() => {
   };
 
   return (
+    <>
+    <style>{`
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    `}</style>
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #ED8B00 0%, #c67600 100%)',
+      background: 'linear-gradient(160deg, #1a1a18 0%, #2d2a24 50%, #3d3520 100%)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '2rem'
     }}>
       <div style={{
-        background: 'white',
-        borderRadius: '20px',
-        padding: '3rem',
-        maxWidth: '450px',
+        background: 'rgba(255,255,255,0.96)',
+        borderRadius: '24px',
+        padding: '2.5rem',
+        maxWidth: '420px',
         width: '100%',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+        boxShadow: '0 24px 80px rgba(0,0,0,0.18), 0 8px 24px rgba(0,0,0,0.08)',
+        border: '1px solid rgba(255,255,255,0.8)',
+        animation: 'fadeInUp 0.5s ease-out both',
+        backdropFilter: 'blur(20px)',
       }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👨‍🍳</div>
@@ -193,14 +203,17 @@ useEffect(() => {
             style={{
               width: '100%',
               padding: '1rem',
-              background: loading ? '#9ca3af' : 'linear-gradient(45deg, #ED8B00, #059669)',
+              background: loading ? '#9ca3af' : '#ED8B00',
               color: 'white',
               border: 'none',
               borderRadius: '12px',
               fontWeight: '600',
               fontSize: '1rem',
               cursor: loading ? 'not-allowed' : 'pointer',
-              marginBottom: '1rem'
+              marginBottom: '1rem',
+              boxShadow: loading ? 'none' : '0 4px 16px rgba(237,139,0,0.35)',
+              letterSpacing: '-0.01em',
+              fontFamily: "'Outfit', sans-serif",
             }}
           >
             {loading ? t('auth.loading') : (isSignUp ? t('auth.signUp') : t('auth.signIn'))}
@@ -227,6 +240,7 @@ useEffect(() => {
         </form>
       </div>
     </div>
+    </>
   );
 };
 

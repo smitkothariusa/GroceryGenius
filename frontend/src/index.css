@@ -28,6 +28,16 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background:
+    linear-gradient(135deg, #f7f4ef 0%, #f3efe8 100%),
+    repeating-linear-gradient(
+      45deg,
+      rgba(0,0,0,0.015),
+      rgba(0,0,0,0.015) 1px,
+      transparent 1px,
+      transparent 5px
+    );
+  background-blend-mode: overlay;
 }
 
 h1 {
@@ -264,5 +274,5 @@ html {
 
 .card-hover:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 24px rgba(237,139,0,0.12), 0 4px 8px rgba(0,0,0,0.06);
 }

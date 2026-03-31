@@ -742,6 +742,15 @@ const App: React.FC = () => {
     return ingredients.slice(0, 20); // Increased from 12 to 20
   };
 
+  // Strip trailing prep descriptions for preview display only
+  // e.g. "apple cored and peeled" → "apple"
+  const stripPrepDesc = (name: string): string => {
+    return name
+      .replace(/\b(peeled|cored|pitted|halved|quartered|trimmed|seeded|deveined|shelled|hulled|thawed|softened|divided|washed|rinsed|drained|beaten|melted|toasted|soaked|torn|scored|pricked|stemmed)\b.*/gi, '')
+      .replace(/\s+(and|or)\s+\w+\s*$/gi, '')
+      .trim();
+  };
+
   const calculateHealthGrade = (recipe: Recipe) => {
     if (!recipe.nutrition) return 'B';
     const { calories, protein, fiber, sodium, fat } = recipe.nutrition;
@@ -2474,7 +2483,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                 <button onClick={() => setShowDemoConfirm(true)} style={{
                   padding: '0.5rem 1rem',
-                  background: '#ED8B00',
+                  background: '#6B7280',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
@@ -2603,7 +2612,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
                 {pantry.length > 0 && (
                   <button onClick={addPantryToIngredients} style={{
-                    padding: '0.75rem 1rem', background: '#ED8B00', color: 'white',
+                    padding: '0.75rem 1rem', background: '#0891B2', color: 'white',
                     border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
                   }}>📦 {t('recipes.addPantryItems')}</button>
                 )}
@@ -2616,7 +2625,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   setCameraSource('recipes');
                   setShowImageUpload(true);
                 }} style={{
-                  padding: '0.75rem 1rem', background: '#ED8B00', color: 'white',
+                  padding: '0.75rem 1rem', background: '#0891B2', color: 'white',
                   border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
                   display: 'flex', alignItems: 'center', gap: '0.5rem'
                 }}>
@@ -2803,7 +2812,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                               color: '#4a5c00'
                             }}>
                               {ingredients.slice(0, isMobile ? 4 : 8).map((ing, i) => (
-                                <div key={i}>• {Math.round(ing.quantity * 10) / 10} {ing.unit} {ing.name}</div>
+                                <div key={i}>• {Math.round(ing.quantity * 10) / 10} {ing.unit} {stripPrepDesc(ing.name)}</div>
                               ))}
                               {ingredients.length > (isMobile ? 4 : 8) && (
                                 <div style={{ fontStyle: 'italic' }}>+ {ingredients.length - (isMobile ? 4 : 8)} {t('recipes.moreIngredients')}</div>
@@ -2894,7 +2903,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       }} style={{
                         flex: isMobile ? '1' : 'initial',
                         padding: '0.75rem',
-                        background: '#ED8B00',
+                        background: '#7C3AED',
                         color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600',
                         fontSize: isMobile ? '0.875rem' : '1rem',
                         minWidth: isMobile ? 'auto' : '120px'
@@ -3018,7 +3027,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     }}
                     style={{
                       padding: isMobile ? '0.75rem' : '0.75rem 1.5rem',
-                      background: '#ED8B00',
+                      background: '#0891B2',
                       color: 'white',
                       border: 'none',
                       borderRadius: '12px',
@@ -3497,7 +3506,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       <button 
                         onClick={() => handleEditPantryItem(item)}
                         style={{
-                          background: '#ED8B00',
+                          background: '#0891B2',
                           color: 'white',
                           border: 'none',
                           padding: isMobile ? '0.5rem' : '0.5rem 1rem',
@@ -3611,9 +3620,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 </button>
                 <button onClick={() => setShowExportMenu(!showExportMenu)} style={{
                   padding: isMobile ? '0.75rem' : '0.75rem 1.5rem',
-                  background: '#ED8B00', 
+                  background: '#475569',
                   color: 'white',
-                  border: 'none', 
+                  border: 'none',
                   borderRadius: '12px', 
                   cursor: 'pointer', 
                   fontWeight: '600',
@@ -3624,7 +3633,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             </div>
 
             {showExportMenu && (
-              <div style={{ background: '#fff9f0', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem', border: '2px solid #ED8B00' }}>
+              <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem', border: '2px solid #cbd5e1' }}>
                 <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>{t('shopping.exportOptions')}</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
                   <button onClick={exportAsText} style={{
@@ -3972,8 +3981,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
         {currentTab === 'donate' && (
           <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
             {/* Impact Dashboard */}
-            <div style={{ 
-              background: 'linear-gradient(135deg, #EF3340 0%, #ED8B00 100%)',
+            <div style={{
+              background: 'linear-gradient(135deg, #065f46 0%, #059669 100%)',
               padding: isMobile ? '1.5rem' : '2rem',
               borderRadius: '16px',
               marginBottom: isMobile ? '1rem' : '2rem',
@@ -4469,7 +4478,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         }}
                         style={{
                           padding: isMobile ? '0.75rem' : '0.5rem 1rem',
-                          background: '#ED8B00',
+                          background: '#0891B2',
                           color: 'white',
                           border: 'none',
                           borderRadius: '8px',
@@ -4600,7 +4609,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                               }}
                               style={{
                                 padding: isMobile ? '0.75rem' : '0.5rem 1rem',
-                                background: '#ED8B00',
+                                background: '#0891B2',
                                 color: 'white',
                                 border: 'none',
                                 borderRadius: '8px',
@@ -5339,7 +5348,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     display: 'block',
                     width: '100%',
                     padding: '1rem',
-                    background: '#ED8B00',
+                    background: '#0891B2',
                     color: 'white',
                     borderRadius: '8px',
                     textAlign: 'left',
@@ -5559,7 +5568,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 }
               }} style={{
                 padding: '0.75rem 1rem',
-                background: '#ED8B00',
+                background: '#789A01',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
@@ -5995,7 +6004,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
             {/* Mission Statement */}
             <div style={{
-              background: 'linear-gradient(135deg, #ED8B00 0%, #c67600 100%)',
+              background: 'linear-gradient(135deg, #7c2d12 0%, #b45309 100%)',
               padding: isMobile ? '1.25rem' : '2rem',
               borderRadius: isMobile ? '12px' : '16px',
               color: 'white',
@@ -6363,7 +6372,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.75rem' }}>📱 Share Your Impact</h3>
             
             <div style={{
-              background: 'linear-gradient(135deg, #EF3340 0%, #ED8B00 100%)',
+              background: 'linear-gradient(135deg, #065f46 0%, #059669 100%)',
               padding: '2rem',
               borderRadius: '16px',
               color: 'white',

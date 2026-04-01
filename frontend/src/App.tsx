@@ -633,6 +633,12 @@ const App: React.FC = () => {
     });
   };
 
+  const isExpiringSoon = (item: PantryItem): boolean => {
+    if (!item.expiryDate) return false;
+    const diff = new Date(item.expiryDate).getTime() - Date.now();
+    return diff > 0 && diff < 3 * 24 * 60 * 60 * 1000;
+  };
+
   // Parse ingredients from recipe text
   const parseIngredients = (recipe: Recipe): ParsedIngredient[] => {
     const ingredients: ParsedIngredient[] = [];
@@ -3502,13 +3508,13 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               {pantry.map(item => {
                 const expiring = getExpiringItems().some(e => e.id === item.id);
                 return (
-                  <div 
+                  <div
                     key={item.id}
-                    className="card-hover"
+                    className={`card-hover pantry-item-row${isExpiringSoon(item) ? ' expiring-soon' : ''}`}
                     style={{
-                      display: 'flex', 
+                      display: 'flex',
                       flexDirection: isMobile ? 'column' : 'row',
-                      justifyContent: 'space-between', 
+                      justifyContent: 'space-between',
                       alignItems: isMobile ? 'stretch' : 'center',
                       padding: isMobile ? '0.75rem' : '1rem',
                       background: expiring ? '#fee2e2' : '#f9fafb',
@@ -3517,11 +3523,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       gap: isMobile ? '0.75rem' : '0'
                     }}
                   >
-                    <div style={{ flex: 1 }}>
-                      <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: isMobile ? '0.5rem' : '0.75rem' 
+                    <div className="item-content" style={{ flex: 1 }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: isMobile ? '0.5rem' : '0.75rem'
                       }}>
                         <div style={{
                           fontSize: '2rem',
@@ -3542,13 +3548,13 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           item.category === 'breakfast' ? '🥞' : '📦'}
                         </div>
                         <div>
-                          <span style={{ fontWeight: '600', fontSize: '1.05rem', color: '#1f2937' }}>
+                          <span className="item-name" style={{ fontWeight: '600', fontSize: '1.05rem', color: '#1f2937' }}>
                             {item.name}
                           </span>
-                          <div style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.25rem' }}>
+                          <div className="item-meta" style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.25rem' }}>
                             {item.quantity} {item.unit}
                             {item.expiryDate && (
-                              <span style={{ 
+                              <span style={{
                                 marginLeft: '0.5rem',
                                 color: expiring ? '#dc2626' : '#6b7280',
                                 fontWeight: expiring ? '600' : '400'
@@ -3561,13 +3567,14 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         </div>
                       </div>
                     </div>
-                    
-                    <div style={{ 
-                      display: 'flex', 
+
+                    <div style={{
+                      display: 'flex',
                       gap: '0.5rem',
                       width: isMobile ? '100%' : 'auto'
                     }}>
-                      <button 
+                      <button
+                        className="item-edit-btn"
                         onClick={() => handleEditPantryItem(item)}
                         style={{
                           background: '#3b82f6',
@@ -3587,17 +3594,18 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       >
                         ✏️ {isMobile ? '' : t('common.edit')}
                       </button>
-                      <button 
+                      <button
+                          className="item-delete-btn"
                           onClick={async () => {
                             try {
                               // Check if this is a local-only item (scanned items have timestamp-based IDs)
                               const isLocalItem = item.id.includes('-') && item.id.includes('.');
-                              
+
                               if (user && !isLocalItem) {
                                 // Only try database delete for items that came from database
                                 await pantryService.delete(item.id);
                               }
-                              
+
                               // Always remove from local state
                               setPantry(prev => prev.filter(i => i.id !== item.id));
                               success(t('toasts.itemRemoved'));
@@ -3607,13 +3615,13 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                               setPantry(prev => prev.filter(i => i.id !== item.id));
                               success(t('toasts.itemRemoved'));
                             }
-                          }} 
+                          }}
                         style={{
-                          background: '#fee2e2', 
-                          color: '#dc2626', 
+                          background: '#fee2e2',
+                          color: '#dc2626',
                           border: 'none',
                           padding: isMobile ? '0.5rem' : '0.5rem 1rem',
-                          borderRadius: '6px', 
+                          borderRadius: '6px',
                           cursor: 'pointer',
                           fontWeight: '600',
                           fontSize: isMobile ? '0.75rem' : '0.875rem',
@@ -3835,9 +3843,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
             <div style={{ display: 'grid', gap: '0.75rem' }}>
               {sortShoppingList().map(item => (
-                <div 
+                <div
                   key={item.id}
-                  className="card-hover"
+                  className="card-hover shopping-item-row"
                   style={{
                     display: 'flex',
                     flexDirection: isMobile ? 'column' : 'row',
@@ -3851,7 +3859,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     opacity: item.checked ? 0.6 : 1
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.75rem' : '1rem', flex: 1 }}>
+                  <div className="item-content" style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.75rem' : '1rem', flex: 1 }}>
                     <input type="checkbox" checked={item.checked}
                       onChange={async () => {
                         try {
@@ -3861,30 +3869,30 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           console.error('Error updating shopping item:', error);
                         }
                       }}
-                      style={{ 
-                        width: isMobile ? '18px' : '20px', 
-                        height: isMobile ? '18px' : '20px', 
+                      style={{
+                        width: isMobile ? '18px' : '20px',
+                        height: isMobile ? '18px' : '20px',
                         cursor: 'pointer',
                         flexShrink: 0
                       }} />
-                    
+
                     <div style={{ flex: 1 }}>
-                      <div style={{ 
+                      <div className="item-name" style={{
                         fontWeight: '500',
                         fontSize: isMobile ? '0.875rem' : '1rem'
                       }}>{item.name}</div>
-                      <div style={{ 
-                        fontSize: isMobile ? '0.75rem' : '0.875rem', 
-                        color: mutedText 
+                      <div className="item-meta" style={{
+                        fontSize: isMobile ? '0.75rem' : '0.875rem',
+                        color: mutedText
                       }}>
                         {item.quantity} {item.unit} • {item.category}
                       </div>
                     </div>
                   </div>
 
-                  <div style={{ 
-                    display: 'flex', 
-                    gap: '0.5rem', 
+                  <div style={{
+                    display: 'flex',
+                    gap: '0.5rem',
                     flexWrap: 'wrap',
                     width: isMobile ? '100%' : 'auto'
                   }}>
@@ -3924,13 +3932,13 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       }}>
                       {isMobile ? 'W' : 'Walmart'}
                     </a>
-                    <button onClick={async () => {
+                    <button className="item-delete-btn" onClick={async () => {
                       console.log('🗑️ Attempting to delete item:', item.id, item.name);
-                      
+
                       // Always remove from local state first (optimistic update)
                       setShoppingList(prev => prev.filter(i => i.id !== item.id));
                       success(t('notifications.itemRemoved'));
-                      
+
                       // Then try to delete from database in background
                       try {
                         await shoppingService.delete(item.id);

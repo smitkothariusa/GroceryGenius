@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { mealPlansService } from '../lib/database';
+import ParticleButton from './ParticleButton';
 interface Recipe {
   id: string;
   name: string;
@@ -456,13 +457,20 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
           </div>
         </div>
 
-        <button onClick={generateWeekShoppingList} style={{
-          padding: '0.75rem 1.5rem', background: 'linear-gradient(45deg, #10b981, #059669)',
-          color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer',
-          fontWeight: '600', fontSize: '1rem', width: '100%'
-        }}>
+        <ParticleButton
+          onClick={generateWeekShoppingList}
+          buttonStyle={{
+            padding: '0.75rem 1.5rem',
+            background: 'linear-gradient(135deg, #789A01 0%, #5c7300 100%)',
+            color: 'white',
+            borderRadius: '12px',
+            fontWeight: '700',
+            fontSize: '1rem',
+            width: '100%',
+          }}
+        >
           🛒 {t('mealPlan.generateShoppingList')}
-        </button>
+        </ParticleButton>
       </div>
       {isMobile && savedRecipes.length > 0 && (
         <div style={{

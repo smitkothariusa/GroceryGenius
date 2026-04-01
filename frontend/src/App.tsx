@@ -42,6 +42,8 @@ import Auth from './components/Auth';
 import MealPlanCalendar from './components/MealPlanCalendar';
 import IngredientSubstitution from './components/IngredientSubstitution';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import ParticleButton from './components/ParticleButton';
+import FavoriteHeartButton from './components/FavoriteHeartButton';
 
 
 interface PantryItem {
@@ -2634,13 +2636,21 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 }}>
                   📷 {t('recipes.scanIngredients')}
                 </button>
-                <button onClick={handleGetRecipes} disabled={recipeLoading}
-                  style={{
-                    padding: '0.75rem 2rem', background: recipeLoading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)',
-                    color: 'white', border: 'none', borderRadius: '12px', fontWeight: '600', cursor: recipeLoading ? 'not-allowed' : 'pointer'
-                  }}>
+                <ParticleButton
+                  onClick={handleGetRecipes}
+                  disabled={recipeLoading}
+                  buttonStyle={{
+                    padding: '0.75rem 2rem',
+                    background: recipeLoading ? '#9ca3af' : 'linear-gradient(135deg, #ED8B00 0%, #c67600 100%)',
+                    color: 'white',
+                    borderRadius: '12px',
+                    fontWeight: '700',
+                    cursor: recipeLoading ? 'not-allowed' : 'pointer',
+                    fontSize: '1rem',
+                  }}
+                >
                   {recipeLoading ? `⏳ ${t('recipes.generating')}` : `🍳 ${t('recipes.getRecipes')}`}
-                </button>
+                </ParticleButton>
               </div>
 
               {errorMsg && <div style={{ background: '#fee2e2', color: '#dc2626', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #dc2626' }}>{errorMsg}</div>}
@@ -2719,12 +2729,45 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     style={{ animationDelay: `${idx * 0.1}s` }}
                   >
                     <div onClick={() => { setSelectedRecipe(recipe); setShowDetailedView(true); }} style={{ cursor: 'pointer', marginBottom: '0.5rem' }}>
-                      <div style={{ 
-                        background: cardBg, 
-                        borderRadius: isMobile ? '12px' : '16px', 
-                        padding: isMobile ? '1rem' : '1.5rem', 
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)' 
+                      <div style={{
+                        background: cardBg,
+                        borderRadius: isMobile ? '12px' : '16px',
+                        padding: isMobile ? '1rem' : '1.5rem',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                        position: 'relative',
                       }}>
+                        {/* Favorite heart — top-right corner of card */}
+                        <FavoriteHeartButton
+                          isFavorited={favorites.some(f => f.name === recipe.name)}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            const exists = favorites.some(f => f.name === recipe.name);
+                            if (!exists) {
+                              try {
+                                const savedRecipe = await recipesService.add({
+                                  name: recipe.name,
+                                  ingredients: recipe.ingredients,
+                                  instructions: recipe.instructions,
+                                  prep_time: recipe.prep_time,
+                                  cook_time: recipe.cook_time,
+                                  difficulty: recipe.difficulty,
+                                  servings: recipe.servings,
+                                  nutrition: recipe.nutrition,
+                                  health_benefits: recipe.health_benefits,
+                                  budget_tip: recipe.budget_tip,
+                                });
+                                setFavorites(prev => [...prev, { ...recipe, id: savedRecipe.id, savedDate: savedRecipe.created_at }]);
+                                success(t('toasts.addedToFavorites'));
+                              } catch (err) {
+                                console.error('Error saving recipe:', err);
+                                warning(t('toasts.failedSaveRecipe'));
+                              }
+                            } else {
+                              info(t('toasts.alreadyInFavorites'));
+                            }
+                          }}
+                          style={{ position: 'absolute', top: isMobile ? '0.5rem' : '0.75rem', right: isMobile ? '0.5rem' : '0.75rem', zIndex: 2 }}
+                        />
                         <div style={{ 
                           display: 'flex', 
                           justifyContent: 'space-between', 
@@ -2839,50 +2882,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       <button onClick={() => addMissingToShopping(recipe)} style={{
                         flex: isMobile ? '1 1 100%' : '1',
                         padding: isMobile ? '0.75rem' : '0.75rem',
-                        background: 'linear-gradient(45deg, #ec4899, #8b5cf6)',
+                        background: 'linear-gradient(135deg, #789A01 0%, #5c7300 100%)',
                         fontSize: isMobile ? '0.875rem' : '1rem',
                         color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600',
                         minWidth: isMobile ? 'auto' : '120px'
                       }}>🛒 {t('recipes.addToShopping')}</button>
-                      
-                      <button onClick={async () => {
-                        const exists = favorites.some(f => f.name === recipe.name);
-                        if (!exists) {
-                          try {
-                            const savedRecipe = await recipesService.add({
-                              name: recipe.name,
-                              ingredients: recipe.ingredients,
-                              instructions: recipe.instructions,
-                              prep_time: recipe.prep_time,
-                              cook_time: recipe.cook_time,
-                              difficulty: recipe.difficulty,
-                              servings: recipe.servings,
-                              nutrition: recipe.nutrition,
-                              health_benefits: recipe.health_benefits,
-                              budget_tip: recipe.budget_tip,
-                            });
-
-                            setFavorites(prev => [...prev, {
-                              ...recipe,
-                              id: savedRecipe.id,
-                              savedDate: savedRecipe.created_at,
-                            }]);
-                            success(t('toasts.addedToFavorites'));
-                          } catch (error) {
-                            console.error('Error saving recipe:', error);
-                            warning(t('toasts.failedSaveRecipe'));
-                          }
-                        } else {
-                          info(t('toasts.alreadyInFavorites'));
-                        }
-                      }} style={{
-                        flex: isMobile ? '1' : 'initial',
-                        padding: '0.75rem',
-                        background: 'linear-gradient(45deg, #f59e0b, #d97706)',
-                        color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer',
-                        fontSize: isMobile ? '0.875rem' : '1rem',
-                        minWidth: isMobile ? 'auto' : '50px'
-                      }}>💖 {isMobile && t('recipes.addToFavorites')}</button>
 
                       <button onClick={() => {
                         setCurrentTab('mealplan');
@@ -5891,37 +5895,33 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 {t('common.cancel')}
               </button>
               
-              <button 
+              <ParticleButton
                 onClick={async () => {
                   if ((!selectedFoodBank && !selectedDropOffSite) || itemsToDonate.length === 0) {
                     warning(t('toasts.pleaseSelectDonate'));
                     return;
                   }
-                  
-                  const itemsToDonateFull = pantry.filter(item => 
-                    itemsToDonate.includes(item.id)
-                  );
-                  
+                  const itemsToDonateFull = pantry.filter(item => itemsToDonate.includes(item.id));
                   await handleDonation(selectedFoodBank || selectedDropOffSite, itemsToDonateFull);
                 }}
                 disabled={(!selectedFoodBank && !selectedDropOffSite) || itemsToDonate.length === 0}
-                style={{
+                buttonStyle={{
                   padding: '1rem',
-                  background: ((!selectedFoodBank && !selectedDropOffSite) || itemsToDonate.length === 0) 
-                    ? '#9ca3af' 
-                    : 'linear-gradient(45deg, #ec4899, #8b5cf6)',
+                  background: ((!selectedFoodBank && !selectedDropOffSite) || itemsToDonate.length === 0)
+                    ? '#9ca3af'
+                    : 'linear-gradient(135deg, #065f46 0%, #059669 100%)',
                   color: 'white',
-                  border: 'none',
                   borderRadius: '12px',
-                  cursor: ((!selectedFoodBank && !selectedDropOffSite) || itemsToDonate.length === 0) 
-                    ? 'not-allowed' 
+                  cursor: ((!selectedFoodBank && !selectedDropOffSite) || itemsToDonate.length === 0)
+                    ? 'not-allowed'
                     : 'pointer',
-                  fontWeight: '600',
-                  fontSize: '1rem'
+                  fontWeight: '700',
+                  fontSize: '1rem',
+                  flex: 1,
                 }}
               >
                 🎁 {t('donate.recordDonationBtn')}
-              </button>
+              </ParticleButton>
             </div>
 
             {/* Tax Receipt Info */}

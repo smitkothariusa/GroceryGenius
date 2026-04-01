@@ -3128,15 +3128,16 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       🎁 {isMobile ? `${t('tabs.donate')} (${getExpiringItems().length})` : `${t('tabs.donate')} (${getExpiringItems().length})`}
                     </button>
                   )}
-                  <button 
-                    onClick={() => setShowAddPantry(!showAddPantry)} 
+                  <button
+                    className="desktop-add-btn"
+                    onClick={() => setShowAddPantry(!showAddPantry)}
                     style={{
                       padding: isMobile ? '0.75rem' : '0.75rem 1.5rem',
-                      background: '#10b981', 
+                      background: '#10b981',
                       color: 'white',
-                      border: 'none', 
-                      borderRadius: '12px', 
-                      cursor: 'pointer', 
+                      border: 'none',
+                      borderRadius: '12px',
+                      cursor: 'pointer',
                       fontWeight: '600',
                       flex: isMobile ? '1' : 'initial',
                       fontSize: isMobile ? '0.875rem' : '1rem'
@@ -3661,7 +3662,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 flexWrap: 'wrap',
                 justifyContent: isMobile ? 'stretch' : 'flex-start'
               }}>
-                <button 
+                <button
+                  className="desktop-add-btn"
                   onClick={() => setShowAddShopping(true)}
                   style={{
                     padding: isMobile ? '0.75rem' : '0.75rem 1.5rem',
@@ -4785,6 +4787,19 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             )}
           </div>
         )}
+      {/* Mobile FAB — only shown on mobile via CSS */}
+      {isMobile && (currentTab === 'pantry' || currentTab === 'shopping') && (
+        <button
+          className="mobile-fab"
+          onClick={() => {
+            if (currentTab === 'pantry') setShowAddPantry(true);
+            if (currentTab === 'shopping') setShowAddShopping(true);
+          }}
+          aria-label="Add item"
+        >
+          +
+        </button>
+      )}
       </main>
       {showAddShopping && (
         <div 

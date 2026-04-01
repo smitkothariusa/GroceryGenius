@@ -2662,7 +2662,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 onChange={(e) => setRecipeSearchQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && !recipeLoading && handleGetRecipes()}
                 style={{ width: '100%', padding: isMobile ? '0.75rem' : '1rem', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: isMobile ? '0.875rem' : '1rem', marginBottom: '1rem', boxSizing: 'border-box' }} />
 
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+              <div className="recipe-controls-row" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
                 <select value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
                   style={{ padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '8px', minWidth: '200px' }}>
                   <option value="">{t('recipes.dietary.all')}</option>
@@ -2674,7 +2674,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   <option value="heart-healthy">{t('recipes.dietary.heartHealthy')}</option>
                 </select>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div className="recipe-servings-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <span>⚖️</span>
                   <label style={{ fontWeight: '600' }}>{t('recipes.servings')}:</label>
                   <input type="number" min="1" max="12" value={recipeServings}
@@ -2790,7 +2790,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 ))}
               </div>
             )}
-            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>              {recipes.map((recipe, idx) => {
+            <div className="recipe-card-grid" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>              {recipes.map((recipe, idx) => {
                 const grade = calculateHealthGrade(recipe);
                 const ingredients = parseIngredients(recipe);
                 return (

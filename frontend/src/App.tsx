@@ -2447,11 +2447,24 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
         zIndex: 100
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className="mobile-header-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>👨‍🍳</span>
-            <h1 style={{ margin: 0, color: '#10b981', fontSize: isMobile ? '1.25rem' : '1.8rem', fontWeight: '700' }}>
-              {isMobile ? t('app.shortName') : t('app.name')}
-            </h1>
+            <div>
+              <span className="mobile-app-label">👨‍🍳 GroceryGenius</span>
+              <h1 className="mobile-page-title" style={{ margin: 0, color: '#10b981', fontSize: isMobile ? '1.25rem' : '1.8rem', fontWeight: '700' }}>
+                {isMobile ? (() => {
+                  const labels: Record<string, string> = {
+                    pantry: `📦 ${t('tabs.pantry')}`,
+                    recipes: `🍳 ${t('tabs.recipes')}`,
+                    mealplan: `📅 ${t('tabs.mealPlan')}`,
+                    shopping: `🛒 ${t('tabs.shopping')}`,
+                    donate: `❤️ ${t('tabs.donate')}`,
+                    favorites: `⭐ ${t('tabs.favorites')}`,
+                  };
+                  return labels[currentTab] || t('app.name');
+                })() : t('app.name')}
+              </h1>
+            </div>
           </div>
           <div style={{ display: 'flex', gap: isMobile ? '0.5rem' : '0.75rem', alignItems: 'center' }}>
             <button onClick={() => setShowCalorieTracker(!showCalorieTracker)} style={{

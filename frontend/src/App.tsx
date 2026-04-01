@@ -117,6 +117,7 @@ const App: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [dietaryFilter, setDietaryFilter] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [pantry, setPantry] = useState<PantryItem[]>([]);
   const [showAddPantry, setShowAddPantry] = useState(false);
   const [newPantryItem, setNewPantryItem] = useState<{ 
@@ -2438,6 +2439,59 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
   }
   return (
     <div style={{ minHeight: '100vh', background: bgColor }}>
+      {/* Mobile drawer backdrop */}
+      <div
+        className={`mobile-drawer-backdrop ${drawerOpen ? 'open' : ''}`}
+        onClick={() => setDrawerOpen(false)}
+      />
+
+      {/* Mobile slide-out drawer */}
+      <div className={`mobile-drawer ${drawerOpen ? 'open' : ''}`}>
+        <div className="mobile-drawer-header">
+          <span style={{ fontSize: '1.4rem' }}>👨‍🍳</span>
+          <h2 className="mobile-drawer-header-title">GroceryGenius</h2>
+        </div>
+
+        <nav className="mobile-drawer-nav">
+          {([
+            { key: 'pantry',    icon: '📦', label: t('tabs.pantry'),    count: pantry.length },
+            { key: 'recipes',   icon: '🍳', label: t('tabs.recipes'),   count: null },
+            { key: 'mealplan',  icon: '📅', label: t('tabs.mealPlan'),  count: null },
+            { key: 'shopping',  icon: '🛒', label: t('tabs.shopping'),  count: shoppingList.filter(i => !i.checked).length },
+            { key: 'donate',    icon: '❤️', label: t('tabs.donate'),    count: getExpiringItems().length },
+            { key: 'favorites', icon: '⭐', label: t('tabs.favorites'), count: favorites.length },
+          ] as const).map(({ key, icon, label, count }) => (
+            <button
+              key={key}
+              className={`mobile-drawer-tab ${currentTab === key ? 'active' : ''}`}
+              onClick={() => { handleTabChange(key); setDrawerOpen(false); }}
+            >
+              <span>{icon}</span>
+              <span>{label}</span>
+              {count !== null && count > 0 && (
+                <span className="mobile-drawer-tab-badge">{count}</span>
+              )}
+            </button>
+          ))}
+        </nav>
+
+        <div className="mobile-drawer-footer">
+          <LanguageSwitcher compact />
+          <button
+            className="mobile-drawer-footer-btn"
+            onClick={() => { setShowDemoConfirm(true); setDrawerOpen(false); }}
+          >
+            🎬 Demo
+          </button>
+          <button
+            className="mobile-drawer-footer-btn signout"
+            onClick={async () => { await authService.signOut(); setUser(null); setDrawerOpen(false); }}
+          >
+            🚪 {t('header.signOut')}
+          </button>
+        </div>
+      </div>
+
       <header style={{
         background: cardBg,
         padding: isMobile ? '0.75rem 1rem' : '1rem',
@@ -2467,6 +2521,15 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             </div>
           </div>
           <div style={{ display: 'flex', gap: isMobile ? '0.5rem' : '0.75rem', alignItems: 'center' }}>
+            <button
+              className="mobile-hamburger"
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Open menu"
+            >
+              <span />
+              <span />
+              <span />
+            </button>
             <button onClick={() => setShowCalorieTracker(!showCalorieTracker)} style={{
               padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 1rem',
               background: todayCalories > dailyCalorieGoal ? '#fee2e2' : '#f0fdf4',
@@ -2479,7 +2542,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               </span>
             </button>
             
-            {isMobile && <LanguageSwitcher compact />}
             {!isMobile && (
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                 <button onClick={() => setShowDemoConfirm(true)} style={{

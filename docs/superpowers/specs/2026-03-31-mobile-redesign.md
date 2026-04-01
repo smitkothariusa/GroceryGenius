@@ -172,13 +172,60 @@ The modals currently use inline styles. We'll add a `modal-content` className to
 
 ---
 
+## 8. Meal Plan — Touch Drag-and-Drop
+
+The component already has `draggedRecipe` state and desktop HTML5 drag/drop. On mobile it currently falls back to tap-to-select + tap-to-place. We replace this with real touch dragging.
+
+**How it works:**
+
+1. `onTouchStart` on a recipe card: record the recipe, create a drag ghost element (a clone of the card, `position: fixed`, `pointer-events: none`, `opacity: 0.85`, `z-index: 9999`), set `draggedRecipe`
+2. `onTouchMove` (on `document`, via `useEffect` listener): move the ghost to `touch.clientX / clientY` with a small offset so the finger doesn't cover it. Call `document.elementFromPoint(x, y)` and highlight any calendar slot the ghost is hovering over (add `drag-over` CSS class)
+3. `onTouchEnd`: call `document.elementFromPoint(x, y)`, walk up the DOM to find the nearest element with `data-date` and `data-meal-type` attributes (added to each calendar slot div). If found, call the existing `handleDrop(dateStr, mealType)` logic. Remove the ghost, clear highlights, clear `draggedRecipe`.
+
+**Calendar slot markup change:**
+Each slot div gets `data-date={dateStr}` and `data-meal-type={mealType}` attributes so `elementFromPoint` can identify them.
+
+**Ghost element styles:**
+```css
+.drag-ghost {
+  position: fixed;
+  pointer-events: none;
+  opacity: 0.85;
+  z-index: 9999;
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  border-radius: 8px;
+  background: white;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+```
+
+**Drag-over highlight:**
+```css
+.calendar-slot.drag-over {
+  background: #d1fae5 !important;
+  border: 2px dashed #10b981 !important;
+}
+```
+
+**Desktop unaffected:** Touch handlers only attach when `isMobile` is true; the existing `draggable` / `onDragStart` / `onDrop` props stay as-is for desktop.
+
+---
+
 ## Files Changed
 
 | File | Change |
 |------|--------|
-| `frontend/src/mobile-responsive.css` | **New file** — all mobile CSS overrides |
+| `frontend/src/mobile-responsive.css` | **New file** — all mobile CSS overrides + drag ghost + drag-over styles |
 | `frontend/src/main.tsx` | Import new CSS file |
 | `frontend/src/App.tsx` | Add `drawerOpen` state, `DrawerNav` JSX, `mobile-fab` button, `modal-content` classNames, hamburger button in header |
+| `frontend/src/components/MealPlanCalendar.tsx` | Add touch drag handlers, ghost element logic, `data-date`/`data-meal-type` attrs on slot divs |
 
 **No new dependencies. No changes to desktop layout.**
 
@@ -186,6 +233,5 @@ The modals currently use inline styles. We'll add a `modal-content` className to
 
 ## Out of Scope
 
-- Swipe gesture detection (JS touch events) — the delete button is visible, not swipe-triggered; true swipe-to-delete is a future enhancement
-- MealPlanCalendar mobile layout — complex enough to warrant its own pass
+- Swipe gesture detection for list delete — the delete button is visible, not swipe-triggered; true swipe-to-delete is a future enhancement
 - PWA install prompt styling

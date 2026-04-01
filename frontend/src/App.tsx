@@ -3168,7 +3168,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   justifyContent: 'center', zIndex: 2000
                 }}
               >
-                <div 
+                <div
+                  className="modal-content"
                   onClick={(e) => e.stopPropagation()}
                   style={{
                     background: cardBg,
@@ -4822,7 +4823,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             justifyContent: 'center', zIndex: 2000
           }}
         >
-        <div 
+        <div
+          className="modal-content"
           onClick={(e) => e.stopPropagation()}
           style={{
             background: cardBg,
@@ -5105,8 +5107,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             alignItems: 'center', zIndex: 1000, padding: '2rem', overflow: 'auto'
           }}
         >
-          <div 
-            onClick={(e) => e.stopPropagation()} 
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
             style={{
               background: cardBg,
               borderRadius: '20px',
@@ -5732,7 +5735,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             justifyContent: 'center', zIndex: 2000, padding: '2rem'
           }}
         >
-          <div 
+          <div
+            className="modal-content"
             onClick={(e) => e.stopPropagation()}
             style={{
               background: cardBg,
@@ -6048,7 +6052,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             padding: isMobile ? '1rem' : '2rem'
           }}
         >
-          <div 
+          <div
+            className="modal-content"
             onClick={(e) => e.stopPropagation()}
             style={{
               background: 'white',
@@ -6321,7 +6326,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             justifyContent: 'center', zIndex: 2500
           }}
         >
-          <div 
+          <div
+            className="modal-content"
             onClick={(e) => e.stopPropagation()}
             style={{
               background: cardBg,
@@ -6421,7 +6427,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             justifyContent: 'center', zIndex: 2500
           }}
         >
-          <div 
+          <div
+            className="modal-content"
             onClick={(e) => e.stopPropagation()}
             style={{
               background: cardBg,

@@ -2587,7 +2587,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
       {getExpiringItems().length > 0 && (
         <div style={{ background: '#fee2e2', borderBottom: '2px solid #dc2626', padding: '0.75rem' }}>
           <div style={{ maxWidth: '1200px', margin: '0 auto', color: '#dc2626', fontWeight: '600' }}>
-            ⚠️ {t('donate.itemsExpiring', { count: getExpiringItems().length })} {getExpiringItems().map(i => i.name).join(', ')}
+            ⚠️ {t('donate.itemsExpiring', { count: getExpiringItems().length })}{' '}
+            <span className="expiry-banner-items">{getExpiringItems().map(i => i.name).join(', ')}</span>
           </div>
         </div>
       )}
@@ -5598,11 +5599,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             justifyContent: 'center', zIndex: 1000
           }}
         >
-          <div style={{ 
-            background: cardBg, 
-            padding: '2rem', 
-            borderRadius: '16px', 
-            maxWidth: '400px', 
+          <div className="calorie-tracker-panel" style={{
+            background: cardBg,
+            padding: '2rem',
+            borderRadius: '16px',
+            maxWidth: '400px',
             width: '90%',
             animation: 'scaleIn 0.3s ease-out'
           }}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { mealPlansService } from '../lib/database';
 interface Recipe {
@@ -46,6 +46,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
   const [selectedSlot, setSelectedSlot] = useState<{ date: string; mealType: string } | null>(null);
   const [showRecipePicker, setShowRecipePicker] = useState(false);
   const [draggedRecipe, setDraggedRecipe] = useState<Recipe | null>(null);
+  const dragGhostRef = useRef<HTMLDivElement | null>(null);
 
   const daysOfWeek = [
     t('mealPlan.days.sunday'),
@@ -206,6 +207,73 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
         }
       }
     };
+
+  const handleTouchStart = (recipe: Recipe, e: React.TouchEvent) => {
+    if (!isMobile) return;
+    setDraggedRecipe(recipe);
+
+    // Create ghost element
+    const ghost = document.createElement('div');
+    ghost.className = 'drag-ghost';
+    ghost.textContent = recipe.name;
+    document.body.appendChild(ghost);
+    dragGhostRef.current = ghost;
+
+    const touch = e.touches[0];
+    ghost.style.left = `${touch.clientX - 90}px`;
+    ghost.style.top = `${touch.clientY - 24}px`;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isMobile || !dragGhostRef.current) return;
+    e.preventDefault(); // prevent page scroll during drag
+
+    const touch = e.touches[0];
+    dragGhostRef.current.style.left = `${touch.clientX - 90}px`;
+    dragGhostRef.current.style.top = `${touch.clientY - 24}px`;
+
+    // Highlight calendar slot under finger
+    dragGhostRef.current.style.pointerEvents = 'none';
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    dragGhostRef.current.style.pointerEvents = '';
+
+    // Remove previous highlight
+    document.querySelectorAll('.calendar-slot.drag-over').forEach(s => s.classList.remove('drag-over'));
+
+    // Find nearest slot
+    const slot = el?.closest('[data-date]');
+    if (slot) slot.classList.add('drag-over');
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!isMobile) return;
+
+    // Remove ghost
+    if (dragGhostRef.current) {
+      document.body.removeChild(dragGhostRef.current);
+      dragGhostRef.current = null;
+    }
+
+    // Remove all highlights
+    document.querySelectorAll('.calendar-slot.drag-over').forEach(s => s.classList.remove('drag-over'));
+
+    // Find slot under finger
+    const touch = e.changedTouches[0];
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    const slot = el?.closest('[data-date]') as HTMLElement | null;
+
+    if (slot) {
+      const date = slot.dataset.date;
+      const mealType = slot.dataset.mealType;
+      if (date && mealType) {
+        handleDrop(date, mealType);
+        return;
+      }
+    }
+
+    // No slot found — clear selection
+    setDraggedRecipe(null);
+  };
 
   const handleSlotClick = (date: string, mealType: string) => {
     const existing = getMealForSlot(date, mealType);
@@ -525,21 +593,20 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
                   draggable={!isMobile}
                   onDragStart={() => !isMobile && setDraggedRecipe(recipe)}
                   onDragEnd={() => !isMobile && setDraggedRecipe(null)}
-                  onClick={() => {
-                    if (isMobile) {
-                      setDraggedRecipe(recipe);
-                    }
-                  }}
+                  onTouchStart={(e) => handleTouchStart(recipe, e)}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
                   style={{
                     padding: isMobile ? '0.65rem' : '0.75rem',
                     background: isMobile && draggedRecipe?.id === recipe.id ? '#dbeafe' : 'white',
                     marginBottom: '0.5rem',
                     borderRadius: '8px',
-                    border: isMobile && draggedRecipe?.id === recipe.id 
-                      ? '2px solid #3b82f6' 
+                    border: isMobile && draggedRecipe?.id === recipe.id
+                      ? '2px solid #3b82f6'
                       : '2px solid #e5e7eb',
-                    cursor: isMobile ? 'pointer' : 'grab',
-                    transition: 'all 0.2s'
+                    cursor: isMobile ? 'grab' : 'grab',
+                    transition: 'all 0.2s',
+                    touchAction: isMobile ? 'none' : 'auto',
                   }}
                   onMouseDown={(e) => !isMobile && (e.currentTarget.style.cursor = 'grabbing')}
                   onMouseUp={(e) => !isMobile && (e.currentTarget.style.cursor = 'grab')}
@@ -617,6 +684,9 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
                   return (
                     <div
                       key={`${dateStr}-${mealType}`}
+                      className="calendar-slot"
+                      data-date={dateStr}
+                      data-meal-type={mealType}
                       onDragOver={handleDragOver}
                       onDrop={() => handleDrop(dateStr, mealType)}
                       onClick={() => handleSlotClick(dateStr, mealType)}

@@ -7,7 +7,7 @@
    1. DRAWER NAV — hide the existing top nav bar on mobile
    ---------------------------------------------------------- */
 @media (max-width: 768px) {
-  nav {
+  nav:not(.mobile-drawer-nav) {
     display: none !important;
   }
 }
@@ -246,6 +246,13 @@
   /* Hide secondary action buttons (edit icons) on mobile; keep only delete */
   .item-edit-btn {
     display: none !important;
+  }
+
+  /* Button group inside item rows — prevent full-width stretch */
+  .pantry-item-row > div:last-child,
+  .shopping-item-row > div:last-child {
+    width: auto !important;
+    flex-shrink: 0;
   }
 
   .item-delete-btn {

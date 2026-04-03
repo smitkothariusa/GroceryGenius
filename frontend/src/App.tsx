@@ -2916,7 +2916,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       <button onClick={() => addMissingToShopping(recipe)} style={{
                         flex: isMobile ? '1 1 100%' : '1',
                         padding: isMobile ? '0.75rem' : '0.75rem',
-                        background: 'linear-gradient(45deg, #ec4899, #8b5cf6)',
+                        background: 'var(--gg-tomato)',
                         fontSize: isMobile ? '0.875rem' : '1rem',
                         color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600',
                         minWidth: isMobile ? 'auto' : '120px'
@@ -3092,7 +3092,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     }}
                     style={{
                       padding: isMobile ? '0.75rem' : '0.75rem 1.5rem',
-                      background: '#8b5cf6',
+                      background: 'var(--gg-espresso)',
                       color: 'white',
                       border: 'none',
                       borderRadius: '12px',
@@ -3690,7 +3690,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 </button>
                 <button onClick={() => setShowExportMenu(!showExportMenu)} style={{
                   padding: isMobile ? '0.75rem' : '0.75rem 1.5rem',
-                  background: '#8b5cf6', 
+                  background: 'var(--gg-espresso)', 
                   color: 'white',
                   border: 'none', 
                   borderRadius: '12px', 
@@ -4052,7 +4052,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
             {/* Impact Dashboard */}
             <div style={{ 
-              background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)',
+              background: 'var(--gg-tomato)',
               padding: isMobile ? '1.5rem' : '2rem',
               borderRadius: '16px',
               marginBottom: isMobile ? '1rem' : '2rem',
@@ -5431,7 +5431,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     display: 'block',
                     width: '100%',
                     padding: '1rem',
-                    background: '#8b5cf6',
+                    background: 'var(--gg-espresso)',
                     color: 'white',
                     borderRadius: '8px',
                     textAlign: 'left',
@@ -5527,7 +5527,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   display: 'block',
                   width: '100%',
                   padding: '1rem',
-                  background: '#6366f1',
+                  background: 'var(--gg-espresso)',
                   color: 'white',
                   borderRadius: '8px',
                   textAlign: 'left',
@@ -6007,7 +6007,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   padding: '1rem',
                   background: ((!selectedFoodBank && !selectedDropOffSite) || itemsToDonate.length === 0) 
                     ? '#9ca3af' 
-                    : 'linear-gradient(45deg, #ec4899, #8b5cf6)',
+                    : 'var(--gg-tomato)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '12px',
@@ -6254,7 +6254,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'start' }}>
                   <div style={{
-                    background: '#ec4899',
+                    background: 'var(--gg-tomato)',
                     color: 'white',
                     width: '40px',
                     height: '40px',
@@ -6378,7 +6378,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 style={{
                   flex: 1,
                   padding: '1rem',
-                  background: 'linear-gradient(45deg, #8b5cf6, #6366f1)',
+                  background: 'rgba(255,255,255,0.1)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '12px',
@@ -6459,7 +6459,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.75rem' }}>📱 Share Your Impact</h3>
             
             <div style={{
-              background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)',
+              background: 'var(--gg-tomato)',
               padding: '2rem',
               borderRadius: '16px',
               color: 'white',

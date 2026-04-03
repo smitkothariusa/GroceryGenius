@@ -460,7 +460,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
           marginBottom: '1rem',
           gap: isMobile ? '0.75rem' : '0'
         }}>
-          <h2 style={{ margin: 0, fontSize: isMobile ? '1.5rem' : '2rem', fontWeight: '700' }}>
+          <h2 style={{ margin: 0, fontSize: isMobile ? '1.5rem' : '2rem', fontWeight: '800', fontFamily: "'Bricolage Grotesque', sans-serif", color: 'var(--gg-espresso)' }}>
             📅 {t('mealPlan.title')}
           </h2>
           <div style={{ 
@@ -477,16 +477,16 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
               <button onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))} style={{
                 flex: isMobile ? '1' : 'initial',
                 padding: isMobile ? '0.75rem' : '0.5rem 1rem',
-                background: '#f3f4f6', border: 'none',
+                background: 'var(--gg-cream)', border: 'none',
                 borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
-                fontSize: isMobile ? '0.875rem' : '1rem'
+                fontSize: isMobile ? '0.875rem' : '1rem', color: 'var(--gg-espresso)'
               }}>← {isMobile ? t('mealPlan.prev') : t('mealPlan.prevWeek')}</button>
               <button onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))} style={{
                 flex: isMobile ? '1' : 'initial',
                 padding: isMobile ? '0.75rem' : '0.5rem 1rem',
-                background: '#f3f4f6', border: 'none',
+                background: 'var(--gg-cream)', border: 'none',
                 borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
-                fontSize: isMobile ? '0.875rem' : '1rem'
+                fontSize: isMobile ? '0.875rem' : '1rem', color: 'var(--gg-espresso)'
               }}>{isMobile ? t('mealPlan.next') : t('mealPlan.nextWeek')} →</button>
             </div>
             <div style={{ 
@@ -506,11 +506,11 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
           gap: isMobile ? '0.75rem' : '1rem',
           marginBottom: isMobile ? '1rem' : '1.5rem'
         }}>
-          <div style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '1rem', borderRadius: '12px', color: 'white' }}>
+          <div style={{ background: 'var(--gg-tomato)', padding: '1rem', borderRadius: '12px', color: 'white' }}>
             <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>{t('mealPlan.mealsPlanned')}</div>
             <div style={{ fontSize: '2rem', fontWeight: '700' }}>{stats.mealsPlanned}/21</div>
           </div>
-          <div style={{ background: '#10b981', padding: '1rem', borderRadius: '12px', color: 'white' }}>
+          <div style={{ background: 'var(--gg-forest)', padding: '1rem', borderRadius: '12px', color: 'white' }}>
             <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>{t('mealPlan.totalCalories')}</div>
             <div style={{ fontSize: '2rem', fontWeight: '700' }}>{stats.totalCalories.toLocaleString()}</div>
           </div>
@@ -525,7 +525,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
         </div>
 
         <button onClick={generateWeekShoppingList} style={{
-          padding: '0.75rem 1.5rem', background: 'linear-gradient(45deg, #10b981, #059669)',
+          padding: '0.75rem 1.5rem', background: 'var(--gg-tomato)',
           color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer',
           fontWeight: '600', fontSize: '1rem', width: '100%'
         }}>
@@ -559,25 +559,25 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
           order: isMobile ? 2 : 1
         }}>
           <div style={{ 
-            background: 'rgba(255,255,255,0.95)', 
-            borderRadius: '16px', 
-            padding: isMobile ? '1rem' : '1.5rem', 
-            position: isMobile ? 'relative' : 'sticky', 
-            top: isMobile ? '0' : '1rem' 
+            background: 'var(--gg-cream)',
+            borderRadius: '16px',
+            padding: isMobile ? '1rem' : '1.5rem',
+            position: isMobile ? 'relative' : 'sticky',
+            top: isMobile ? '0' : '1rem'
           }}>
-            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.25rem' }}>📚 {t('mealPlan.savedRecipes')}</h3>
-            <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
+            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.25rem', fontFamily: "'Bricolage Grotesque', sans-serif", fontWeight: '700', color: 'var(--gg-espresso)' }}>📚 {t('mealPlan.savedRecipes')}</h3>
+            <div style={{ fontSize: '0.875rem', color: 'var(--gg-taupe)', marginBottom: '1rem' }}>
               {t('mealPlan.dragHint')}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '600px', overflowY: 'auto' }}>
               {savedRecipes.length === 0 && (
                 <div style={{ 
-                  textAlign: 'center', 
-                  padding: '2rem', 
-                  color: '#6b7280',
-                  background: '#f9fafb',
+                  textAlign: 'center',
+                  padding: '2rem',
+                  color: 'var(--gg-taupe)',
+                  background: 'var(--gg-cream)',
                   borderRadius: '12px',
-                  border: '2px dashed #e5e7eb'
+                  border: '2px dashed var(--gg-border)'
                 }}>
                   <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⭐</div>
                   <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>{t('mealPlan.noSavedRecipes')}</div>
@@ -598,12 +598,12 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
                   onTouchEnd={handleTouchEnd}
                   style={{
                     padding: isMobile ? '0.65rem' : '0.75rem',
-                    background: isMobile && draggedRecipe?.id === recipe.id ? '#dbeafe' : 'white',
+                    background: isMobile && draggedRecipe?.id === recipe.id ? '#dbeafe' : 'var(--gg-cream)',
                     marginBottom: '0.5rem',
                     borderRadius: '8px',
                     border: isMobile && draggedRecipe?.id === recipe.id
                       ? '2px solid #3b82f6'
-                      : '2px solid #e5e7eb',
+                      : '2px solid var(--gg-border)',
                     cursor: isMobile ? 'grab' : 'grab',
                     transition: 'all 0.2s',
                     touchAction: isMobile ? 'none' : 'auto',
@@ -612,7 +612,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
                   onMouseUp={(e) => !isMobile && (e.currentTarget.style.cursor = 'grab')}
                 >
                   <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>{translatedNames[recipe.id] || recipe.name}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--gg-taupe)' }}>
                     {recipe.prep_time} • {recipe.nutrition?.calories || 0} cal
                   </div>
                 </div>
@@ -627,36 +627,40 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
           order: isMobile ? 1 : 2
         }}>
           <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: isMobile ? `80px repeat(7, minmax(100px, 1fr))` : `120px repeat(7, 1fr)`, 
-            gap: '1px', 
-            background: '#e5e7eb', 
-            borderRadius: '12px', 
-            overflow: 'hidden', 
+            display: 'grid',
+            gridTemplateColumns: isMobile ? `80px repeat(7, minmax(100px, 1fr))` : `120px repeat(7, 1fr)`,
+            gap: '1px',
+            background: 'var(--gg-border)',
+            borderRadius: '12px',
+            overflow: 'hidden',
             minWidth: isMobile ? '800px' : '900px'
           }}>
             {/* Header Row */}
-            <div style={{ 
-              background: '#f9fafb', 
-              padding: isMobile ? '0.5rem' : '1rem', 
-              fontWeight: '600',
-              fontSize: isMobile ? '0.75rem' : '1rem'
+            <div style={{
+              background: 'var(--gg-cream)',
+              padding: isMobile ? '0.5rem' : '1rem',
+              fontWeight: '700',
+              fontFamily: "'Bricolage Grotesque', sans-serif",
+              fontSize: isMobile ? '0.75rem' : '1rem',
+              color: 'var(--gg-espresso)'
             }}>
               {isMobile ? t('mealPlan.mealTypeShort') : t('mealPlan.mealType')}
             </div>
             {weekDates.map((date, idx) => (
-              <div key={idx} style={{ 
-                background: '#f9fafb', 
-                padding: isMobile ? '0.5rem' : '1rem', 
-                textAlign: 'center' 
+              <div key={idx} style={{
+                background: 'var(--gg-cream)',
+                padding: isMobile ? '0.5rem' : '1rem',
+                textAlign: 'center'
               }}>
-                <div style={{ 
-                  fontWeight: '700', 
-                  fontSize: isMobile ? '0.75rem' : '1.1rem' 
+                <div style={{
+                  fontWeight: '700',
+                  fontFamily: "'Bricolage Grotesque', sans-serif",
+                  fontSize: isMobile ? '0.75rem' : '1.1rem',
+                  color: 'var(--gg-espresso)'
                 }}>
                   {isMobile ? daysOfWeek[date.getDay()].substring(0, 3) : daysOfWeek[date.getDay()]}
                 </div>
-                <div style={{ fontSize: isMobile ? '0.65rem' : '0.875rem', color: '#6b7280' }}>
+                <div style={{ fontSize: isMobile ? '0.65rem' : '0.875rem', color: 'var(--gg-taupe)' }}>
                   {date.toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })}
                 </div>
               </div>
@@ -665,14 +669,16 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
             {/* Meal Rows */}
             {mealTypes.map(mealType => (
               <React.Fragment key={mealType}>
-                <div style={{ 
-                  background: 'white', 
-                  padding: isMobile ? '0.5rem' : '1rem', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  fontWeight: '600', 
+                <div style={{
+                  background: 'var(--gg-cream)',
+                  padding: isMobile ? '0.5rem' : '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  fontWeight: '700',
+                  fontFamily: "'Bricolage Grotesque', sans-serif",
                   textTransform: 'capitalize',
-                  fontSize: isMobile ? '0.75rem' : '1rem'
+                  fontSize: isMobile ? '0.75rem' : '1rem',
+                  color: 'var(--gg-espresso)'
                 }}>
                   {mealType === 'breakfast' && '🍳'} {mealType === 'lunch' && '🥗'} {mealType === 'dinner' && '🍽️'} {mealType === 'snack' && '🍿'}
                   {!isMobile && ' '}{!isMobile && t(`mealPlan.${mealType === 'snack' ? 'snacks' : mealType}`)}
@@ -691,7 +697,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
                       onDrop={() => handleDrop(dateStr, mealType)}
                       onClick={() => handleSlotClick(dateStr, mealType)}
                       style={{
-                        background: 'white',
+                        background: 'var(--gg-cream)',
                         padding: isMobile ? '0.5rem' : '0.75rem',
                         minHeight: isMobile ? '80px' : '120px',
                         cursor: meal ? 'default' : 'pointer',
@@ -699,16 +705,16 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
                         position: 'relative'
                       }}
                       onMouseEnter={(e) => {
-                        if (!meal) e.currentTarget.style.background = '#f9fafb';
+                        if (!meal) e.currentTarget.style.background = 'var(--gg-parchment)';
                       }}
                       onMouseLeave={(e) => {
-                        if (!meal) e.currentTarget.style.background = 'white';
+                        if (!meal) e.currentTarget.style.background = 'var(--gg-cream)';
                       }}
                     >
                       {meal ? (
                         <div style={{
-                          background: meal.completed ? '#f0fdf4' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                          color: meal.completed ? '#166534' : 'white',
+                          background: meal.completed ? 'var(--gg-forest-light)' : 'var(--gg-tomato)',
+                          color: meal.completed ? 'var(--gg-forest)' : 'white',
                           padding: isMobile ? '0.5rem' : '0.75rem',
                           borderRadius: '8px',
                           fontSize: isMobile ? '0.75rem' : '0.875rem',
@@ -748,7 +754,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
                           </div>
                         </div>
                       ) : (
-                        <div style={{ textAlign: 'center', color: '#9ca3af', fontSize: '0.875rem', paddingTop: '2rem' }}>
+                        <div style={{ textAlign: 'center', color: 'var(--gg-taupe)', fontSize: '0.875rem', paddingTop: '2rem' }}>
                           + {t('mealPlan.addMeal')}
                         </div>
                       )}
@@ -769,10 +775,10 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
           justifyContent: 'center', zIndex: 1000
         }}>
           <div onClick={(e) => e.stopPropagation()} style={{
-            background: 'white', borderRadius: '16px', padding: '2rem',
+            background: 'var(--gg-cream)', borderRadius: '16px', padding: '2rem',
             maxWidth: '600px', maxHeight: '80vh', overflow: 'auto'
           }}>
-            <h3 style={{ margin: '0 0 1.5rem 0' }}>{t('mealPlan.selectRecipe')}</h3>
+            <h3 style={{ margin: '0 0 1.5rem 0', fontFamily: "'Bricolage Grotesque', sans-serif", fontWeight: '700', color: 'var(--gg-espresso)' }}>{t('mealPlan.selectRecipe')}</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {savedRecipes.map(recipe => (
                 <div
@@ -780,22 +786,23 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
                   onClick={() => handleRecipeSelect(recipe)}
                   style={{
                     padding: '1rem',
-                    border: '2px solid #e5e7eb',
+                    border: '2px solid var(--gg-border)',
                     borderRadius: '8px',
                     cursor: 'pointer',
-                    transition: 'all 0.2s'
+                    transition: 'all 0.2s',
+                    background: 'var(--gg-cream)'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#10b981';
-                    e.currentTarget.style.background = '#f0fdf4';
+                    e.currentTarget.style.borderColor = 'var(--gg-tomato)';
+                    e.currentTarget.style.background = 'var(--gg-tomato-subtle)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#e5e7eb';
-                    e.currentTarget.style.background = 'white';
+                    e.currentTarget.style.borderColor = 'var(--gg-border)';
+                    e.currentTarget.style.background = 'var(--gg-cream)';
                   }}
                 >
                   <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>{translatedNames[recipe.id] || recipe.name}</div>
-                  <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                  <div style={{ fontSize: '0.875rem', color: 'var(--gg-taupe)' }}>
                     {recipe.prep_time} • {recipe.nutrition?.calories || 0} cal • {recipe.servings} {t('recipes.servings')}
                   </div>
                 </div>

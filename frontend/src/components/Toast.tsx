@@ -17,22 +17,27 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 3000 }
     switch (type) {
       case 'success':
         return {
-          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+          background: 'linear-gradient(135deg, var(--gg-forest) 0%, var(--gg-forest-hover) 100%)',
           icon: '✅'
         };
       case 'error':
         return {
-          background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+          background: 'linear-gradient(135deg, var(--gg-red) 0%, var(--gg-red-hover) 100%)',
           icon: '❌'
         };
       case 'warning':
         return {
-          background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+          background: 'linear-gradient(135deg, var(--gg-amber) 0%, var(--gg-amber-hover) 100%)',
           icon: '⚠️'
         };
       case 'info':
         return {
-          background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+          background: 'linear-gradient(135deg, var(--gg-espresso) 0%, #3a2a1a 100%)',
+          icon: 'ℹ️'
+        };
+      default:
+        return {
+          background: 'linear-gradient(135deg, var(--gg-espresso) 0%, #3a2a1a 100%)',
           icon: 'ℹ️'
         };
     }
@@ -42,6 +47,7 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 3000 }
 
   return (
     <div
+      className="gg-toast"
       style={{
         position: 'fixed',
         bottom: '2rem',
@@ -49,8 +55,8 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 3000 }
         background: styles.background,
         color: 'white',
         padding: '1rem 1.5rem',
-        borderRadius: '12px',
-        boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+        borderRadius: 'var(--gg-radius-lg)',
+        boxShadow: 'var(--gg-shadow-lg)',
         display: 'flex',
         alignItems: 'center',
         gap: '0.75rem',
@@ -64,10 +70,10 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 3000 }
     >
       <span style={{ fontSize: '1.5rem' }}>{styles.icon}</span>
       <div style={{ flex: 1 }}>
-        <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>
+        <div style={{ fontWeight: 700, fontFamily: "'Bricolage Grotesque', sans-serif", marginBottom: '0.25rem' }}>
           {type.charAt(0).toUpperCase() + type.slice(1)}
         </div>
-        <div style={{ fontSize: '0.875rem', opacity: 0.95 }}>
+        <div style={{ fontSize: '0.875rem', opacity: 0.9, fontFamily: "'Lato', sans-serif" }}>
           {message}
         </div>
       </div>

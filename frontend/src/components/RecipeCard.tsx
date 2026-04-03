@@ -102,10 +102,10 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
   const healthRating = calculateHealthRating();
   
   const getRatingColor = (rating: string): string => {
-    if (rating.startsWith('A')) return '#10b981';
-    if (rating.startsWith('B')) return '#3b82f6';
-    if (rating.startsWith('C')) return '#f59e0b';
-    return '#ef4444';
+    if (rating.startsWith('A')) return 'var(--gg-forest)';
+    if (rating.startsWith('B')) return 'var(--gg-forest)';
+    if (rating.startsWith('C')) return 'var(--gg-amber)';
+    return 'var(--gg-red)';
   };
 
   // Better format instructions preview - get first meaningful sentence
@@ -134,22 +134,24 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
 
   return (
     <div style={{
-      background: 'rgba(255, 255, 255, 0.95)',
-      borderRadius: '16px',
+      background: 'var(--gg-cream)',
+      borderRadius: 'var(--gg-radius-lg)',
       padding: '1.5rem',
-      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+      boxShadow: 'var(--gg-shadow-sm)',
       marginBottom: '1rem',
-      border: '1px solid rgba(255, 255, 255, 0.2)',
+      border: '1.5px solid var(--gg-border)',
       transition: 'all 0.3s ease',
-      cursor: 'pointer'
+      cursor: 'pointer',
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-        <h3 style={{ 
-          margin: '0', 
-          color: '#1f2937', 
-          fontSize: '1.25rem', 
-          fontWeight: '700',
-          lineHeight: '1.4',
+        <h3 style={{
+          margin: '0',
+          color: 'var(--gg-espresso)',
+          fontSize: '1.3rem',
+          fontWeight: 800,
+          fontFamily: "'Bricolage Grotesque', sans-serif",
+          lineHeight: '1.3',
+          letterSpacing: '-0.5px',
           flex: 1,
           paddingRight: '1rem'
         }}>
@@ -166,7 +168,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
             background: getRatingColor(healthRating),
             color: 'white',
             padding: '0.5rem 0.75rem',
-            borderRadius: '12px',
+            borderRadius: 'var(--gg-radius-md)',
             fontSize: '1rem',
             fontWeight: '700',
             minWidth: '50px',
@@ -177,7 +179,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
           </div>
           <span style={{
             fontSize: '0.7rem',
-            color: '#6b7280',
+            color: 'var(--gg-taupe)',
             fontWeight: '500'
           }}>
             {t('recipes.healthGrade')}
@@ -189,7 +191,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
         {recipe.prep_time && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             <span style={{ fontSize: '1rem' }}>⏱</span>
-            <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>
+            <span style={{ color: 'var(--gg-taupe)', fontSize: '0.875rem' }}>
               <strong>{t('recipes.prepTime')}:</strong> {recipe.prep_time}
             </span>
           </div>
@@ -198,7 +200,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
         {recipe.cook_time && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             <span style={{ fontSize: '1rem' }}>🔥</span>
-            <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>
+            <span style={{ color: 'var(--gg-taupe)', fontSize: '0.875rem' }}>
               <strong>{t('recipes.cookTime')}:</strong> {recipe.cook_time}
             </span>
           </div>
@@ -210,12 +212,14 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
             borderRadius: '12px',
             fontSize: '0.875rem',
             fontWeight: '500',
-            background: recipe.difficulty.toLowerCase().includes('easy') ? '#dcfce7' : 
-                       recipe.difficulty.toLowerCase().includes('medium') ? '#fef3c7' : 
-                       recipe.difficulty.toLowerCase().includes('hard') ? '#fee2e2' : '#e0e7ff',
-            color: recipe.difficulty.toLowerCase().includes('easy') ? '#166534' : 
-                   recipe.difficulty.toLowerCase().includes('medium') ? '#92400e' :
-                   recipe.difficulty.toLowerCase().includes('hard') ? '#dc2626' : '#3730a3'
+            background: recipe.difficulty.toLowerCase().includes('easy') ? 'var(--gg-forest-light)' :
+                       recipe.difficulty.toLowerCase().includes('medium') ? 'var(--gg-amber-light)' :
+                       'var(--gg-red-light)',
+            color: recipe.difficulty.toLowerCase().includes('easy') ? 'var(--gg-forest)' :
+                   recipe.difficulty.toLowerCase().includes('medium') ? 'var(--gg-amber-hover)' :
+                   'var(--gg-red)',
+            fontFamily: "'Bricolage Grotesque', sans-serif",
+            fontWeight: 600,
           }}>
             {recipe.difficulty}
           </span>
@@ -224,7 +228,7 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
         {recipe.servings && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             <span style={{ fontSize: '1rem' }}>👥</span>
-            <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>
+            <span style={{ color: 'var(--gg-taupe)', fontSize: '0.875rem' }}>
               <strong>{t('recipes.servings')}:</strong> {recipe.servings}
             </span>
           </div>
@@ -233,39 +237,39 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
 
       {recipe.nutrition && (
         <div style={{
-          background: '#f8fafc',
+          background: 'var(--gg-parchment)',
           padding: '1rem',
           borderRadius: '12px',
           marginBottom: '1rem',
-          border: '1px solid #e2e8f0'
+          border: '1px solid var(--gg-border)',
         }}>
-          <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.9rem', fontWeight: '600', color: '#374151' }}>
+          <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.8rem', fontWeight: 600, color: 'var(--gg-taupe)', fontFamily: "'Bricolage Grotesque', sans-serif", textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             {t('recipes.nutritionFacts')}
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', fontSize: '0.85rem' }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: '600', color: '#059669' }}>{recipe.nutrition.calories}</div>
-              <div style={{ color: '#6b7280' }}>{t('recipes.calories')}</div>
+              <div style={{ fontWeight: '600', color: 'var(--gg-forest)' }}>{recipe.nutrition.calories}</div>
+              <div style={{ color: 'var(--gg-taupe)' }}>{t('recipes.calories')}</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: '600', color: '#7c3aed' }}>{recipe.nutrition.protein}g</div>
-              <div style={{ color: '#6b7280' }}>{t('recipes.protein')}</div>
+              <div style={{ fontWeight: '600', color: 'var(--gg-espresso)' }}>{recipe.nutrition.protein}g</div>
+              <div style={{ color: 'var(--gg-taupe)' }}>{t('recipes.protein')}</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: '600', color: '#dc2626' }}>{recipe.nutrition.carbs}g</div>
-              <div style={{ color: '#6b7280' }}>{t('recipes.carbs')}</div>
+              <div style={{ fontWeight: '600', color: 'var(--gg-espresso)' }}>{recipe.nutrition.carbs}g</div>
+              <div style={{ color: 'var(--gg-taupe)' }}>{t('recipes.carbs')}</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: '600', color: '#f59e0b' }}>{recipe.nutrition.fat}g</div>
-              <div style={{ color: '#6b7280' }}>{t('recipes.fat')}</div>
+              <div style={{ fontWeight: '600', color: 'var(--gg-amber)' }}>{recipe.nutrition.fat}g</div>
+              <div style={{ color: 'var(--gg-taupe)' }}>{t('recipes.fat')}</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: '600', color: '#10b981' }}>{recipe.nutrition.fiber}g</div>
-              <div style={{ color: '#6b7280' }}>{t('recipes.fiber')}</div>
+              <div style={{ fontWeight: '600', color: 'var(--gg-forest)' }}>{recipe.nutrition.fiber}g</div>
+              <div style={{ color: 'var(--gg-taupe)' }}>{t('recipes.fiber')}</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: '600', color: '#ef4444' }}>{recipe.nutrition.sodium}mg</div>
-              <div style={{ color: '#6b7280' }}>{t('recipes.sodium')}</div>
+              <div style={{ fontWeight: '600', color: 'var(--gg-red)' }}>{recipe.nutrition.sodium}mg</div>
+              <div style={{ color: 'var(--gg-taupe)' }}>{t('recipes.sodium')}</div>
             </div>
           </div>
         </div>
@@ -273,16 +277,16 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
 
       {recipe.health_benefits && (
         <div style={{
-          background: '#f0fdf4',
+          background: 'var(--gg-forest-light)',
           padding: '0.75rem',
           borderRadius: '8px',
           marginBottom: '1rem',
-          border: '1px solid #bbf7d0'
+          border: '1px solid var(--gg-border)',
         }}>
-          <div style={{ fontSize: '0.85rem', color: '#166534', fontWeight: '500', marginBottom: '0.25rem' }}>
+          <div style={{ fontSize: '0.85rem', color: 'var(--gg-forest)', fontWeight: '500', marginBottom: '0.25rem' }}>
             {t('recipes.healthBenefitsHeading')}
           </div>
-          <div style={{ fontSize: '0.8rem', color: '#047857', lineHeight: '1.4' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--gg-forest)', lineHeight: '1.4' }}>
             {recipe.health_benefits}
           </div>
         </div>
@@ -290,33 +294,33 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
 
       {recipe.budget_tip && (
         <div style={{
-          background: '#fef3c7',
+          background: 'var(--gg-amber-light)',
           padding: '0.75rem',
           borderRadius: '8px',
           marginBottom: '1rem',
-          border: '1px solid #fbbf24'
+          border: '1px solid var(--gg-border)',
         }}>
-          <div style={{ fontSize: '0.85rem', color: '#92400e', fontWeight: '500', marginBottom: '0.25rem' }}>
+          <div style={{ fontSize: '0.85rem', color: 'var(--gg-amber-hover)', fontWeight: '500', marginBottom: '0.25rem' }}>
             {t('recipes.moneySavingHeading')}
           </div>
-          <div style={{ fontSize: '0.8rem', color: '#a16207', lineHeight: '1.4' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--gg-amber-hover)', lineHeight: '1.4' }}>
             {recipe.budget_tip}
           </div>
         </div>
       )}
       
       <div style={{
-        background: '#fafafa',
+        background: 'var(--gg-parchment)',
         padding: '1rem',
         borderRadius: '8px',
         marginBottom: '1rem',
-        border: '1px solid #e5e7eb'
+        border: '1px solid var(--gg-border)',
       }}>
-        <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', fontWeight: '600', color: '#374151' }}>
+        <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', fontWeight: '600', color: 'var(--gg-espresso)' }}>
           {t('recipes.quickPreview')}
         </h4>
         <p style={{ 
-          color: '#4b5563', 
+          color: 'var(--gg-taupe)',
           lineHeight: '1.6', 
           margin: 0,
           fontSize: '0.9rem'
@@ -330,13 +334,14 @@ const RecipeCard: React.FC<Props> = ({ recipe, index }) => {
         alignItems: 'center',
         justifyContent: 'center',
         gap: '0.5rem',
-        color: '#10b981',
-        fontWeight: '600',
+        color: 'var(--gg-tomato)',
+        fontWeight: 600,
         fontSize: '0.9rem',
         padding: '0.75rem',
-        background: '#f0fdf4',
+        background: 'var(--gg-tomato-subtle)',
         borderRadius: '8px',
-        border: '1px solid #bbf7d0'
+        border: '1.5px solid var(--gg-tomato)',
+        fontFamily: "'Bricolage Grotesque', sans-serif",
       }}>
         {t('recipes.clickForFullRecipe')}
       </div>

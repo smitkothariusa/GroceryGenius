@@ -18,7 +18,7 @@ const PROXIMITY_MULTIPLIER = 1.2;
 const PROXIMITY_OPACITY_BOOST = 0.7;
 
 // Brand dot color — warm amber tint that works on white cards
-const DOT_COLOR = '#e8a830';
+const DOT_COLOR = 'rgba(232, 57, 26, 0.35)';
 
 interface Dot {
   id: string;
@@ -163,6 +163,9 @@ export default function MouseEffectCard({
   const mouseX = useMotionValue(Infinity);
   const mouseY = useMotionValue(Infinity);
   const [dots, setDots] = useState<Dot[]>([]);
+  const [isMobileDevice] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches
+  );
 
   useEffect(() => {
     const update = () => {
@@ -179,17 +182,25 @@ export default function MouseEffectCard({
   return (
     <div
       ref={containerRef}
-      onMouseMove={(e) => {
+      onMouseMove={isMobileDevice ? undefined : (e) => {
         if (!containerRef.current) return;
         const { left, top } = containerRef.current.getBoundingClientRect();
         mouseX.set(e.clientX - left);
         mouseY.set(e.clientY - top);
       }}
-      onMouseLeave={() => { mouseX.set(Infinity); mouseY.set(Infinity); }}
-      style={{ position: 'relative', overflow: 'hidden', ...style }}
+      onMouseLeave={isMobileDevice ? undefined : () => { mouseX.set(Infinity); mouseY.set(Infinity); }}
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        background: 'var(--gg-cream)',
+        border: '1.5px solid var(--gg-border)',
+        borderRadius: 'var(--gg-radius-lg)',
+        boxShadow: 'var(--gg-shadow-sm)',
+        ...style
+      }}
     >
       {/* Dot layer — behind content */}
-      {dots.map((dot, i) => (
+      {!isMobileDevice && dots.map((dot, i) => (
         <DotComponent
           key={dot.id}
           dot={dot}

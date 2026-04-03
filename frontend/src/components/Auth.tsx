@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { authService, supabase } from '../lib/supabase';
+import AttractButton from './AttractButton';
 
 interface AuthProps {
   onAuthSuccess: () => void;
@@ -14,6 +15,7 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
   // Check for email confirmation token in URL
 // Handle email confirmation from URL
@@ -88,24 +90,25 @@ useEffect(() => {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'var(--gg-parchment)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '2rem'
     }}>
-      <div style={{
-        background: 'white',
-        borderRadius: '20px',
+      <div className="auth-card" style={{
+        background: 'var(--gg-cream)',
+        borderRadius: 'var(--gg-radius-xl)',
         padding: '3rem',
         maxWidth: '450px',
         width: '100%',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+        boxShadow: 'var(--gg-shadow-lg)',
+        border: '1.5px solid var(--gg-border)',
       }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👨‍🍳</div>
-          <h1 style={{ margin: 0, color: '#10b981', fontSize: '2rem' }}>GroceryGenius</h1>
-          <p style={{ color: '#6b7280', marginTop: '0.5rem' }}>
+          <h1 style={{ margin: 0, color: 'var(--gg-espresso)', fontSize: '2.5rem', fontFamily: "'Bricolage Grotesque', sans-serif", fontWeight: 800, letterSpacing: '-1px' }}>GroceryGenius</h1>
+          <p style={{ color: 'var(--gg-taupe)', marginTop: '0.5rem', fontFamily: "'Lato', sans-serif" }}>
             {t('auth.aiPoweredMealPlanning')}
           </p>
         </div>
@@ -113,7 +116,7 @@ useEffect(() => {
         <form onSubmit={handleSubmit}>
           {isSignUp && (
             <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: '0.8rem', color: 'var(--gg-espresso)' }}>
                 {t('auth.fullName')}
               </label>
               <input
@@ -121,20 +124,28 @@ useEffect(() => {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required={isSignUp}
+                onFocus={() => setFocusedInput('fullname')}
+                onBlur={() => setFocusedInput(null)}
                 style={{
                   width: '100%',
                   padding: '0.75rem',
-                  border: '2px solid #e5e7eb',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  boxSizing: 'border-box'
+                  border: focusedInput === 'fullname' ? '1.5px solid var(--gg-tomato)' : '1.5px solid var(--gg-border)',
+                  borderRadius: 'var(--gg-radius-md)',
+                  fontSize: '16px',
+                  fontFamily: "'Lato', sans-serif",
+                  background: 'var(--gg-cream)',
+                  color: 'var(--gg-espresso)',
+                  boxSizing: 'border-box' as const,
+                  outline: 'none',
+                  minHeight: '48px',
+                  boxShadow: focusedInput === 'fullname' ? '0 0 0 3px var(--gg-tomato-subtle)' : 'none',
                 }}
               />
             </div>
           )}
 
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: '0.8rem', color: 'var(--gg-espresso)' }}>
               {t('auth.email')}
             </label>
             <input
@@ -142,19 +153,27 @@ useEffect(() => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              onFocus={() => setFocusedInput('email')}
+              onBlur={() => setFocusedInput(null)}
               style={{
                 width: '100%',
                 padding: '0.75rem',
-                border: '2px solid #e5e7eb',
-                borderRadius: '8px',
-                fontSize: '1rem',
-                boxSizing: 'border-box'
+                border: focusedInput === 'email' ? '1.5px solid var(--gg-tomato)' : '1.5px solid var(--gg-border)',
+                borderRadius: 'var(--gg-radius-md)',
+                fontSize: '16px',
+                fontFamily: "'Lato', sans-serif",
+                background: 'var(--gg-cream)',
+                color: 'var(--gg-espresso)',
+                boxSizing: 'border-box' as const,
+                outline: 'none',
+                minHeight: '48px',
+                boxShadow: focusedInput === 'email' ? '0 0 0 3px var(--gg-tomato-subtle)' : 'none',
               }}
             />
           </div>
 
           <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: '0.8rem', color: 'var(--gg-espresso)' }}>
               {t('auth.password')}
             </label>
             <input
@@ -163,21 +182,29 @@ useEffect(() => {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
+              onFocus={() => setFocusedInput('password')}
+              onBlur={() => setFocusedInput(null)}
               style={{
                 width: '100%',
                 padding: '0.75rem',
-                border: '2px solid #e5e7eb',
-                borderRadius: '8px',
-                fontSize: '1rem',
-                boxSizing: 'border-box'
+                border: focusedInput === 'password' ? '1.5px solid var(--gg-tomato)' : '1.5px solid var(--gg-border)',
+                borderRadius: 'var(--gg-radius-md)',
+                fontSize: '16px',
+                fontFamily: "'Lato', sans-serif",
+                background: 'var(--gg-cream)',
+                color: 'var(--gg-espresso)',
+                boxSizing: 'border-box' as const,
+                outline: 'none',
+                minHeight: '48px',
+                boxShadow: focusedInput === 'password' ? '0 0 0 3px var(--gg-tomato-subtle)' : 'none',
               }}
             />
           </div>
 
           {error && (
             <div style={{
-              background: '#fee2e2',
-              color: '#dc2626',
+              background: 'var(--gg-red-light)',
+              color: 'var(--gg-red)',
               padding: '0.75rem',
               borderRadius: '8px',
               marginBottom: '1rem',
@@ -187,24 +214,14 @@ useEffect(() => {
             </div>
           )}
 
-          <button
+          <AttractButton
             type="submit"
             disabled={loading}
-            style={{
-              width: '100%',
-              padding: '1rem',
-              background: loading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              fontWeight: '600',
-              fontSize: '1rem',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              marginBottom: '1rem'
-            }}
+            loading={loading}
+            style={{ marginTop: '0.5rem', marginBottom: '1rem' }}
           >
-            {loading ? t('auth.loading') : (isSignUp ? t('auth.signUp') : t('auth.signIn'))}
-          </button>
+            {isSignUp ? t('auth.signUp') : t('auth.signIn')}
+          </AttractButton>
 
           <button
             type="button"
@@ -216,8 +233,11 @@ useEffect(() => {
               width: '100%',
               padding: '0.75rem',
               background: 'transparent',
-              color: '#6b7280',
+              color: 'var(--gg-tomato)',
               border: 'none',
+              fontFamily: "'Lato', sans-serif",
+              fontWeight: 700,
+              textDecoration: 'underline',
               cursor: 'pointer',
               fontSize: '0.875rem'
             }}

@@ -208,20 +208,20 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
       justifyContent: 'center', zIndex: 2000, padding: '2rem'
     }}>
       <div onClick={(e) => e.stopPropagation()} style={{
-        background: 'white', borderRadius: '20px', padding: '2rem',
+        background: 'var(--gg-cream)', borderRadius: '20px', padding: '2rem',
         maxWidth: '700px', width: '100%', maxHeight: '90vh', overflow: 'auto',
         position: 'relative'
       }}>
         <button onClick={onClose} style={{
           position: 'absolute', top: '1rem', right: '1rem',
-          background: '#f3f4f6', border: 'none', borderRadius: '50%',
+          background: 'var(--gg-cream)', border: 'none', borderRadius: '50%',
           width: '40px', height: '40px', cursor: 'pointer', fontSize: '1.5rem'
         }}>×</button>
 
         <h2 style={{ marginBottom: '0.5rem', fontSize: '1.75rem', fontWeight: '700' }}>
           🔄 {t('recipes.smartSubstitution')}
         </h2>
-        <p style={{ color: '#6b7280', marginBottom: '2rem' }}>
+        <p style={{ color: 'var(--gg-taupe)', marginBottom: '2rem' }}>
           {t('recipes.findAlternativesFor')} <strong>{quantity} {unit} {ingredientName}</strong>
         </p>
 
@@ -237,8 +237,8 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
                 onClick={() => setSelectedDietaryFilter(filter.value)}
                 style={{
                   padding: '0.5rem 1rem',
-                  background: selectedDietaryFilter === filter.value ? '#10b981' : '#f3f4f6',
-                  color: selectedDietaryFilter === filter.value ? 'white' : '#1f2937',
+                  background: selectedDietaryFilter === filter.value ? 'var(--gg-forest)' : 'var(--gg-cream)',
+                  color: selectedDietaryFilter === filter.value ? 'white' : 'var(--gg-espresso)',
                   border: 'none',
                   borderRadius: '20px',
                   cursor: 'pointer',
@@ -259,7 +259,7 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
 
         {/* Loading State */}
         {loading && (
-          <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
+          <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--gg-taupe)' }}>
             <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔍</div>
             {t('recipes.findingSubstitutions')}
           </div>
@@ -269,10 +269,10 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
         {!loading && filteredSubstitutions.length === 0 && (
           <div style={{ textAlign: 'center', padding: '3rem' }}>
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>😕</div>
-            <p style={{ color: '#6b7280', fontSize: '1.1rem' }}>
+            <p style={{ color: 'var(--gg-taupe)', fontSize: '1.1rem' }}>
               {t('recipes.noSubstitutionsFound')}
             </p>
-            <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginTop: '0.5rem' }}>
+            <p style={{ color: 'var(--gg-taupe)', fontSize: '0.875rem', marginTop: '0.5rem' }}>
               {t('recipes.adjustFilters')}
             </p>
           </div>
@@ -291,36 +291,36 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
                   onClick={() => handleSelect(sub)}
                   style={{
                     padding: '1.5rem',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '12px',
+                    border: '1.5px solid var(--gg-border)',
+                    borderRadius: 'var(--gg-radius-lg)',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
-                    background: 'white'
+                    background: 'var(--gg-cream)'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#10b981';
+                    e.currentTarget.style.borderColor = 'var(--gg-tomato)';
                     e.currentTarget.style.background = '#f0fdf4';
                     e.currentTarget.style.transform = 'translateY(-2px)';
                     e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.15)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#e5e7eb';
-                    e.currentTarget.style.background = 'white';
+                    e.currentTarget.style.borderColor = 'var(--gg-border)';
+                    e.currentTarget.style.background = 'var(--gg-cream)';
                     e.currentTarget.style.transform = 'translateY(0)';
                     e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.75rem' }}>
                     <div>
-                      <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.25rem', fontWeight: '600', color: '#1f2937' }}>
+                      <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.25rem', fontWeight: 700, color: 'var(--gg-espresso)', fontFamily: "'Bricolage Grotesque', sans-serif" }}>
                         {sub.substitute_name}
                       </h3>
-                      <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                      <div style={{ fontSize: '0.875rem', color: 'var(--gg-taupe)' }}>
                         {t('recipes.useAmount', { quantity: newQuantity, unit })}
                         {quantityChanged && (
                           <span style={{ 
                             marginLeft: '0.5rem',
-                            color: newQuantity > quantity ? '#dc2626' : '#10b981',
+                            color: newQuantity > quantity ? '#dc2626' : 'var(--gg-forest)',
                             fontWeight: '600'
                           }}>
                             ({newQuantity > quantity ? '+' : ''}{Math.round((newQuantity - quantity) * 10) / 10} {unit})
@@ -333,7 +333,7 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
                         <span key={tag} style={{
                           padding: '0.25rem 0.5rem',
                           background: '#e0e7ff',
-                          color: '#3730a3',
+                          color: 'var(--gg-espresso)',
                           borderRadius: '12px',
                           fontSize: '0.75rem',
                           fontWeight: '600',
@@ -349,7 +349,7 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
                     <div style={{
                       background: '#fef3c7',
                       padding: '0.75rem',
-                      borderRadius: '8px',
+                      borderRadius: 'var(--gg-radius-md)',
                       fontSize: '0.875rem',
                       color: '#92400e',
                       lineHeight: '1.5'
@@ -362,7 +362,7 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
                     marginTop: '0.75rem',
                     padding: '0.5rem',
                     background: '#f0fdf4',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--gg-radius-md)',
                     textAlign: 'center',
                     color: '#166534',
                     fontWeight: '600',

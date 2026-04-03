@@ -277,3 +277,13 @@ html {
     border-radius: var(--gg-radius-lg) !important;
   }
 }
+
+@media (max-width: 768px) {
+  .gg-toast {
+    left: 12px !important;
+    right: 12px !important;
+    bottom: 16px !important;
+    max-width: calc(100vw - 24px) !important;
+    min-width: unset !important;
+  }
+}

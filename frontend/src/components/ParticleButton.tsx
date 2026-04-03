@@ -1,114 +1,120 @@
-import React, { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+/**
+ * ParticleButton — GroceryGenius adaptation
+ * Tomato/forest/amber particles, Sparkles icon.
+ * Wraps: Generate Recipes, Add to Meal Plan, Save to Pantry.
+ */
+import { Sparkles } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import { useRef, useState } from 'react';
 
-interface Particle {
-  id: number;
-  x: number;
-  y: number;
-  color: string;
-  dx: number;
-  dy: number;
-}
+const GG_PARTICLES = ['#e8391a', '#2d6a4f', '#e8962a', '#eddecb', '#c42f14'];
 
 interface ParticleButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  particleCount?: number;
-  children: React.ReactNode;
-  buttonStyle?: React.CSSProperties;
+  successDuration?: number;
+  variant?: 'primary' | 'outline';
+  hideIcon?: boolean;
 }
 
-const PARTICLE_COLORS = ['#ED8B00', '#789A01', '#EF3340'];
+function SuccessParticles({ buttonRef }: { buttonRef: React.RefObject<HTMLButtonElement> }) {
+  const rect = buttonRef.current?.getBoundingClientRect();
+  if (!rect) return null;
 
-const ParticleButton: React.FC<ParticleButtonProps> = ({
-  particleCount = 10,
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+
+  return (
+    <AnimatePresence>
+      {[...Array(8)].map((_, i) => (
+        <motion.div
+          key={i}
+          animate={{
+            scale: [0, 1.2, 0],
+            x: [0, (i % 2 ? 1 : -1) * (Math.random() * 60 + 20)],
+            y: [0, -Math.random() * 60 - 20],
+            opacity: [1, 1, 0],
+          }}
+          style={{
+            position: 'fixed',
+            width: 6,
+            height: 6,
+            borderRadius: '50%',
+            left: centerX,
+            top: centerY,
+            background: GG_PARTICLES[i % GG_PARTICLES.length],
+            pointerEvents: 'none',
+            zIndex: 9999,
+          }}
+          initial={{ scale: 0, x: 0, y: 0 }}
+          transition={{
+            duration: 0.65,
+            delay: i * 0.07,
+            ease: 'easeOut',
+          }}
+        />
+      ))}
+    </AnimatePresence>
+  );
+}
+
+export default function ParticleButton({
   children,
-  buttonStyle,
   onClick,
-  ...rest
-}) => {
-  const [particles, setParticles] = useState<Particle[]>([]);
-  const [isPressed, setIsPressed] = useState(false);
+  successDuration = 900,
+  variant = 'primary',
+  hideIcon = false,
+  style,
+  disabled,
+  ...props
+}: ParticleButtonProps) {
+  const [showParticles, setShowParticles] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const counterRef = useRef(0);
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-
-      const newParticles: Particle[] = Array.from({ length: particleCount }, (_, i) => {
-        const angle = (Math.PI * 2 * i) / particleCount;
-        const spread = 40 + Math.random() * 20;
-        return {
-          id: ++counterRef.current,
-          x: centerX,
-          y: centerY,
-          color: PARTICLE_COLORS[i % PARTICLE_COLORS.length],
-          dx: Math.cos(angle) * spread,
-          dy: Math.sin(angle) * spread - 20,
-        };
-      });
-
-      setParticles((prev) => [...prev, ...newParticles]);
-      setIsPressed(true);
-
-      setTimeout(() => setIsPressed(false), 100);
-      setTimeout(() => {
-        setParticles((prev) =>
-          prev.filter((p) => !newParticles.find((np) => np.id === p.id))
-        );
-      }, 700);
-    }
-
-    if (onClick) {
-      onClick(e);
-    }
+    if (disabled) return;
+    setShowParticles(true);
+    setTimeout(() => setShowParticles(false), successDuration);
+    onClick?.(e);
   };
+
+  const isPrimary = variant === 'primary';
 
   return (
     <>
-      <AnimatePresence>
-        {particles.map((particle) => (
-          <motion.div
-            key={particle.id}
-            initial={{ scale: 0, x: particle.x - 3, y: particle.y - 3, opacity: 1 }}
-            animate={{
-              scale: [0, 1, 0],
-              x: particle.x - 3 + particle.dx,
-              y: particle.y - 3 + particle.dy,
-              opacity: [1, 1, 0],
-            }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
-            style={{
-              position: 'fixed',
-              width: '6px',
-              height: '6px',
-              borderRadius: '50%',
-              background: particle.color,
-              pointerEvents: 'none',
-              zIndex: 9999,
-            }}
-          />
-        ))}
-      </AnimatePresence>
-
-      <motion.button
+      {showParticles && <SuccessParticles buttonRef={buttonRef} />}
+      <button
         ref={buttonRef}
         onClick={handleClick}
-        animate={{ scale: isPressed ? 0.96 : 1 }}
-        transition={{ duration: 0.1 }}
+        disabled={disabled}
         style={{
-          ...buttonStyle,
-          border: 'none',
-          cursor: 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.5rem',
+          padding: '0.65rem 1.5rem',
+          borderRadius: 'var(--gg-radius-md)',
+          fontFamily: "'Bricolage Grotesque', sans-serif",
+          fontWeight: 600,
+          fontSize: '0.925rem',
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          transition: 'all 0.15s ease',
+          transform: showParticles ? 'scale(0.96)' : 'scale(1)',
+          border: isPrimary ? 'none' : '1.5px solid var(--gg-tomato)',
+          background: disabled
+            ? 'var(--gg-taupe)'
+            : isPrimary
+            ? showParticles ? 'var(--gg-tomato-hover)' : 'var(--gg-tomato)'
+            : 'transparent',
+          color: isPrimary ? '#ffffff' : 'var(--gg-tomato)',
+          boxShadow: isPrimary && !disabled && !showParticles
+            ? '0 2px 8px rgba(232, 57, 26, 0.30)'
+            : 'none',
+          ...style,
         }}
-        {...(rest as any)}
+        {...props}
       >
         {children}
-      </motion.button>
+        {!hideIcon && <Sparkles size={15} style={{ flexShrink: 0 }} />}
+      </button>
     </>
   );
-};
-
-export default ParticleButton;
+}

@@ -1,5 +1,6 @@
 ﻿import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import ParticleButton from './ParticleButton';
 
 interface Props {
   tags: string[];
@@ -34,14 +35,17 @@ const IngredientInput: React.FC<Props> = ({ tags, onTagsChange, onSubmit, loadin
           <span 
             key={tag} 
             style={{
-              background: 'linear-gradient(45deg, #10b981, #059669)',
+              background: 'linear-gradient(135deg, var(--gg-tomato), var(--gg-tomato-hover))',
               color: 'white',
-              padding: '0.5rem 1rem',
-              borderRadius: '20px',
+              padding: '0.4rem 0.9rem',
+              borderRadius: 'var(--gg-radius-xl)',
+              fontFamily: "'Bricolage Grotesque', sans-serif",
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              minHeight: '36px',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              fontWeight: '500'
+              gap: '0.5rem'
             }}
           >
             {tag}
@@ -70,33 +74,27 @@ const IngredientInput: React.FC<Props> = ({ tags, onTagsChange, onSubmit, loadin
         onChange={(e) => setInput(e.target.value)}
         onKeyPress={handleKeyPress}
         style={{ 
-          width: '100%', 
-          padding: '1rem', 
-          border: '2px solid #e5e7eb',
-          borderRadius: '12px',
-          fontSize: '1rem',
+          width: '100%',
+          padding: '1rem',
+          border: '1.5px solid var(--gg-border)',
+          borderRadius: 'var(--gg-radius-md)',
+          fontSize: '16px',
+          fontFamily: "'Lato', sans-serif",
+          background: 'var(--gg-cream)',
+          color: 'var(--gg-espresso)',
           marginBottom: '1rem',
           boxSizing: 'border-box'
         }}
         disabled={loading}
       />
       
-      <button 
-        onClick={onSubmit} 
+      <ParticleButton
+        onClick={onSubmit}
         disabled={loading || tags.length === 0}
-        style={{
-          background: loading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)',
-          color: 'white',
-          border: 'none',
-          padding: '0.75rem 2rem',
-          borderRadius: '12px',
-          fontWeight: '600',
-          cursor: loading ? 'not-allowed' : 'pointer',
-          fontSize: '1rem'
-        }}
+        style={{ width: '100%', justifyContent: 'center', padding: '0.75rem 2rem' }}
       >
         {loading ? t('recipes.generating') : t('recipes.getRecipes')}
-      </button>
+      </ParticleButton>
     </div>
   );
 };

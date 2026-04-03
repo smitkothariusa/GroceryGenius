@@ -1,8 +1,9 @@
 /**
- * AttractButton — adapted from kokonutui.com for GroceryGenius
- * Particles spread out from button center at rest, attract inward on hover.
- * No shadcn/lucide dependencies — pure React + motion/react.
+ * AttractButton — GroceryGenius adaptation of kokonutui.com attract button
+ * Tomato palette, parchment particles, LogIn icon.
+ * Used ONLY on the Auth sign-in button.
  */
+import { LogIn } from 'lucide-react';
 import { motion, useAnimation } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -48,7 +49,7 @@ export default function AttractButton({
       await controls.start({
         x: 0,
         y: 0,
-        opacity: 1,
+        opacity: 0.9,
         transition: { type: 'spring', stiffness: 55, damping: 11 },
       });
       onMouseEnter?.(e);
@@ -70,12 +71,33 @@ export default function AttractButton({
     [controls, particles, onMouseLeave]
   );
 
+  const handleTouchStart = useCallback(
+    async (e: React.TouchEvent<HTMLButtonElement>) => {
+      if (disabled || loading) return;
+      setIsAttracting(true);
+      await controls.start({
+        x: 0, y: 0, opacity: 0.9,
+        transition: { type: 'spring', stiffness: 55, damping: 11 },
+      });
+    },
+    [controls, disabled, loading]
+  );
+
+  const handleTouchEnd = useCallback(async () => {
+    setIsAttracting(false);
+    await controls.start((i: number) => ({
+      x: particles[i]?.x ?? 0,
+      y: particles[i]?.y ?? 0,
+      opacity: 0.45,
+      transition: { type: 'spring', stiffness: 90, damping: 14 },
+    }));
+  }, [controls, particles]);
+
   const isDisabled = disabled || loading;
 
   return (
-    /* Wrapper gives particles room to exist outside button bounds */
     <div style={{ position: 'relative', width: '100%' }}>
-      {/* Particle layer — rendered behind button text, outside overflow clip */}
+      {/* Parchment particles — visible against tomato background */}
       {particles.map((p, i) => (
         <motion.div
           key={p.id}
@@ -91,7 +113,7 @@ export default function AttractButton({
             marginTop: -3.5,
             marginLeft: -3.5,
             borderRadius: '50%',
-            background: i % 3 === 0 ? '#ED8B00' : i % 3 === 1 ? '#789A01' : 'rgba(255,255,255,0.8)',
+            background: '#fdf6ec',
             pointerEvents: 'none',
             zIndex: 0,
           }}
@@ -102,58 +124,58 @@ export default function AttractButton({
         disabled={isDisabled}
         onMouseEnter={handleEnter}
         onMouseLeave={handleLeave}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         style={{
           position: 'relative',
           zIndex: 1,
           width: '100%',
-          padding: '1rem',
+          padding: '0.85rem 1.5rem',
           background: isDisabled
-            ? '#9ca3af'
+            ? 'var(--gg-taupe)'
             : isAttracting
-            ? 'linear-gradient(135deg, #b86200 0%, #ED8B00 100%)'
-            : 'linear-gradient(135deg, #ED8B00 0%, #f59e0b 100%)',
+            ? 'var(--gg-tomato-hover)'
+            : 'var(--gg-tomato)',
           color: 'white',
-          border: 'none',
-          borderRadius: '12px',
-          fontWeight: '700',
+          border: '1.5px solid var(--gg-tomato-hover)',
+          borderRadius: 'var(--gg-radius-md)',
+          fontWeight: 600,
+          fontFamily: "'Bricolage Grotesque', sans-serif",
           fontSize: '1rem',
           cursor: isDisabled ? 'not-allowed' : 'pointer',
-          transition: 'background 0.3s ease, box-shadow 0.3s ease',
+          transition: 'background 0.2s ease, box-shadow 0.2s ease',
           boxShadow: isAttracting && !isDisabled
-            ? '0 6px 24px rgba(237,139,0,0.45)'
-            : '0 2px 8px rgba(0,0,0,0.12)',
+            ? '0 4px 16px rgba(232, 57, 26, 0.4)'
+            : '0 2px 8px rgba(232, 57, 26, 0.25)',
+          transform: isAttracting ? 'scale(0.98)' : 'scale(1)',
           letterSpacing: '0.02em',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.5rem',
           ...style,
         }}
         {...props}
       >
-        <span
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.5rem',
-          }}
-        >
-          {loading ? (
-            <>
-              <span
-                style={{
-                  display: 'inline-block',
-                  width: 16,
-                  height: 16,
-                  borderRadius: '50%',
-                  border: '2px solid rgba(255,255,255,0.35)',
-                  borderTopColor: 'white',
-                  animation: 'attractBtn-spin 0.75s linear infinite',
-                }}
-              />
-              {children}
-            </>
-          ) : (
-            children
-          )}
-        </span>
+        {loading ? (
+          <>
+            <span style={{
+              display: 'inline-block',
+              width: 16,
+              height: 16,
+              borderRadius: '50%',
+              border: '2px solid rgba(255,255,255,0.35)',
+              borderTopColor: 'white',
+              animation: 'attractBtn-spin 0.75s linear infinite',
+            }} />
+            {children}
+          </>
+        ) : (
+          <>
+            <LogIn size={16} />
+            {children ?? 'Sign In'}
+          </>
+        )}
       </button>
 
       <style>{`

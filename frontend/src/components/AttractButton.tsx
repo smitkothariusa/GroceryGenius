@@ -113,7 +113,7 @@ export default function AttractButton({
             marginTop: -3.5,
             marginLeft: -3.5,
             borderRadius: '50%',
-            background: '#fdf6ec',
+            background: 'var(--gg-parchment)',
             pointerEvents: 'none',
             zIndex: 0,
           }}

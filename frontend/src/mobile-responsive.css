@@ -179,35 +179,14 @@
 }
 
 /* ----------------------------------------------------------
-   4. HEADER — dynamic page title layout on mobile
+   4. HEADER — logo layout on mobile
    ---------------------------------------------------------- */
 @media (max-width: 768px) {
-  .mobile-app-label {
-    display: block !important;
-    font-size: 0.7rem;
-    color: #9ca3af;
-    font-weight: 500;
-    line-height: 1;
-    margin-bottom: 1px;
-  }
-
   .mobile-page-title {
     font-size: 1.15rem !important;
     line-height: 1.2;
     margin: 0 !important;
   }
-
-  .mobile-header-brand {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0;
-  }
-}
-
-/* .mobile-app-label is hidden on desktop */
-.mobile-app-label {
-  display: none;
 }
 
 /* ----------------------------------------------------------

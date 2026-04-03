@@ -2482,7 +2482,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
         </nav>
 
         <div className="mobile-drawer-footer">
-          <LanguageSwitcher compact />
           <button
             className="mobile-drawer-footer-btn"
             onClick={() => { setShowDemoConfirm(true); setDrawerOpen(false); }}
@@ -2495,6 +2494,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           >
             🚪 {t('header.signOut')}
           </button>
+          <LanguageSwitcher compact />
         </div>
       </div>
 
@@ -2509,45 +2509,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1200px', margin: '0 auto' }}>
           <div className="mobile-header-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>👨‍🍳</span>
-            <div>
-              <span className="mobile-app-label">👨‍🍳 GroceryGenius</span>
-              <h1 className="mobile-page-title" style={{ margin: 0, color: '#10b981', fontSize: isMobile ? '1.25rem' : '1.8rem', fontWeight: '700' }}>
-                {isMobile ? (() => {
-                  const labels: Record<string, string> = {
-                    pantry: `📦 ${t('tabs.pantry')}`,
-                    recipes: `🍳 ${t('tabs.recipes')}`,
-                    mealplan: `📅 ${t('tabs.mealPlan')}`,
-                    shopping: `🛒 ${t('tabs.shopping')}`,
-                    donate: `❤️ ${t('tabs.donate')}`,
-                    favorites: `⭐ ${t('tabs.favorites')}`,
-                  };
-                  return labels[currentTab] || t('app.name');
-                })() : t('app.name')}
-              </h1>
-            </div>
+            <h1 className="mobile-page-title" style={{ margin: 0, color: '#10b981', fontSize: isMobile ? '1.25rem' : '1.8rem', fontWeight: '700' }}>
+              {t('app.name')}
+            </h1>
           </div>
           <div style={{ display: 'flex', gap: isMobile ? '0.5rem' : '0.75rem', alignItems: 'center' }}>
-            <button
-              className="mobile-hamburger"
-              onClick={() => setDrawerOpen(true)}
-              aria-label="Open menu"
-            >
-              <span />
-              <span />
-              <span />
-            </button>
-            <button onClick={() => setShowCalorieTracker(!showCalorieTracker)} style={{
-              padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 1rem',
-              background: todayCalories > dailyCalorieGoal ? '#fee2e2' : '#f0fdf4',
-              border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem',
-              fontSize: isMobile ? '0.7rem' : '0.875rem'
-            }}>
-              <span style={{ fontSize: isMobile ? '0.9rem' : '1.1rem' }}>📊</span>
-              <span style={{ fontWeight: '600', color: textColor }}>
-                {isMobile ? `${todayCalories}/${dailyCalorieGoal}` : `${todayCalories}/${dailyCalorieGoal} Cal`}
-              </span>
-            </button>
-            
             {!isMobile && (
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                 <button onClick={() => setShowDemoConfirm(true)} style={{
@@ -2565,20 +2531,42 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 <LanguageSwitcher />
               </div>
             )}
-            <button onClick={async () => {
-              await authService.signOut();
-              setUser(null);
-            }} style={{
-              padding: isMobile ? '0.4rem 0.8rem' : '0.5rem 1rem',
-              background: '#ef4444',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: '600',
-              fontSize: isMobile ? '0.75rem' : '1rem'
+            {!isMobile && (
+              <button onClick={async () => {
+                await authService.signOut();
+                setUser(null);
+              }} style={{
+                padding: '0.5rem 1rem',
+                background: '#ef4444',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                fontSize: '1rem'
+              }}>
+                {t('header.signOut')}
+              </button>
+            )}
+            <button onClick={() => setShowCalorieTracker(!showCalorieTracker)} style={{
+              padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 1rem',
+              background: todayCalories > dailyCalorieGoal ? '#fee2e2' : '#f0fdf4',
+              border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem',
+              fontSize: isMobile ? '0.7rem' : '0.875rem'
             }}>
-              {isMobile ? '🚪' : t('header.signOut')}
+              <span style={{ fontSize: isMobile ? '0.9rem' : '1.1rem' }}>📊</span>
+              <span style={{ fontWeight: '600', color: textColor }}>
+                {isMobile ? `${todayCalories}/${dailyCalorieGoal}` : `${todayCalories}/${dailyCalorieGoal} Cal`}
+              </span>
+            </button>
+            <button
+              className="mobile-hamburger"
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Open menu"
+            >
+              <span />
+              <span />
+              <span />
             </button>
           </div>
         </div>

@@ -232,7 +232,7 @@ button:active:not(:disabled) {
 /* Input focus effects */
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: #10b981 !important;
+  border-color: var(--gg-tomato) !important;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
   transition: all 0.2s ease;
 }

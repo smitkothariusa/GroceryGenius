@@ -420,7 +420,7 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
   border-radius: 8px;
   background: white;
-  border: 2px solid #10b981;
+  border: 2px solid var(--gg-tomato);
   padding: 8px 12px;
   font-size: 0.875rem;
   font-weight: 600;
@@ -428,11 +428,11 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #1f2937;
+  color: var(--gg-espresso);
 }
 
 .calendar-slot.drag-over {
   background: #d1fae5 !important;
-  outline: 2px dashed #10b981 !important;
+  outline: 2px dashed var(--gg-tomato) !important;
   outline-offset: -2px;
 }

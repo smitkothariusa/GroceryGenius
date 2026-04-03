@@ -298,7 +298,7 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
                     background: 'var(--gg-cream)'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#10b981';
+                    e.currentTarget.style.borderColor = 'var(--gg-tomato)';
                     e.currentTarget.style.background = '#f0fdf4';
                     e.currentTarget.style.transform = 'translateY(-2px)';
                     e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.15)';
@@ -333,7 +333,7 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
                         <span key={tag} style={{
                           padding: '0.25rem 0.5rem',
                           background: '#e0e7ff',
-                          color: '#3730a3',
+                          color: 'var(--gg-espresso)',
                           borderRadius: '12px',
                           fontSize: '0.75rem',
                           fontWeight: '600',

@@ -518,7 +518,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
             <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>{t('mealPlan.avgCalDay')}</div>
             <div style={{ fontSize: '2rem', fontWeight: '700' }}>{stats.avgCaloriesPerDay}</div>
           </div>
-          <div style={{ background: '#f59e0b', padding: '1rem', borderRadius: '12px', color: 'white' }}>
+          <div style={{ background: 'var(--gg-amber)', padding: '1rem', borderRadius: '12px', color: 'white' }}>
             <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>{t('mealPlan.totalProtein')}</div>
             <div style={{ fontSize: '2rem', fontWeight: '700' }}>{stats.totalProtein}g</div>
           </div>

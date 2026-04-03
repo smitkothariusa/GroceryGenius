@@ -270,3 +270,10 @@ html {
     display: none !important;
   }
 }
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 1.5rem !important;
+    border-radius: var(--gg-radius-lg) !important;
+  }
+}

@@ -2715,7 +2715,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     style={{ width: '100%', padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '10px', fontSize: '0.875rem', marginBottom: '0.75rem', boxSizing: 'border-box' }} />
 
                   {/* Dietary */}
-                  <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' }}>Dietary</div>
+                  <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' }}>{t('recipes.dietaryPreferences')}</div>
                   <select value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
                     style={{ width: '100%', padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '10px', fontSize: '0.875rem', marginBottom: '0.75rem', boxSizing: 'border-box' }}>
                     <option value="">{t('recipes.dietary.all')}</option>
@@ -2730,11 +2730,12 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   {/* Difficulty + Servings — 2-column grid */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                     <div>
-                      <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' }}>Difficulty</div>
+                      <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' }}>{t('recipes.difficulty')}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', background: '#f3f4f6', borderRadius: '10px', padding: '0.2rem' }}>
-                        {(['flexible', 'easy', 'medium', 'hard'] as const).map((level) => {
+                        {(() => {
+                          const mobileDifficultyLabel: Record<string, string> = { flexible: 'Flex', easy: 'Easy', medium: 'Med', hard: 'Hard' };
+                          return (['flexible', 'easy', 'medium', 'hard'] as const).map((level) => {
                           const active = recipeDifficulty === level;
-                          const mobileLabel: Record<string, string> = { flexible: 'Flex', easy: 'Easy', medium: 'Med', hard: 'Hard' };
                           const colors: Record<string, { bg: string; text: string }> = {
                             flexible: { bg: '#6366f1', text: 'white' },
                             easy:     { bg: '#10b981', text: 'white' },
@@ -2744,6 +2745,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           return (
                             <button
                               key={level}
+                              aria-pressed={active}
                               onClick={() => setRecipeDifficulty(level)}
                               style={{
                                 flex: 1, padding: '0.35rem 0',
@@ -2754,21 +2756,22 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                                 transition: 'background 0.2s, color 0.2s',
                               }}
                             >
-                              {mobileLabel[level]}
+                              {mobileDifficultyLabel[level]}
                             </button>
                           );
-                        })}
+                        });
+                        })()}
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' }}>Servings</div>
+                      <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' }}>{t('recipes.servings')}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#f3f4f6', borderRadius: '10px', padding: '0.4rem 0.5rem', justifyContent: 'center' }}>
                         <button
-                          onClick={() => setRecipeServings(Math.max(1, (recipeServings as number) - 1))}
+                          onClick={() => setRecipeServings(Math.max(1, (typeof recipeServings === 'number' ? recipeServings : 2) - 1))}
                           style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: '6px', width: '28px', height: '28px', cursor: 'pointer', fontWeight: '600', fontSize: '1rem', color: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
                         <span style={{ fontWeight: '700', fontSize: '1rem', color: '#1f2937', minWidth: '24px', textAlign: 'center' as const }}>{recipeServings}</span>
                         <button
-                          onClick={() => setRecipeServings(Math.min(12, (recipeServings as number) + 1))}
+                          onClick={() => setRecipeServings(Math.min(12, (typeof recipeServings === 'number' ? recipeServings : 2) + 1))}
                           style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: '6px', width: '28px', height: '28px', cursor: 'pointer', fontWeight: '600', fontSize: '1rem', color: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                       </div>
                     </div>

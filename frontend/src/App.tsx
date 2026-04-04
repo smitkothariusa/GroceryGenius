@@ -113,7 +113,8 @@ const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<'pantry' | 'recipes' | 'mealplan' | 'shopping' | 'donate' | 'favorites'>('pantry');  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [showDetailedView, setShowDetailedView] = useState(false);
   const [recipeSearchQuery, setRecipeSearchQuery] = useState('');
-  const [recipeServings, setRecipeServings] = useState<number | ''>(2);  
+  const [recipeServings, setRecipeServings] = useState<number | ''>(2);
+  const [recipeDifficulty, setRecipeDifficulty] = useState<'flexible' | 'easy' | 'medium' | 'hard'>('flexible');
   const [ingredientTags, setIngredientTags] = useState<string[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const recipesRef = useRef<Recipe[]>([]);
@@ -2733,6 +2734,40 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     style={{ width: '60px', padding: '0.5rem', border: '2px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', fontWeight: '600' }} />
                 </div>
 
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: '#f3f4f6', borderRadius: '10px', padding: '0.25rem' }}>
+                  {(['flexible', 'easy', 'medium', 'hard'] as const).map((level) => {
+                    const active = recipeDifficulty === level;
+                    const colors: Record<string, { bg: string; text: string }> = {
+                      flexible: { bg: '#6366f1', text: 'white' },
+                      easy:     { bg: '#10b981', text: 'white' },
+                      medium:   { bg: '#f59e0b', text: 'white' },
+                      hard:     { bg: '#ef4444', text: 'white' },
+                    };
+                    return (
+                      <button
+                        key={level}
+                        onClick={() => setRecipeDifficulty(level)}
+                        style={{
+                          padding: '0.4rem 0.75rem',
+                          background: active ? colors[level].bg : 'transparent',
+                          color: active ? colors[level].text : '#6b7280',
+                          border: 'none',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontWeight: active ? '700' : '500',
+                          fontSize: '0.8rem',
+                          transition: 'background 0.2s, color 0.2s, transform 0.15s',
+                          transform: active ? 'scale(1.05)' : 'scale(1)',
+                          textTransform: 'capitalize',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {level}
+                      </button>
+                    );
+                  })}
+                </div>
+
                 <button onClick={() => {
                   setCameraSource('recipes');
                   setShowImageUpload(true);
@@ -2818,7 +2853,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 ))}
               </div>
             )}
-            <div className="recipe-card-grid" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>              {recipes.map((recipe, idx) => {
+            <div className="recipe-card-grid" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>              {recipes.filter((recipe) => {
+                if (recipeDifficulty === 'flexible') return true;
+                return recipe.difficulty?.toLowerCase() === recipeDifficulty;
+              }).map((recipe, idx) => {
                 const grade = calculateHealthGrade(recipe);
                 const ingredients = parseIngredients(recipe);
                 return (
@@ -5181,17 +5219,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 marginTop: '1rem',
                 fontSize: '0.95rem'
               }}>
-                <div style={{ 
-                  background: '#dcfce7', 
-                  padding: '0.75rem', 
-                  borderRadius: '8px',
-                  marginBottom: '1rem',
-                  border: '1px solid #86efac'
-                }}>
-                  <div style={{ fontSize: '0.875rem', color: '#166534', fontWeight: '600' }}>
-                    💡 {t('recipes.substitutionTip')}
-                  </div>
-                </div>
                 {(() => {
                   const detailScale = (selectedRecipe.originalServings && selectedRecipe.servings)
                     ? selectedRecipe.servings / selectedRecipe.originalServings

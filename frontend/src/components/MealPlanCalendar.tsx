@@ -532,20 +532,6 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
           🛒 {t('mealPlan.generateShoppingList')}
         </button>
       </div>
-      {isMobile && savedRecipes.length > 0 && (
-        <div style={{
-          background: '#eff6ff',
-          padding: '0.75rem',
-          borderRadius: '8px',
-          marginTop: '1rem',
-          border: '1px solid #bfdbfe',
-          fontSize: '0.75rem',
-          color: '#1e40af',
-          textAlign: 'center'
-        }}>
-          💡 <strong>{t('mealPlan.mobileTip')}:</strong> {t('mealPlan.mobileTipMessage')}
-        </div>
-      )}
 
       <div style={{ 
         display: 'flex', 
@@ -674,8 +660,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
                   textTransform: 'capitalize',
                   fontSize: isMobile ? '0.75rem' : '1rem'
                 }}>
-                  {mealType === 'breakfast' && '🍳'} {mealType === 'lunch' && '🥗'} {mealType === 'dinner' && '🍽️'} {mealType === 'snack' && '🍿'}
-                  {!isMobile && ' '}{!isMobile && t(`mealPlan.${mealType === 'snack' ? 'snacks' : mealType}`)}
+                  {t(`mealPlan.${mealType === 'snack' ? 'snacks' : mealType}`)}
                 </div>
                 {weekDates.map((date) => {
                   const dateStr = formatDate(date);

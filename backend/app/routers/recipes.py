@@ -10,6 +10,7 @@ router = APIRouter()
 
 class Ingredients(BaseModel):
     ingredients: List[str]
+    strict: bool = False
 
 LANGUAGE_NAMES = {
     "en": "English", "es": "Spanish", "fr": "French",
@@ -52,9 +53,15 @@ Output structured JSON format for easy parsing."""
     if specific_recipe:
         recipe_request = f"Create a recipe for: {specific_recipe}"
         if ingredient_list:
-            recipe_request += f"\nIncorporate these ingredients when possible: {', '.join(ingredient_list)}"
+            if payload.strict:
+                recipe_request += f"\nUse ONLY these exact ingredients (no substitutions or additions): {', '.join(ingredient_list)}"
+            else:
+                recipe_request += f"\nIncorporate these ingredients when possible: {', '.join(ingredient_list)}"
     else:
-        recipe_request = f"Using these ingredients: {', '.join(ingredient_list)}"
+        if payload.strict:
+            recipe_request = f"Using ONLY these exact ingredients (no substitutions, additions, or extra pantry staples): {', '.join(ingredient_list)}"
+        else:
+            recipe_request = f"Using these ingredients: {', '.join(ingredient_list)}"
 
     dietary_text = f"\nDietary preference: {dietary}" if dietary else ""
 

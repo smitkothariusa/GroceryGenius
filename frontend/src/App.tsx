@@ -2647,11 +2647,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   }}>📦 {t('recipes.addPantryItems')}</button>
                 )}
                 <div style={{
-                  marginLeft: 'auto', display: 'flex',
+                  display: 'flex',
                   background: '#f3f4f6', border: '1px solid #e5e7eb',
                   borderRadius: '8px', padding: '3px'
                 }}>
-                  {([['strict', 'Only mine'], ['loose', 'Allow extras']] as const).map(([mode, label]) => (
+                  {([['strict', 'Use only my ingredients'], ['loose', 'Allow extras']] as const).map(([mode, label]) => (
                     <button
                       key={mode}
                       type="button"
@@ -2671,6 +2671,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     </button>
                   ))}
                 </div>
+                <button onClick={() => { setRecipes([]); setIngredientTags([]); setRecipeSearchQuery(''); setErrorMsg(''); }}
+                  style={{ marginLeft: 'auto', padding: '0.25rem 0.65rem', background: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600', color: '#6b7280', whiteSpace: 'nowrap' }}>
+                  {t('common.clearAll')}
+                </button>
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
                 {ingredientTags.map(tag => (
@@ -2729,10 +2733,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     style={{ width: '60px', padding: '0.5rem', border: '2px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', fontWeight: '600' }} />
                 </div>
 
-                <button onClick={() => { setRecipes([]); setIngredientTags([]); setRecipeSearchQuery(''); setErrorMsg(''); }}
-                  style={{ padding: '0.75rem 1rem', background: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: '8px', cursor: 'pointer' }}>
-                  {t('common.clearAll')}
-                </button>
                 <button onClick={() => {
                   setCameraSource('recipes');
                   setShowImageUpload(true);

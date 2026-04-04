@@ -2795,44 +2795,77 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         padding: isMobile ? '1rem' : '1.5rem', 
                         boxShadow: '0 8px 32px rgba(0,0,0,0.1)' 
                       }}>
-                        <div style={{ 
-                          display: 'flex', 
-                          justifyContent: 'space-between', 
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
                           marginBottom: isMobile ? '0.75rem' : '1rem',
                           gap: isMobile ? '0.75rem' : '1rem'
                         }}>
-                          <h3 style={{ 
-                            margin: 0, 
-                            fontSize: isMobile ? '0.95rem' : '1.25rem', 
-                            fontWeight: '700', 
-                            flex: 1, 
+                          <h3 style={{
+                            margin: 0,
+                            fontSize: isMobile ? '0.95rem' : '1.25rem',
+                            fontWeight: '700',
+                            flex: 1,
                             paddingRight: isMobile ? '0.5rem' : '1rem',
                             lineHeight: '1.3'
                           }}>
                             {idx + 1}. {recipe.name}
                           </h3>
-                          <div style={{ 
-                            display: 'flex', 
-                            flexDirection: 'column', 
-                            alignItems: 'center', 
-                            gap: '0.25rem',
-                            flexShrink: 0
-                          }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', flexShrink: 0 }}>
+                            <button onClick={(e) => {
+                              e.stopPropagation();
+                              const exists = favorites.some(f => f.name === recipe.name);
+                              if (!exists) {
+                                recipesService.add({
+                                  name: recipe.name,
+                                  ingredients: recipe.ingredients,
+                                  instructions: recipe.instructions,
+                                  prep_time: recipe.prep_time,
+                                  cook_time: recipe.cook_time,
+                                  difficulty: recipe.difficulty,
+                                  servings: recipe.servings,
+                                  nutrition: recipe.nutrition,
+                                  health_benefits: recipe.health_benefits,
+                                  budget_tip: recipe.budget_tip,
+                                }).then(savedRecipe => {
+                                  setFavorites(prev => [...prev, { ...recipe, id: savedRecipe.id, savedDate: savedRecipe.created_at }]);
+                                  success(t('toasts.addedToFavorites'));
+                                }).catch(() => warning(t('toasts.failedSaveRecipe')));
+                              } else {
+                                info(t('toasts.alreadyInFavorites'));
+                              }
+                            }} style={{
+                              background: favorites.some(f => f.name === recipe.name) ? 'linear-gradient(45deg, #f59e0b, #d97706)' : 'rgba(245,158,11,0.15)',
+                              color: favorites.some(f => f.name === recipe.name) ? 'white' : '#d97706',
+                              border: '1px solid rgba(245,158,11,0.4)',
+                              borderRadius: '10px',
+                              padding: isMobile ? '0.4rem 0.5rem' : '0.5rem 0.6rem',
+                              cursor: 'pointer',
+                              fontSize: isMobile ? '1rem' : '1.1rem',
+                              lineHeight: 1,
+                            }}>💖</button>
                             <div style={{
-                              background: getGradeColor(grade), 
-                              color: 'white', 
-                              padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 0.75rem',
-                              borderRadius: '12px', 
-                              fontSize: isMobile ? '0.9rem' : '1.1rem', 
-                              fontWeight: '700', 
-                              minWidth: isMobile ? '45px' : '55px', 
-                              textAlign: 'center'
-                            }}>{grade}</div>
-                            <span style={{
-                              fontSize: isMobile ? '0.65rem' : '0.7rem',
-                              color: mutedText,
-                              fontWeight: '600'
-                            }}>{t('recipes.healthGrade')}</span>
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              gap: '0.25rem',
+                            }}>
+                              <div style={{
+                                background: getGradeColor(grade),
+                                color: 'white',
+                                padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 0.75rem',
+                                borderRadius: '12px',
+                                fontSize: isMobile ? '0.9rem' : '1.1rem',
+                                fontWeight: '700',
+                                minWidth: isMobile ? '45px' : '55px',
+                                textAlign: 'center'
+                              }}>{grade}</div>
+                              <span style={{
+                                fontSize: isMobile ? '0.65rem' : '0.7rem',
+                                color: mutedText,
+                                fontWeight: '600'
+                              }}>{t('recipes.healthGrade')}</span>
+                            </div>
                           </div>
                         </div>
 
@@ -2915,58 +2948,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         minWidth: isMobile ? 'auto' : '120px'
                       }}>🛒 {t('recipes.addToShopping')}</button>
                       
-                      <button onClick={async () => {
-                        const exists = favorites.some(f => f.name === recipe.name);
-                        if (!exists) {
-                          try {
-                            const savedRecipe = await recipesService.add({
-                              name: recipe.name,
-                              ingredients: recipe.ingredients,
-                              instructions: recipe.instructions,
-                              prep_time: recipe.prep_time,
-                              cook_time: recipe.cook_time,
-                              difficulty: recipe.difficulty,
-                              servings: recipe.servings,
-                              nutrition: recipe.nutrition,
-                              health_benefits: recipe.health_benefits,
-                              budget_tip: recipe.budget_tip,
-                            });
-
-                            setFavorites(prev => [...prev, {
-                              ...recipe,
-                              id: savedRecipe.id,
-                              savedDate: savedRecipe.created_at,
-                            }]);
-                            success(t('toasts.addedToFavorites'));
-                          } catch (error) {
-                            console.error('Error saving recipe:', error);
-                            warning(t('toasts.failedSaveRecipe'));
-                          }
-                        } else {
-                          info(t('toasts.alreadyInFavorites'));
-                        }
-                      }} style={{
-                        flex: isMobile ? '1' : 'initial',
-                        padding: '0.75rem',
-                        background: 'linear-gradient(45deg, #f59e0b, #d97706)',
-                        color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer',
-                        fontSize: isMobile ? '0.875rem' : '1rem',
-                        minWidth: isMobile ? 'auto' : '50px'
-                      }}>💖 {isMobile && t('recipes.addToFavorites')}</button>
-
-                      <button onClick={() => {
-                        setCurrentTab('mealplan');
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                        info(t('toasts.switchedToMealPlan'));
-                      }} style={{
-                        flex: isMobile ? '1' : 'initial',
-                        padding: '0.75rem',
-                        background: 'linear-gradient(45deg, #3b82f6, #2563eb)',
-                        color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600',
-                        fontSize: isMobile ? '0.875rem' : '1rem',
-                        minWidth: isMobile ? 'auto' : '120px'
-                      }}>📅 {t('tabs.mealPlan')}</button>
-                      
                       {recipe.nutrition && (
                         <button onClick={async () => {
                           const calories = recipe.nutrition!.calories;
@@ -2989,7 +2970,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           border: 'none', borderRadius: '12px', cursor: 'pointer',
                           fontSize: isMobile ? '0.875rem' : '0.875rem',
                           minWidth: isMobile ? 'auto' : '80px'
-                        }}>📊 {recipe.nutrition.calories}</button>
+                        }}>📊 {t('recipes.addCalories')} ({recipe.nutrition.calories} kcal)</button>
                       )}
                     </div>
                   </div>

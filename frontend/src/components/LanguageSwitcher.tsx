@@ -58,9 +58,10 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ compact = false }) 
           textAlign: compact ? 'left' : undefined,
         }}
       >
-        <span style={{ fontSize: '1.1rem' }}>{current.flag}</span>
-        <span>{compact ? current.label : current.code.toUpperCase()}</span>
-        {!compact && <span style={{ fontSize: '0.6rem', opacity: 0.6 }}>{open ? '▲' : '▼'}</span>}
+        {compact
+          ? <><span style={{ fontSize: '1.1rem' }}>{current.flag}</span><span>{current.label}</span></>
+          : <><span style={{ fontSize: '1rem' }}>🌐</span><span>{current.code.toUpperCase()}</span><span style={{ fontSize: '0.6rem', opacity: 0.6 }}>{open ? '▲' : '▼'}</span></>
+        }
       </button>
 
       {open && (

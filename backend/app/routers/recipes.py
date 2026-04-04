@@ -36,8 +36,9 @@ async def generate_recipes(payload: Ingredients, dietary: Optional[str] = Query(
     lang_name = LANGUAGE_NAMES.get(lang_code, "English")
 
     # Enhanced system message for health and budget focus
+    difficulty_requirement = f"\nIMPORTANT: ALL 3 recipes MUST be {difficulty.capitalize()} difficulty. Set the \"difficulty\" field to \"{difficulty.capitalize()}\" for every recipe." if difficulty else ""
     system_prompt = f"""You are a professional nutritionist and chef assistant. You create detailed recipes with exact measurements and nutritional information.
-IMPORTANT: You MUST write ALL recipe text (name, ingredients, instructions, health_benefits, budget_tip, difficulty) in {lang_name}.
+IMPORTANT: You MUST write ALL recipe text (name, ingredients, instructions, health_benefits, budget_tip, difficulty) in {lang_name}.{difficulty_requirement}
 
 Key requirements:
 1. Provide ONE normal recipe and TWO healthy, budget-friendly recipes
@@ -90,7 +91,7 @@ CRITICAL: Return ONLY a valid JSON array with this exact structure:
     "instructions": "1. First step...\\n2. Second step...",
     "prep_time": "15 min",
     "cook_time": "20 min",
-    "difficulty": "Easy",
+    "difficulty": "{difficulty.capitalize() if difficulty else 'Easy'}",
     "servings": 2,
     "nutrition": {{"calories": 350, "protein": 20, "carbs": 45, "fat": 10, "fiber": 6, "sodium": 400}},
     "health_benefits": "Benefits in {lang_name}...",

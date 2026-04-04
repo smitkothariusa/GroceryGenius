@@ -800,6 +800,7 @@ const App: React.FC = () => {
       const params = new URLSearchParams();
       if (dietaryFilter) params.append('dietary', dietaryFilter);
       params.append('language', i18n.language || 'en');
+      if (recipeDifficulty !== 'flexible') params.append('difficulty', recipeDifficulty);
 
       const allIngredients = recipeSearchQuery.trim()
         ? [recipeSearchQuery, ...ingredientTags]
@@ -2853,10 +2854,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 ))}
               </div>
             )}
-            <div className="recipe-card-grid" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>              {recipes.filter((recipe) => {
-                if (recipeDifficulty === 'flexible') return true;
-                return recipe.difficulty?.toLowerCase() === recipeDifficulty;
-              }).map((recipe, idx) => {
+            <div className="recipe-card-grid" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>              {recipes.map((recipe, idx) => {
                 const grade = calculateHealthGrade(recipe);
                 const ingredients = parseIngredients(recipe);
                 return (

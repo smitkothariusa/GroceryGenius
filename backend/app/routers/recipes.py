@@ -18,7 +18,7 @@ LANGUAGE_NAMES = {
 }
 
 @router.post("/", response_model=List[dict])
-async def generate_recipes(payload: Ingredients, dietary: Optional[str] = Query(None), language: Optional[str] = Query(None)):
+async def generate_recipes(payload: Ingredients, dietary: Optional[str] = Query(None), language: Optional[str] = Query(None), difficulty: Optional[str] = Query(None)):
     ingredients = [i.strip() for i in payload.ingredients if i.strip()]
     if not ingredients:
         return [{"name": "No ingredients provided", "instructions": "Please provide at least one ingredient."}]
@@ -64,8 +64,9 @@ Output structured JSON format for easy parsing."""
             recipe_request = f"Using these ingredients: {', '.join(ingredient_list)}"
 
     dietary_text = f"\nDietary preference: {dietary}" if dietary else ""
+    difficulty_text = f"\nDifficulty level: ALL 3 recipes MUST be {difficulty.capitalize()} difficulty" if difficulty else ""
 
-    user_prompt = f"""{recipe_request}{dietary_text}
+    user_prompt = f"""{recipe_request}{dietary_text}{difficulty_text}
 
 Create EXACTLY 3 different recipes (DO NOT number the recipe names).
 Write ALL text in {lang_name}.

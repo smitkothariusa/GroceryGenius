@@ -42,35 +42,38 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ compact = false }) 
         onClick={() => setOpen(o => !o)}
         title="Change language"
         style={{
-          padding: compact ? '0.4rem 0.5rem' : '0.4rem 0.65rem',
-          background: '#f3f4f6',
-          border: '1px solid #e5e7eb',
+          padding: compact ? '0.65rem 1rem' : '0.4rem 0.65rem',
+          background: compact ? 'transparent' : '#f3f4f6',
+          border: compact ? 'none' : '1px solid #e5e7eb',
           borderRadius: '8px',
           cursor: 'pointer',
           fontWeight: '600',
           fontSize: '0.85rem',
           display: 'flex',
           alignItems: 'center',
-          gap: '0.3rem',
+          gap: '0.5rem',
           whiteSpace: 'nowrap',
+          width: compact ? '100%' : undefined,
+          color: compact ? '#6b7280' : undefined,
+          textAlign: compact ? 'left' : undefined,
         }}
       >
-        <span style={{ fontSize: compact ? '1.1rem' : '1rem' }}>🌐</span>
-        {!compact && <span>{current.code.toUpperCase()}</span>}
+        <span style={{ fontSize: '1.1rem' }}>{current.flag}</span>
+        <span>{compact ? current.label : current.code.toUpperCase()}</span>
         {!compact && <span style={{ fontSize: '0.6rem', opacity: 0.6 }}>{open ? '▲' : '▼'}</span>}
       </button>
 
       {open && (
         <div style={{
           position: 'absolute',
-          top: 'calc(100% + 4px)',
+          ...(compact ? { bottom: 'calc(100% + 4px)' } : { top: 'calc(100% + 4px)' }),
           right: 0,
           background: 'white',
           border: '1px solid #e5e7eb',
           borderRadius: '10px',
           boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
           zIndex: 999,
-          minWidth: '150px',
+          minWidth: '160px',
           overflow: 'hidden',
         }}>
           {LANGUAGES.map(lang => (

@@ -2527,6 +2527,17 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             </h1>
           </div>
           <div style={{ display: 'flex', gap: isMobile ? '0.5rem' : '0.75rem', alignItems: 'center' }}>
+            <button onClick={() => setShowCalorieTracker(!showCalorieTracker)} style={{
+              padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 1rem',
+              background: todayCalories > dailyCalorieGoal ? '#fee2e2' : '#f0fdf4',
+              border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem',
+              fontSize: isMobile ? '0.7rem' : '0.875rem'
+            }}>
+              <span style={{ fontSize: isMobile ? '0.9rem' : '1.1rem' }}>📊</span>
+              <span style={{ fontWeight: '600', color: textColor }}>
+                {isMobile ? `${todayCalories}/${dailyCalorieGoal}` : `${todayCalories}/${dailyCalorieGoal} Cal`}
+              </span>
+            </button>
             {!isMobile && (
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                 <button onClick={() => setShowDemoConfirm(true)} style={{
@@ -2561,17 +2572,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 {t('header.signOut')}
               </button>
             )}
-            <button onClick={() => setShowCalorieTracker(!showCalorieTracker)} style={{
-              padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 1rem',
-              background: todayCalories > dailyCalorieGoal ? '#fee2e2' : '#f0fdf4',
-              border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem',
-              fontSize: isMobile ? '0.7rem' : '0.875rem'
-            }}>
-              <span style={{ fontSize: isMobile ? '0.9rem' : '1.1rem' }}>📊</span>
-              <span style={{ fontWeight: '600', color: textColor }}>
-                {isMobile ? `${todayCalories}/${dailyCalorieGoal}` : `${todayCalories}/${dailyCalorieGoal} Cal`}
-              </span>
-            </button>
             <button
               className="mobile-hamburger"
               onClick={() => setDrawerOpen(true)}
@@ -5214,15 +5214,12 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       .replace(/\b(fresh|dried|raw|cooked|minced|chopped|diced|sliced|grated)\b/g, '')
                       .trim();
                     
-                    // Check if substitutions exist for this ingredient
+                    // Check if substitutions exist for this ingredient (must match actual substitution database keys)
                     const commonIngredients = [
-                      'chicken', 'beef', 'pork', 'fish', 'salmon', 'shrimp', 'turkey',
+                      'chicken', 'beef', 'pork', 'fish', 'salmon', 'shrimp',
                       'milk', 'butter', 'cheese', 'cream', 'yogurt', 'egg',
-                      'rice', 'pasta', 'flour', 'bread', 'noodle',
-                      'sugar', 'honey', 'syrup',
-                      'oil', 'olive', 'coconut', 'avocado',
-                      'potato', 'tomato', 'cauliflower', 'mushroom',
-                      'tofu', 'tempeh', 'seitan'
+                      'rice', 'pasta', 'flour', 'bread',
+                      'sugar', 'oil', 'potato', 'tomato'
                     ];
                     
                     const hasSubstitutions = commonIngredients.some(ing => 

@@ -2646,6 +2646,31 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem'
                   }}>📦 {t('recipes.addPantryItems')}</button>
                 )}
+                <div style={{
+                  marginLeft: 'auto', display: 'flex',
+                  background: '#f3f4f6', border: '1px solid #e5e7eb',
+                  borderRadius: '8px', padding: '3px'
+                }}>
+                  {([['strict', 'Only mine'], ['loose', 'Allow extras']] as const).map(([mode, label]) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      aria-pressed={recipeMode === mode}
+                      onClick={() => handleRecipeModeChange(mode)}
+                      style={{
+                        padding: '0.25rem 0.65rem',
+                        background: recipeMode === mode ? '#1f2937' : 'transparent',
+                        color: recipeMode === mode ? 'white' : '#6b7280',
+                        border: 'none', borderRadius: '6px', cursor: 'pointer',
+                        fontSize: '0.8rem', fontWeight: '600',
+                        transition: 'background 0.15s, color 0.15s',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
                 {ingredientTags.map(tag => (
@@ -2718,36 +2743,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 }}>
                   📷 {t('recipes.scanIngredients')}
                 </button>
-                {/* Recipe mode toggle */}
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  background: '#f3f4f6', border: '1px solid #e5e7eb',
-                  borderRadius: '8px', padding: '0.4rem 0.6rem'
-                }}>
-                  <span style={{
-                    fontSize: '0.85rem', fontWeight: '600', color: '#374151',
-                    whiteSpace: 'nowrap'
-                  }}>{t('recipes.recipeMode')}</span>
-                  {(['loose', 'strict'] as const).map(mode => (
-                    <button
-                      key={mode}
-                      type="button"
-                      aria-pressed={recipeMode === mode}
-                      onClick={() => handleRecipeModeChange(mode)}
-                      style={{
-                        padding: '0.25rem 0.65rem',
-                        background: recipeMode === mode ? '#1f2937' : 'transparent',
-                        color: recipeMode === mode ? 'white' : '#6b7280',
-                        border: 'none', borderRadius: '6px', cursor: 'pointer',
-                        fontSize: '0.8rem', fontWeight: '600',
-                        textTransform: 'capitalize',
-                        transition: 'background 0.15s, color 0.15s'
-                      }}
-                    >
-                      {mode}
-                    </button>
-                  ))}
-                </div>
                 <button onClick={handleGetRecipes} disabled={recipeLoading}
                   style={{
                     padding: '0.75rem 2rem', background: recipeLoading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)',

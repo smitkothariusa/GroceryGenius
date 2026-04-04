@@ -2678,117 +2678,97 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   {t('common.clearAll')}
                 </button>
               </div>
-              {/* Two-column layout: inputs left, filters right */}
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1.5rem', marginBottom: '1rem', alignItems: 'start' }}>
-                {/* Left: Ingredient tags + inputs */}
-                <div>
-                  {ingredientTags.length > 0 && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                      {ingredientTags.map(tag => (
-                        <span key={tag} style={{
-                          background: 'linear-gradient(45deg, #10b981, #059669)', color: 'white',
-                          padding: '0.5rem 1rem', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '0.5rem'
-                        }}>
-                          {tag}
-                          <button onClick={() => setIngredientTags(ingredientTags.filter(t => t !== tag))}
-                            style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.25rem' }}>×</button>
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <input type="text" placeholder={t('recipes.ingredientsPlaceholder')} onKeyPress={(e) => {
-                    if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
-                      const tag = (e.target as HTMLInputElement).value.trim().toLowerCase();
-                      if (!ingredientTags.includes(tag)) setIngredientTags([...ingredientTags, tag]);
-                      (e.target as HTMLInputElement).value = '';
-                    }
-                  }} style={{ width: '100%', padding: isMobile ? '0.75rem' : '0.875rem', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: isMobile ? '0.875rem' : '1rem', marginBottom: '0.75rem', boxSizing: 'border-box' }} />
-
-                  <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.875rem' }}>🔍 {t('recipes.searchLabel')}</label>
-                  <input type="text" placeholder={t('recipes.searchPlaceholder')} value={recipeSearchQuery}
-                    onChange={(e) => setRecipeSearchQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && !recipeLoading && handleGetRecipes()}
-                    style={{ width: '100%', padding: isMobile ? '0.75rem' : '0.875rem', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: isMobile ? '0.875rem' : '1rem', boxSizing: 'border-box' }} />
-                </div>
-
-                {/* Right: Filters */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.875rem' }}>🥗 Dietary Filter:</label>
-                    <select value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
-                      style={{ padding: '0.65rem 0.75rem', border: '2px solid #e5e7eb', borderRadius: '8px', width: '100%', fontSize: '0.9rem' }}>
-                      <option value="">{t('recipes.dietary.all')}</option>
-                      <option value="vegetarian">{t('recipes.dietary.vegetarian')}</option>
-                      <option value="vegan">{t('recipes.dietary.vegan')}</option>
-                      <option value="gluten-free">{t('recipes.dietary.glutenFree')}</option>
-                      <option value="keto">{t('recipes.dietary.keto')}</option>
-                      <option value="diabetic-friendly">{t('recipes.dietary.diabeticFriendly')}</option>
-                      <option value="heart-healthy">{t('recipes.dietary.heartHealthy')}</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.875rem' }}>⚖️ {t('recipes.servings')}:</label>
-                    <div className="recipe-servings-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <input type="number" min="1" max="12" value={recipeServings}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === '') {
-                            setRecipeServings('' as any);
-                          } else {
-                            setRecipeServings(Math.max(1, Math.min(12, parseInt(val) || 2)));
-                          }
-                        }}
-                        onBlur={(e) => {
-                          if (e.target.value === '' || parseInt(e.target.value) < 1) {
-                            setRecipeServings(2);
-                          }
-                        }}
-                        style={{ width: '70px', padding: '0.5rem', border: '2px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', fontWeight: '600', fontSize: '1rem' }} />
-                      <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>people</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.875rem' }}>⚡ Difficulty:</label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: '#f3f4f6', borderRadius: '10px', padding: '0.25rem', width: 'fit-content' }}>
-                      {(['flexible', 'easy', 'medium', 'hard'] as const).map((level) => {
-                        const active = recipeDifficulty === level;
-                        const colors: Record<string, { bg: string; text: string }> = {
-                          flexible: { bg: '#6366f1', text: 'white' },
-                          easy:     { bg: '#10b981', text: 'white' },
-                          medium:   { bg: '#f59e0b', text: 'white' },
-                          hard:     { bg: '#ef4444', text: 'white' },
-                        };
-                        return (
-                          <button
-                            key={level}
-                            onClick={() => setRecipeDifficulty(level)}
-                            style={{
-                              padding: '0.4rem 0.75rem',
-                              background: active ? colors[level].bg : 'transparent',
-                              color: active ? colors[level].text : '#6b7280',
-                              border: 'none',
-                              borderRadius: '8px',
-                              cursor: 'pointer',
-                              fontWeight: active ? '700' : '500',
-                              fontSize: '0.8rem',
-                              transition: 'background 0.2s, color 0.2s, transform 0.15s',
-                              transform: active ? 'scale(1.05)' : 'scale(1)',
-                              textTransform: 'capitalize',
-                              whiteSpace: 'nowrap'
-                            }}
-                          >
-                            {level}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+                {ingredientTags.map(tag => (
+                  <span key={tag} style={{
+                    background: 'linear-gradient(45deg, #10b981, #059669)', color: 'white',
+                    padding: '0.5rem 1rem', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '0.5rem'
+                  }}>
+                    {tag}
+                    <button onClick={() => setIngredientTags(ingredientTags.filter(t => t !== tag))}
+                      style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.25rem' }}>×</button>
+                  </span>
+                ))}
               </div>
+              <input type="text" placeholder={t('recipes.ingredientsPlaceholder')} onKeyPress={(e) => {
+                if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
+                  const tag = (e.target as HTMLInputElement).value.trim().toLowerCase();
+                  if (!ingredientTags.includes(tag)) setIngredientTags([...ingredientTags, tag]);
+                  (e.target as HTMLInputElement).value = '';
+                }
+              }} style={{ width: '100%', padding: isMobile ? '0.75rem' : '1rem', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: isMobile ? '0.875rem' : '1rem', marginBottom: '1rem', boxSizing: 'border-box' }} />
 
-              {/* Action buttons */}
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>🔍 {t('recipes.searchLabel')}</label>
+              <input type="text" placeholder={t('recipes.searchPlaceholder')} value={recipeSearchQuery}
+                onChange={(e) => setRecipeSearchQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && !recipeLoading && handleGetRecipes()}
+                style={{ width: '100%', padding: isMobile ? '0.75rem' : '1rem', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: isMobile ? '0.875rem' : '1rem', marginBottom: '1rem', boxSizing: 'border-box' }} />
+
+              <div className="recipe-controls-row" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                <select value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
+                  style={{ padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '8px', minWidth: '200px' }}>
+                  <option value="">{t('recipes.dietary.all')}</option>
+                  <option value="vegetarian">{t('recipes.dietary.vegetarian')}</option>
+                  <option value="vegan">{t('recipes.dietary.vegan')}</option>
+                  <option value="gluten-free">{t('recipes.dietary.glutenFree')}</option>
+                  <option value="keto">{t('recipes.dietary.keto')}</option>
+                  <option value="diabetic-friendly">{t('recipes.dietary.diabeticFriendly')}</option>
+                  <option value="heart-healthy">{t('recipes.dietary.heartHealthy')}</option>
+                </select>
+
+                <div className="recipe-servings-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span>⚖️</span>
+                  <label style={{ fontWeight: '600' }}>{t('recipes.servings')}:</label>
+                  <input type="number" min="1" max="12" value={recipeServings}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '') {
+                        setRecipeServings('' as any);
+                      } else {
+                        setRecipeServings(Math.max(1, Math.min(12, parseInt(val) || 2)));
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value === '' || parseInt(e.target.value) < 1) {
+                        setRecipeServings(2);
+                      }
+                    }}
+                    style={{ width: '60px', padding: '0.5rem', border: '2px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', fontWeight: '600' }} />
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: '#f3f4f6', borderRadius: '10px', padding: '0.25rem' }}>
+                  {(['flexible', 'easy', 'medium', 'hard'] as const).map((level) => {
+                    const active = recipeDifficulty === level;
+                    const colors: Record<string, { bg: string; text: string }> = {
+                      flexible: { bg: '#6366f1', text: 'white' },
+                      easy:     { bg: '#10b981', text: 'white' },
+                      medium:   { bg: '#f59e0b', text: 'white' },
+                      hard:     { bg: '#ef4444', text: 'white' },
+                    };
+                    return (
+                      <button
+                        key={level}
+                        onClick={() => setRecipeDifficulty(level)}
+                        style={{
+                          padding: '0.4rem 0.75rem',
+                          background: active ? colors[level].bg : 'transparent',
+                          color: active ? colors[level].text : '#6b7280',
+                          border: 'none',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontWeight: active ? '700' : '500',
+                          fontSize: '0.8rem',
+                          transition: 'background 0.2s, color 0.2s, transform 0.15s',
+                          transform: active ? 'scale(1.05)' : 'scale(1)',
+                          textTransform: 'capitalize',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {level}
+                      </button>
+                    );
+                  })}
+                </div>
+
                 <button onClick={() => {
                   setCameraSource('recipes');
                   setShowImageUpload(true);

@@ -100,6 +100,9 @@ const App: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [recipeLoading, setRecipeLoading] = useState(false);
+  const [recipeMode, setRecipeMode] = useState<'loose' | 'strict'>(
+    () => (localStorage.getItem('gg_recipe_mode') as 'loose' | 'strict') ?? 'loose'
+  );
   const [showSubstitution, setShowSubstitution] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState<{
     name: string;
@@ -800,7 +803,7 @@ const App: React.FC = () => {
       const response = await fetch(`${API_BASE}/recipes?${params.toString()}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ingredients: allIngredients }),
+        body: JSON.stringify({ ingredients: allIngredients, strict: recipeMode === 'strict' }),
         signal: controller.signal
       });
       
@@ -844,6 +847,11 @@ const App: React.FC = () => {
     } finally {
       setRecipeLoading(false);
     }
+  };
+
+  const handleRecipeModeChange = (mode: 'loose' | 'strict') => {
+    setRecipeMode(mode);
+    localStorage.setItem('gg_recipe_mode', mode);
   };
 
   const addPantryToIngredients = () => {

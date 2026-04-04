@@ -5192,15 +5192,24 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     💡 {t('recipes.substitutionTip')}
                   </div>
                 </div>
-                {(typeof selectedRecipe.ingredients === 'string' 
-                  ? selectedRecipe.ingredients.split('\n') 
-                  : selectedRecipe.ingredients
-                ).map((line, idx) => {
+                {(() => {
+                  const detailScale = (selectedRecipe.originalServings && selectedRecipe.servings)
+                    ? selectedRecipe.servings / selectedRecipe.originalServings
+                    : 1;
+                  const fmtQty = (q: number) => {
+                    const scaled = q * detailScale;
+                    return parseFloat(scaled.toFixed(2)).toString();
+                  };
+                  return (typeof selectedRecipe.ingredients === 'string'
+                    ? selectedRecipe.ingredients.split('\n')
+                    : selectedRecipe.ingredients
+                  ).map((line, idx) => {
                     // Parse ingredient from line
-                  const match = line.match(/^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)\s+(.+)$/);
-                  
+                  const match = line.match(/^(\d+(?:\.\d+)?(?:\/\d+)?)\s*([a-zA-Z]+)\s+(.+)$/);
+
                   if (match) {
                     const [, quantity, unit, name] = match;
+                    const displayQty = fmtQty(quantity.includes('/') ? (() => { const [n,d] = quantity.split('/').map(Number); return n/d; })() : parseFloat(quantity));
                     const cleanName = name.trim().toLowerCase()
                       .replace(/\b(fresh|dried|raw|cooked|minced|chopped|diced|sliced|grated)\b/g, '')
                       .trim();
@@ -5255,7 +5264,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           }}
                         >
                           <span style={{ fontWeight: '600', color: '#059669' }}>
-                            {quantity} {unit}
+                            {displayQty} {unit}
                           </span>
                           {' '}
                           <span style={{ color: '#166534' }}>{name}</span>
@@ -5285,7 +5294,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           }}
                         >
                           <span style={{ fontWeight: '600', color: '#374151' }}>
-                            {quantity} {unit}
+                            {displayQty} {unit}
                           </span>
                           {' '}
                           <span style={{ color: '#4b5563' }}>{name}</span>
@@ -5312,7 +5321,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   }
                   
                   return null;
-                })}
+                });})()}
               </div>
             </div>
 

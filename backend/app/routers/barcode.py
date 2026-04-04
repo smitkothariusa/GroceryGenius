@@ -4,243 +4,256 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import os
 import base64
+import json
+import httpx
 from openai import OpenAI
 
+try:
+    import zxingcpp
+    from PIL import Image
+    import io
+    ZXING_AVAILABLE = True
+except Exception:
+    # zxingcpp is optional — falls back to GPT-4o vision for digit reading
+    ZXING_AVAILABLE = False
+
 router = APIRouter()
+
 
 class BarcodeImageRequest(BaseModel):
     image: str  # base64 encoded image
 
+
 class BarcodeRequest(BaseModel):
     barcode: str
+
+
+def _map_off_category(categories_tags: list) -> str:
+    cats = [c.lower() for c in categories_tags]
+    if any("meat" in c or "poultry" in c or "beef" in c or "chicken" in c for c in cats):
+        return "meat"
+    if any("dairy" in c or "milk" in c or "cheese" in c or "yogurt" in c for c in cats):
+        return "dairy"
+    if any("fruit" in c or "vegetable" in c or "produce" in c for c in cats):
+        return "produce"
+    if any("beverage" in c or "drink" in c or "juice" in c or "water" in c for c in cats):
+        return "beverages"
+    if any("snack" in c or "chip" in c or "cookie" in c or "cracker" in c for c in cats):
+        return "snacks"
+    if any("frozen" in c for c in cats):
+        return "frozen"
+    if any("breakfast" in c or "cereal" in c for c in cats):
+        return "breakfast"
+    if any("bakery" in c or "baked" in c or "bread" in c for c in cats):
+        return "bakery"
+    if any("condiment" in c or "sauce" in c or "dressing" in c for c in cats):
+        return "condiments"
+    if any("grain" in c or "pasta" in c or "rice" in c for c in cats):
+        return "grains"
+    if any("can" in c or "preserved" in c for c in cats):
+        return "canned"
+    return "other"
+
+
+async def _ai_clean_name(barcode: str, raw_name: str = None) -> dict:
+    """Use GPT-4o to identify or clean a product name from a barcode number."""
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+    if raw_name:
+        user_msg = (
+            f"Barcode: {barcode}\n"
+            f"Product database returned: \"{raw_name}\"\n\n"
+            f"Extract just the generic food item name from this."
+        )
+    else:
+        user_msg = f"Barcode: {barcode}\n\nWhat grocery product is this?"
+
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are a grocery product identifier. Return a JSON object:\n"
+                    "{\n"
+                    '    "name": "generic food name",\n'
+                    '    "category": "produce|dairy|meat|canned|grains|breakfast|beverages|snacks|frozen|bakery|condiments|other",\n'
+                    '    "confidence": "high|medium|low"\n'
+                    "}\n\n"
+                    "Name rules — be brief and generic:\n"
+                    '- Remove brand names: "Kraft Mac & Cheese" → "Mac & Cheese"\n'
+                    '- Remove size/weight/count: "Campbell\'s Tomato Soup 10.75oz" → "Tomato Soup"\n'
+                    '- Remove packaging words: "can", "box", "bag", "bottle"\n'
+                    '- Good examples: "Macaroni and Cheese", "Tomato Soup", "Whole Milk", "Cherry Tomatoes", "Granola Bar"\n'
+                    '- If unknown: {"name": "Unknown Product", "category": "other", "confidence": "low"}'
+                ),
+            },
+            {"role": "user", "content": user_msg},
+        ],
+        response_format={"type": "json_object"},
+        temperature=0.1,
+        max_tokens=100,
+    )
+
+    return json.loads(response.choices[0].message.content)
+
+
+async def _lookup_product_by_number(barcode: str) -> dict:
+    """
+    Look up a product by its barcode number.
+    1. Try Open Food Facts (free, no key, huge food database)
+    2. Fall back to GPT-4o using its training data
+    """
+    # --- Open Food Facts ---
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(
+                f"https://world.openfoodfacts.org/api/v2/product/{barcode}.json"
+            )
+        if resp.status_code == 200:
+            data = resp.json()
+            if data.get("status") == 1 and data.get("product"):
+                product = data["product"]
+                raw_name = (
+                    product.get("product_name")
+                    or product.get("product_name_en")
+                    or product.get("generic_name")
+                )
+                if raw_name and raw_name.strip():
+                    ai = await _ai_clean_name(barcode, raw_name)
+                    category = ai.get("category") or _map_off_category(
+                        product.get("categories_tags") or []
+                    )
+                    clean = ai.get("name") or raw_name
+                    print(f"✅ OFF: '{raw_name}' → '{clean}'")
+                    return {
+                        "barcode": barcode,
+                        "name": clean,
+                        "category": category,
+                        "confidence": "high",
+                    }
+    except Exception as e:
+        print(f"⚠️ Open Food Facts failed: {e}")
+
+    # --- GPT-4o fallback ---
+    try:
+        ai = await _ai_clean_name(barcode)
+        print(f"✅ GPT-4o identified: '{ai.get('name')}' (confidence: {ai.get('confidence')})")
+        return {
+            "barcode": barcode,
+            "name": ai.get("name", "Unknown Product"),
+            "category": ai.get("category", "other"),
+            "confidence": ai.get("confidence", "low"),
+        }
+    except Exception as e:
+        print(f"❌ GPT-4o identification failed: {e}")
+        return {
+            "barcode": barcode,
+            "name": "Unknown Product",
+            "category": "other",
+            "confidence": "low",
+        }
+
 
 @router.post("/barcode/vision-lookup")
 async def vision_barcode_lookup(request: BarcodeImageRequest):
     """
-    Use GPT-4 Vision to identify a product from a barcode image.
-    This analyzes the actual image of the barcode/product packaging.
+    Decode a barcode from an image, then look up the product.
+
+    Stage 1 — read the digits:
+      a. pyzbar (decodes the barcode symbology directly — most reliable)
+      b. GPT-4o vision (reads the printed digits as text — fallback)
+
+    Stage 2 — identify the product:
+      Uses _lookup_product_by_number (Open Food Facts → GPT-4o)
     """
     try:
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        
-        # The image should already be base64 encoded from frontend
         base64_image = request.image
-        
-        # Remove data URL prefix if present
-        if ',' in base64_image:
-            base64_image = base64_image.split(',')[1]
-        
-        response = client.chat.completions.create(
-            model="gpt-4o",  # Full GPT-4o for best vision performance
-            messages=[
-                {
-                    "role": "system",
-                    "content": """You are an expert barcode scanner with web search capabilities. Your PRIMARY task is to read and search barcode numbers, NOT to read brand names.
+        if "," in base64_image:
+            base64_image = base64_image.split(",")[1]
 
-🔴 CRITICAL RULE: You MUST use the BARCODE NUMBER to identify products. Do NOT identify products by brand names or packaging alone.
+        barcode_number = None
 
-STEP 1 - READ THE BARCODE NUMBER:
-- Find the vertical black/white lines (the barcode)
-- Look DIRECTLY BELOW those lines for printed numbers
-- These numbers are typically 12 digits (UPC) or 13 digits (EAN)
-- Read ALL digits carefully: "0 12345 67890 1"
-- Ignore ALL other text on the package (brand names, product descriptions, etc.)
+        # --- Stage 1a: zxingcpp (decodes barcode lines directly, Windows-friendly) ---
+        if ZXING_AVAILABLE:
+            try:
+                image_bytes = base64.b64decode(base64_image)
+                img = Image.open(io.BytesIO(image_bytes))
+                results = zxingcpp.read_barcodes(img)
+                for r in results:
+                    data = r.text
+                    if data.isdigit() and len(data) >= 8:
+                        barcode_number = data
+                        print(f"✅ zxingcpp decoded: {barcode_number}")
+                        break
+            except Exception as e:
+                print(f"⚠️ zxingcpp failed: {e}")
 
-STEP 2 - SEARCH THE WEB FOR THE BARCODE:
-- Search EXACTLY: "[barcode number] UPC lookup"
-- Also try: "[barcode number] barcode" 
-- Find multiple sources to confirm the product
-- The web results will tell you the EXACT product name
+        # --- Stage 1b: GPT-4o vision — read digits only, not identify product ---
+        if not barcode_number:
+            client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            vision_resp = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": (
+                                    "Find the barcode in this image (the parallel black and white stripes). "
+                                    "Read ONLY the digits printed directly below those stripes. "
+                                    "Reply with ONLY those digits — no spaces, no other text. "
+                                    "If you cannot read them clearly, reply with 'unreadable'."
+                                ),
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64_image}",
+                                    "detail": "high",
+                                },
+                            },
+                        ],
+                    }
+                ],
+                max_tokens=30,
+                temperature=0,
+            )
+            raw = vision_resp.choices[0].message.content.strip()
+            digits_only = "".join(c for c in raw if c.isdigit())
+            if len(digits_only) >= 8:
+                barcode_number = digits_only
+                print(f"✅ GPT-4o vision read digits: {barcode_number}")
+            else:
+                print(f"⚠️ GPT-4o could not read digits from image: '{raw}'")
 
-STEP 3 - VERIFY THE RESULT:
-- Make sure the web search result makes sense with the package
-- If web search says "Cherry Tomatoes" but the brand is "Wild Wonders", the product is "Wild Wonders Cherry Tomatoes"
-- If web search says "Marinara Sauce" but you see pasta on the package, TRUST the web search - it's marinara sauce
-
-RESPONSE FORMAT (JSON only):
-{
-    "barcode": "the exact barcode number you read (all digits, no spaces)",
-    "name": "Exact product from web search results (Brand + Product Type + Size)",
-    "category": "produce|dairy|meat|canned|grains|breakfast|beverages|snacks|frozen|bakery|condiments|other",
-    "confidence": "high|medium|low",
-    "search_query": "the search query you used"
-}
-
-🚫 ABSOLUTELY FORBIDDEN:
-- DO NOT identify products by reading brand names like "Wild Wonders" or "Kraft"
-- DO NOT return "Kraft Singles" or any other product unless the BARCODE matches
-- DO NOT guess - if you can't read the barcode, return "unreadable"
-- DO NOT return the same product multiple times for different barcodes
-
-IF BARCODE IS UNREADABLE:
-{
-    "barcode": "unreadable",
-    "name": "Unknown Product",
-    "category": "other",
-    "confidence": "low",
-    "search_query": "none"
-}
-
-REMEMBER: The barcode number is the ONLY reliable way to identify the product. Brand names and packaging can be misleading."""
-                },
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "IMPORTANT: First, read ONLY the barcode number (the digits below the black/white lines). Then search the web for that EXACT barcode number to identify the product. Do NOT identify the product by reading brand names on the package."
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{base64_image}",
-                                "detail": "high"  # High detail for better barcode reading
-                            }
-                        }
-                    ]
-                }
-            ],
-            tools=[
-                {
-                    "type": "web_search_20250305",
-                    "name": "web_search"
-                }
-            ],
-            response_format={ "type": "json_object" },
-            temperature=0.1,  # Very low temperature for consistency
-            max_tokens=500  # Much higher for thorough web search
-        )
-        
-        import json
-        
-        # Handle response - may include tool calls for web search
-        message_content = response.choices[0].message.content
-        
-        # Parse the JSON response
-        result = json.loads(message_content)
-        
-        barcode_read = result.get('barcode', 'unknown')
-        product_name = result.get('name', 'Unknown Product')
-        confidence = result.get('confidence', 'unknown')
-        search_query = result.get('search_query', 'none')
-        
-        print(f"========================================")
-        print(f"📸 Vision API Analysis (with Web Search):")
-        print(f"   Barcode Read: {barcode_read}")
-        print(f"   Search Query: {search_query}")
-        print(f"   Product Name: {product_name}")
-        print(f"   Confidence: {confidence}")
-        print(f"   Category: {result.get('category', 'other')}")
-        
-        # Log if web search was used
-        if hasattr(response.choices[0].message, 'tool_calls') and response.choices[0].message.tool_calls:
-            print(f"   🌐 Web Search: Used ({len(response.choices[0].message.tool_calls)} searches)")
-        else:
-            print(f"   ⚠️ Web Search: NOT USED - This is a problem!")
-        
-        print(f"========================================")
-        
-        # Validation: Reject if barcode is unreadable or too short
-        if barcode_read == 'unreadable' or (barcode_read != 'unknown' and len(barcode_read) < 8):
-            print(f"⚠️ Invalid barcode detected, marking as unreadable")
+        if not barcode_number:
             return {
                 "barcode": "unreadable",
                 "name": "Unknown Product",
                 "category": "other",
                 "confidence": "low",
-                "source": "vision"
+                "source": "vision",
             }
-        
-        # Extra validation: Check if the search query actually contains the barcode
-        if search_query != 'none' and barcode_read not in search_query:
-            print(f"🚨 WARNING: Search query '{search_query}' doesn't contain barcode '{barcode_read}'")
-            print(f"🚨 This means GPT-4 is NOT using the barcode properly!")
-        
-        return {
-            "barcode": barcode_read,
-            "name": product_name,
-            "category": result.get("category", "other"),
-            "confidence": confidence,
-            "source": "vision"
-        }
-        
-        # Validation: Reject if barcode is unreadable or too short
-        if barcode_read == 'unreadable' or (barcode_read != 'unknown' and len(barcode_read) < 8):
-            print(f"⚠️ Invalid barcode detected, marking as unreadable")
-            return {
-                "barcode": "unreadable",
-                "name": "Unknown Product",
-                "category": "other",
-                "confidence": "low",
-                "source": "vision"
-            }
-        
-        return {
-            "barcode": barcode_read,
-            "name": product_name,
-            "category": result.get("category", "other"),
-            "confidence": confidence,
-            "source": "vision"
-        }
-        
+
+        # --- Stage 2: Look up product by the decoded number ---
+        result = await _lookup_product_by_number(barcode_number)
+        result["source"] = "vision"
+        return result
+
     except Exception as e:
         print(f"❌ Vision barcode lookup error: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Vision lookup failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Vision lookup failed: {str(e)}")
+
 
 @router.post("/barcode/ai-lookup")
 async def ai_barcode_lookup(request: BarcodeRequest):
-    """
-    Use OpenAI to identify a product from its barcode number.
-    This is a fallback when vision lookup is not available.
-    """
+    """Look up a product by its barcode number (Open Food Facts → GPT-4o)."""
     try:
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",  # Using mini for cost efficiency
-            messages=[
-                {
-                    "role": "system",
-                    "content": """You are a product identification expert. Given a barcode/UPC number, 
-                    identify the most likely product name. Be concise and accurate.
-                    
-                    Return ONLY a JSON object with this structure:
-                    {
-                        "name": "Product Name",
-                        "category": "produce|dairy|meat|canned|grains|breakfast|beverages|snacks|frozen|bakery|condiments|other"
-                    }
-                    
-                    If you cannot identify the product with confidence, return:
-                    {
-                        "name": "Unknown Product",
-                        "category": "other"
-                    }"""
-                },
-                {
-                    "role": "user",
-                    "content": f"Identify this barcode: {request.barcode}"
-                }
-            ],
-            response_format={ "type": "json_object" },
-            temperature=0.3,
-            max_tokens=100
-        )
-        
-        import json
-        result = json.loads(response.choices[0].message.content)
-        
-        return {
-            "name": result.get("name", f"Item {request.barcode[-6:]}"),
-            "category": result.get("category", "other"),
-            "source": "ai"
-        }
-        
+        result = await _lookup_product_by_number(request.barcode)
+        result["source"] = "ai"
+        return result
     except Exception as e:
         print(f"❌ AI barcode lookup error: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"AI lookup failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"AI lookup failed: {str(e)}")

@@ -2715,13 +2715,13 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 </button>
                 {/* Recipe mode toggle */}
                 <div style={{
-                  display: 'flex', alignItems: 'center', gap: '0.75rem',
-                  background: 'var(--gg-cream)', border: '1px solid var(--gg-border)',
-                  borderRadius: 'var(--gg-radius-md)', padding: '0.4rem 0.75rem'
+                  display: 'flex', alignItems: 'center', gap: '0.5rem',
+                  background: '#f3f4f6', border: '1px solid #e5e7eb',
+                  borderRadius: '8px', padding: '0.4rem 0.6rem'
                 }}>
                   <span style={{
-                    fontFamily: "'Bricolage Grotesque', sans-serif",
-                    fontWeight: 600, fontSize: '0.85rem', color: 'var(--gg-espresso)'
+                    fontSize: '0.85rem', fontWeight: '600', color: '#374151',
+                    whiteSpace: 'nowrap'
                   }}>{t('recipes.recipeMode')}</span>
                   {(['loose', 'strict'] as const).map(mode => (
                     <button
@@ -2730,13 +2730,13 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       aria-pressed={recipeMode === mode}
                       onClick={() => handleRecipeModeChange(mode)}
                       style={{
-                        padding: '0.3rem 0.75rem',
-                        background: recipeMode === mode ? 'var(--gg-tomato)' : 'var(--gg-parchment)',
-                        color: recipeMode === mode ? 'white' : 'var(--gg-taupe)',
-                        border: 'none', borderRadius: 'var(--gg-radius-md)', cursor: 'pointer',
-                        fontFamily: "'Bricolage Grotesque', sans-serif",
-                        fontWeight: 600, fontSize: '0.85rem',
-                        textTransform: 'capitalize', transition: 'background 0.15s, color 0.15s'
+                        padding: '0.25rem 0.65rem',
+                        background: recipeMode === mode ? '#1f2937' : 'transparent',
+                        color: recipeMode === mode ? 'white' : '#6b7280',
+                        border: 'none', borderRadius: '6px', cursor: 'pointer',
+                        fontSize: '0.8rem', fontWeight: '600',
+                        textTransform: 'capitalize',
+                        transition: 'background 0.15s, color 0.15s'
                       }}
                     >
                       {mode}

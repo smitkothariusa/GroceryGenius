@@ -2713,6 +2713,34 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 }}>
                   📷 {t('recipes.scanIngredients')}
                 </button>
+                {/* Recipe mode toggle */}
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: '0.75rem',
+                  background: 'var(--gg-cream)', border: '1px solid var(--gg-border)',
+                  borderRadius: 'var(--gg-radius-md)', padding: '0.4rem 0.75rem'
+                }}>
+                  <span style={{
+                    fontFamily: "'Bricolage Grotesque', sans-serif",
+                    fontWeight: 600, fontSize: '0.85rem', color: 'var(--gg-espresso)'
+                  }}>Recipe mode:</span>
+                  {(['loose', 'strict'] as const).map(mode => (
+                    <button
+                      key={mode}
+                      onClick={() => handleRecipeModeChange(mode)}
+                      style={{
+                        padding: '0.3rem 0.75rem',
+                        background: recipeMode === mode ? 'var(--gg-tomato)' : 'var(--gg-parchment)',
+                        color: recipeMode === mode ? 'white' : 'var(--gg-taupe)',
+                        border: 'none', borderRadius: 'var(--gg-radius-md)', cursor: 'pointer',
+                        fontFamily: "'Bricolage Grotesque', sans-serif",
+                        fontWeight: 600, fontSize: '0.85rem',
+                        textTransform: 'capitalize', transition: 'background 0.15s, color 0.15s'
+                      }}
+                    >
+                      {mode}
+                    </button>
+                  ))}
+                </div>
                 <button onClick={handleGetRecipes} disabled={recipeLoading}
                   style={{
                     padding: '0.75rem 2rem', background: recipeLoading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)',

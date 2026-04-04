@@ -101,7 +101,7 @@ const App: React.FC = () => {
   const [authLoading, setAuthLoading] = useState(true);
   const [recipeLoading, setRecipeLoading] = useState(false);
   const [recipeMode, setRecipeMode] = useState<'loose' | 'strict'>(
-    () => (localStorage.getItem('gg_recipe_mode') as 'loose' | 'strict') ?? 'loose'
+    () => localStorage.getItem('gg_recipe_mode') === 'strict' ? 'strict' : 'loose'
   );
   const [showSubstitution, setShowSubstitution] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState<{

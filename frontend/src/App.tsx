@@ -555,6 +555,8 @@ const App: React.FC = () => {
             totalPounds: 0,
             co2Saved: 0
           });
+          localStorage.removeItem('gg_recipe_mode');
+          setRecipeMode('loose');
         }
       });
 

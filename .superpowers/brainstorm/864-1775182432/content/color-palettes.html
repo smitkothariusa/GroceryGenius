@@ -1,0 +1,109 @@
+<h2>Which color palette?</h2>
+<p class="subtitle">All built around the Bright Kitchen direction — warm, bold, food-forward</p>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Lato:wght@400;700&display=swap');
+.swatch { width: 36px; height: 36px; border-radius: 8px; display:inline-block; }
+.palette-row { display:flex; gap:8px; align-items:center; margin: 12px 0 6px; }
+.pal-label { font-family:'Lato',sans-serif; font-size:11px; color:#888; margin-top:4px; }
+.mini-card { border-radius: 12px; padding: 18px; margin-bottom: 8px; }
+.mini-title { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:20px; letter-spacing:-0.5px; }
+.mini-sub { font-family:'Lato',sans-serif; font-size:11px; margin-top:4px; }
+.mini-tag { display:inline-block; padding:3px 10px; border-radius:20px; font-family:'Lato',sans-serif; font-size:11px; font-weight:700; margin-top:10px; margin-right:4px; }
+</style>
+
+<div class="cards">
+
+  <div class="card" data-choice="tomato-cream" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#fdf6ec; padding:20px; border-bottom:1px solid #f0e0c8;">
+      <div class="mini-card" style="background:#fff; border: 1.5px solid #f0e0c8;">
+        <div class="mini-title" style="color:#1c1208;">Pasta Primavera</div>
+        <div class="mini-sub" style="color:#7a6652;">Ready in 25 min · 4 servings</div>
+        <span class="mini-tag" style="background:#e8391a; color:#fff;">A+ Health</span>
+        <span class="mini-tag" style="background:#fdf6ec; color:#e8391a; border:1.5px solid #e8391a;">Vegetarian</span>
+      </div>
+      <div class="palette-row">
+        <div class="swatch" style="background:#e8391a;" title="#e8391a"></div>
+        <div class="swatch" style="background:#fdf6ec;" title="#fdf6ec"></div>
+        <div class="swatch" style="background:#1c1208;" title="#1c1208"></div>
+        <div class="swatch" style="background:#7a6652;" title="#7a6652"></div>
+        <div class="swatch" style="background:#2d6a4f;" title="#2d6a4f"></div>
+      </div>
+      <div class="pal-label">Tomato · Parchment · Espresso · Taupe · Forest accent</div>
+    </div>
+    <div class="card-body">
+      <h3>Tomato & Parchment</h3>
+      <p>Warm off-white base with a punchy tomato red. Feels like a well-loved cookbook. The green accent adds a fresh veggie counterpoint.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="saffron-charcoal" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#1e1b16; padding:20px; border-bottom:1px solid #2e2a22;">
+      <div class="mini-card" style="background:#2a2620; border: 1.5px solid #3a3630;">
+        <div class="mini-title" style="color:#f5f0e8;">Pasta Primavera</div>
+        <div class="mini-sub" style="color:#9a9080;">Ready in 25 min · 4 servings</div>
+        <span class="mini-tag" style="background:#f0a500; color:#1e1b16;">A+ Health</span>
+        <span class="mini-tag" style="background:transparent; color:#f0a500; border:1.5px solid #f0a500;">Vegetarian</span>
+      </div>
+      <div class="palette-row">
+        <div class="swatch" style="background:#f0a500;" title="#f0a500"></div>
+        <div class="swatch" style="background:#f5f0e8;" title="#f5f0e8"></div>
+        <div class="swatch" style="background:#1e1b16;" title="#1e1b16"></div>
+        <div class="swatch" style="background:#9a9080;" title="#9a9080"></div>
+        <div class="swatch" style="background:#e85d26;" title="#e85d26"></div>
+      </div>
+      <div class="pal-label">Saffron · Linen · Dark roast · Warm gray · Ember accent</div>
+    </div>
+    <div class="card-body">
+      <h3>Saffron & Dark Roast</h3>
+      <p>Deep charcoal base with saffron-gold primary. Rich and dramatic — like a high-end restaurant menu. The warm ember accent adds heat without clashing.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="basil-lemon" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f8fdf4; padding:20px; border-bottom:1px solid #dff0d4;">
+      <div class="mini-card" style="background:#fff; border: 1.5px solid #dff0d4;">
+        <div class="mini-title" style="color:#141f0f;">Pasta Primavera</div>
+        <div class="mini-sub" style="color:#5a7050;">Ready in 25 min · 4 servings</div>
+        <span class="mini-tag" style="background:#2e7d32; color:#fff;">A+ Health</span>
+        <span class="mini-tag" style="background:#f9f450; color:#1a1a00; border:1.5px solid #d4c800;">Vegetarian</span>
+      </div>
+      <div class="palette-row">
+        <div class="swatch" style="background:#2e7d32;" title="#2e7d32"></div>
+        <div class="swatch" style="background:#f8fdf4;" title="#f8fdf4"></div>
+        <div class="swatch" style="background:#141f0f;" title="#141f0f"></div>
+        <div class="swatch" style="background:#5a7050;" title="#5a7050"></div>
+        <div class="swatch" style="background:#e8b400;" title="#e8b400"></div>
+      </div>
+      <div class="pal-label">Basil · Mint white · Deep green · Herb gray · Lemon accent</div>
+    </div>
+    <div class="card-body">
+      <h3>Basil & Lemon</h3>
+      <p>Fresh produce-inspired — clean white-green base with deep basil green and a zingy lemon accent. Healthy, vibrant, and distinctly food-forward.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="paprika-sand" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#faf4ee; padding:20px; border-bottom:1px solid #eadfd2;">
+      <div class="mini-card" style="background:#fff; border: 1.5px solid #eadfd2;">
+        <div class="mini-title" style="color:#1a0f08;">Pasta Primavera</div>
+        <div class="mini-sub" style="color:#8a7060;">Ready in 25 min · 4 servings</div>
+        <span class="mini-tag" style="background:#c0392b; color:#fff;">A+ Health</span>
+        <span class="mini-tag" style="background:#e8c49a; color:#5a3010; border:1.5px solid #d4a870;">Vegetarian</span>
+      </div>
+      <div class="palette-row">
+        <div class="swatch" style="background:#c0392b;" title="#c0392b"></div>
+        <div class="swatch" style="background:#faf4ee;" title="#faf4ee"></div>
+        <div class="swatch" style="background:#1a0f08;" title="#1a0f08"></div>
+        <div class="swatch" style="background:#8a7060;" title="#8a7060"></div>
+        <div class="swatch" style="background:#e8962a;" title="#e8962a"></div>
+      </div>
+      <div class="pal-label">Paprika · Sand · Dark espresso · Warm taupe · Turmeric accent</div>
+    </div>
+    <div class="card-body">
+      <h3>Paprika & Sand</h3>
+      <p>Earthy spice market tones — paprika red on warm sandy beige. Feels warm, mature, and distinctly culinary. The turmeric accent is unexpected and memorable.</p>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "skills": {
+    "brand-identity-creator": {
+      "source": "irahardianto/monarch",
+      "sourceType": "github",
+      "computedHash": "6ba89dcb19dd3e5fcba3453d8af1fef832a0abcf3712fbf4d5e4cdd794452a93"
+    },
+    "debugging-protocol": {
+      "source": "irahardianto/monarch",
+      "sourceType": "github",
+      "computedHash": "48de01c3d931593cfb8ba6fbbaf9176a8de71492bb344bf4bbf3fd38ecdef73a"
+    },
+    "frontend-design": {
+      "source": "irahardianto/monarch",
+      "sourceType": "github",
+      "computedHash": "9c9015a989ca821a3fd24ef9154c628bfb43171b13c2101617a5264772e0309e"
+    },
+    "knowledge-searching": {
+      "source": "irahardianto/monarch",
+      "sourceType": "github",
+      "computedHash": "d14c976f06f2a82a0833b5859bdc7096aef8aee107adfdc246119941dc8366b7"
+    },
+    "mobile-design": {
+      "source": "irahardianto/monarch",
+      "sourceType": "github",
+      "computedHash": "172ca14209fcb522a598bd2bce2474e438a0a5dfef9b3a42cfb73f48d6e0f451"
+    },
+    "opensource-readme-generator": {
+      "source": "irahardianto/monarch",
+      "sourceType": "github",
+      "computedHash": "d4709ee96be8a77981a305fa20a10672ed08fe3f03947b081055d7753bc62d23"
+    },
+    "sequential-thinking": {
+      "source": "irahardianto/monarch",
+      "sourceType": "github",
+      "computedHash": "8f2d24d750d35e4ee2ca4f6db75ddfb0ed242e30e9af5dbfc23d205e0f7356b9"
+    },
+    "technical-constitution": {
+      "source": "irahardianto/monarch",
+      "sourceType": "github",
+      "computedHash": "1ad0e40674834f56bf6bebc0d05874dba43d150ba3e83e611dd7d5bce9dca46c"
+    }
+  }
+}

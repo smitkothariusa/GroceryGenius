@@ -1,0 +1,96 @@
+<h2>Mobile Header: What lives at the top?</h2>
+<p class="subtitle">With a drawer nav, the header gets cleaned up. How much do you want in it?</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 1.5rem; background: #f8fafc;">
+      <div style="width: 220px; margin: 0 auto;">
+        <!-- Header A: Ultra minimal -->
+        <div style="background: white; padding: 10px 14px; border-radius: 12px 12px 0 0; border: 2px solid #334155; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 16px;">👨‍🍳</span>
+            <span style="font-size: 13px; font-weight: 700; color: #10b981;">GroceryGenius</span>
+          </div>
+          <div style="cursor: pointer; display: flex; flex-direction: column; gap: 3px; padding: 4px;">
+            <div style="width: 18px; height: 2px; background: #374151; border-radius: 2px;"></div>
+            <div style="width: 18px; height: 2px; background: #374151; border-radius: 2px;"></div>
+            <div style="width: 18px; height: 2px; background: #374151; border-radius: 2px;"></div>
+          </div>
+        </div>
+        <!-- Content preview -->
+        <div style="background: #f8fafc; padding: 10px; border: 2px solid #334155; border-top: none; border-radius: 0 0 12px 12px; height: 80px; font-size: 9px; color: #6b7280; display: flex; align-items: center; justify-content: center;">
+          ↑ Maximum space for content
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Ultra Minimal</h3>
+      <p>Logo + app name on left, hamburger on right. Nothing else. Calorie tracker, language, sign out all move into the drawer.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 1.5rem; background: #f8fafc;">
+      <div style="width: 220px; margin: 0 auto;">
+        <!-- Header B: Name + calorie pill + hamburger -->
+        <div style="background: white; padding: 10px 14px; border-radius: 12px 12px 0 0; border: 2px solid #334155; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 16px;">👨‍🍳</span>
+            <span style="font-size: 13px; font-weight: 700; color: #10b981;">GroceryGenius</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="background: #f0fdf4; border-radius: 20px; padding: 3px 8px; display: flex; align-items: center; gap: 3px;">
+              <span style="font-size: 11px;">📊</span>
+              <span style="font-size: 10px; font-weight: 600; color: #10b981;">1800 cal</span>
+            </div>
+            <div style="cursor: pointer; display: flex; flex-direction: column; gap: 3px; padding: 4px;">
+              <div style="width: 18px; height: 2px; background: #374151; border-radius: 2px;"></div>
+              <div style="width: 18px; height: 2px; background: #374151; border-radius: 2px;"></div>
+              <div style="width: 18px; height: 2px; background: #374151; border-radius: 2px;"></div>
+            </div>
+          </div>
+        </div>
+        <div style="background: #f8fafc; padding: 10px; border: 2px solid #334155; border-top: none; border-radius: 0 0 12px 12px; height: 80px; font-size: 9px; color: #6b7280; display: flex; align-items: center; justify-content: center;">
+          ↑ Calorie count always visible
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Name + Calorie Pill</h3>
+      <p>App name left, calorie tracker pill in the middle-right (always visible), hamburger far right. Language + sign out move to drawer.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 1.5rem; background: #f8fafc;">
+      <div style="width: 220px; margin: 0 auto;">
+        <!-- Header C: Page title (changes per tab) + calorie + hamburger -->
+        <div style="background: white; padding: 10px 14px; border-radius: 12px 12px 0 0; border: 2px solid #334155; border-bottom: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-size: 10px; color: #9ca3af; font-weight: 500;">GroceryGenius</span>
+              <span style="font-size: 15px; font-weight: 700; color: #1f2937;">📦 Pantry</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="background: #f0fdf4; border-radius: 20px; padding: 3px 8px;">
+                <span style="font-size: 10px; font-weight: 600; color: #10b981;">📊 1800</span>
+              </div>
+              <div style="cursor: pointer; display: flex; flex-direction: column; gap: 3px; padding: 4px;">
+                <div style="width: 18px; height: 2px; background: #374151; border-radius: 2px;"></div>
+                <div style="width: 18px; height: 2px; background: #374151; border-radius: 2px;"></div>
+                <div style="width: 18px; height: 2px; background: #374151; border-radius: 2px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="background: #f8fafc; padding: 10px; border: 2px solid #334155; border-top: none; border-radius: 0 0 12px 12px; height: 80px; font-size: 9px; color: #6b7280; display: flex; align-items: center; justify-content: center;">
+          ↑ Current section always labeled
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Dynamic Page Title</h3>
+      <p>Header shows current tab name prominently. App name shrinks to a small label above it. Calorie pill + hamburger on right.</p>
+    </div>
+  </div>
+</div>

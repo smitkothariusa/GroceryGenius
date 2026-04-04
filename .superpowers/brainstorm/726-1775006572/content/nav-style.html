@@ -1,0 +1,122 @@
+<h2>Mobile Navigation: Which pattern fits best?</h2>
+<p class="subtitle">The current tab bar horizontally scrolls — hard to use on mobile. Which structure should we move to?</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 1.5rem; background: #f8fafc;">
+      <!-- Phone mockup: Bottom tab bar -->
+      <div style="width: 200px; margin: 0 auto; border: 2px solid #334155; border-radius: 20px; overflow: hidden; background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+        <!-- Status bar -->
+        <div style="background: #f1f5f9; padding: 6px 12px; font-size: 9px; color: #64748b; display: flex; justify-content: space-between;">
+          <span>9:41</span><span>●●●</span>
+        </div>
+        <!-- App header -->
+        <div style="background: white; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 13px; font-weight: 700; color: #10b981;">👨‍🍳 GroceryGenius</span>
+          <span style="font-size: 10px; color: #6b7280;">📊 1800</span>
+        </div>
+        <!-- Content area -->
+        <div style="height: 180px; background: #f8fafc; padding: 12px; font-size: 10px; color: #374151;">
+          <div style="background: white; border-radius: 8px; padding: 8px; margin-bottom: 6px; font-size: 9px;">
+            🥕 Carrots — 3 pc
+          </div>
+          <div style="background: white; border-radius: 8px; padding: 8px; margin-bottom: 6px; font-size: 9px;">
+            🍎 Apples — 6 pc
+          </div>
+          <div style="background: white; border-radius: 8px; padding: 8px; font-size: 9px;">
+            🧅 Onions — 2 pc
+          </div>
+        </div>
+        <!-- Bottom tab bar -->
+        <div style="background: white; border-top: 1px solid #e2e8f0; display: flex; padding: 6px 0 10px;">
+          <div style="flex: 1; text-align: center; font-size: 18px; color: #10b981;">📦</div>
+          <div style="flex: 1; text-align: center; font-size: 18px; color: #9ca3af;">🍳</div>
+          <div style="flex: 1; text-align: center; font-size: 18px; color: #9ca3af;">📅</div>
+          <div style="flex: 1; text-align: center; font-size: 18px; color: #9ca3af;">🛒</div>
+          <div style="flex: 1; text-align: center; font-size: 18px; color: #9ca3af;">⭐</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Bottom Tab Bar</h3>
+      <p>Persistent tab bar anchored to the bottom. Thumb-friendly, native mobile feel. "Donate" & "Favorites" collapse into a "More" overflow.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 1.5rem; background: #f8fafc;">
+      <!-- Phone mockup: Hamburger drawer -->
+      <div style="width: 200px; margin: 0 auto; border: 2px solid #334155; border-radius: 20px; overflow: hidden; background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+        <div style="background: #f1f5f9; padding: 6px 12px; font-size: 9px; color: #64748b; display: flex; justify-content: space-between;">
+          <span>9:41</span><span>●●●</span>
+        </div>
+        <div style="background: white; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 13px; font-weight: 700; color: #10b981;">📦 Pantry</span>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span style="font-size: 10px; color: #6b7280;">📊</span>
+            <div style="cursor: pointer; display: flex; flex-direction: column; gap: 2px;">
+              <div style="width: 16px; height: 2px; background: #374151; border-radius: 2px;"></div>
+              <div style="width: 16px; height: 2px; background: #374151; border-radius: 2px;"></div>
+              <div style="width: 16px; height: 2px; background: #374151; border-radius: 2px;"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Drawer overlay (half-open) -->
+        <div style="position: relative; height: 190px;">
+          <div style="height: 190px; background: #f8fafc; padding: 12px; font-size: 9px; color: #374151;">
+            <div style="background: white; border-radius: 8px; padding: 8px; margin-bottom: 6px;">🥕 Carrots — 3 pc</div>
+            <div style="background: white; border-radius: 8px; padding: 8px; margin-bottom: 6px;">🍎 Apples — 6 pc</div>
+          </div>
+          <!-- Drawer sliding in -->
+          <div style="position: absolute; top: 0; right: 0; width: 65%; height: 100%; background: white; border-left: 1px solid #e2e8f0; box-shadow: -4px 0 12px rgba(0,0,0,0.1); padding: 10px 8px; font-size: 9px;">
+            <div style="font-weight: 700; color: #374151; margin-bottom: 8px; font-size: 10px;">Menu</div>
+            <div style="padding: 5px 4px; color: #10b981; font-weight: 600; border-radius: 4px; background: #f0fdf4;">📦 Pantry</div>
+            <div style="padding: 5px 4px; color: #6b7280;">🍳 Recipes</div>
+            <div style="padding: 5px 4px; color: #6b7280;">📅 Meal Plan</div>
+            <div style="padding: 5px 4px; color: #6b7280;">🛒 Shopping</div>
+            <div style="padding: 5px 4px; color: #6b7280;">❤️ Donate</div>
+            <div style="padding: 5px 4px; color: #6b7280;">⭐ Favorites</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Slide-out Drawer</h3>
+      <p>Hamburger icon in header opens a side drawer. Gives all 6 tabs full labels + icons, maximizes content space when closed.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 1.5rem; background: #f8fafc;">
+      <!-- Phone mockup: Redesigned compact top tabs -->
+      <div style="width: 200px; margin: 0 auto; border: 2px solid #334155; border-radius: 20px; overflow: hidden; background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+        <div style="background: #f1f5f9; padding: 6px 12px; font-size: 9px; color: #64748b; display: flex; justify-content: space-between;">
+          <span>9:41</span><span>●●●</span>
+        </div>
+        <div style="background: white; padding: 8px 12px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 12px; font-weight: 700; color: #10b981;">👨‍🍳 GroceryGenius</span>
+          <span style="font-size: 10px; color: #6b7280; background: #f0fdf4; padding: 2px 5px; border-radius: 6px;">📊 1800</span>
+        </div>
+        <!-- Top icon tabs, no text, no scroll -->
+        <div style="background: white; display: flex; border-bottom: 2px solid #e2e8f0; padding: 4px 6px; gap: 2px;">
+          <div style="flex: 1; text-align: center; padding: 4px 2px; background: #10b981; border-radius: 8px; font-size: 14px;">📦</div>
+          <div style="flex: 1; text-align: center; padding: 4px 2px; font-size: 14px; color: #9ca3af;">🍳</div>
+          <div style="flex: 1; text-align: center; padding: 4px 2px; font-size: 14px; color: #9ca3af;">📅</div>
+          <div style="flex: 1; text-align: center; padding: 4px 2px; font-size: 14px; color: #9ca3af;">🛒</div>
+          <div style="flex: 1; text-align: center; padding: 4px 2px; font-size: 14px; color: #9ca3af;">❤️</div>
+          <div style="flex: 1; text-align: center; padding: 4px 2px; font-size: 14px; color: #9ca3af;">⭐</div>
+        </div>
+        <!-- Content -->
+        <div style="height: 170px; background: #f8fafc; padding: 10px; font-size: 9px; color: #374151; overflow: hidden;">
+          <div style="background: white; border-radius: 8px; padding: 7px; margin-bottom: 5px;">🥕 Carrots — 3 pc</div>
+          <div style="background: white; border-radius: 8px; padding: 7px; margin-bottom: 5px;">🍎 Apples — 6 pc</div>
+          <div style="background: white; border-radius: 8px; padding: 7px;">🧅 Onions — 2 pc</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Compact Icon Tabs (top, no text)</h3>
+      <p>All 6 tabs visible at once as icons only — no overflow, no scroll. Active tab gets a background highlight. Familiar but not thumb-friendly.</p>
+    </div>
+  </div>
+</div>

@@ -71,6 +71,7 @@ interface Recipe {
   cook_time?: string;
   difficulty?: string;
   servings?: number;
+  originalServings?: number;
   nutrition?: {
     calories: number;
     protein: number;
@@ -646,6 +647,9 @@ const App: React.FC = () => {
   const parseIngredients = (recipe: Recipe): ParsedIngredient[] => {
     const ingredients: ParsedIngredient[] = [];
     const text = `${recipe.ingredients}\n${recipe.instructions}`.toLowerCase();
+    const servingScale = (recipe.originalServings && recipe.servings)
+      ? recipe.servings / recipe.originalServings
+      : 1;
     
     // Split by newlines to process each ingredient line
     const lines = recipe.ingredients.split('\n').filter(line => line.trim());
@@ -681,13 +685,13 @@ const App: React.FC = () => {
           seen.add(name);
           ingredients.push({
             name,
-            quantity: parseFloat(quantity),
+            quantity: parseFloat(quantity) * servingScale,
             unit: unit.toLowerCase()
           });
         }
         return;
       }
-      
+
       // Pattern 2: Just Quantity + Ingredient (e.g., "2 avocados", "3 eggs", "4 tomatoes")
       const pattern2 = /^(\d+(?:\/\d+)?|\d+\.\d+)\s+(?:whole|medium|large|small)?\s*(.+)$/i;
       const match2 = cleanLine.match(pattern2);
@@ -712,13 +716,13 @@ const App: React.FC = () => {
           seen.add(name);
           ingredients.push({
             name,
-            quantity: parseFloat(quantity),
+            quantity: parseFloat(quantity) * servingScale,
             unit: 'pc'
           });
         }
         return;
       }
-      
+
       // Pattern 3: Ingredient with descriptive words (e.g., "large avocado", "ripe banana")
       const pattern3 = /^(?:a|an|one|some)?\s*(?:large|medium|small|ripe|fresh)?\s*(.+)$/i;
       const match3 = cleanLine.match(pattern3);
@@ -739,13 +743,13 @@ const App: React.FC = () => {
           seen.add(name);
           ingredients.push({
             name,
-            quantity: 1,
+            quantity: 1 * servingScale,
             unit: 'pc'
           });
         }
       }
     });
-    
+
     return ingredients.slice(0, 20); // Increased from 12 to 20
   };
 
@@ -824,6 +828,7 @@ const App: React.FC = () => {
         return {
           ...recipe,
           servings: servings,
+          originalServings: originalServings,
           nutrition: recipe.nutrition ? {
             calories: Math.round(recipe.nutrition.calories * scale),
             protein: Math.round(recipe.nutrition.protein * scale),

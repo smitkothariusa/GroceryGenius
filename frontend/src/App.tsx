@@ -2722,10 +2722,12 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   <span style={{
                     fontFamily: "'Bricolage Grotesque', sans-serif",
                     fontWeight: 600, fontSize: '0.85rem', color: 'var(--gg-espresso)'
-                  }}>Recipe mode:</span>
+                  }}>{t('recipes.recipeMode')}</span>
                   {(['loose', 'strict'] as const).map(mode => (
                     <button
                       key={mode}
+                      type="button"
+                      aria-pressed={recipeMode === mode}
                       onClick={() => handleRecipeModeChange(mode)}
                       style={{
                         padding: '0.3rem 0.75rem',

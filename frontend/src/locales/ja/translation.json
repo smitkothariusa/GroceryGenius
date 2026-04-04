@@ -98,6 +98,7 @@
     "generateRecipes": "レシピを生成",
     "getRecipes": "レシピを取得",
     "generating": "生成中...",
+    "recipeMode": "レシピモード：",
     "addPantryItems": "パントリーから追加",
     "scanIngredients": "材料をスキャン",
     "dietary": {

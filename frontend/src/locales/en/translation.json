@@ -98,6 +98,7 @@
     "generateRecipes": "Generate Recipes",
     "getRecipes": "Get Recipes",
     "generating": "Generating...",
+    "recipeMode": "Recipe mode:",
     "addPantryItems": "Add Pantry Items",
     "scanIngredients": "Scan Ingredients",
     "dietary": {

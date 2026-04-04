@@ -98,6 +98,7 @@
     "generateRecipes": "Rezepte Generieren",
     "getRecipes": "Rezepte Erhalten",
     "generating": "Generiere...",
+    "recipeMode": "Rezeptmodus:",
     "addPantryItems": "Vorratskammer Hinzufügen",
     "scanIngredients": "Zutaten Scannen",
     "dietary": {

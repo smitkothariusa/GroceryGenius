@@ -11,6 +11,30 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Bright Kitchen Design Tokens */
+  --gg-tomato:        #e8391a;
+  --gg-tomato-hover:  #c42f14;
+  --gg-tomato-subtle: rgba(232, 57, 26, 0.08);
+  --gg-parchment:     #fdf6ec;
+  --gg-cream:         #fff8f0;
+  --gg-espresso:      #1c1208;
+  --gg-taupe:         #7a6652;
+  --gg-border:        #eddecb;
+  --gg-border-strong: #d4b896;
+  --gg-forest:        #2d6a4f;
+  --gg-forest-light:  #e8f5ee;
+  --gg-amber:         #e8962a;
+  --gg-amber-light:   #fef3dc;
+  --gg-red:           #c0392b;
+  --gg-red-light:     #fde8e6;
+  --gg-radius-sm:  6px;
+  --gg-radius-md:  10px;
+  --gg-radius-lg:  14px;
+  --gg-radius-xl:  20px;
+  --gg-shadow-sm:  0 2px 8px rgba(28, 18, 8, 0.06);
+  --gg-shadow-md:  0 4px 16px rgba(28, 18, 8, 0.10);
+  --gg-shadow-lg:  0 8px 32px rgba(28, 18, 8, 0.14);
 }
 
 a {

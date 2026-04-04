@@ -98,6 +98,7 @@
     "generateRecipes": "生成食谱",
     "getRecipes": "获取食谱",
     "generating": "生成中...",
+    "recipeMode": "食谱模式：",
     "addPantryItems": "添加储藏室物品",
     "scanIngredients": "扫描食材",
     "dietary": {

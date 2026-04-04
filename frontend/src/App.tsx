@@ -2625,7 +2625,15 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
         {currentTab === 'recipes' && (
           <>
             <div style={{ background: cardBg, padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>🥘 {t('recipes.whatIngredientsLabel')}</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+                <label style={{ fontWeight: '600' }}>🥘 {t('recipes.whatIngredientsLabel')}</label>
+                {pantry.length > 0 && (
+                  <button onClick={addPantryToIngredients} style={{
+                    padding: '0.35rem 0.75rem', background: '#8b5cf6', color: 'white',
+                    border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem'
+                  }}>📦 {t('recipes.addPantryItems')}</button>
+                )}
+              </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
                 {ingredientTags.map(tag => (
                   <span key={tag} style={{
@@ -2682,13 +2690,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     }}
                     style={{ width: '60px', padding: '0.5rem', border: '2px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', fontWeight: '600' }} />
                 </div>
-
-                {pantry.length > 0 && (
-                  <button onClick={addPantryToIngredients} style={{
-                    padding: '0.75rem 1rem', background: '#8b5cf6', color: 'white',
-                    border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
-                  }}>📦 {t('recipes.addPantryItems')}</button>
-                )}
 
                 <button onClick={() => { setRecipes([]); setIngredientTags([]); setRecipeSearchQuery(''); setErrorMsg(''); }}
                   style={{ padding: '0.75rem 1rem', background: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: '8px', cursor: 'pointer' }}>

@@ -1,13 +1,27 @@
 ---
 name: grocerygenius-ui
-description: Full UI redesign skill for GroceryGenius. Applies the Bright Kitchen design system — Bricolage Grotesque + Lato fonts, Tomato & Parchment color palette — to every component, desktop and mobile, in one structured, comprehensive pass. Use this skill whenever the user asks to redesign the app, improve the UI, fix the colors or fonts, polish the interface, apply the brand design system, or make GroceryGenius look better. Also use for any individual component update to ensure it stays on-brand. This skill must be invoked any time a UI change is requested — even for a single component — to ensure consistency with the GroceryGenius design system.
+description: DORMANT — future redesign plan for GroceryGenius using the Bright Kitchen design system. Do NOT invoke for routine UI changes. Only invoke if the user explicitly says they are ready to implement the full Bright Kitchen redesign.
 ---
 
 # GroceryGenius UI Redesign Skill
 
-You are performing a complete, top-to-bottom visual redesign of GroceryGenius. The app currently uses generic system fonts, a clichéd emerald green/orange/purple palette, and no distinct typographic identity. Your job is to replace all of this with the **Bright Kitchen** design system defined below.
+> **⚠️ DORMANT — NOT IMPLEMENTED**
+>
+> The Bright Kitchen design system described below is a **future redesign plan** that has never been applied to the live app.
+>
+> **The actual live app uses:**
+> - Background: `linear-gradient(135deg, #667eea 0%, #764ba2 100%)` (purple-blue gradient)
+> - Cards: `rgba(255, 255, 255, 0.95)` white
+> - Font: `system-ui, -apple-system, sans-serif`
+> - Accent: `#8b5cf6` (purple), `#10b981` / `#059669` (green CTA), `#ef4444` (red/error)
+>
+> **Do not apply any Bright Kitchen styles (CSS variables, Bricolage Grotesque, tomato/parchment palette) unless the user explicitly says they want the full redesign.**
+>
+> For routine UI work, match the live app's existing hex colors and `system-ui` font stack.
 
-Work through the checklist in order. For each component: implement desktop styles, then immediately handle mobile overrides — do not batch mobile work at the end.
+---
+
+When the user explicitly asks to begin the Bright Kitchen redesign, work through the checklist below in order. For each component: implement desktop styles, then immediately handle mobile overrides.
 
 ---
 

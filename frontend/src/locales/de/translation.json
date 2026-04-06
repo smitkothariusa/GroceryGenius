@@ -114,6 +114,22 @@
     "prepTime": "Vorbereitung",
     "cookTime": "Kochzeit",
     "difficulty": "Schwierigkeit",
+    "difficultyLevel": {
+      "flexible": "Flexibel",
+      "easy": "Einfach",
+      "medium": "Mittel",
+      "hard": "Schwer"
+    },
+    "difficultyLevelShort": {
+      "flexible": "Flex",
+      "easy": "Leicht",
+      "medium": "Mittel",
+      "hard": "Schwer"
+    },
+    "modeStrict": "Nur meine Zutaten",
+    "modeLoose": "Extras erlauben",
+    "modeStrictMobile": "Strikt — nur meine Zutaten",
+    "modeLooseMobile": "Locker — Extras erlaubt",
     "servings_count": "{{count}} Portionen",
     "calories": "Kalorien",
     "protein": "Eiweiß",

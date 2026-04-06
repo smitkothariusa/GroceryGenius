@@ -114,6 +114,22 @@
     "prepTime": "準備",
     "cookTime": "調理",
     "difficulty": "難易度",
+    "difficultyLevel": {
+      "flexible": "柔軟",
+      "easy": "簡単",
+      "medium": "普通",
+      "hard": "難しい"
+    },
+    "difficultyLevelShort": {
+      "flexible": "柔軟",
+      "easy": "簡単",
+      "medium": "普通",
+      "hard": "難"
+    },
+    "modeStrict": "自分の食材のみ",
+    "modeLoose": "追加食材を許可",
+    "modeStrictMobile": "厳密 — 自分の食材のみ",
+    "modeLooseMobile": "柔軟 — 追加食材あり",
     "servings_count": "{{count}}人前",
     "calories": "カロリー",
     "protein": "タンパク質",

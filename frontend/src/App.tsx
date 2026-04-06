@@ -2684,7 +2684,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
                   {/* Mode toggle — full width below input */}
                   <div style={{ display: 'flex', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '3px', marginBottom: '0.75rem' }}>
-                    {([['strict', 'Strict — only my items'], ['loose', 'Loose — allow extras']] as const).map(([mode, label]) => (
+                    {(['strict', 'loose'] as const).map((mode) => (
                       <button
                         key={mode}
                         type="button"
@@ -2700,7 +2700,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           whiteSpace: 'nowrap', textAlign: 'center' as const
                         }}
                       >
-                        {label}
+                        {mode === 'strict' ? t('recipes.modeStrictMobile') : t('recipes.modeLooseMobile')}
                       </button>
                     ))}
                   </div>
@@ -2732,9 +2732,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     <div>
                       <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' }}>{t('recipes.difficulty')}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', background: '#f3f4f6', borderRadius: '10px', padding: '0.2rem' }}>
-                        {(() => {
-                          const mobileDifficultyLabel: Record<string, string> = { flexible: 'Flex', easy: 'Easy', medium: 'Med', hard: 'Hard' };
-                          return (['flexible', 'easy', 'medium', 'hard'] as const).map((level) => {
+                        {(['flexible', 'easy', 'medium', 'hard'] as const).map((level) => {
                           const active = recipeDifficulty === level;
                           const colors: Record<string, { bg: string; text: string }> = {
                             flexible: { bg: '#6366f1', text: 'white' },
@@ -2756,11 +2754,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                                 transition: 'background 0.2s, color 0.2s',
                               }}
                             >
-                              {mobileDifficultyLabel[level]}
+                              {t(`recipes.difficultyLevelShort.${level}`)}
                             </button>
                           );
-                        });
-                        })()}
+                        })}
                       </div>
                     </div>
                     <div>
@@ -2803,7 +2800,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       }}>📦 {t('recipes.addPantryItems')}</button>
                     )}
                     <div style={{ display: 'flex', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '3px' }}>
-                      {([['strict', 'Use only my ingredients'], ['loose', 'Allow extras']] as const).map(([mode, label]) => (
+                      {(['strict', 'loose'] as const).map((mode) => (
                         <button
                           key={mode}
                           type="button"
@@ -2819,7 +2816,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                             whiteSpace: 'nowrap'
                           }}
                         >
-                          {label}
+                          {mode === 'strict' ? t('recipes.modeStrict') : t('recipes.modeLoose')}
                         </button>
                       ))}
                     </div>
@@ -2894,9 +2891,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                             fontWeight: active ? '700' : '500', fontSize: '0.8rem',
                             transition: 'background 0.2s, color 0.2s, transform 0.15s',
                             transform: active ? 'scale(1.05)' : 'scale(1)',
-                            textTransform: 'capitalize', whiteSpace: 'nowrap'
+                            whiteSpace: 'nowrap'
                           }}>
-                            {level}
+                            {t(`recipes.difficultyLevel.${level}`)}
                           </button>
                         );
                       })}

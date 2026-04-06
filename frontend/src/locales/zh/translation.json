@@ -114,6 +114,22 @@
     "prepTime": "准备",
     "cookTime": "烹饪",
     "difficulty": "难度",
+    "difficultyLevel": {
+      "flexible": "灵活",
+      "easy": "简单",
+      "medium": "中等",
+      "hard": "困难"
+    },
+    "difficultyLevelShort": {
+      "flexible": "灵活",
+      "easy": "简单",
+      "medium": "中等",
+      "hard": "难"
+    },
+    "modeStrict": "仅使用我的食材",
+    "modeLoose": "允许额外食材",
+    "modeStrictMobile": "严格 — 仅用我的食材",
+    "modeLooseMobile": "宽松 — 可加其他食材",
     "servings_count": "{{count}}份",
     "calories": "卡路里",
     "protein": "蛋白质",

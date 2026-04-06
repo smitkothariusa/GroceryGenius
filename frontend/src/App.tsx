@@ -5940,6 +5940,43 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               🎁 {t('donate.recordDonationTitle')}
             </h2>
 
+            {/* Tip: accurate measurements = precise impact */}
+            <div style={{
+              background: 'var(--gg-amber-light)',
+              border: '1.5px solid var(--gg-amber)',
+              borderRadius: 'var(--gg-radius-md)',
+              padding: '0.875rem 1rem',
+              marginBottom: '1.5rem',
+              display: 'flex',
+              gap: '0.75rem',
+              alignItems: 'flex-start',
+            }}>
+              <span style={{ fontSize: '1.1rem', lineHeight: 1, flexShrink: 0, marginTop: '2px' }}>💡</span>
+              <div>
+                <div style={{
+                  fontFamily: "'Bricolage Grotesque', sans-serif",
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  color: 'var(--gg-espresso)',
+                  marginBottom: '0.25rem',
+                  letterSpacing: '0.3px',
+                }}>
+                  Get a more accurate meal count
+                </div>
+                <div style={{
+                  fontFamily: "'Lato', sans-serif",
+                  fontSize: '0.82rem',
+                  color: 'var(--gg-taupe)',
+                  lineHeight: 1.5,
+                }}>
+                  Add items to your pantry with exact weights (lbs or oz) and precise units — like{' '}
+                  <span style={{ fontWeight: 700, color: 'var(--gg-espresso)' }}>2 lbs ground turkey</span>{' '}
+                  instead of <span style={{ fontWeight: 700, color: 'var(--gg-espresso)' }}>1 pc turkey</span>.
+                  The more specific your pantry entries, the more accurate your donation impact estimate.
+                </div>
+              </div>
+            </div>
+
             {(selectedFoodBank || selectedDropOffSite) && (
               <div style={{
                 background: '#f0f9ff',

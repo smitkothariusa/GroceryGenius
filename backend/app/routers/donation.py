@@ -1,212 +1,221 @@
 # backend/app/routers/donation.py
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from typing import List
 from pydantic import BaseModel
-import os
-from openai import OpenAI
 
 router = APIRouter()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# One "meal" = 600 calories (standard food-bank meal equivalent)
+CALORIES_PER_MEAL = 600
+
+# ---------------------------------------------------------------------------
+# Calorie lookup tables
+# All meal counts derive from: total_calories / CALORIES_PER_MEAL
+# Unknown foods fall back to _CAL_PER_LB_FALLBACK cal/lb
+# ---------------------------------------------------------------------------
+
+# unit == "pc": (keywords, cal_per_piece, lbs_per_piece)
+# Keywords are checked in order; first match wins.
+_PC_TABLE: list[tuple[list[str], float, float]] = [
+    # dairy
+    (["milk"],                            1192,  4.30),   # half-gallon carton (8 cups × 149 cal)
+    (["yogurt"],                           150,  0.375),  # 6 oz container
+    (["cheese"],                           900,  0.50),   # 8 oz block
+    # eggs
+    (["egg"],                               70,  0.125),  # 1 large egg
+    # proteins
+    (["turkey breast"],                    280,  0.50),   # raw 8 oz breast portion
+    (["turkey"],                           280,  0.50),   # default to breast-sized piece
+    (["chicken breast", "chicken"],        250,  0.50),   # raw 8 oz breast
+    (["ground beef", "ground turkey",
+      "ground pork", "ground"],            640,  0.50),   # 8 oz of ground meat
+    (["tuna", "canned tuna",
+      "canned chicken"],                   150,  0.31),   # 5 oz can
+    # produce
+    (["banana"],                           105,  0.25),   # medium banana
+    (["apple", "pear"],                     95,  0.375),  # medium fruit (~6 oz)
+    (["orange", "fruit"],                   85,  0.375),
+    (["potato", "sweet potato", "yam"],    165,  0.50),   # medium potato (~8 oz)
+    # bread / bakery
+    (["bread", "loaf"],                   1200,  1.25),   # 20 oz loaf
+    # generic can (fallback for "1 pc can")
+    (["can"],                              300,  0.94),
+    # catch-all for unknown pc items: assume ~8 oz, 400 cal/lb
+    ([],                                   200,  0.50),
+]
+
+# unit in lbs / oz / g: (keywords, cal_per_lb)
+_LB_TABLE: list[tuple[list[str], float]] = [
+    (["peanut butter", "nut butter"],     2640),
+    (["cheese"],                          1800),
+    (["cereal", "granola"],               1700),
+    (["rice", "pasta", "grain", "flour",
+      "oat", "oats", "quinoa"],           1640),
+    (["bread", "loaf"],                   1200),
+    (["ground beef", "ground turkey",
+      "ground pork", "ground"],            900),
+    (["beef", "pork", "lamb", "steak"],    900),
+    (["turkey", "chicken"],                560),
+    (["fish", "salmon", "tilapia",
+      "shrimp", "cod", "seafood"],         500),
+    (["egg"],                              560),
+    (["bean", "lentil", "legume"],        1550),  # dry; canned beans handled via 'can' unit
+    (["tofu"],                             400),
+    (["potato", "yam", "sweet potato"],    350),
+    (["banana"],                           400),
+    (["apple", "pear", "orange", "fruit"], 240),
+    (["carrot", "vegetable", "broccoli",
+      "spinach", "lettuce", "cabbage",
+      "tomato", "pepper", "zucchini"],     200),
+    (["milk"],                             280),
+    (["yogurt"],                           270),
+    (["sauce", "tomato sauce"],            400),
+    (["soup"],                             120),
+]
+_CAL_PER_LB_FALLBACK = 400   # reasonable average for an unlabeled grocery item
+
+# unit == "can": (keywords, cal_per_can)
+# A standard 15 oz can; 10 oz soup cans handled by "soup" keyword.
+_CAN_TABLE: list[tuple[list[str], float]] = [
+    (["soup"],             200),   # 10 oz soup can
+    (["tuna", "chicken"],  150),   # 5 oz protein can
+    (["bean", "lentil"],   350),   # 15 oz beans (cooked)
+    (["vegetable", "corn",
+      "pea", "green bean"],250),   # 15 oz veg
+    (["tomato", "sauce"],  150),   # 15 oz tomato/sauce
+    ([],                   300),   # generic 15 oz can
+]
+
 
 class DonationItem(BaseModel):
     name: str
     quantity: float
     unit: str
 
+
 class DonationImpactRequest(BaseModel):
     items: List[DonationItem]
+
+
+# ---------------------------------------------------------------------------
+# Internal helpers
+# ---------------------------------------------------------------------------
+
+def _match(name_lower: str, table: list) -> int:
+    """Return index of first matching rule. Catch-all row (empty keywords) always last."""
+    for i, row in enumerate(table):
+        keywords = row[0]
+        if not keywords:
+            return i
+        if any(kw in name_lower for kw in keywords):
+            return i
+    return len(table) - 1  # fallback to last row if no catch-all
+
+
+def _cal_per_lb(name_lower: str) -> float:
+    idx = _match(name_lower, _LB_TABLE)
+    # _LB_TABLE has no catch-all row, so fall back explicitly
+    if idx == len(_LB_TABLE) - 1 and not any(
+        kw in name_lower for kw in _LB_TABLE[-1][0]
+    ):
+        return _CAL_PER_LB_FALLBACK
+    return _LB_TABLE[idx][1]
+
+
+def _calculate_item(item: DonationItem) -> tuple[float, float, str]:
+    """Return (pounds, calories, description_for_reasoning)."""
+    name = item.name.lower()
+    qty = item.quantity
+    unit = item.unit.lower().strip()
+
+    if unit == "pc":
+        idx = _match(name, _PC_TABLE)
+        _, cal_per_pc, lbs_per_pc = _PC_TABLE[idx]
+        pounds = qty * lbs_per_pc
+        calories = qty * cal_per_pc
+        desc = f"{qty} piece(s) × {cal_per_pc} cal"
+
+    elif unit == "lbs":
+        pounds = qty
+        cpl = _cal_per_lb(name)
+        calories = qty * cpl
+        desc = f"{qty} lbs × {cpl} cal/lb"
+
+    elif unit == "oz":
+        pounds = qty / 16
+        cpl = _cal_per_lb(name)
+        calories = pounds * cpl
+        desc = f"{qty} oz × {cpl} cal/lb"
+
+    elif unit == "g":
+        pounds = qty / 453.592
+        cpl = _cal_per_lb(name)
+        calories = pounds * cpl
+        desc = f"{qty} g × {cpl} cal/lb"
+
+    elif unit == "can":
+        pounds = qty * 0.9375   # ~15 oz can
+        idx = _match(name, _CAN_TABLE)
+        cal_per_can = _CAN_TABLE[idx][1]
+        calories = qty * cal_per_can
+        desc = f"{qty} can(s) × {cal_per_can} cal/can"
+
+    elif unit in ("gallon", "gal"):
+        pounds = qty * 8.6
+        # 1 gallon whole milk ≈ 2400 cal; use cal/lb for other liquids
+        if "milk" in name:
+            calories = qty * 2400
+        else:
+            cpl = _cal_per_lb(name)
+            calories = pounds * cpl
+        desc = f"{qty} gal"
+
+    elif unit in ("cup", "cups"):
+        pounds = qty * 0.5
+        cpl = _cal_per_lb(name)
+        calories = pounds * cpl
+        desc = f"{qty} cup(s) × {cpl} cal/lb"
+
+    else:
+        # Unknown unit — treat as rough weight equivalent
+        pounds = qty * 0.5
+        cpl = _CAL_PER_LB_FALLBACK
+        calories = pounds * cpl
+        desc = f"{qty} {unit} (unknown unit, estimated)"
+
+    return pounds, calories, desc
+
+
+# ---------------------------------------------------------------------------
+# Endpoint
+# ---------------------------------------------------------------------------
 
 @router.post("/calculate-impact")
 async def calculate_donation_impact(payload: DonationImpactRequest):
     """
-    Calculate accurate meal estimates and environmental impact using AI
+    Calculate meal estimates using a calorie-based lookup table.
+    meals = total_calories / CALORIES_PER_MEAL (600 cal).
+    Unknown foods fall back to 400 cal/lb so all items produce a reasonable result.
     """
-    try:
-        items_text = "\n".join([
-            f"- {item.quantity} {item.unit} {item.name}" 
-            for item in payload.items
-        ])
-        
-        prompt = f"""You are a food waste and nutrition expert. Calculate the donation impact for these food items:
+    total_meals = 0.0
+    total_pounds = 0.0
+    breakdown = []
 
-{items_text}
+    for item in payload.items:
+        pounds, calories, desc = _calculate_item(item)
+        meals = calories / CALORIES_PER_MEAL
+        total_pounds += pounds
+        total_meals += meals
+        breakdown.append({
+            "name": item.name,
+            "meals": round(meals, 1),
+            "pounds": round(pounds, 2),
+            "reasoning": f"{desc} = {round(calories)} cal ÷ {CALORIES_PER_MEAL} cal/meal = {round(meals, 1)} meals",
+        })
 
-CRITICAL: You must return EXACTLY {len(payload.items)} entries in items_breakdown, one for each item listed above. Even if items are duplicates, calculate and return each one separately.
-
-CONVERSION RULES (FOLLOW EXACTLY):
-
-PROTEINS (assume typical grocery portions):
-- Chicken breast (1 pc) = 8oz = 0.5 lbs = 2 meals
-- Turkey breast (1 pc) = 8oz = 0.5 lbs = 2 meals  
-- Ground beef/turkey (1 lb) = 4 meals
-- Eggs (1 pc) = 2oz = 0.125 lbs = 0.25 meals
-- Canned tuna/chicken (1 can, 5oz) = 1.5 meals
-
-GRAINS & STARCHES:
-- Rice (1 lb dry) = 8 meals (as side dish)
-- Pasta (1 lb dry) = 8 meals (as main dish)
-- Bread (1 loaf, 20oz) = 10 meals (2 slices per meal)
-- Cereal (1 box, 18oz) = 6 meals
-
-CANNED GOODS:
-- Beans (1 can, 15oz) = 2 meals
-- Vegetables (1 can, 15oz) = 2 meals
-- Soup (1 can, 10oz) = 1 meal
-- Tomato sauce (1 can, 15oz) = 3 meals (as ingredient)
-
-FRESH PRODUCE:
-- Apple (1 pc, medium 6oz) = 0.5 meals (snack)
-- Banana (1 pc, 4oz) = 0.5 meals (snack)
-- Potato (1 pc, 8oz) = 0.5 meals (side dish)
-- Carrots (1 lb) = 4 meals (as side)
-- Lettuce (1 head, 1 lb) = 4 meals (salad)
-
-DAIRY:
-- Milk (1 gallon) = 16 meals (1 cup servings)
-- Cheese (1 lb) = 8 meals (2oz servings)
-- Yogurt (1 container, 6oz) = 1 meal
-
-WEIGHT CONVERSIONS:
-- If unit is "pc" (piece), use the specific item rules above
-- If unit is "lbs", calculate directly using meal-per-pound ratios
-- If unit is "oz", convert to pounds first (oz / 16)
-- If unit is "can", use canned goods rules above
-- If item type is unclear, estimate conservatively
-
-CALCULATION PROCESS:
-1. Identify the food item and unit
-2. Convert to pounds using rules above
-3. Calculate meals based on typical serving sizes
-4. For items not listed, use these defaults:
-   - Fruits/vegetables: 0.5 lbs = 1 meal
-   - Proteins: 0.25 lbs (4oz) = 1 meal
-   - Grains/pasta: 1 lb = 8 meals
-   - Canned goods: 1 can = 2 meals
-
-IMPORTANT: Return one breakdown entry for EACH item in the input list, even if items are identical.
-
-Return ONLY a JSON object with this exact structure:
-{{
-  "total_meals": <number>,
-  "total_pounds": <number>,
-  "co2_saved_lbs": <number>,
-  "items_breakdown": [
-    {{
-      "name": "<item name>",
-      "meals": <number>,
-      "pounds": <number>,
-      "reasoning": "<brief explanation>"
-    }}
-  ]
-}}
-
-Example for "1 pc apple":
-{{
-  "total_meals": 0.5,
-  "total_pounds": 0.375,
-  "co2_saved_lbs": 1.43,
-  "items_breakdown": [
-    {{
-      "name": "apple",
-      "meals": 0.5,
-      "pounds": 0.375,
-      "reasoning": "One medium apple (~6oz) is typically a snack portion, about half a meal equivalent"
-    }}
-  ]
-}}"""
-
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are a food waste and nutrition calculation expert. Always return valid JSON."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.0,  # Changed from 0.3 to 0.0 for consistent results
-            max_tokens=800,
-            seed=42  # Added seed for even more consistency
-        )
-        
-        content = response.choices[0].message.content.strip()
-        
-        # Parse JSON response
-        import json
-        import re
-        
-        # Extract JSON from response (in case there's extra text)
-        json_match = re.search(r'\{.*\}', content, re.DOTALL)
-        if json_match:
-            result = json.loads(json_match.group())
-        else:
-            raise ValueError("No JSON found in response")
-        
-        # Round values for cleaner display
-        result['total_meals'] = round(result['total_meals'], 1)
-        result['total_pounds'] = round(result['total_pounds'], 2)
-        result['co2_saved_lbs'] = round(result['co2_saved_lbs'], 2)
-        
-        return result
-        
-    except Exception as e:
-        print(f"Error calculating impact: {str(e)}")
-        # Fallback to simple calculation if AI fails
-        total_meals = 0
-        total_pounds = 0
-        
-        for item in payload.items:
-            # Improved fallback logic with food-specific estimates
-            item_name_lower = item.name.lower()
-            
-            # Convert to pounds
-            if item.unit == 'lbs':
-                pounds = item.quantity
-            elif item.unit == 'oz':
-                pounds = item.quantity / 16
-            elif item.unit == 'g':
-                pounds = item.quantity / 453.592
-            elif item.unit == 'can':
-                pounds = item.quantity * 0.9375  # Assume 15oz can
-            elif item.unit == 'pc':
-                # Estimate weight per piece based on item type
-                if any(word in item_name_lower for word in ['apple', 'orange', 'fruit']):
-                    pounds = item.quantity * 0.375  # 6oz fruit
-                elif any(word in item_name_lower for word in ['chicken', 'turkey', 'meat', 'breast']):
-                    pounds = item.quantity * 0.5  # 8oz protein
-                elif any(word in item_name_lower for word in ['egg']):
-                    pounds = item.quantity * 0.125  # 2oz egg
-                elif any(word in item_name_lower for word in ['potato', 'vegetable']):
-                    pounds = item.quantity * 0.5  # 8oz vegetable
-                else:
-                    pounds = item.quantity * 0.5  # Default 8oz
-            else:  # cup, etc
-                pounds = item.quantity * 0.5
-            
-            # Calculate meals based on food type
-            if any(word in item_name_lower for word in ['rice', 'pasta', 'grain']):
-                meals = pounds * 8  # 1 lb = 8 meals
-            elif any(word in item_name_lower for word in ['meat', 'chicken', 'turkey', 'beef', 'protein', 'fish']):
-                meals = pounds * 4  # 1 lb = 4 meals
-            elif any(word in item_name_lower for word in ['apple', 'banana', 'fruit', 'snack']):
-                meals = pounds * 1.33  # 6oz = 0.5 meals, so 1 lb ≈ 1.33 meals
-            elif any(word in item_name_lower for word in ['can', 'bean', 'soup']):
-                meals = pounds * 2  # 15oz can ≈ 2 meals
-            else:
-                meals = pounds * 2  # Default: 8oz = 1 meal
-            
-            total_pounds += pounds
-            total_meals += meals
-        
-        return {
-            "total_meals": round(total_meals, 1),
-            "total_pounds": round(total_pounds, 2),
-            "co2_saved_lbs": round(total_pounds * 3.8, 2),
-            "items_breakdown": [
-                {
-                    "name": item.name,
-                    "meals": round(item.quantity * 0.5, 1),
-                    "pounds": round(item.quantity * 0.5, 2),
-                    "reasoning": "Fallback calculation"
-                }
-                for item in payload.items
-            ]
-        }
+    return {
+        "total_meals": round(total_meals, 1),
+        "total_pounds": round(total_pounds, 2),
+        "co2_saved_lbs": round(total_pounds * 3.8, 2),
+        "items_breakdown": breakdown,
+    }

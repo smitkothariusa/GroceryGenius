@@ -193,6 +193,7 @@
     "avgCalDay": "Moy Cal/Jour",
     "totalProtein": "Protéines Totales",
     "generateShoppingList": "Générer la Liste de Courses pour Cette Semaine",
+    "generatingShoppingList": "Génération en cours...",
     "mobileTip": "Conseil Mobile",
     "mobileTipMessage": "Appuyez sur les créneaux vides pour ajouter des recettes, puis sélectionnez dans votre liste sauvegardée",
     "savedRecipes": "Recettes Sauvegardées",

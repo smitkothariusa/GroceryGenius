@@ -193,6 +193,7 @@
     "avgCalDay": "Prom Cal/Día",
     "totalProtein": "Proteína Total",
     "generateShoppingList": "Generar Lista de Compras para Esta Semana",
+    "generatingShoppingList": "Generando...",
     "mobileTip": "Consejo Móvil",
     "mobileTipMessage": "Toca las casillas vacías del calendario para agregar recetas, luego selecciona de tu lista de recetas guardadas",
     "savedRecipes": "Recetas Guardadas",

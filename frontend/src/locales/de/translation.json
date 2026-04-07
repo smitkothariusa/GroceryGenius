@@ -193,6 +193,7 @@
     "avgCalDay": "Ø Kal/Tag",
     "totalProtein": "Protein Gesamt",
     "generateShoppingList": "Einkaufsliste für diese Woche erstellen",
+    "generatingShoppingList": "Wird erstellt...",
     "mobileTip": "Mobile Tipp",
     "mobileTipMessage": "Tippe auf leere Kalenderfelder, um Rezepte hinzuzufügen, dann aus deiner Liste wählen",
     "savedRecipes": "Gespeicherte Rezepte",

@@ -202,3 +202,37 @@ async def translate_full_recipes(payload: TranslateFullRecipesRequest):
             print("Full recipe translation error:", e)
             translated_recipes.append(recipe)
     return translated_recipes
+
+
+class IngredientParseRequest(BaseModel):
+    lines: List[str]
+
+@router.post("/parse-ingredients")
+async def parse_ingredients(payload: IngredientParseRequest):
+    """Use AI to parse raw ingredient lines into structured name/quantity/unit objects."""
+    lines = [l.strip() for l in payload.lines if l.strip()]
+    if not lines:
+        return []
+
+    system_prompt = (
+        "You are an ingredient parser. Convert each ingredient line into structured data.\n"
+        "Rules:\n"
+        "- name: the ingredient only — no preparation notes, descriptors, or parenthetical info "
+        "(e.g. 'apples, diced' → 'apples', 'fresh garlic (optional)' → 'garlic')\n"
+        "- quantity: decimal number — convert fractions (1/4 → 0.25, 1/2 → 0.5, 1 1/2 → 1.5). "
+        "Use 1 if no quantity given.\n"
+        "- unit: measurement unit (cup, tbsp, tsp, oz, lb, g, kg, ml, clove, slice, etc.). "
+        "Use 'pc' if no unit.\n"
+        "Return ONLY a valid JSON array with no markdown: "
+        '[{"name": "...", "quantity": 0.0, "unit": "..."}]'
+    )
+    user_prompt = "\n".join(lines)
+
+    try:
+        raw = await call_chat_completion(system_prompt, user_prompt, max_tokens=2000, temperature=0.1)
+        raw = raw.replace("```json", "").replace("```", "").strip()
+        items = json.loads(raw)
+        return items
+    except Exception as e:
+        print(f"Ingredient parse error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to parse ingredients")

@@ -193,6 +193,7 @@
     "avgCalDay": "平均カロリー/日",
     "totalProtein": "総タンパク質",
     "generateShoppingList": "今週の買い物リストを生成",
+    "generatingShoppingList": "生成中...",
     "mobileTip": "モバイルのヒント",
     "mobileTipMessage": "カレンダーの空きスロットをタップしてレシピを追加し、保存済みレシピリストから選択してください",
     "savedRecipes": "保存済みレシピ",

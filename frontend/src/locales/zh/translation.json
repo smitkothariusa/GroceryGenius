@@ -193,6 +193,7 @@
     "avgCalDay": "平均卡/天",
     "totalProtein": "总蛋白质",
     "generateShoppingList": "生成本周购物清单",
+    "generatingShoppingList": "生成中...",
     "mobileTip": "移动端提示",
     "mobileTipMessage": "点击日历空白格添加食谱，然后从已保存的食谱列表中选择",
     "savedRecipes": "已保存食谱",

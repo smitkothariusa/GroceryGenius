@@ -372,104 +372,73 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
 
   const stats = calculateWeekStats();
 
-  const DESCRIPTORS = new Set([
-    'diced', 'chopped', 'minced', 'sliced', 'grated', 'shredded', 'crushed',
-    'peeled', 'pitted', 'halved', 'quartered', 'roughly', 'finely', 'thinly',
-    'freshly', 'ground', 'whole', 'large', 'small', 'medium', 'fresh', 'dried',
-    'frozen', 'canned', 'cooked', 'raw', 'ripe', 'optional', 'packed', 'heaping',
-    'sifted', 'melted', 'softened', 'divided', 'trimmed', 'rinsed', 'drained',
-    'toasted', 'roasted', 'boiled', 'steamed', 'cubed', 'torn', 'beaten',
-  ]);
+  const [generatingList, setGeneratingList] = useState(false);
 
-  const stripDescriptors = (name: string): string => {
-    // Remove parenthetical notes: "(optional)", "(to taste)", etc.
-    const noParens = name.replace(/\(.*?\)/g, '').trim();
-    // Take only the part before the first comma
-    const beforeComma = noParens.split(',')[0].trim();
-    // Remove known descriptor words
-    const words = beforeComma.split(/\s+/);
-    const filtered = words.filter(w => !DESCRIPTORS.has(w.toLowerCase()));
-    return (filtered.join(' ').trim() || beforeComma).toLowerCase();
-  };
+  const generateWeekShoppingList = async () => {
+    const weekDateStrings = weekDates.map(formatDate);
+    const thisWeekMealPlans = mealPlans.filter(meal => weekDateStrings.includes(meal.date));
 
-    const generateWeekShoppingList = () => {
-        console.log('🔍 Generate shopping list clicked');
-        console.log('📋 Meal plans:', mealPlans);
+    if (thisWeekMealPlans.length === 0) {
+      alert('📅 No meals planned this week! Add some recipes to your meal plan first.');
+      return;
+    }
 
-        const weekDateStrings = weekDates.map(formatDate);
-        const thisWeekMealPlans = mealPlans.filter(meal => weekDateStrings.includes(meal.date));
-
-        if (thisWeekMealPlans.length === 0) {
-            alert('📅 No meals planned this week! Add some recipes to your meal plan first.');
-            return;
-        }
-
-        const ingredientMap = new Map<string, ParsedIngredient>();
-
-        thisWeekMealPlans.forEach(meal => {
-            console.log('🍽️ Processing meal:', meal);
-            if (meal.recipe) {
-            const lines = meal.recipe.ingredients.split('\n');
-            console.log('📝 Ingredient lines:', lines);
-            
-            lines.forEach(line => {
-                const match = line.match(/^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)\s+(.+)$/);
-                
-                if (match) {
-                const [, quantityStr, unit, name] = match;
-                const quantity = parseFloat(quantityStr);
-                const cleanName = stripDescriptors(name);
-                
-                if (ingredientMap.has(cleanName)) {
-                    const existing = ingredientMap.get(cleanName)!;
-                    if (existing.unit === unit.toLowerCase()) {
-                    existing.quantity += quantity;
-                    } else {
-                    ingredientMap.set(`${cleanName} (${unit})`, {
-                        name: cleanName,
-                        quantity,
-                        unit: unit.toLowerCase()
-                    });
-                    }
-                } else {
-                    ingredientMap.set(cleanName, {
-                    name: cleanName,
-                    quantity,
-                    unit: unit.toLowerCase()
-                    });
-                }
-                } else {
-                const cleanLine = stripDescriptors(line.trim());
-                if (cleanLine && cleanLine.length > 2) {
-                    ingredientMap.set(cleanLine, {
-                    name: cleanLine,
-                    quantity: 1,
-                    unit: 'pc'
-                    });
-                }
-                }
-            });
-        }
+    const allLines: string[] = [];
+    thisWeekMealPlans.forEach(meal => {
+      if (meal.recipe?.ingredients) {
+        meal.recipe.ingredients.split('\n').forEach(line => {
+          const trimmed = line.trim();
+          if (trimmed) allLines.push(trimmed);
+        });
+      }
     });
 
-  const items = Array.from(ingredientMap.values());
-  console.log('🛒 Parsed items:', items);
-  console.log('✅ Has callback?', !!onAddToShoppingList);
+    if (allLines.length === 0) {
+      alert('📋 No ingredients found in your meal plans!');
+      return;
+    }
 
-  if (ingredientMap.size === 0) {
-    alert('📋 No ingredients found in your meal plans!');
-    return;
-  }
-  
-  if (onAddToShoppingList) {
-    console.log('🚀 Calling callback with items:', items);
-    onAddToShoppingList(items);
-  } else {
-    console.log('❌ No callback provided!');
-    const summary = items.map(ing => `• ${ing.quantity} ${ing.unit} ${ing.name}`).join('\n');
-    alert(`📋 Shopping List (${items.length} items):\n\n${summary}`);
-  }
-    };
+    setGeneratingList(true);
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_BASE}/recipes/parse-ingredients`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lines: allLines }),
+      });
+
+      if (!response.ok) throw new Error('Parse failed');
+      const parsed: { name: string; quantity: number; unit: string }[] = await response.json();
+
+      // Deduplicate by name+unit, summing quantities
+      const ingredientMap = new Map<string, ParsedIngredient>();
+      parsed.forEach(item => {
+        const key = `${item.name.toLowerCase()}|${item.unit.toLowerCase()}`;
+        if (ingredientMap.has(key)) {
+          ingredientMap.get(key)!.quantity += item.quantity;
+        } else {
+          ingredientMap.set(key, {
+            name: item.name.toLowerCase(),
+            quantity: item.quantity,
+            unit: item.unit.toLowerCase(),
+          });
+        }
+      });
+
+      const items = Array.from(ingredientMap.values());
+      if (onAddToShoppingList) {
+        onAddToShoppingList(items);
+      } else {
+        const summary = items.map(i => `• ${i.quantity} ${i.unit} ${i.name}`).join('\n');
+        alert(`📋 Shopping List (${items.length} items):\n\n${summary}`);
+      }
+    } catch (err) {
+      console.error('Failed to parse ingredients:', err);
+      alert('❌ Failed to generate shopping list. Please check that the backend is running.');
+    } finally {
+      setGeneratingList(false);
+    }
+  };
 
   return (
     <div style={{ padding: isMobile ? '1rem' : '2rem', maxWidth: '1400px', margin: '0 auto' }}>
@@ -547,12 +516,12 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
           </div>
         </div>
 
-        <button onClick={generateWeekShoppingList} style={{
-          padding: '0.75rem 1.5rem', background: 'linear-gradient(45deg, #10b981, #059669)',
-          color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer',
+        <button onClick={generateWeekShoppingList} disabled={generatingList} style={{
+          padding: '0.75rem 1.5rem', background: generatingList ? '#6b7280' : 'linear-gradient(45deg, #10b981, #059669)',
+          color: 'white', border: 'none', borderRadius: '12px', cursor: generatingList ? 'not-allowed' : 'pointer',
           fontWeight: '600', fontSize: '1rem', width: '100%'
         }}>
-          🛒 {t('mealPlan.generateShoppingList')}
+          {generatingList ? `⏳ ${t('mealPlan.generatingShoppingList')}` : `🛒 ${t('mealPlan.generateShoppingList')}`}
         </button>
       </div>
 

@@ -193,6 +193,7 @@
     "avgCalDay": "Avg Cal/Day",
     "totalProtein": "Total Protein",
     "generateShoppingList": "Generate Shopping List for This Week",
+    "generatingShoppingList": "Generating...",
     "mobileTip": "Mobile Tip",
     "mobileTipMessage": "Tap empty calendar slots to add recipes, then select from your saved recipes list",
     "savedRecipes": "Saved Recipes",

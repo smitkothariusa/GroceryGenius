@@ -3187,6 +3187,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
         <MealPlanCalendar
           savedRecipes={favorites}
           translatedNames={translatedFavoriteNames}
+          pantry={pantry}
+          onPantryUpdate={(updatedPantry) => setPantry(updatedPantry)}
           onAddToShoppingList={async (items) => {
             try {
               // Save to Supabase

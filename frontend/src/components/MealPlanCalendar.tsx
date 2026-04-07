@@ -372,6 +372,22 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
 
   const stats = calculateWeekStats();
 
+  const DESCRIPTORS = new Set([
+    'diced', 'chopped', 'minced', 'sliced', 'grated', 'shredded', 'crushed',
+    'peeled', 'pitted', 'halved', 'quartered', 'roughly', 'finely', 'thinly',
+    'freshly', 'ground', 'whole', 'large', 'small', 'medium', 'fresh', 'dried',
+    'frozen', 'canned', 'cooked', 'raw', 'ripe', 'optional', 'packed', 'heaping',
+    'sifted', 'melted', 'softened', 'divided', 'trimmed', 'rinsed', 'drained',
+    'toasted', 'roasted', 'boiled', 'steamed', 'cubed', 'torn', 'beaten',
+  ]);
+
+  const stripDescriptors = (name: string): string => {
+    const beforeComma = name.split(',')[0].trim();
+    const words = beforeComma.split(/\s+/);
+    const filtered = words.filter(w => !DESCRIPTORS.has(w.toLowerCase()));
+    return (filtered.join(' ').trim() || beforeComma).toLowerCase();
+  };
+
     const generateWeekShoppingList = () => {
         console.log('🔍 Generate shopping list clicked');
         console.log('📋 Meal plans:', mealPlans);
@@ -398,7 +414,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
                 if (match) {
                 const [, quantityStr, unit, name] = match;
                 const quantity = parseFloat(quantityStr);
-                const cleanName = name.trim().toLowerCase();
+                const cleanName = stripDescriptors(name);
                 
                 if (ingredientMap.has(cleanName)) {
                     const existing = ingredientMap.get(cleanName)!;
@@ -419,7 +435,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
                     });
                 }
                 } else {
-                const cleanLine = line.trim().toLowerCase();
+                const cleanLine = stripDescriptors(line.trim());
                 if (cleanLine && cleanLine.length > 2) {
                     ingredientMap.set(cleanLine, {
                     name: cleanLine,

@@ -382,7 +382,11 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
   ]);
 
   const stripDescriptors = (name: string): string => {
-    const beforeComma = name.split(',')[0].trim();
+    // Remove parenthetical notes: "(optional)", "(to taste)", etc.
+    const noParens = name.replace(/\(.*?\)/g, '').trim();
+    // Take only the part before the first comma
+    const beforeComma = noParens.split(',')[0].trim();
+    // Remove known descriptor words
     const words = beforeComma.split(/\s+/);
     const filtered = words.filter(w => !DESCRIPTORS.has(w.toLowerCase()));
     return (filtered.join(' ').trim() || beforeComma).toLowerCase();

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { mealPlansService } from '../lib/database';
+import { pantryService } from '../lib/database';
+import DeductIngredientsModal, { MatchResult } from './DeductIngredientsModal';
 interface Recipe {
   id: string;
   name: string;
@@ -32,13 +34,24 @@ interface ParsedIngredient {
   unit: string;
 }
 
+interface PantryItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  category: string;
+  expiryDate?: string;
+}
+
 interface MealPlanCalendarProps {
   savedRecipes: Recipe[];
   translatedNames?: Record<string, string>;
   onAddToShoppingList?: (items: ParsedIngredient[]) => void;
+  pantry?: PantryItem[];
+  onPantryUpdate?: (updatedPantry: PantryItem[]) => void;
 }
 
-const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, translatedNames = {}, onAddToShoppingList }) => {
+const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, translatedNames = {}, onAddToShoppingList, pantry = [], onPantryUpdate }) => {
   const { t, i18n } = useTranslation();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(getWeekStart(new Date()));
@@ -337,17 +350,79 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
 
   const handleToggleComplete = async (mealId: string) => {
     const meal = mealPlans.find(m => m.id === mealId);
-    if (meal) {
-      try {
-        await mealPlansService.update(mealId, { completed: !meal.completed });
-        setMealPlans(mealPlans.map(m => 
-          m.id === mealId ? { ...m, completed: !m.completed } : m
-        ));
-      } catch (error) {
-        console.error('Error updating meal:', error);
+    if (!meal) return;
+    try {
+      const nowComplete = !meal.completed;
+      await mealPlansService.update(mealId, { completed: nowComplete });
+      setMealPlans(mealPlans.map(m =>
+        m.id === mealId ? { ...m, completed: nowComplete } : m
+      ));
+
+      // Only trigger deduction flow when marking complete (not uncomplete) and recipe exists
+      if (nowComplete && meal.recipe?.ingredients) {
+        const ingredientLines = meal.recipe.ingredients
+          .split('\n')
+          .map(l => l.trim())
+          .filter(Boolean);
+
+        setDeductModal({ mealId, recipeName: meal.recipe.name, matches: [] });
+        setDeductLoading(true);
+
+        try {
+          const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+          const response = await fetch(`${API_BASE}/pantry/match-ingredients`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ingredient_lines: ingredientLines,
+              pantry_items: pantry.map(p => ({
+                id: p.id,
+                name: p.name,
+                quantity: p.quantity,
+                unit: p.unit,
+              })),
+            }),
+          });
+          if (!response.ok) throw new Error('Match failed');
+          const matches: MatchResult[] = await response.json();
+          setDeductModal({ mealId, recipeName: meal.recipe.name, matches });
+        } catch (err) {
+          console.error('Failed to match ingredients:', err);
+          setDeductModal(null);
+        } finally {
+          setDeductLoading(false);
+        }
       }
+    } catch (error) {
+      console.error('Error updating meal:', error);
     }
   };
+
+  const handleDeductConfirm = async (checkedPantryIds: string[]) => {
+    const updatedPantry = [...pantry];
+
+    await Promise.all(
+      checkedPantryIds.map(async pantryId => {
+        const match = deductModal!.matches.find(m => m.pantry_id === pantryId);
+        if (!match || match.remainder === null) return;
+
+        if (match.remainder <= 0) {
+          await pantryService.delete(pantryId);
+          const idx = updatedPantry.findIndex(p => p.id === pantryId);
+          if (idx !== -1) updatedPantry.splice(idx, 1);
+        } else {
+          await pantryService.update(pantryId, { quantity: match.remainder });
+          const idx = updatedPantry.findIndex(p => p.id === pantryId);
+          if (idx !== -1) updatedPantry[idx] = { ...updatedPantry[idx], quantity: match.remainder };
+        }
+      })
+    );
+
+    onPantryUpdate?.(updatedPantry);
+    setDeductModal(null);
+  };
+
+  const handleDeductSkip = () => setDeductModal(null);
 
   const calculateWeekStats = () => {
     let totalCalories = 0;
@@ -373,6 +448,12 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
   const stats = calculateWeekStats();
 
   const [generatingList, setGeneratingList] = useState(false);
+  const [deductModal, setDeductModal] = useState<{
+    mealId: string;
+    recipeName: string;
+    matches: MatchResult[];
+  } | null>(null);
+  const [deductLoading, setDeductLoading] = useState(false);
 
   const generateWeekShoppingList = async () => {
     const weekDateStrings = weekDates.map(formatDate);
@@ -780,6 +861,17 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
             </div>
           </div>
         </div>
+      )}
+
+      {deductModal && (
+        <DeductIngredientsModal
+          recipeName={deductModal.recipeName}
+          matches={deductModal.matches}
+          loading={deductLoading}
+          isMobile={isMobile}
+          onConfirm={handleDeductConfirm}
+          onSkip={handleDeductSkip}
+        />
       )}
     </div>
   );

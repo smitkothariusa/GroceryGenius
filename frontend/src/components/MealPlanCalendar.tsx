@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { mealPlansService } from '../lib/database';
-import { pantryService } from '../lib/database';
+import { mealPlansService, pantryService } from '../lib/database';
 import DeductIngredientsModal, { MatchResult } from './DeductIngredientsModal';
 interface Recipe {
   id: string;
@@ -59,6 +58,13 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
   const [selectedSlot, setSelectedSlot] = useState<{ date: string; mealType: string } | null>(null);
   const [showRecipePicker, setShowRecipePicker] = useState(false);
   const [draggedRecipe, setDraggedRecipe] = useState<Recipe | null>(null);
+  const [generatingList, setGeneratingList] = useState(false);
+  const [deductModal, setDeductModal] = useState<{
+    mealId: string;
+    recipeName: string;
+    matches: MatchResult[];
+  } | null>(null);
+  const [deductLoading, setDeductLoading] = useState(false);
   const dragGhostRef = useRef<HTMLDivElement | null>(null);
 
   const daysOfWeek = [
@@ -388,7 +394,8 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
           setDeductModal({ mealId, recipeName: meal.recipe.name, matches });
         } catch (err) {
           console.error('Failed to match ingredients:', err);
-          setDeductModal(null);
+          // Keep modal open with empty matches so user can skip manually
+          setDeductModal(prev => prev ? { ...prev, matches: [] } : null);
         } finally {
           setDeductLoading(false);
         }
@@ -399,27 +406,40 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
   };
 
   const handleDeductConfirm = async (checkedPantryIds: string[]) => {
-    const updatedPantry = [...pantry];
+    // Collect intended mutations before any async work
+    const toDelete: string[] = [];
+    const toUpdate: { id: string; quantity: number }[] = [];
 
-    await Promise.all(
-      checkedPantryIds.map(async pantryId => {
-        const match = deductModal!.matches.find(m => m.pantry_id === pantryId);
-        if (!match || match.remainder === null) return;
+    checkedPantryIds.forEach(pantryId => {
+      const match = deductModal?.matches.find(m => m.pantry_id === pantryId);
+      if (!match || match.remainder === null) return;
+      if (match.remainder <= 0) {
+        toDelete.push(pantryId);
+      } else {
+        toUpdate.push({ id: pantryId, quantity: match.remainder });
+      }
+    });
 
-        if (match.remainder <= 0) {
-          await pantryService.delete(pantryId);
-          const idx = updatedPantry.findIndex(p => p.id === pantryId);
-          if (idx !== -1) updatedPantry.splice(idx, 1);
-        } else {
-          await pantryService.update(pantryId, { quantity: match.remainder });
-          const idx = updatedPantry.findIndex(p => p.id === pantryId);
-          if (idx !== -1) updatedPantry[idx] = { ...updatedPantry[idx], quantity: match.remainder };
-        }
-      })
-    );
+    try {
+      await Promise.all([
+        ...toDelete.map(id => pantryService.delete(id)),
+        ...toUpdate.map(({ id, quantity }) => pantryService.update(id, { quantity })),
+      ]);
 
-    onPantryUpdate?.(updatedPantry);
-    setDeductModal(null);
+      // Apply mutations to local state after all DB calls succeed
+      const updatedPantry = pantry
+        .filter(p => !toDelete.includes(p.id))
+        .map(p => {
+          const upd = toUpdate.find(u => u.id === p.id);
+          return upd ? { ...p, quantity: upd.quantity } : p;
+        });
+
+      onPantryUpdate?.(updatedPantry);
+      setDeductModal(null);
+    } catch (err) {
+      console.error('Failed to deduct pantry items:', err);
+      // Modal stays open — DeductIngredientsModal's confirming state resets via finally
+    }
   };
 
   const handleDeductSkip = () => setDeductModal(null);
@@ -446,14 +466,6 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
   };
 
   const stats = calculateWeekStats();
-
-  const [generatingList, setGeneratingList] = useState(false);
-  const [deductModal, setDeductModal] = useState<{
-    mealId: string;
-    recipeName: string;
-    matches: MatchResult[];
-  } | null>(null);
-  const [deductLoading, setDeductLoading] = useState(false);
 
   const generateWeekShoppingList = async () => {
     const weekDateStrings = weekDates.map(formatDate);

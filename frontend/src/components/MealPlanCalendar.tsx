@@ -375,15 +375,18 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
     const generateWeekShoppingList = () => {
         console.log('🔍 Generate shopping list clicked');
         console.log('📋 Meal plans:', mealPlans);
-        
-        if (mealPlans.length === 0) {
+
+        const weekDateStrings = weekDates.map(formatDate);
+        const thisWeekMealPlans = mealPlans.filter(meal => weekDateStrings.includes(meal.date));
+
+        if (thisWeekMealPlans.length === 0) {
             alert('📅 No meals planned this week! Add some recipes to your meal plan first.');
             return;
         }
 
         const ingredientMap = new Map<string, ParsedIngredient>();
-        
-        mealPlans.forEach(meal => {
+
+        thisWeekMealPlans.forEach(meal => {
             console.log('🍽️ Processing meal:', meal);
             if (meal.recipe) {
             const lines = meal.recipe.ingredients.split('\n');

@@ -63,9 +63,17 @@ def delete_pantry_item(item_id: str):
     pantry_storage = [item for item in pantry_storage if item["id"] != item_id]
     return {"message": "Item deleted successfully"}
 
+
+class PantryItemInput(BaseModel):
+    id: str
+    name: str
+    quantity: float
+    unit: str
+
+
 class MatchIngredientsRequest(BaseModel):
     ingredient_lines: List[str]
-    pantry_items: List[dict]  # [{id, name, quantity, unit}]
+    pantry_items: List[PantryItemInput]
 
 @router.post("/match-ingredients")
 async def match_ingredients(payload: MatchIngredientsRequest):
@@ -73,14 +81,13 @@ async def match_ingredients(payload: MatchIngredientsRequest):
     lines = [l.strip() for l in payload.ingredient_lines if l.strip()]
     if not lines or not payload.pantry_items:
         # Still parse ingredients even with no pantry
-        parsed = [{"ingredient_name": l, "quantity": 1, "unit": "pc",
-                   "pantry_id": None, "pantry_name": None,
-                   "pantry_quantity": None, "pantry_unit": None, "remainder": None}
-                  for l in lines]
-        return parsed
+        return [{"ingredient_name": l, "quantity": None, "unit": None,
+                 "pantry_id": None, "pantry_name": None,
+                 "pantry_quantity": None, "pantry_unit": None, "remainder": None}
+                for l in lines]
 
     pantry_text = "\n".join(
-        f"- id:{item['id']} name:\"{item['name']}\" qty:{item['quantity']} unit:{item['unit']}"
+        f"- id:{item.id} name:\"{item.name}\" qty:{item.quantity} unit:{item.unit}"
         for item in payload.pantry_items
     )
     ingredients_text = "\n".join(f"- {l}" for l in lines)

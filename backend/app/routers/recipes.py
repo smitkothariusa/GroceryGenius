@@ -223,6 +223,8 @@ async def parse_ingredients(payload: IngredientParseRequest):
         "Use 1 if no quantity given.\n"
         "- unit: measurement unit (cup, tbsp, tsp, oz, lb, g, kg, ml, clove, slice, etc.). "
         "Use 'pc' if no unit.\n"
+        "- SKIP items that are not bought at a grocery store: water, ice, boiling water, tap water, "
+        "hot water, cold water, ice cubes, ice water. These should be omitted entirely.\n"
         "Return ONLY a valid JSON array with no markdown: "
         '[{"name": "...", "quantity": 0.0, "unit": "..."}]'
     )

@@ -194,6 +194,16 @@
     "totalProtein": "総タンパク質",
     "generateShoppingList": "今週の買い物リストを生成",
     "generatingShoppingList": "生成中...",
+    "deductModal": {
+      "title": "パントリーから食材を差し引く",
+      "loading": "食材をパントリーと照合中...",
+      "matchFound": "{{quantity}} {{unit}} 使用 · 在庫 {{pantryQuantity}} {{pantryUnit}} → 残り {{remainder}}",
+      "notInPantry": "パントリーにありません",
+      "depleted": "{{quantity}} {{unit}} 使用 · 在庫 {{pantryQuantity}} {{pantryUnit}} → 削除されます",
+      "deductButton": "パントリーから差し引く",
+      "skipButton": "スキップ",
+      "successToast": "{{count}} 個の食材をパントリーから差し引きました"
+    },
     "mobileTip": "モバイルのヒント",
     "mobileTipMessage": "カレンダーの空きスロットをタップしてレシピを追加し、保存済みレシピリストから選択してください",
     "savedRecipes": "保存済みレシピ",

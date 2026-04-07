@@ -194,6 +194,16 @@
     "totalProtein": "Total Protein",
     "generateShoppingList": "Generate Shopping List for This Week",
     "generatingShoppingList": "Generating...",
+    "deductModal": {
+      "title": "Deduct Ingredients from Pantry",
+      "loading": "Matching ingredients to your pantry...",
+      "matchFound": "uses {{quantity}} {{unit}} · you have {{pantryQuantity}} {{pantryUnit}} → {{remainder}} remaining",
+      "notInPantry": "Not in pantry",
+      "depleted": "uses {{quantity}} {{unit}} · you have {{pantryQuantity}} {{pantryUnit}} → will be removed",
+      "deductButton": "Deduct from Pantry",
+      "skipButton": "Skip",
+      "successToast": "Deducted {{count}} ingredient(s) from your pantry"
+    },
     "mobileTip": "Mobile Tip",
     "mobileTipMessage": "Tap empty calendar slots to add recipes, then select from your saved recipes list",
     "savedRecipes": "Saved Recipes",

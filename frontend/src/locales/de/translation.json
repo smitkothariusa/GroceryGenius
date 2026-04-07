@@ -194,6 +194,16 @@
     "totalProtein": "Protein Gesamt",
     "generateShoppingList": "Einkaufsliste für diese Woche erstellen",
     "generatingShoppingList": "Wird erstellt...",
+    "deductModal": {
+      "title": "Zutaten aus der Speisekammer abziehen",
+      "loading": "Zutaten werden mit der Speisekammer abgeglichen...",
+      "matchFound": "benötigt {{quantity}} {{unit}} · vorhanden {{pantryQuantity}} {{pantryUnit}} → {{remainder}} verbleiben",
+      "notInPantry": "Nicht in der Speisekammer",
+      "depleted": "benötigt {{quantity}} {{unit}} · vorhanden {{pantryQuantity}} {{pantryUnit}} → wird entfernt",
+      "deductButton": "Aus Speisekammer abziehen",
+      "skipButton": "Überspringen",
+      "successToast": "{{count}} Zutat(en) aus der Speisekammer abgezogen"
+    },
     "mobileTip": "Mobile Tipp",
     "mobileTipMessage": "Tippe auf leere Kalenderfelder, um Rezepte hinzuzufügen, dann aus deiner Liste wählen",
     "savedRecipes": "Gespeicherte Rezepte",

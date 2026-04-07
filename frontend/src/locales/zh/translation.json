@@ -194,6 +194,16 @@
     "totalProtein": "总蛋白质",
     "generateShoppingList": "生成本周购物清单",
     "generatingShoppingList": "生成中...",
+    "deductModal": {
+      "title": "从储藏室扣除食材",
+      "loading": "正在将食材与储藏室匹配...",
+      "matchFound": "使用 {{quantity}} {{unit}} · 库存 {{pantryQuantity}} {{pantryUnit}} → 剩余 {{remainder}}",
+      "notInPantry": "储藏室中没有",
+      "depleted": "使用 {{quantity}} {{unit}} · 库存 {{pantryQuantity}} {{pantryUnit}} → 将被移除",
+      "deductButton": "从储藏室扣除",
+      "skipButton": "跳过",
+      "successToast": "已从储藏室扣除 {{count}} 种食材"
+    },
     "mobileTip": "移动端提示",
     "mobileTipMessage": "点击日历空白格添加食谱，然后从已保存的食谱列表中选择",
     "savedRecipes": "已保存食谱",

@@ -194,6 +194,16 @@
     "totalProtein": "Protéines Totales",
     "generateShoppingList": "Générer la Liste de Courses pour Cette Semaine",
     "generatingShoppingList": "Génération en cours...",
+    "deductModal": {
+      "title": "Déduire les Ingrédients du Garde-manger",
+      "loading": "Correspondance des ingrédients avec votre garde-manger...",
+      "matchFound": "utilise {{quantity}} {{unit}} · vous avez {{pantryQuantity}} {{pantryUnit}} → il reste {{remainder}}",
+      "notInPantry": "Pas dans le garde-manger",
+      "depleted": "utilise {{quantity}} {{unit}} · vous avez {{pantryQuantity}} {{pantryUnit}} → sera supprimé",
+      "deductButton": "Déduire du Garde-manger",
+      "skipButton": "Passer",
+      "successToast": "{{count}} ingrédient(s) déduit(s) de votre garde-manger"
+    },
     "mobileTip": "Conseil Mobile",
     "mobileTipMessage": "Appuyez sur les créneaux vides pour ajouter des recettes, puis sélectionnez dans votre liste sauvegardée",
     "savedRecipes": "Recettes Sauvegardées",

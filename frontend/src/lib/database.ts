@@ -162,7 +162,20 @@ export const shoppingService = {
       .from('shopping_items')
       .delete()
       .eq('checked', true);
-    
+
+    if (error) throw error;
+  },
+
+  // Check or uncheck all items
+  async updateAll(checked: boolean) {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error('Not authenticated');
+
+    const { error } = await supabase
+      .from('shopping_items')
+      .update({ checked })
+      .eq('user_id', userData.user.id);
+
     if (error) throw error;
   },
 };

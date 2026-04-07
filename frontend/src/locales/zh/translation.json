@@ -228,6 +228,8 @@
     "share": "分享",
     "print": "打印",
     "clearChecked": "清除已勾选",
+    "selectAll": "全选",
+    "deselectAll": "取消全选",
     "sortBy": "排序方式",
     "sortCategory": "类别",
     "sortAlphabetical": "字母顺序",

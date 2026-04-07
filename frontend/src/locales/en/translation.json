@@ -228,6 +228,8 @@
     "share": "Share",
     "print": "Print",
     "clearChecked": "Clear Checked Items",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
     "sortBy": "Sort by",
     "sortCategory": "Category",
     "sortAlphabetical": "Alphabetical",

@@ -228,6 +228,8 @@
     "share": "Partager",
     "print": "Imprimer",
     "clearChecked": "Effacer Cochés",
+    "selectAll": "Tout Sélectionner",
+    "deselectAll": "Tout Désélectionner",
     "sortBy": "Trier par",
     "sortCategory": "Catégorie",
     "sortAlphabetical": "Alphabétique",

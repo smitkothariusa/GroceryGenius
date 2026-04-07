@@ -228,6 +228,8 @@
     "share": "共有",
     "print": "印刷",
     "clearChecked": "チェック済みを削除",
+    "selectAll": "すべて選択",
+    "deselectAll": "選択を解除",
     "sortBy": "並び替え",
     "sortCategory": "カテゴリ",
     "sortAlphabetical": "アルファベット順",

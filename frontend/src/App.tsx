@@ -4146,13 +4146,25 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       {t('shopping.itemsRemaining', { count: shoppingList.filter(i => !i.checked).length })}
                     </div>
                   </div>
-                  <button onClick={async () => {
-                    await shoppingService.deleteChecked();
-                    setShoppingList(prev => prev.filter(i => !i.checked));
-                  }} style={{
-                    padding: '0.75rem 1.5rem', background: '#ef4444', color: 'white',
-                    border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
-                  }}>🗑️ {t('shopping.clearChecked')}</button>
+                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                    <button onClick={async () => {
+                      const allChecked = shoppingList.every(i => i.checked);
+                      await shoppingService.updateAll(!allChecked);
+                      setShoppingList(prev => prev.map(i => ({ ...i, checked: !allChecked })));
+                    }} style={{
+                      padding: '0.75rem 1.5rem', background: '#6366f1', color: 'white',
+                      border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
+                    }}>
+                      {shoppingList.every(i => i.checked) ? `☑️ ${t('shopping.deselectAll')}` : `☐ ${t('shopping.selectAll')}`}
+                    </button>
+                    <button onClick={async () => {
+                      await shoppingService.deleteChecked();
+                      setShoppingList(prev => prev.filter(i => !i.checked));
+                    }} style={{
+                      padding: '0.75rem 1.5rem', background: '#ef4444', color: 'white',
+                      border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
+                    }}>🗑️ {t('shopping.clearChecked')}</button>
+                  </div>
                 </div>
               </div>
             )}

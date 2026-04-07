@@ -791,7 +791,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
                             fontSize: isMobile ? '0.7rem' : '0.875rem',
                             lineHeight: '1.2'
                           }}>
-                            {meal.recipe?.name}
+                            {(meal.recipe && translatedNames[meal.recipe.id]) || meal.recipe?.name}
                           </div>
                           <div style={{ 
                             fontSize: isMobile ? '0.65rem' : '0.75rem', 

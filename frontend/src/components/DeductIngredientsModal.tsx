@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export interface MatchResult {
@@ -31,11 +31,13 @@ const DeductIngredientsModal: React.FC<DeductIngredientsModalProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const matchedItems = matches.filter(m => m.pantry_id !== null);
-  const [checked, setChecked] = useState<Set<string>>(
-    () => new Set(matchedItems.map(m => m.pantry_id!))
-  );
+  const [checked, setChecked] = useState<Set<string>>(new Set());
   const [confirming, setConfirming] = useState(false);
+
+  useEffect(() => {
+    const matched = matches.filter(m => m.pantry_id !== null);
+    setChecked(new Set(matched.map(m => m.pantry_id!)));
+  }, [matches]);
 
   const toggle = (id: string) => {
     setChecked(prev => {
@@ -47,8 +49,11 @@ const DeductIngredientsModal: React.FC<DeductIngredientsModalProps> = ({
 
   const handleConfirm = async () => {
     setConfirming(true);
-    await onConfirm(Array.from(checked));
-    setConfirming(false);
+    try {
+      await onConfirm(Array.from(checked));
+    } finally {
+      setConfirming(false);
+    }
   };
 
   const overlayStyle: React.CSSProperties = {
@@ -122,6 +127,11 @@ const DeductIngredientsModal: React.FC<DeductIngredientsModalProps> = ({
                   </label>
                 );
               })}
+              {matches.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '1rem', color: '#6b7280', fontSize: '0.9rem' }}>
+                  {t('mealPlan.deductModal.notInPantry')}
+                </div>
+              )}
             </div>
 
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>

@@ -4146,7 +4146,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       {t('shopping.itemsRemaining', { count: shoppingList.filter(i => !i.checked).length })}
                     </div>
                   </div>
-                  <button onClick={() => setShoppingList(prev => prev.filter(i => !i.checked))} style={{
+                  <button onClick={async () => {
+                    await shoppingService.deleteChecked();
+                    setShoppingList(prev => prev.filter(i => !i.checked));
+                  }} style={{
                     padding: '0.75rem 1.5rem', background: '#ef4444', color: 'white',
                     border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
                   }}>🗑️ {t('shopping.clearChecked')}</button>

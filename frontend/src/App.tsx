@@ -3912,15 +3912,35 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontWeight: '600' }}>{t('shopping.sortBy')}:</span>
-                <select value={sortShoppingBy} onChange={(e) => setSortShoppingBy(e.target.value as any)}
-                  style={{ padding: '0.5rem', border: '2px solid #e5e7eb', borderRadius: '8px' }}>
-                  <option value="category">{t('shopping.sortCategory')}</option>
-                  <option value="alphabetical">{t('shopping.sortAlphabetical')}</option>
-                </select>
-              </div>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <select value={sortShoppingBy} onChange={(e) => setSortShoppingBy(e.target.value as any)}
+                style={{ padding: '0.5rem', border: '2px solid #e5e7eb', borderRadius: '8px', flexShrink: 0 }}>
+                <option value="category">{t('shopping.sortCategory')}</option>
+                <option value="alphabetical">{t('shopping.sortAlphabetical')}</option>
+              </select>
+              {shoppingList.length > 0 && (
+                <button onClick={async () => {
+                  const allChecked = shoppingList.every(i => i.checked);
+                  await shoppingService.updateAll(!allChecked);
+                  setShoppingList(prev => prev.map(i => ({ ...i, checked: !allChecked })));
+                }} style={{
+                  padding: '0.5rem 0.75rem', background: '#6366f1', color: 'white',
+                  border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
+                  fontSize: isMobile ? '0.75rem' : '0.875rem', flexShrink: 0
+                }}>
+                  {shoppingList.every(i => i.checked) ? `☑️ ${t('shopping.deselectAll')}` : `☐ ${t('shopping.selectAll')}`}
+                </button>
+              )}
+              {shoppingList.some(i => i.checked) && (
+                <button onClick={async () => {
+                  await shoppingService.deleteChecked();
+                  setShoppingList(prev => prev.filter(i => !i.checked));
+                }} style={{
+                  padding: '0.5rem 0.75rem', background: '#ef4444', color: 'white',
+                  border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
+                  fontSize: isMobile ? '0.75rem' : '0.875rem', flexShrink: 0
+                }}>🗑️ {t('shopping.clearChecked')}</button>
+              )}
               
               {shoppingList.length > 0 && (
                 <div style={{ flex: 1 }}>
@@ -4010,39 +4030,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               )}
             </div>
 
-            {shoppingList.length > 0 && (
-              <div style={{ marginBottom: '1.5rem', padding: '1.5rem', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #86efac' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                  <div>
-                    <strong style={{ color: '#166534', fontSize: '1.1rem' }}>
-                      📊 {t('shopping.itemsChecked', { checked: shoppingList.filter(i => i.checked).length, total: shoppingList.length })}
-                    </strong>
-                    <div style={{ fontSize: '0.875rem', color: '#047857', marginTop: '0.25rem' }}>
-                      {t('shopping.itemsRemaining', { count: shoppingList.filter(i => !i.checked).length })}
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                    <button onClick={async () => {
-                      const allChecked = shoppingList.every(i => i.checked);
-                      await shoppingService.updateAll(!allChecked);
-                      setShoppingList(prev => prev.map(i => ({ ...i, checked: !allChecked })));
-                    }} style={{
-                      padding: '0.75rem 1.5rem', background: '#6366f1', color: 'white',
-                      border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
-                    }}>
-                      {shoppingList.every(i => i.checked) ? `☑️ ${t('shopping.deselectAll')}` : `☐ ${t('shopping.selectAll')}`}
-                    </button>
-                    <button onClick={async () => {
-                      await shoppingService.deleteChecked();
-                      setShoppingList(prev => prev.filter(i => !i.checked));
-                    }} style={{
-                      padding: '0.75rem 1.5rem', background: '#ef4444', color: 'white',
-                      border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
-                    }}>🗑️ {t('shopping.clearChecked')}</button>
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div style={{ display: 'grid', gap: '0.75rem' }}>
               {sortShoppingList().map(item => (
@@ -4115,7 +4102,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         alignItems: 'center',
                         justifyContent: 'center'
                       }}>
-                      {isMobile ? '🛒' : '🛒 Amazon'}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" width="52" height="16" aria-label="Amazon">
+                        <text x="0" y="36" fontFamily="Arial, sans-serif" fontWeight="900" fontSize="36" fill="white" letterSpacing="-1">amazon</text>
+                        <path d="M8 48 Q100 64 192 48" stroke="#232f3e" strokeWidth="4" fill="none" strokeLinecap="round"/>
+                        <polygon points="178,41 192,48 178,55" fill="#232f3e"/>
+                      </svg>
                     </a>
                     <a href={`https://www.walmart.com/search?q=${encodeURIComponent(item.name)}`}
                       target="_blank" rel="noopener noreferrer"
@@ -4133,7 +4124,18 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         alignItems: 'center',
                         justifyContent: 'center'
                       }}>
-                      {isMobile ? 'W' : 'Walmart'}
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" width="14" height="14" aria-hidden="true">
+                          <circle cx="7" cy="7" r="1.5" fill="white"/>
+                          <line x1="7" y1="0" x2="7" y2="4.5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+                          <line x1="7" y1="9.5" x2="7" y2="14" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+                          <line x1="0.86" y1="3.5" x2="4.5" y2="5.5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+                          <line x1="9.5" y1="8.5" x2="13.14" y2="10.5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+                          <line x1="0.86" y1="10.5" x2="4.5" y2="8.5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+                          <line x1="9.5" y1="5.5" x2="13.14" y2="3.5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+                        </svg>
+                        <span style={{ fontFamily: 'Arial, sans-serif', fontWeight: '700', fontSize: '0.75rem', letterSpacing: '-0.2px' }}>walmart</span>
+                      </span>
                     </a>
                     <button className="item-delete-btn" onClick={async () => {
                       console.log('🗑️ Attempting to delete item:', item.id, item.name);
@@ -4158,7 +4160,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       borderRadius: '6px',
                       cursor: 'pointer',
                       fontSize: isMobile ? '0.75rem' : '0.875rem'}}>
-                      {isMobile ? `🗑️ ${t('common.delete')}` : t('common.delete')}
+                      {isMobile ? '🗑️' : t('common.delete')}
                     </button>
                   </div>
                 </div>

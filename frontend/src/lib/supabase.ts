@@ -504,9 +504,16 @@ export const profileService = {
   },
 
   async upsertProfile(userId: string, updates: Partial<Omit<Profile, 'id' | 'created_at' | 'updated_at'>>): Promise<{ error: any }> {
+    // Include email so INSERT succeeds if the profile row doesn't exist yet
+    // (email is NOT NULL; the trigger normally creates the row, but this guards against edge cases)
+    let email = updates.email;
+    if (!email) {
+      const { data: { user } } = await supabase.auth.getUser();
+      email = user?.email ?? '';
+    }
     const { error } = await supabase
       .from('profiles')
-      .upsert({ id: userId, ...updates }, { onConflict: 'id' });
+      .upsert({ id: userId, email, ...updates }, { onConflict: 'id' });
     return { error };
   },
 };

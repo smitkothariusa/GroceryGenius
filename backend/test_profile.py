@@ -124,3 +124,26 @@ def test_delete_account_missing_service_key_returns_500():
 
     assert response.status_code == 500
     assert "service credentials not configured" in response.json()["detail"]
+
+
+def test_delete_account_invalid_token_returns_401():
+    """DELETE /account returns 401 when token is invalid."""
+    from app.routers.profile import router
+    from fastapi import FastAPI
+    app = FastAPI()
+    app.include_router(router, prefix="/profile")
+    client = TestClient(app)
+
+    # Mock create_client so get_user returns a response with user=None
+    mock_user_response = MagicMock()
+    mock_user_response.user = None
+    mock_sb = MagicMock()
+    mock_sb.auth.get_user.return_value = mock_user_response
+
+    with patch("app.routers.profile.create_client", return_value=mock_sb):
+        response = client.delete(
+            "/profile/account",
+            headers={"Authorization": "Bearer invalid-token"}
+        )
+
+    assert response.status_code == 401

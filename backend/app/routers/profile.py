@@ -59,7 +59,9 @@ async def delete_account(authorization: str = Header(...)):
     Reads the Bearer token from the Authorization header to identify and verify the user.
     Requires SUPABASE_SERVICE_ROLE_KEY env var (not the anon key).
     """
-    token = authorization.replace("Bearer ", "").strip()
+    if not authorization.lower().startswith("bearer "):
+        raise HTTPException(status_code=401, detail="Invalid authorization header format")
+    token = authorization[7:].strip()
 
     sb_anon = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
     user_response = sb_anon.auth.get_user(token)

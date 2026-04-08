@@ -81,7 +81,7 @@ async def delete_account(authorization: str = Header(...)):
 
     sb_service = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
-    tables = ["calorie_log", "meal_plans", "shopping_items", "pantry_items", "saved_recipes", "profiles"]
+    tables = ["calorie_log", "meal_plans", "shopping_items", "pantry_items", "saved_recipes"]
     for table in tables:
         try:
             sb_service.table(table).delete().eq("user_id", user_id).execute()
@@ -89,6 +89,14 @@ async def delete_account(authorization: str = Header(...)):
         except Exception as exc:
             print(f"[delete_account] FAILED on {table}: {exc}")
             raise HTTPException(status_code=500, detail=f"Failed to delete rows from {table}: {exc}")
+
+    # profiles uses 'id' as the user identifier, not 'user_id'
+    try:
+        sb_service.table("profiles").delete().eq("id", user_id).execute()
+        print(f"[delete_account] deleted from profiles ✓")
+    except Exception as exc:
+        print(f"[delete_account] FAILED on profiles: {exc}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete rows from profiles: {exc}")
 
     try:
         sb_service.auth.admin.delete_user(user_id)

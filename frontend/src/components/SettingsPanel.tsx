@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
 import { Profile, CustomDietaryLabel, profileService, authService, supabase } from '../lib/supabase';
@@ -52,7 +52,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const [cookingLevel, setCookingLevel] = useState(profile.cooking_level ?? '');
+  const [cookingLevel, setCookingLevel] = useState<Profile['cooking_level'] | ''>(profile.cooking_level ?? '');
   const [age, setAge] = useState(String(profile.age ?? ''));
   const [sex, setSex] = useState<Profile['biological_sex']>(profile.biological_sex);
   const [weightValue, setWeightValue] = useState(profile.weight_kg ? String(kgToLbs(profile.weight_kg)) : '');
@@ -84,7 +84,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deleting, setDeleting] = useState(false);
 
-  const recommendedCalories = useCallback((): number | null => {
+  const rec = useMemo((): number | null => {
     const ageNum = parseInt(age);
     if (!ageNum || !sex) return null;
     let kg: number;
@@ -134,6 +134,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         },
         body: JSON.stringify({ text }),
       });
+      if (!res.ok) throw new Error('server error');
       const labelData = await res.json();
       const newLabel: CustomDietaryLabel = { id: uuidv4(), label: labelData.label, description: labelData.description };
       setCustomLabels(prev => [...prev, newLabel]);
@@ -168,7 +169,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
     }
 
     const updates: Partial<Profile> = {
-      cooking_level: cookingLevel as Profile['cooking_level'] || undefined,
+      cooking_level: cookingLevel || undefined,
       age: parseInt(age) || undefined,
       biological_sex: sex,
       weight_kg,
@@ -212,13 +213,14 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
-      await fetch(`${apiBase}/profile/account`, {
+      const res = await fetch(`${apiBase}/profile/account`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
       });
+      if (!res.ok) throw new Error('Delete failed');
       await authService.signOut();
       onDeleteAccount();
     } catch {
@@ -227,8 +229,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
       setDeleting(false);
     }
   };
-
-  const rec = recommendedCalories();
 
   const inputStyle: React.CSSProperties = {
     width: '100%',
@@ -274,7 +274,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         )}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontWeight: '700', fontSize: '1.1rem' }}>⚙️ {t('settings.title')}</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.25rem', cursor: 'pointer', opacity: 0.8 }}>✕</button>
+          <button onClick={onClose} aria-label="Close" style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.25rem', cursor: 'pointer', opacity: 0.8 }}>✕</button>
         </div>
         <div style={{ fontSize: '0.75rem', opacity: 0.85, marginTop: '0.25rem' }}>
           {profile.full_name} · {profile.email}
@@ -287,7 +287,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         <div style={sectionStyle}>
           <div style={sectionHeaderStyle}>👤 {t('settings.sections.profile')}</div>
           <label style={{ fontSize: '0.8rem', color: '#6b7280', display: 'block', marginBottom: '0.25rem' }}>{t('settings.cookingLevel')}</label>
-          <select value={cookingLevel} onChange={e => setCookingLevel(e.target.value)} style={inputStyle}>
+          <select value={cookingLevel} onChange={e => setCookingLevel(e.target.value as Profile['cooking_level'] | '')} style={inputStyle}>
             <option value="">—</option>
             {(['beginner','home_cook','intermediate','advanced'] as const).map(level => (
               <option key={level} value={level}>{t(`survey.cookingLevels.${level}`)}</option>
@@ -466,9 +466,9 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
     <>
       {/* Delete confirmation modal */}
       {showDeleteModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+        <div role="dialog" aria-modal="true" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
           <div style={{ background: 'white', borderRadius: '16px', padding: '1.5rem', maxWidth: '400px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
-            <h3 style={{ margin: '0 0 0.75rem', color: '#dc2626' }}>{t('settings.deleteConfirmTitle')}</h3>
+            <h3 id="delete-modal-title" style={{ margin: '0 0 0.75rem', color: '#dc2626' }}>{t('settings.deleteConfirmTitle')}</h3>
             <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: '0 0 1rem' }}>{t('settings.deleteConfirmBody')}</p>
             <label style={{ fontSize: '0.8rem', color: '#374151', display: 'block', marginBottom: '0.5rem' }}>{t('settings.deleteTypeConfirm')}</label>
             <input

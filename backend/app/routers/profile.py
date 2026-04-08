@@ -1,10 +1,15 @@
 import json
 import os
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel
 from app.services.openai_client import call_chat_completion
+from supabase import create_client
 
 router = APIRouter()
+
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 
 DIETARY_LABEL_SYSTEM_PROMPT = (
     "You are a dietary preference labeler for a recipe app. "
@@ -47,29 +52,36 @@ async def generate_dietary_label(payload: DietaryLabelRequest):
         return DietaryLabelResponse(label=truncated, description="")
 
 
-class DeleteAccountRequest(BaseModel):
-    user_id: str
-
-
 @router.delete("/account")
-async def delete_account(payload: DeleteAccountRequest):
+async def delete_account(authorization: str = Header(...)):
     """
     Delete all user data from all tables, then delete the Supabase auth user.
+    Reads the Bearer token from the Authorization header to identify and verify the user.
     Requires SUPABASE_SERVICE_ROLE_KEY env var (not the anon key).
     """
-    from supabase import create_client
-    url = os.getenv("SUPABASE_URL")
-    service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-    if not url or not service_key:
+    token = authorization.replace("Bearer ", "").strip()
+
+    sb_anon = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+    user_response = sb_anon.auth.get_user(token)
+    if not user_response or not user_response.user:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    user_id = user_response.user.id
+
+    if not SUPABASE_SERVICE_KEY:
         raise HTTPException(status_code=500, detail="Supabase service credentials not configured")
 
-    sb = create_client(url, service_key)
-    user_id = payload.user_id
+    sb_service = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
     tables = ["calorie_log", "meal_plans", "shopping_items", "pantry_items", "saved_recipes", "profiles"]
     for table in tables:
-        sb.table(table).delete().eq("user_id", user_id).execute()
+        try:
+            sb_service.table(table).delete().eq("user_id", user_id).execute()
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=f"Failed to delete rows from {table}: {exc}")
 
-    sb.auth.admin.delete_user(user_id)
+    try:
+        sb_service.auth.admin.delete_user(user_id)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to delete auth user: {exc}")
 
     return {"deleted": True}

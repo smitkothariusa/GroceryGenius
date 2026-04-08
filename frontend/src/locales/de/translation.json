@@ -476,5 +476,93 @@
     "failedAddItemSimple": "Artikel konnte nicht hinzugefügt werden",
     "failedAddSomeItems": "Einige Artikel konnten nicht hinzugefügt werden",
     "alreadyHaveIngredients": "Du hast bereits alle Zutaten!"
+  },
+  "survey": {
+    "title": "GroceryGenius personalisieren",
+    "subtitle": "Dauert ca. 60 Sekunden. Hilft uns, Rezepte und Kalorienziele auf Sie anzupassen.",
+    "letsGo": "Los geht's →",
+    "skipForNow": "Jetzt überspringen",
+    "back": "← Zurück",
+    "skipStep": "Schritt überspringen",
+    "next": "Weiter →",
+    "finish": "Fertig ✓",
+    "stepOf": "{{step}} von {{total}}",
+    "step1Title": "Was ist Ihre bevorzugte Sprache?",
+    "step2Title": "Erzählen Sie uns von sich",
+    "step3Title": "Wie sicher sind Sie in der Küche?",
+    "step4Title": "Haben Sie Ernährungspräferenzen?",
+    "recommendedCalories": "Empfohlen: {{calories}} kcal/Tag",
+    "tapToOverride": "(tippen zum Bearbeiten)",
+    "aiWillGenerate": "✨ KI erstellt ein Label für individuelle Diäten",
+    "customDietPlaceholder": "Oder eigene eingeben: z.B. Mediterran...",
+    "cookingLevels": {
+      "beginner": "🌱 Anfänger — Ich halte es einfach",
+      "home_cook": "🏠 Hobbykoch — Ich folge Rezepten",
+      "intermediate": "🔪 Fortgeschritten — Ich improvisiere",
+      "advanced": "⭐ Profi — Ich experimentiere gerne"
+    },
+    "activityLevels": {
+      "sedentary": "Sitzend (wenig oder kein Sport)",
+      "light": "Leicht (1–3 Tage/Woche)",
+      "moderate": "Mäßig (3–5 Tage/Woche)",
+      "active": "Aktiv (6–7 Tage/Woche)",
+      "very_active": "Sehr aktiv (tägliches intensives Training)"
+    },
+    "dietaryPresets": {
+      "vegetarian": "Vegetarisch",
+      "vegan": "Vegan",
+      "gluten-free": "Glutenfrei",
+      "dairy-free": "Laktosefrei",
+      "halal": "Halal",
+      "kosher": "Koscher",
+      "keto": "Keto",
+      "low-carb": "Low-Carb",
+      "nut-free": "Nussfrei",
+      "paleo": "Paleo"
+    },
+    "fields": {
+      "age": "Alter",
+      "sex": "Biologisches Geschlecht",
+      "male": "Männlich",
+      "female": "Weiblich",
+      "weight": "Gewicht",
+      "height": "Größe",
+      "activityLevel": "Aktivitätslevel",
+      "dailyCalorieGoal": "Tägliches Kalorienziel",
+      "lbs": "lbs",
+      "kg": "kg",
+      "ftIn": "ft/in",
+      "cm": "cm"
+    }
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "saveChanges": "Speichern",
+    "saved": "Einstellungen gespeichert",
+    "sections": {
+      "profile": "Profil",
+      "physical": "Körperliche Daten",
+      "dietary": "Ernährungspräferenzen",
+      "security": "Sicherheit",
+      "danger": "Gefahrenbereich"
+    },
+    "cookingLevel": "Kochlevel",
+    "recommendedCalories": "✨ Empfohlen: {{calories}} kcal/Tag",
+    "dailyCalorieGoal": "Tägliches Kalorienziel",
+    "addCustomDiet": "+ Individuelle Diät hinzufügen",
+    "customDietPlaceholder": "Individuelle Diät eingeben...",
+    "changePassword": "🔑 Passwort ändern",
+    "newPassword": "Neues Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "passwordMismatch": "Passwörter stimmen nicht überein",
+    "passwordChanged": "Passwort erfolgreich geändert",
+    "deleteAccount": "🗑️ Konto löschen",
+    "deleteConfirmTitle": "Ihr Konto löschen?",
+    "deleteConfirmBody": "Dies löscht dauerhaft alle Ihre Daten. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "deleteTypeConfirm": "Geben Sie DELETE ein zur Bestätigung",
+    "deleteConfirmPlaceholder": "DELETE",
+    "deleteConfirmButton": "Konto dauerhaft löschen",
+    "deleteCancel": "Abbrechen",
+    "aiGeneratingLabel": "Label wird erstellt..."
   }
 }

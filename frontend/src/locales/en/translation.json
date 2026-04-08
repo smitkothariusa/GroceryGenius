@@ -476,5 +476,93 @@
     "failedAddItemSimple": "Failed to add item",
     "failedAddSomeItems": "Failed to add some items",
     "alreadyHaveIngredients": "You already have all ingredients!"
+  },
+  "survey": {
+    "title": "Personalize GroceryGenius",
+    "subtitle": "Takes about 60 seconds. Helps us tailor recipes and calorie goals just for you.",
+    "letsGo": "Let's Go →",
+    "skipForNow": "Skip for now",
+    "back": "← Back",
+    "skipStep": "Skip this step",
+    "next": "Next →",
+    "finish": "Finish ✓",
+    "stepOf": "{{step}} of {{total}}",
+    "step1Title": "What's your preferred language?",
+    "step2Title": "Tell us about yourself",
+    "step3Title": "How comfortable are you in the kitchen?",
+    "step4Title": "Any dietary preferences?",
+    "recommendedCalories": "Recommended: {{calories}} cal/day",
+    "tapToOverride": "(tap to override)",
+    "aiWillGenerate": "✨ AI will generate a label for custom diets",
+    "customDietPlaceholder": "Or type your own: e.g. Mediterranean...",
+    "cookingLevels": {
+      "beginner": "🌱 Beginner — I keep it simple",
+      "home_cook": "🏠 Home Cook — I follow recipes",
+      "intermediate": "🔪 Intermediate — I improvise",
+      "advanced": "⭐ Advanced — I love to experiment"
+    },
+    "activityLevels": {
+      "sedentary": "Sedentary (little or no exercise)",
+      "light": "Light (1–3 days/week)",
+      "moderate": "Moderate (3–5 days/week)",
+      "active": "Active (6–7 days/week)",
+      "very_active": "Very Active (hard exercise daily)"
+    },
+    "dietaryPresets": {
+      "vegetarian": "Vegetarian",
+      "vegan": "Vegan",
+      "gluten-free": "Gluten-Free",
+      "dairy-free": "Dairy-Free",
+      "halal": "Halal",
+      "kosher": "Kosher",
+      "keto": "Keto",
+      "low-carb": "Low-Carb",
+      "nut-free": "Nut-Free",
+      "paleo": "Paleo"
+    },
+    "fields": {
+      "age": "Age",
+      "sex": "Biological Sex",
+      "male": "Male",
+      "female": "Female",
+      "weight": "Weight",
+      "height": "Height",
+      "activityLevel": "Activity Level",
+      "dailyCalorieGoal": "Daily Calorie Goal",
+      "lbs": "lbs",
+      "kg": "kg",
+      "ftIn": "ft/in",
+      "cm": "cm"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "saveChanges": "Save Changes",
+    "saved": "Settings saved",
+    "sections": {
+      "profile": "Profile",
+      "physical": "Physical Info",
+      "dietary": "Dietary Preferences",
+      "security": "Security",
+      "danger": "Danger Zone"
+    },
+    "cookingLevel": "Cooking Level",
+    "recommendedCalories": "✨ Recommended: {{calories}} cal/day",
+    "dailyCalorieGoal": "Daily Calorie Goal",
+    "addCustomDiet": "+ Add custom diet",
+    "customDietPlaceholder": "Type a custom diet...",
+    "changePassword": "🔑 Change Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "passwordMismatch": "Passwords do not match",
+    "passwordChanged": "Password changed successfully",
+    "deleteAccount": "🗑️ Delete Account",
+    "deleteConfirmTitle": "Delete Your Account?",
+    "deleteConfirmBody": "This will permanently delete all your data including pantry, recipes, meal plans, and shopping lists. This cannot be undone.",
+    "deleteTypeConfirm": "Type DELETE to confirm",
+    "deleteConfirmPlaceholder": "DELETE",
+    "deleteConfirmButton": "Permanently Delete Account",
+    "deleteCancel": "Cancel",
+    "aiGeneratingLabel": "Generating label..."
   }
 }

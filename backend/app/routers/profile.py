@@ -63,14 +63,18 @@ async def delete_account(authorization: str = Header(...)):
         raise HTTPException(status_code=401, detail="Invalid authorization header format")
     token = authorization[7:].strip()
 
+    print(f"[delete_account] SUPABASE_URL set: {bool(SUPABASE_URL)}, ANON_KEY set: {bool(SUPABASE_ANON_KEY)}, SERVICE_KEY set: {bool(SUPABASE_SERVICE_KEY)}")
     sb_anon = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
     try:
         user_response = sb_anon.auth.get_user(token)
+        print(f"[delete_account] get_user succeeded: {bool(user_response and user_response.user)}")
     except Exception as exc:
+        print(f"[delete_account] get_user failed: {exc}")
         raise HTTPException(status_code=401, detail=f"Invalid or expired token: {exc}")
     if not user_response or not user_response.user:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
     user_id = user_response.user.id
+    print(f"[delete_account] user_id: {user_id}")
 
     if not SUPABASE_SERVICE_KEY:
         raise HTTPException(status_code=500, detail="Supabase service credentials not configured")
@@ -81,12 +85,16 @@ async def delete_account(authorization: str = Header(...)):
     for table in tables:
         try:
             sb_service.table(table).delete().eq("user_id", user_id).execute()
+            print(f"[delete_account] deleted from {table} ✓")
         except Exception as exc:
+            print(f"[delete_account] FAILED on {table}: {exc}")
             raise HTTPException(status_code=500, detail=f"Failed to delete rows from {table}: {exc}")
 
     try:
         sb_service.auth.admin.delete_user(user_id)
+        print(f"[delete_account] auth user deleted ✓")
     except Exception as exc:
+        print(f"[delete_account] FAILED deleting auth user: {exc}")
         raise HTTPException(status_code=500, detail=f"Failed to delete auth user: {exc}")
 
     return {"deleted": True}

@@ -35,13 +35,15 @@ const dropOffSites: DropOffSite[] = [
 import Toast from './components/Toast';
 import { useToast } from './hooks/useToast';
 import { useState, useEffect, useRef } from 'react';
-import { authService, supabase } from './lib/supabase';
+import { authService, supabase, profileService, CustomDietaryLabel, Profile } from './lib/supabase';
 import { calorieService } from './lib/database';
 import { pantryService, shoppingService, recipesService, mealPlansService, donationService } from './lib/database';
 import Auth from './components/Auth';
 import MealPlanCalendar from './components/MealPlanCalendar';
 import IngredientSubstitution from './components/IngredientSubstitution';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import OnboardingSurvey from './components/OnboardingSurvey';
+import SettingsPanel from './components/SettingsPanel';
 
 
 interface PantryItem {
@@ -110,7 +112,9 @@ const App: React.FC = () => {
     quantity: number;
     unit: string;
   } | null>(null);
-  const [currentTab, setCurrentTab] = useState<'pantry' | 'recipes' | 'mealplan' | 'shopping' | 'donate' | 'favorites'>('pantry');  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [currentTab, setCurrentTab] = useState<'pantry' | 'recipes' | 'mealplan' | 'shopping' | 'donate' | 'favorites'>(
+    () => (localStorage.getItem('activeTab') as 'pantry' | 'recipes' | 'mealplan' | 'shopping' | 'donate' | 'favorites') || 'pantry'
+  );  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [showDetailedView, setShowDetailedView] = useState(false);
   const [recipeSearchQuery, setRecipeSearchQuery] = useState('');
   const [recipeServings, setRecipeServings] = useState<number | ''>(2);
@@ -144,6 +148,10 @@ const App: React.FC = () => {
   const [detectedBarcode, setDetectedBarcode] = useState<string>('');
   const [detectedExpiry, setDetectedExpiry] = useState<string>('');
   const [showMissionPopup, setShowMissionPopup] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showSurvey, setShowSurvey] = useState(false);
+  const [userProfile, setUserProfile] = useState<Profile | null>(null);
+  const [customDietaryLabels, setCustomDietaryLabels] = useState<CustomDietaryLabel[]>([]);
   const [showDemoConfirm, setShowDemoConfirm] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([]);
@@ -351,7 +359,24 @@ const App: React.FC = () => {
       } catch (error) {
         console.error('❌ Error loading calorie data:', error);
       }
-      
+
+      // Load full profile for settings + survey
+      try {
+        const profileResult = await profileService.getProfile(user.id);
+        if (profileResult) {
+          setUserProfile(profileResult);
+          setCustomDietaryLabels(profileResult.custom_dietary_labels ?? []);
+          if (profileResult.dietary_preferences && profileResult.dietary_preferences.length > 0) {
+            setDietaryFilter(profileResult.dietary_preferences[0]);
+          }
+          if (!profileResult.onboarding_completed) {
+            setShowSurvey(true);
+          }
+        }
+      } catch (err) {
+        console.error('❌ Error loading profile:', err);
+      }
+
       // Load pantry items
       // Load pantry items
     console.log('⏳ Starting to load pantry...');
@@ -624,6 +649,7 @@ const App: React.FC = () => {
   }, [i18n.language, favorites]);
 
   const handleTabChange = (tab: typeof currentTab) => {
+    localStorage.setItem('activeTab', tab);
     setIsTabChanging(true);
     setTimeout(() => {
       setCurrentTab(tab);
@@ -2153,10 +2179,7 @@ const App: React.FC = () => {
           
           success(t('toasts.locationGranted'));
         },
-        (error) => {
-          setLocationPermission('denied');
-          localStorage.setItem('locationPermission', 'denied');
-          localStorage.removeItem('userLocation');
+        () => {
           warning(t('toasts.locationDenied'));
         }
       );
@@ -2506,6 +2529,12 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             🎬 Demo
           </button>
           <button
+            className="mobile-drawer-footer-btn"
+            onClick={() => { setShowSettings(true); setDrawerOpen(false); }}
+          >
+            ⚙️ {t('settings.title')}
+          </button>
+          <button
             className="mobile-drawer-footer-btn signout"
             onClick={async () => { await authService.signOut(); setUser(null); setDrawerOpen(false); }}
           >
@@ -2558,6 +2587,20 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 </button>
                 <LanguageSwitcher />
               </div>
+            )}
+            {!isMobile && (
+              <button onClick={() => setShowSettings(true)} style={{
+                padding: '0.5rem 1rem',
+                background: '#f3f4f6',
+                color: '#374151',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                fontSize: '1rem',
+              }}>
+                ⚙️
+              </button>
             )}
             {!isMobile && (
               <button onClick={async () => {
@@ -2725,6 +2768,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     <option value="keto">{t('recipes.dietary.keto')}</option>
                     <option value="diabetic-friendly">{t('recipes.dietary.diabeticFriendly')}</option>
                     <option value="heart-healthy">{t('recipes.dietary.heartHealthy')}</option>
+                    {customDietaryLabels.map(custom => (
+                      <option key={custom.id} value={custom.id}>✨ {custom.label}</option>
+                    ))}
                   </select>
 
                   {/* Difficulty + Servings — 2-column grid */}
@@ -2858,6 +2904,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       <option value="keto">{t('recipes.dietary.keto')}</option>
                       <option value="diabetic-friendly">{t('recipes.dietary.diabeticFriendly')}</option>
                       <option value="heart-healthy">{t('recipes.dietary.heartHealthy')}</option>
+                      {customDietaryLabels.map(custom => (
+                        <option key={custom.id} value={custom.id}>✨ {custom.label}</option>
+                      ))}
                     </select>
                     <div className="recipe-servings-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <span>⚖️</span>
@@ -3912,137 +3961,124 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontWeight: '600' }}>{t('shopping.sortBy')}:</span>
-                <select value={sortShoppingBy} onChange={(e) => setSortShoppingBy(e.target.value as any)}
-                  style={{ padding: '0.5rem', border: '2px solid #e5e7eb', borderRadius: '8px' }}>
-                  <option value="category">{t('shopping.sortCategory')}</option>
-                  <option value="alphabetical">{t('shopping.sortAlphabetical')}</option>
-                </select>
+            {shoppingList.length > 0 && (
+              <div style={{ marginBottom: '1rem' }}>
+                {priceComparison.loading ? (
+                  <div style={{
+                    padding: '0.5rem 1rem',
+                    background: '#f0fdf4',
+                    borderRadius: '8px',
+                    border: '1px solid #86efac',
+                    fontSize: '0.875rem',
+                    color: '#166534',
+                    fontStyle: 'italic'
+                  }}>
+                    🔄 {t('shopping.fetchingPrices')}
+                  </div>
+                ) : (
+                  <div style={{
+                    background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                    padding: '1rem',
+                    borderRadius: '12px',
+                    border: '1px solid #bae6fd'
+                  }}>
+                    <div style={{
+                      fontSize: '0.75rem',
+                      color: '#0369a1',
+                      fontWeight: '600',
+                      marginBottom: '0.5rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
+                    }}>
+                      💰 {t('shopping.priceComparison')}
+                    </div>
+                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-around' }}>
+                      <div style={{ flex: 1, textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#0369a1', marginBottom: '0.25rem' }}>
+                          Amazon
+                        </div>
+                        <div style={{
+                          fontSize: '1.25rem',
+                          fontWeight: '700',
+                          color: priceComparison.amazon <= priceComparison.walmart ? '#10b981' : textColor
+                        }}>
+                          ${priceComparison.amazon.toFixed(2)}
+                        </div>
+                        {priceComparison.amazon < priceComparison.walmart && (
+                          <div style={{ fontSize: '0.7rem', color: '#10b981', marginTop: '0.25rem' }}>
+                            ✓ {t('shopping.bestPrice')}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{
+                        width: '1px',
+                        background: '#bae6fd',
+                        margin: '0.5rem 0'
+                      }} />
+                      <div style={{ flex: 1, textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#0369a1', marginBottom: '0.25rem' }}>
+                          Walmart
+                        </div>
+                        <div style={{
+                          fontSize: '1.25rem',
+                          fontWeight: '700',
+                          color: priceComparison.walmart < priceComparison.amazon ? '#10b981' : textColor
+                        }}>
+                          ${priceComparison.walmart.toFixed(2)}
+                        </div>
+                        {priceComparison.walmart < priceComparison.amazon && (
+                          <div style={{ fontSize: '0.7rem', color: '#10b981', marginTop: '0.25rem' }}>
+                            ✓ {t('shopping.bestPrice')}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div style={{
+                      marginTop: '0.75rem',
+                      paddingTop: '0.75rem',
+                      borderTop: '1px solid #bae6fd',
+                      fontSize: '0.75rem',
+                      color: '#0369a1',
+                      textAlign: 'center'
+                    }}>
+                      💡 {t('shopping.saveByShopping', { amount: Math.abs(priceComparison.amazon - priceComparison.walmart).toFixed(2), store: priceComparison.walmart < priceComparison.amazon ? 'Walmart' : 'Amazon' })}
+                    </div>
+                  </div>
+                )}
               </div>
-              
+            )}
+
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <select value={sortShoppingBy} onChange={(e) => setSortShoppingBy(e.target.value as any)}
+                style={{ padding: '0.5rem', border: '2px solid #e5e7eb', borderRadius: '8px', flexShrink: 0 }}>
+                <option value="category">{t('shopping.sortCategory')}</option>
+                <option value="alphabetical">{t('shopping.sortAlphabetical')}</option>
+              </select>
               {shoppingList.length > 0 && (
-                <div style={{ flex: 1 }}>
-                  {priceComparison.loading ? (
-                    <div style={{ 
-                      padding: '0.5rem 1rem',
-                      background: '#f0fdf4',
-                      borderRadius: '8px',
-                      border: '1px solid #86efac',
-                      fontSize: '0.875rem',
-                      color: '#166534',
-                      fontStyle: 'italic'
-                    }}>
-                      🔄 {t('shopping.fetchingPrices')}
-                    </div>
-                  ) : (
-                    <div style={{ 
-                      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
-                      padding: '1rem',
-                      borderRadius: '12px',
-                      border: '1px solid #bae6fd'
-                    }}>
-                      <div style={{ 
-                        fontSize: '0.75rem', 
-                        color: '#0369a1',
-                        fontWeight: '600',
-                        marginBottom: '0.5rem',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px'
-                      }}>
-                        💰 {t('shopping.priceComparison')}
-                      </div>
-                      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-around' }}>
-                        <div style={{ flex: 1, textAlign: 'center' }}>
-                          <div style={{ fontSize: '0.75rem', color: '#0369a1', marginBottom: '0.25rem' }}>
-                            Amazon
-                          </div>
-                          <div style={{ 
-                            fontSize: '1.25rem', 
-                            fontWeight: '700',
-                            color: priceComparison.amazon <= priceComparison.walmart ? '#10b981' : textColor
-                          }}>
-                            ${priceComparison.amazon.toFixed(2)}
-                          </div>
-                          {priceComparison.amazon < priceComparison.walmart && (
-                            <div style={{ fontSize: '0.7rem', color: '#10b981', marginTop: '0.25rem' }}>
-                              ✓ {t('shopping.bestPrice')}
-                            </div>
-                          )}
-                        </div>
-                        <div style={{ 
-                          width: '1px', 
-                          background: '#bae6fd',
-                          margin: '0.5rem 0'
-                        }} />
-                        <div style={{ flex: 1, textAlign: 'center' }}>
-                          <div style={{ fontSize: '0.75rem', color: '#0369a1', marginBottom: '0.25rem' }}>
-                            Walmart
-                          </div>
-                          <div style={{ 
-                            fontSize: '1.25rem', 
-                            fontWeight: '700',
-                            color: priceComparison.walmart < priceComparison.amazon ? '#10b981' : textColor
-                          }}>
-                            ${priceComparison.walmart.toFixed(2)}
-                          </div>
-                          {priceComparison.walmart < priceComparison.amazon && (
-                            <div style={{ fontSize: '0.7rem', color: '#10b981', marginTop: '0.25rem' }}>
-                              ✓ {t('shopping.bestPrice')}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div style={{ 
-                        marginTop: '0.75rem',
-                        paddingTop: '0.75rem',
-                        borderTop: '1px solid #bae6fd',
-                        fontSize: '0.75rem',
-                        color: '#0369a1',
-                        textAlign: 'center'
-                      }}>
-                        💡 {t('shopping.saveByShopping', { amount: Math.abs(priceComparison.amazon - priceComparison.walmart).toFixed(2), store: priceComparison.walmart < priceComparison.amazon ? 'Walmart' : 'Amazon' })}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <button onClick={async () => {
+                  const allChecked = shoppingList.every(i => i.checked);
+                  await shoppingService.updateAll(!allChecked);
+                  setShoppingList(prev => prev.map(i => ({ ...i, checked: !allChecked })));
+                }} style={{
+                  padding: '0.5rem 0.75rem', background: '#6366f1', color: 'white',
+                  border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
+                  fontSize: isMobile ? '0.75rem' : '0.875rem', flexShrink: 0
+                }}>
+                  {shoppingList.every(i => i.checked) ? `☑️ ${t('shopping.deselectAll')}` : t('shopping.selectAll')}
+                </button>
+              )}
+              {shoppingList.some(i => i.checked) && (
+                <button onClick={async () => {
+                  await shoppingService.deleteChecked();
+                  setShoppingList(prev => prev.filter(i => !i.checked));
+                }} style={{
+                  padding: '0.5rem 0.75rem', background: '#ef4444', color: 'white',
+                  border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
+                  fontSize: isMobile ? '0.75rem' : '0.875rem', flexShrink: 0
+                }}>🗑️ {t('shopping.clearChecked')}</button>
               )}
             </div>
 
-            {shoppingList.length > 0 && (
-              <div style={{ marginBottom: '1.5rem', padding: '1.5rem', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #86efac' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                  <div>
-                    <strong style={{ color: '#166534', fontSize: '1.1rem' }}>
-                      📊 {t('shopping.itemsChecked', { checked: shoppingList.filter(i => i.checked).length, total: shoppingList.length })}
-                    </strong>
-                    <div style={{ fontSize: '0.875rem', color: '#047857', marginTop: '0.25rem' }}>
-                      {t('shopping.itemsRemaining', { count: shoppingList.filter(i => !i.checked).length })}
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                    <button onClick={async () => {
-                      const allChecked = shoppingList.every(i => i.checked);
-                      await shoppingService.updateAll(!allChecked);
-                      setShoppingList(prev => prev.map(i => ({ ...i, checked: !allChecked })));
-                    }} style={{
-                      padding: '0.75rem 1.5rem', background: '#6366f1', color: 'white',
-                      border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
-                    }}>
-                      {shoppingList.every(i => i.checked) ? `☑️ ${t('shopping.deselectAll')}` : `☐ ${t('shopping.selectAll')}`}
-                    </button>
-                    <button onClick={async () => {
-                      await shoppingService.deleteChecked();
-                      setShoppingList(prev => prev.filter(i => !i.checked));
-                    }} style={{
-                      padding: '0.75rem 1.5rem', background: '#ef4444', color: 'white',
-                      border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600'
-                    }}>🗑️ {t('shopping.clearChecked')}</button>
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div style={{ display: 'grid', gap: '0.75rem' }}>
               {sortShoppingList().map(item => (
@@ -4096,48 +4132,40 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   <div style={{
                     display: 'flex',
                     gap: '0.5rem',
-                    flexWrap: 'wrap',
+                    alignItems: 'center',
                     width: isMobile ? '100%' : 'auto'
                   }}>
                     <a href={`https://www.amazon.com/s?k=${encodeURIComponent(item.name)}&i=amazonfresh`}
                       target="_blank" rel="noopener noreferrer"
                       style={{
-                        flex: isMobile ? '1' : 'initial',
-                        padding: isMobile ? '0.5rem' : '0.5rem 0.75rem',
-                        background: '#ff9900',
-                        color: 'white',
+                        flexShrink: 0,
+                        width: '38px',
+                        height: '38px',
                         borderRadius: '6px',
                         textDecoration: 'none',
-                        fontSize: isMobile ? '0.75rem' : '0.875rem',
-                        fontWeight: '600',
-                        textAlign: 'center',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        overflow: 'hidden'
                       }}>
-                      {isMobile ? '🛒' : '🛒 Amazon'}
+                      <img src="/amazon-logo.svg" alt="Amazon" style={{ width: '38px', height: '38px', display: 'block' }} />
                     </a>
                     <a href={`https://www.walmart.com/search?q=${encodeURIComponent(item.name)}`}
                       target="_blank" rel="noopener noreferrer"
                       style={{
-                        flex: isMobile ? '1' : 'initial',
-                        padding: isMobile ? '0.5rem' : '0.5rem 0.75rem',
-                        background: '#0071ce',
-                        color: 'white',
+                        flexShrink: 0,
+                        width: '38px',
+                        height: '38px',
                         borderRadius: '6px',
                         textDecoration: 'none',
-                        fontSize: isMobile ? '0.75rem' : '0.875rem',
-                        fontWeight: '600',
-                        textAlign: 'center',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        overflow: 'hidden'
                       }}>
-                      {isMobile ? 'W' : 'Walmart'}
+                      <img src="/walmart-logo.svg" alt="Walmart" style={{ width: '38px', height: '38px', display: 'block' }} />
                     </a>
                     <button className="item-delete-btn" onClick={async () => {
-                      console.log('🗑️ Attempting to delete item:', item.id, item.name);
-
                       // Always remove from local state first (optimistic update)
                       setShoppingList(prev => prev.filter(i => i.id !== item.id));
                       success(t('notifications.itemRemoved'));
@@ -4145,20 +4173,24 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       // Then try to delete from database in background
                       try {
                         await shoppingService.delete(item.id);
-                        console.log('✅ Successfully deleted from database:', item.id);
                       } catch (error) {
                         console.error('⚠️ Failed to delete from database (item already removed from UI):', error);
-                        // Item is already removed from UI, so this is fine
                       }
-                    }} style={{flex: isMobile ? '1' : 'initial',
+                    }} style={{
+                      flex: isMobile ? '1' : 'initial',
+                      height: '38px',
                       background: '#fee2e2',
                       color: '#dc2626',
                       border: 'none',
-                      padding: isMobile ? '0.5rem' : '0.5rem 1rem',
+                      padding: '0 0.75rem',
                       borderRadius: '6px',
                       cursor: 'pointer',
-                      fontSize: isMobile ? '0.75rem' : '0.875rem'}}>
-                      {isMobile ? `🗑️ ${t('common.delete')}` : t('common.delete')}
+                      fontSize: '1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {isMobile ? '🗑️' : t('common.delete')}
                     </button>
                   </div>
                 </div>
@@ -6836,6 +6868,58 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           }}
         />
       )}
+      {showSurvey && userProfile && (
+        <OnboardingSurvey
+          userId={user.id}
+          apiBase={API_BASE}
+          onComplete={async (surveyData) => {
+            const { error: saveError } = await profileService.upsertProfile(user.id, { ...surveyData, onboarding_completed: true });
+            if (!saveError) {
+              setUserProfile(prev => prev ? { ...prev, ...surveyData, onboarding_completed: true } : null);
+              if (surveyData.daily_calorie_goal) setDailyCalorieGoal(surveyData.daily_calorie_goal);
+              if (surveyData.custom_dietary_labels) setCustomDietaryLabels(surveyData.custom_dietary_labels);
+              if (surveyData.dietary_preferences && surveyData.dietary_preferences.length > 0) {
+                setDietaryFilter(surveyData.dietary_preferences[0]);
+              }
+            } else {
+              console.error('Survey upsert error:', JSON.stringify(saveError));
+              error('Failed to save your preferences. Please update them in Settings.');
+            }
+            setShowSurvey(false);
+            setShowMissionPopup(true);
+          }}
+          onSkip={async () => {
+            const { error: skipError } = await profileService.upsertProfile(user.id, { onboarding_completed: true });
+            if (!skipError) {
+              setUserProfile(prev => prev ? { ...prev, onboarding_completed: true } : null);
+            }
+            setShowSurvey(false);
+            setShowMissionPopup(true);
+          }}
+        />
+      )}
+
+      {showSettings && userProfile && (
+        <SettingsPanel
+          userId={user.id}
+          profile={userProfile}
+          apiBase={API_BASE}
+          isMobile={isMobile}
+          onClose={() => setShowSettings(false)}
+          onSave={(updated) => {
+            setUserProfile(prev => prev ? { ...prev, ...updated } : null);
+            if (updated.daily_calorie_goal) setDailyCalorieGoal(updated.daily_calorie_goal);
+            if (updated.custom_dietary_labels) setCustomDietaryLabels(updated.custom_dietary_labels);
+          }}
+          onDeleteAccount={() => {
+            setUser(null);
+            setShowSettings(false);
+          }}
+          showSuccess={success}
+          showError={error}
+        />
+      )}
+
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', zIndex: 10000, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {toasts.map((toast) => (
           <Toast

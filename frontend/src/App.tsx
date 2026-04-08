@@ -2153,10 +2153,7 @@ const App: React.FC = () => {
           
           success(t('toasts.locationGranted'));
         },
-        (error) => {
-          setLocationPermission('denied');
-          localStorage.setItem('locationPermission', 'denied');
-          localStorage.removeItem('userLocation');
+        () => {
           warning(t('toasts.locationDenied'));
         }
       );
@@ -4090,31 +4087,27 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       target="_blank" rel="noopener noreferrer"
                       style={{
                         flex: isMobile ? '1' : 'initial',
-                        padding: '0.25rem',
-                        background: 'white',
-                        border: '1px solid #e5e7eb',
+                        padding: isMobile ? '0.5rem' : '0.5rem 0.75rem',
                         borderRadius: '6px',
                         textDecoration: 'none',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center'
                       }}>
-                      <img src="/amazon-logo.svg" alt="Amazon" style={{ width: '32px', height: '32px' }} />
+                      <img src="/amazon-logo.svg" alt="Amazon" style={{ width: '22px', height: '22px', display: 'block' }} />
                     </a>
                     <a href={`https://www.walmart.com/search?q=${encodeURIComponent(item.name)}`}
                       target="_blank" rel="noopener noreferrer"
                       style={{
                         flex: isMobile ? '1' : 'initial',
-                        padding: '0.25rem',
-                        background: 'white',
-                        border: '1px solid #e5e7eb',
+                        padding: isMobile ? '0.5rem' : '0.5rem 0.75rem',
                         borderRadius: '6px',
                         textDecoration: 'none',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center'
                       }}>
-                      <img src="/walmart-logo.svg" alt="Walmart" style={{ width: '32px', height: '32px' }} />
+                      <img src="/walmart-logo.svg" alt="Walmart" style={{ width: '22px', height: '22px', display: 'block' }} />
                     </a>
                     <button className="item-delete-btn" onClick={async () => {
                       console.log('🗑️ Attempting to delete item:', item.id, item.name);

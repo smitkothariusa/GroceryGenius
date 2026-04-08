@@ -4083,39 +4083,38 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   <div style={{
                     display: 'flex',
                     gap: '0.5rem',
-                    flexWrap: 'wrap',
+                    alignItems: 'center',
                     width: isMobile ? '100%' : 'auto'
                   }}>
                     <a href={`https://www.amazon.com/s?k=${encodeURIComponent(item.name)}&i=amazonfresh`}
                       target="_blank" rel="noopener noreferrer"
                       style={{
-                        flex: isMobile ? '1' : 'initial',
+                        flexShrink: 0,
+                        width: '38px',
                         height: '38px',
-                        boxSizing: 'border-box',
-                        border: '1px solid #e5e7eb',
                         borderRadius: '6px',
                         textDecoration: 'none',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        padding: '0 0.75rem'
+                        overflow: 'hidden'
                       }}>
-                      <img src="/amazon-logo.svg" alt="Amazon" style={{ height: '26px', width: '26px', display: 'block' }} />
+                      <img src="/amazon-logo.svg" alt="Amazon" style={{ width: '38px', height: '38px', display: 'block' }} />
                     </a>
                     <a href={`https://www.walmart.com/search?q=${encodeURIComponent(item.name)}`}
                       target="_blank" rel="noopener noreferrer"
                       style={{
-                        flex: isMobile ? '1' : 'initial',
+                        flexShrink: 0,
+                        width: '38px',
                         height: '38px',
-                        boxSizing: 'border-box',
                         borderRadius: '6px',
                         textDecoration: 'none',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        padding: '0 0.75rem'
+                        overflow: 'hidden'
                       }}>
-                      <img src="/walmart-logo.svg" alt="Walmart" style={{ height: '26px', width: '26px', display: 'block' }} />
+                      <img src="/walmart-logo.svg" alt="Walmart" style={{ width: '38px', height: '38px', display: 'block' }} />
                     </a>
                     <button className="item-delete-btn" onClick={async () => {
                       // Always remove from local state first (optimistic update)
@@ -4131,14 +4130,13 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     }} style={{
                       flex: isMobile ? '1' : 'initial',
                       height: '38px',
-                      boxSizing: 'border-box',
                       background: '#fee2e2',
                       color: '#dc2626',
                       border: 'none',
                       padding: '0 0.75rem',
                       borderRadius: '6px',
                       cursor: 'pointer',
-                      fontSize: isMobile ? '1rem' : '0.875rem',
+                      fontSize: '1rem',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'

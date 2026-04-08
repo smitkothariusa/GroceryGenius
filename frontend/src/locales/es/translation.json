@@ -563,6 +563,9 @@
     "deleteConfirmPlaceholder": "DELETE",
     "deleteConfirmButton": "Eliminar Cuenta Permanentemente",
     "deleteCancel": "Cancelar",
-    "aiGeneratingLabel": "Generando etiqueta..."
+    "aiGeneratingLabel": "Generando etiqueta...",
+    "failedToGenerateLabel": "Error al generar etiqueta. Dieta añadida con texto original.",
+    "failedToSave": "Error al guardar la configuración.",
+    "failedToDelete": "Error al eliminar la cuenta. Por favor, inténtalo de nuevo."
   }
 }

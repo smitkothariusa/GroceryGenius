@@ -43,6 +43,7 @@ interface SettingsPanelProps {
   onDeleteAccount: () => void;
   showSuccess: (msg: string) => void;
   showError: (msg: string) => void;
+  onSignOut?: () => void;
 }
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({
@@ -123,9 +124,14 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
     if (!text) return;
     setGeneratingLabel(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
       const res = await fetch(`${apiBase}/profile/dietary-label`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({ text }),
       });
       const labelData = await res.json();
@@ -134,7 +140,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
       setDietaryPrefs(prev => [...prev, newLabel.id]);
       setCustomDietText('');
     } catch {
-      showError('Failed to generate label. Diet added with original text.');
+      showError(t('settings.failedToGenerateLabel'));
       const fallback: CustomDietaryLabel = { id: uuidv4(), label: text.slice(0, 30), description: '' };
       setCustomLabels(prev => [...prev, fallback]);
       setDietaryPrefs(prev => [...prev, fallback.id]);
@@ -175,7 +181,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
     const { error } = await profileService.upsertProfile(userId, updates);
     setSaving(false);
     if (error) {
-      showError('Failed to save settings.');
+      showError(t('settings.failedToSave'));
     } else {
       showSuccess(t('settings.saved'));
       onSave(updates);
@@ -216,7 +222,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
       await authService.signOut();
       onDeleteAccount();
     } catch {
-      showError('Failed to delete account. Please try again.');
+      showError(t('settings.failedToDelete'));
     } finally {
       setDeleting(false);
     }
@@ -229,7 +235,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
     padding: '0.5rem 0.6rem',
     border: '1px solid #e5e7eb',
     borderRadius: '6px',
-    fontSize: '0.875rem',
+    fontSize: '1rem',
     boxSizing: 'border-box',
   };
 

@@ -563,6 +563,9 @@
     "deleteConfirmPlaceholder": "DELETE",
     "deleteConfirmButton": "Supprimer le Compte Définitivement",
     "deleteCancel": "Annuler",
-    "aiGeneratingLabel": "Génération de l'étiquette..."
+    "aiGeneratingLabel": "Génération de l'étiquette...",
+    "failedToGenerateLabel": "Échec de la génération de l'étiquette. Régime ajouté avec le texte original.",
+    "failedToSave": "Erreur lors de la sauvegarde.",
+    "failedToDelete": "Échec de la suppression du compte. Veuillez réessayer."
   }
 }

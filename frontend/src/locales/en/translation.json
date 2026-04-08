@@ -563,6 +563,9 @@
     "deleteConfirmPlaceholder": "DELETE",
     "deleteConfirmButton": "Permanently Delete Account",
     "deleteCancel": "Cancel",
-    "aiGeneratingLabel": "Generating label..."
+    "aiGeneratingLabel": "Generating label...",
+    "failedToGenerateLabel": "Failed to generate label. Diet added with original text.",
+    "failedToSave": "Failed to save settings.",
+    "failedToDelete": "Failed to delete account. Please try again."
   }
 }

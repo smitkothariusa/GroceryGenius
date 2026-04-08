@@ -563,6 +563,9 @@
     "deleteConfirmPlaceholder": "DELETE",
     "deleteConfirmButton": "アカウントを完全に削除",
     "deleteCancel": "キャンセル",
-    "aiGeneratingLabel": "ラベルを生成中..."
+    "aiGeneratingLabel": "ラベルを生成中...",
+    "failedToGenerateLabel": "ラベルの生成に失敗しました。元のテキストで食事制限を追加しました。",
+    "failedToSave": "設定の保存に失敗しました。",
+    "failedToDelete": "アカウントの削除に失敗しました。もう一度お試しください。"
   }
 }

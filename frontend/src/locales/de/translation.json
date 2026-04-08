@@ -563,6 +563,9 @@
     "deleteConfirmPlaceholder": "DELETE",
     "deleteConfirmButton": "Konto dauerhaft löschen",
     "deleteCancel": "Abbrechen",
-    "aiGeneratingLabel": "Label wird erstellt..."
+    "aiGeneratingLabel": "Label wird erstellt...",
+    "failedToGenerateLabel": "Bezeichnung konnte nicht generiert werden. Diät mit Originaltext hinzugefügt.",
+    "failedToSave": "Einstellungen konnten nicht gespeichert werden.",
+    "failedToDelete": "Konto konnte nicht gelöscht werden. Bitte versuche es erneut."
   }
 }

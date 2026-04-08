@@ -563,6 +563,9 @@
     "deleteConfirmPlaceholder": "DELETE",
     "deleteConfirmButton": "永久删除账户",
     "deleteCancel": "取消",
-    "aiGeneratingLabel": "正在生成标签..."
+    "aiGeneratingLabel": "正在生成标签...",
+    "failedToGenerateLabel": "生成标签失败。已使用原始文字添加饮食。",
+    "failedToSave": "保存设置失败。",
+    "failedToDelete": "删除账户失败，请重试。"
   }
 }

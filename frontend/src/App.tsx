@@ -35,13 +35,15 @@ const dropOffSites: DropOffSite[] = [
 import Toast from './components/Toast';
 import { useToast } from './hooks/useToast';
 import { useState, useEffect, useRef } from 'react';
-import { authService, supabase } from './lib/supabase';
+import { authService, supabase, profileService, CustomDietaryLabel, Profile } from './lib/supabase';
 import { calorieService } from './lib/database';
 import { pantryService, shoppingService, recipesService, mealPlansService, donationService } from './lib/database';
 import Auth from './components/Auth';
 import MealPlanCalendar from './components/MealPlanCalendar';
 import IngredientSubstitution from './components/IngredientSubstitution';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import OnboardingSurvey from './components/OnboardingSurvey';
+import SettingsPanel from './components/SettingsPanel';
 
 
 interface PantryItem {
@@ -146,6 +148,10 @@ const App: React.FC = () => {
   const [detectedBarcode, setDetectedBarcode] = useState<string>('');
   const [detectedExpiry, setDetectedExpiry] = useState<string>('');
   const [showMissionPopup, setShowMissionPopup] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showSurvey, setShowSurvey] = useState(false);
+  const [userProfile, setUserProfile] = useState<Profile | null>(null);
+  const [customDietaryLabels, setCustomDietaryLabels] = useState<CustomDietaryLabel[]>([]);
   const [showDemoConfirm, setShowDemoConfirm] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([]);
@@ -353,7 +359,24 @@ const App: React.FC = () => {
       } catch (error) {
         console.error('❌ Error loading calorie data:', error);
       }
-      
+
+      // Load full profile for settings + survey
+      try {
+        const profileResult = await profileService.getProfile(user.id);
+        if (profileResult) {
+          setUserProfile(profileResult);
+          setCustomDietaryLabels(profileResult.custom_dietary_labels ?? []);
+          if (profileResult.dietary_preferences && profileResult.dietary_preferences.length > 0) {
+            setDietaryFilter(profileResult.dietary_preferences[0]);
+          }
+          if (!profileResult.onboarding_completed) {
+            setShowSurvey(true);
+          }
+        }
+      } catch (err) {
+        console.error('❌ Error loading profile:', err);
+      }
+
       // Load pantry items
       // Load pantry items
     console.log('⏳ Starting to load pantry...');
@@ -2506,6 +2529,12 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             🎬 Demo
           </button>
           <button
+            className="mobile-drawer-footer-btn"
+            onClick={() => { setShowSettings(true); setDrawerOpen(false); }}
+          >
+            ⚙️ {t('settings.title')}
+          </button>
+          <button
             className="mobile-drawer-footer-btn signout"
             onClick={async () => { await authService.signOut(); setUser(null); setDrawerOpen(false); }}
           >
@@ -2558,6 +2587,20 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 </button>
                 <LanguageSwitcher />
               </div>
+            )}
+            {!isMobile && (
+              <button onClick={() => setShowSettings(true)} style={{
+                padding: '0.5rem 1rem',
+                background: '#f3f4f6',
+                color: '#374151',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                fontSize: '1rem',
+              }}>
+                ⚙️
+              </button>
             )}
             {!isMobile && (
               <button onClick={async () => {
@@ -2725,6 +2768,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     <option value="keto">{t('recipes.dietary.keto')}</option>
                     <option value="diabetic-friendly">{t('recipes.dietary.diabeticFriendly')}</option>
                     <option value="heart-healthy">{t('recipes.dietary.heartHealthy')}</option>
+                    {customDietaryLabels.map(custom => (
+                      <option key={custom.id} value={custom.id}>✨ {custom.label}</option>
+                    ))}
                   </select>
 
                   {/* Difficulty + Servings — 2-column grid */}
@@ -2858,6 +2904,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       <option value="keto">{t('recipes.dietary.keto')}</option>
                       <option value="diabetic-friendly">{t('recipes.dietary.diabeticFriendly')}</option>
                       <option value="heart-healthy">{t('recipes.dietary.heartHealthy')}</option>
+                      {customDietaryLabels.map(custom => (
+                        <option key={custom.id} value={custom.id}>✨ {custom.label}</option>
+                      ))}
                     </select>
                     <div className="recipe-servings-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <span>⚖️</span>
@@ -6819,6 +6868,53 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           }}
         />
       )}
+      {showSurvey && userProfile && (
+        <OnboardingSurvey
+          userId={user.id}
+          apiBase={API_BASE}
+          onComplete={async (surveyData) => {
+            const { error: saveError } = await profileService.upsertProfile(user.id, { ...surveyData, onboarding_completed: true });
+            if (!saveError) {
+              setUserProfile(prev => prev ? { ...prev, ...surveyData, onboarding_completed: true } : null);
+              if (surveyData.daily_calorie_goal) setDailyCalorieGoal(surveyData.daily_calorie_goal);
+              if (surveyData.custom_dietary_labels) setCustomDietaryLabels(surveyData.custom_dietary_labels);
+              if (surveyData.dietary_preferences && surveyData.dietary_preferences.length > 0) {
+                setDietaryFilter(surveyData.dietary_preferences[0]);
+              }
+            }
+            setShowSurvey(false);
+            setShowMissionPopup(true);
+          }}
+          onSkip={async () => {
+            await profileService.upsertProfile(user.id, { onboarding_completed: true });
+            setUserProfile(prev => prev ? { ...prev, onboarding_completed: true } : null);
+            setShowSurvey(false);
+            setShowMissionPopup(true);
+          }}
+        />
+      )}
+
+      {showSettings && userProfile && (
+        <SettingsPanel
+          userId={user.id}
+          profile={userProfile}
+          apiBase={API_BASE}
+          isMobile={isMobile}
+          onClose={() => setShowSettings(false)}
+          onSave={(updated) => {
+            setUserProfile(prev => prev ? { ...prev, ...updated } : null);
+            if (updated.daily_calorie_goal) setDailyCalorieGoal(updated.daily_calorie_goal);
+            if (updated.custom_dietary_labels) setCustomDietaryLabels(updated.custom_dietary_labels);
+          }}
+          onDeleteAccount={() => {
+            setUser(null);
+            setShowSettings(false);
+          }}
+          showSuccess={success}
+          showError={error}
+        />
+      )}
+
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', zIndex: 10000, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {toasts.map((toast) => (
           <Toast

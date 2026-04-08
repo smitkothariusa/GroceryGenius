@@ -10,6 +10,7 @@
 }
 
 :root {
+  --brand: #667eea;
   --grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --green: #10b981;
   --green-shadow: rgba(16, 185, 129, 0.35);
@@ -179,7 +180,7 @@ a { text-decoration: none; color: inherit; }
 }
 
 .section-label {
-  color: #667eea;
+  color: var(--brand);
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -325,10 +326,8 @@ a { text-decoration: none; color: inherit; }
 .cta-section p {
   color: rgba(255, 255, 255, 0.82);
   font-size: 1rem;
-  margin-bottom: 28px;
+  margin: 0 auto 28px;
   max-width: 420px;
-  margin-left: auto;
-  margin-right: auto;
   line-height: 1.65;
 }
 
@@ -411,4 +410,13 @@ a { text-decoration: none; color: inherit; }
     flex-direction: column;
     text-align: center;
   }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .carousel-track { transition: none; }
+  .btn-primary { transition: none; }
+  .btn-primary:hover { transform: none; box-shadow: 0 4px 18px var(--green-shadow); }
 }

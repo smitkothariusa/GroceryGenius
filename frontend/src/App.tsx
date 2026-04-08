@@ -6882,6 +6882,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 setDietaryFilter(surveyData.dietary_preferences[0]);
               }
             } else {
+              console.error('Survey upsert error:', JSON.stringify(saveError));
               error('Failed to save your preferences. Please update them in Settings.');
             }
             setShowSurvey(false);

@@ -6881,13 +6881,17 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               if (surveyData.dietary_preferences && surveyData.dietary_preferences.length > 0) {
                 setDietaryFilter(surveyData.dietary_preferences[0]);
               }
+            } else {
+              error('Failed to save your preferences. Please update them in Settings.');
             }
             setShowSurvey(false);
             setShowMissionPopup(true);
           }}
           onSkip={async () => {
-            await profileService.upsertProfile(user.id, { onboarding_completed: true });
-            setUserProfile(prev => prev ? { ...prev, onboarding_completed: true } : null);
+            const { error: skipError } = await profileService.upsertProfile(user.id, { onboarding_completed: true });
+            if (!skipError) {
+              setUserProfile(prev => prev ? { ...prev, onboarding_completed: true } : null);
+            }
             setShowSurvey(false);
             setShowMissionPopup(true);
           }}

@@ -64,7 +64,10 @@ async def delete_account(authorization: str = Header(...)):
     token = authorization[7:].strip()
 
     sb_anon = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
-    user_response = sb_anon.auth.get_user(token)
+    try:
+        user_response = sb_anon.auth.get_user(token)
+    except Exception as exc:
+        raise HTTPException(status_code=401, detail=f"Invalid or expired token: {exc}")
     if not user_response or not user_response.user:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
     user_id = user_response.user.id

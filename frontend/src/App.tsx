@@ -3912,6 +3912,93 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               </div>
             )}
 
+            {shoppingList.length > 0 && (
+              <div style={{ marginBottom: '1rem' }}>
+                {priceComparison.loading ? (
+                  <div style={{
+                    padding: '0.5rem 1rem',
+                    background: '#f0fdf4',
+                    borderRadius: '8px',
+                    border: '1px solid #86efac',
+                    fontSize: '0.875rem',
+                    color: '#166534',
+                    fontStyle: 'italic'
+                  }}>
+                    🔄 {t('shopping.fetchingPrices')}
+                  </div>
+                ) : (
+                  <div style={{
+                    background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                    padding: '1rem',
+                    borderRadius: '12px',
+                    border: '1px solid #bae6fd'
+                  }}>
+                    <div style={{
+                      fontSize: '0.75rem',
+                      color: '#0369a1',
+                      fontWeight: '600',
+                      marginBottom: '0.5rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
+                    }}>
+                      💰 {t('shopping.priceComparison')}
+                    </div>
+                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-around' }}>
+                      <div style={{ flex: 1, textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#0369a1', marginBottom: '0.25rem' }}>
+                          Amazon
+                        </div>
+                        <div style={{
+                          fontSize: '1.25rem',
+                          fontWeight: '700',
+                          color: priceComparison.amazon <= priceComparison.walmart ? '#10b981' : textColor
+                        }}>
+                          ${priceComparison.amazon.toFixed(2)}
+                        </div>
+                        {priceComparison.amazon < priceComparison.walmart && (
+                          <div style={{ fontSize: '0.7rem', color: '#10b981', marginTop: '0.25rem' }}>
+                            ✓ {t('shopping.bestPrice')}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{
+                        width: '1px',
+                        background: '#bae6fd',
+                        margin: '0.5rem 0'
+                      }} />
+                      <div style={{ flex: 1, textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#0369a1', marginBottom: '0.25rem' }}>
+                          Walmart
+                        </div>
+                        <div style={{
+                          fontSize: '1.25rem',
+                          fontWeight: '700',
+                          color: priceComparison.walmart < priceComparison.amazon ? '#10b981' : textColor
+                        }}>
+                          ${priceComparison.walmart.toFixed(2)}
+                        </div>
+                        {priceComparison.walmart < priceComparison.amazon && (
+                          <div style={{ fontSize: '0.7rem', color: '#10b981', marginTop: '0.25rem' }}>
+                            ✓ {t('shopping.bestPrice')}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div style={{
+                      marginTop: '0.75rem',
+                      paddingTop: '0.75rem',
+                      borderTop: '1px solid #bae6fd',
+                      fontSize: '0.75rem',
+                      color: '#0369a1',
+                      textAlign: 'center'
+                    }}>
+                      💡 {t('shopping.saveByShopping', { amount: Math.abs(priceComparison.amazon - priceComparison.walmart).toFixed(2), store: priceComparison.walmart < priceComparison.amazon ? 'Walmart' : 'Amazon' })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
               <select value={sortShoppingBy} onChange={(e) => setSortShoppingBy(e.target.value as any)}
                 style={{ padding: '0.5rem', border: '2px solid #e5e7eb', borderRadius: '8px', flexShrink: 0 }}>
@@ -3928,7 +4015,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
                   fontSize: isMobile ? '0.75rem' : '0.875rem', flexShrink: 0
                 }}>
-                  {shoppingList.every(i => i.checked) ? `☑️ ${t('shopping.deselectAll')}` : `☐ ${t('shopping.selectAll')}`}
+                  {shoppingList.every(i => i.checked) ? `☑️ ${t('shopping.deselectAll')}` : t('shopping.selectAll')}
                 </button>
               )}
               {shoppingList.some(i => i.checked) && (
@@ -3940,93 +4027,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
                   fontSize: isMobile ? '0.75rem' : '0.875rem', flexShrink: 0
                 }}>🗑️ {t('shopping.clearChecked')}</button>
-              )}
-              
-              {shoppingList.length > 0 && (
-                <div style={{ flex: 1 }}>
-                  {priceComparison.loading ? (
-                    <div style={{ 
-                      padding: '0.5rem 1rem',
-                      background: '#f0fdf4',
-                      borderRadius: '8px',
-                      border: '1px solid #86efac',
-                      fontSize: '0.875rem',
-                      color: '#166534',
-                      fontStyle: 'italic'
-                    }}>
-                      🔄 {t('shopping.fetchingPrices')}
-                    </div>
-                  ) : (
-                    <div style={{ 
-                      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
-                      padding: '1rem',
-                      borderRadius: '12px',
-                      border: '1px solid #bae6fd'
-                    }}>
-                      <div style={{ 
-                        fontSize: '0.75rem', 
-                        color: '#0369a1',
-                        fontWeight: '600',
-                        marginBottom: '0.5rem',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px'
-                      }}>
-                        💰 {t('shopping.priceComparison')}
-                      </div>
-                      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-around' }}>
-                        <div style={{ flex: 1, textAlign: 'center' }}>
-                          <div style={{ fontSize: '0.75rem', color: '#0369a1', marginBottom: '0.25rem' }}>
-                            Amazon
-                          </div>
-                          <div style={{ 
-                            fontSize: '1.25rem', 
-                            fontWeight: '700',
-                            color: priceComparison.amazon <= priceComparison.walmart ? '#10b981' : textColor
-                          }}>
-                            ${priceComparison.amazon.toFixed(2)}
-                          </div>
-                          {priceComparison.amazon < priceComparison.walmart && (
-                            <div style={{ fontSize: '0.7rem', color: '#10b981', marginTop: '0.25rem' }}>
-                              ✓ {t('shopping.bestPrice')}
-                            </div>
-                          )}
-                        </div>
-                        <div style={{ 
-                          width: '1px', 
-                          background: '#bae6fd',
-                          margin: '0.5rem 0'
-                        }} />
-                        <div style={{ flex: 1, textAlign: 'center' }}>
-                          <div style={{ fontSize: '0.75rem', color: '#0369a1', marginBottom: '0.25rem' }}>
-                            Walmart
-                          </div>
-                          <div style={{ 
-                            fontSize: '1.25rem', 
-                            fontWeight: '700',
-                            color: priceComparison.walmart < priceComparison.amazon ? '#10b981' : textColor
-                          }}>
-                            ${priceComparison.walmart.toFixed(2)}
-                          </div>
-                          {priceComparison.walmart < priceComparison.amazon && (
-                            <div style={{ fontSize: '0.7rem', color: '#10b981', marginTop: '0.25rem' }}>
-                              ✓ {t('shopping.bestPrice')}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div style={{ 
-                        marginTop: '0.75rem',
-                        paddingTop: '0.75rem',
-                        borderTop: '1px solid #bae6fd',
-                        fontSize: '0.75rem',
-                        color: '#0369a1',
-                        textAlign: 'center'
-                      }}>
-                        💡 {t('shopping.saveByShopping', { amount: Math.abs(priceComparison.amazon - priceComparison.walmart).toFixed(2), store: priceComparison.walmart < priceComparison.amazon ? 'Walmart' : 'Amazon' })}
-                      </div>
-                    </div>
-                  )}
-                </div>
               )}
             </div>
 
@@ -4090,52 +4090,31 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       target="_blank" rel="noopener noreferrer"
                       style={{
                         flex: isMobile ? '1' : 'initial',
-                        padding: isMobile ? '0.5rem' : '0.5rem 0.75rem',
-                        background: '#ff9900',
-                        color: 'white',
+                        padding: '0.25rem',
+                        background: 'white',
+                        border: '1px solid #e5e7eb',
                         borderRadius: '6px',
                         textDecoration: 'none',
-                        fontSize: isMobile ? '0.75rem' : '0.875rem',
-                        fontWeight: '600',
-                        textAlign: 'center',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center'
                       }}>
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" width="52" height="16" aria-label="Amazon">
-                        <text x="0" y="36" fontFamily="Arial, sans-serif" fontWeight="900" fontSize="36" fill="white" letterSpacing="-1">amazon</text>
-                        <path d="M8 48 Q100 64 192 48" stroke="#232f3e" strokeWidth="4" fill="none" strokeLinecap="round"/>
-                        <polygon points="178,41 192,48 178,55" fill="#232f3e"/>
-                      </svg>
+                      <img src="/amazon-logo.svg" alt="Amazon" style={{ width: '32px', height: '32px' }} />
                     </a>
                     <a href={`https://www.walmart.com/search?q=${encodeURIComponent(item.name)}`}
                       target="_blank" rel="noopener noreferrer"
                       style={{
                         flex: isMobile ? '1' : 'initial',
-                        padding: isMobile ? '0.5rem' : '0.5rem 0.75rem',
-                        background: '#0071ce',
-                        color: 'white',
+                        padding: '0.25rem',
+                        background: 'white',
+                        border: '1px solid #e5e7eb',
                         borderRadius: '6px',
                         textDecoration: 'none',
-                        fontSize: isMobile ? '0.75rem' : '0.875rem',
-                        fontWeight: '600',
-                        textAlign: 'center',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center'
                       }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" width="14" height="14" aria-hidden="true">
-                          <circle cx="7" cy="7" r="1.5" fill="white"/>
-                          <line x1="7" y1="0" x2="7" y2="4.5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-                          <line x1="7" y1="9.5" x2="7" y2="14" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-                          <line x1="0.86" y1="3.5" x2="4.5" y2="5.5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-                          <line x1="9.5" y1="8.5" x2="13.14" y2="10.5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-                          <line x1="0.86" y1="10.5" x2="4.5" y2="8.5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-                          <line x1="9.5" y1="5.5" x2="13.14" y2="3.5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-                        </svg>
-                        <span style={{ fontFamily: 'Arial, sans-serif', fontWeight: '700', fontSize: '0.75rem', letterSpacing: '-0.2px' }}>walmart</span>
-                      </span>
+                      <img src="/walmart-logo.svg" alt="Walmart" style={{ width: '32px', height: '32px' }} />
                     </a>
                     <button className="item-delete-btn" onClick={async () => {
                       console.log('🗑️ Attempting to delete item:', item.id, item.name);

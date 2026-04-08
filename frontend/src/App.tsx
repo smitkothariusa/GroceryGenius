@@ -110,7 +110,9 @@ const App: React.FC = () => {
     quantity: number;
     unit: string;
   } | null>(null);
-  const [currentTab, setCurrentTab] = useState<'pantry' | 'recipes' | 'mealplan' | 'shopping' | 'donate' | 'favorites'>('pantry');  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [currentTab, setCurrentTab] = useState<'pantry' | 'recipes' | 'mealplan' | 'shopping' | 'donate' | 'favorites'>(
+    () => (localStorage.getItem('activeTab') as 'pantry' | 'recipes' | 'mealplan' | 'shopping' | 'donate' | 'favorites') || 'pantry'
+  );  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [showDetailedView, setShowDetailedView] = useState(false);
   const [recipeSearchQuery, setRecipeSearchQuery] = useState('');
   const [recipeServings, setRecipeServings] = useState<number | ''>(2);
@@ -624,6 +626,7 @@ const App: React.FC = () => {
   }, [i18n.language, favorites]);
 
   const handleTabChange = (tab: typeof currentTab) => {
+    localStorage.setItem('activeTab', tab);
     setIsTabChanging(true);
     setTimeout(() => {
       setCurrentTab(tab);
@@ -4087,32 +4090,34 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       target="_blank" rel="noopener noreferrer"
                       style={{
                         flex: isMobile ? '1' : 'initial',
-                        padding: isMobile ? '0.5rem' : '0.5rem 1rem',
+                        height: '38px',
+                        boxSizing: 'border-box',
                         border: '1px solid #e5e7eb',
                         borderRadius: '6px',
                         textDecoration: 'none',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        padding: '0 0.75rem'
                       }}>
-                      <img src="/amazon-logo.svg" alt="Amazon" style={{ width: '28px', height: '28px', display: 'block' }} />
+                      <img src="/amazon-logo.svg" alt="Amazon" style={{ height: '26px', width: '26px', display: 'block' }} />
                     </a>
                     <a href={`https://www.walmart.com/search?q=${encodeURIComponent(item.name)}`}
                       target="_blank" rel="noopener noreferrer"
                       style={{
                         flex: isMobile ? '1' : 'initial',
-                        padding: isMobile ? '0.5rem' : '0.5rem 1rem',
+                        height: '38px',
+                        boxSizing: 'border-box',
                         borderRadius: '6px',
                         textDecoration: 'none',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        padding: '0 0.75rem'
                       }}>
-                      <img src="/walmart-logo.svg" alt="Walmart" style={{ width: '28px', height: '28px', display: 'block' }} />
+                      <img src="/walmart-logo.svg" alt="Walmart" style={{ height: '26px', width: '26px', display: 'block' }} />
                     </a>
                     <button className="item-delete-btn" onClick={async () => {
-                      console.log('🗑️ Attempting to delete item:', item.id, item.name);
-
                       // Always remove from local state first (optimistic update)
                       setShoppingList(prev => prev.filter(i => i.id !== item.id));
                       success(t('notifications.itemRemoved'));
@@ -4120,19 +4125,24 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       // Then try to delete from database in background
                       try {
                         await shoppingService.delete(item.id);
-                        console.log('✅ Successfully deleted from database:', item.id);
                       } catch (error) {
                         console.error('⚠️ Failed to delete from database (item already removed from UI):', error);
-                        // Item is already removed from UI, so this is fine
                       }
-                    }} style={{flex: isMobile ? '1' : 'initial',
+                    }} style={{
+                      flex: isMobile ? '1' : 'initial',
+                      height: '38px',
+                      boxSizing: 'border-box',
                       background: '#fee2e2',
                       color: '#dc2626',
                       border: 'none',
-                      padding: isMobile ? '0.5rem' : '0.5rem 1rem',
+                      padding: '0 0.75rem',
                       borderRadius: '6px',
                       cursor: 'pointer',
-                      fontSize: isMobile ? '0.75rem' : '0.875rem'}}>
+                      fontSize: isMobile ? '1rem' : '0.875rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
                       {isMobile ? '🗑️' : t('common.delete')}
                     </button>
                   </div>

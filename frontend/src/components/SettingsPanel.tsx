@@ -275,13 +275,30 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontWeight: '700', fontSize: '1.1rem' }}>⚙️ {t('settings.title')}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              style={{ padding: '0.35rem 0.75rem', background: saving ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.25)', color: 'white', border: '1px solid rgba(255,255,255,0.5)', borderRadius: '8px', fontWeight: '700', fontSize: '0.8rem', cursor: saving ? 'not-allowed' : 'pointer', backdropFilter: 'blur(4px)' }}
-            >
-              {saving ? '…' : t('settings.saveChanges')}
-            </button>
+            {isMobile && (
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                style={{
+                  padding: '0.45rem 1.1rem',
+                  background: saving ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.22)',
+                  color: 'white',
+                  border: '1.5px solid rgba(255,255,255,0.55)',
+                  borderRadius: '50px',
+                  fontWeight: '700',
+                  fontSize: '0.85rem',
+                  cursor: saving ? 'not-allowed' : 'pointer',
+                  letterSpacing: '0.01em',
+                  boxShadow: '0 2px 10px rgba(0,0,0,0.15)',
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)',
+                  minWidth: '64px',
+                  opacity: saving ? 0.7 : 1,
+                } as React.CSSProperties}
+              >
+                {saving ? '…' : t('settings.saveChanges')}
+              </button>
+            )}
             <button onClick={onClose} aria-label="Close" style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.25rem', cursor: 'pointer', opacity: 0.8 }}>✕</button>
           </div>
         </div>
@@ -291,7 +308,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
       </div>
 
       {/* Scrollable content */}
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
         {/* Profile section */}
         <div style={sectionStyle}>
           <div style={sectionHeaderStyle}>👤 {t('settings.sections.profile')}</div>
@@ -458,6 +475,18 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         </div>
       </div>
 
+      {/* Desktop-only save button footer */}
+      {!isMobile && (
+        <div style={{ padding: '0.75rem', borderTop: '2px solid #f3f4f6', flexShrink: 0 }}>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            style={{ width: '100%', padding: '0.75rem', background: saving ? '#9ca3af' : 'linear-gradient(45deg,#667eea,#764ba2)', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '700', fontSize: '1rem', cursor: saving ? 'not-allowed' : 'pointer' }}
+          >
+            {saving ? '…' : t('settings.saveChanges')}
+          </button>
+        </div>
+      )}
     </div>
   );
 
@@ -508,7 +537,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
       {/* Mobile: bottom sheet */}
       {isMobile && (
         <div onClick={handleBackdropClick} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 999, display: 'flex', alignItems: 'flex-end' }}>
-          <div style={{ width: '100%', background: 'white', borderRadius: '16px 16px 0 0', maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 -4px 24px rgba(0,0,0,0.18)' }}>
+          <div style={{ width: '100%', background: 'white', borderRadius: '16px 16px 0 0', height: '85vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 -4px 24px rgba(0,0,0,0.18)' }}>
             {panelContent}
           </div>
         </div>

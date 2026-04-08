@@ -14,12 +14,27 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // DATABASE TYPES
 // ============================================
 
+export interface CustomDietaryLabel {
+  id: string;       // uuid generated client-side
+  label: string;    // e.g. "Mediterranean (No Shellfish)"
+  description: string;
+}
+
 export interface Profile {
   id: string;
   email: string;
   full_name?: string;
   daily_calorie_goal: number;
   dietary_preferences?: string[];
+  // New personalization fields
+  cooking_level?: 'beginner' | 'home_cook' | 'intermediate' | 'advanced';
+  age?: number;
+  weight_kg?: number;
+  height_cm?: number;
+  biological_sex?: 'male' | 'female';
+  activity_level?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
+  onboarding_completed: boolean;
+  custom_dietary_labels: CustomDietaryLabel[];
   created_at: string;
   updated_at: string;
 }
@@ -457,17 +472,41 @@ export const calorieService = {
     return { data, error };
   }
 };
-// Add this to your supabase.ts file
-
 export const setupAuthListener = (onAuthSuccess: () => void) => {
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN' && session) {
       onAuthSuccess();
     }
-    
+
     if (event === 'PASSWORD_RECOVERY') {
       // Handle password recovery
       console.log('Password recovery');
     }
   });
+};
+
+// ============================================
+// PROFILE SERVICE
+// ============================================
+
+export const profileService = {
+  async getProfile(userId: string): Promise<Profile | null> {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    if (error) {
+      console.error('Error fetching profile:', error);
+      return null;
+    }
+    return data as Profile;
+  },
+
+  async upsertProfile(userId: string, updates: Partial<Omit<Profile, 'id' | 'created_at' | 'updated_at'>>): Promise<{ error: any }> {
+    const { error } = await supabase
+      .from('profiles')
+      .upsert({ id: userId, ...updates }, { onConflict: 'id' });
+    return { error };
+  },
 };

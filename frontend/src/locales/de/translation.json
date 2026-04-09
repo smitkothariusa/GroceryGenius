@@ -572,7 +572,7 @@
   },
   "tour": {
     "pantry": {
-      "add": { "title": "Vorräte hinzufügen", "desc": "Gib einen Zutaten-Namen ein und tippe auf Hinzufügen, um deinen Vorrat aufzufüllen." },
+      "add": { "title": "Vorräte hinzufügen", "desc": "Tippe auf 'Artikel hinzufügen', um das Formular zu öffnen, dann gib einen Zutaten-Namen ein und speichere ihn." },
       "scan": { "title": "Barcode scannen", "desc": "Nutze deine Kamera, um einen Barcode zu scannen – wir fügen das Produkt automatisch hinzu." },
       "expiry": { "title": "Haltbarkeit verfolgen", "desc": "Füge ein Ablaufdatum hinzu – wir warnen dich automatisch, wenn es sich nähert." }
     },

@@ -572,7 +572,7 @@
   },
   "tour": {
     "pantry": {
-      "add": { "title": "Ajouter des articles au garde-manger", "desc": "Saisissez le nom d'un ingrédient et appuyez sur Ajouter pour remplir votre garde-manger." },
+      "add": { "title": "Ajouter des articles au garde-manger", "desc": "Appuyez sur 'Ajouter un article' pour ouvrir le formulaire, saisissez le nom d'un ingrédient et enregistrez-le." },
       "scan": { "title": "Scanner un code-barres", "desc": "Utilisez votre caméra pour scanner le code-barres d'un produit et nous l'ajouterons automatiquement." },
       "expiry": { "title": "Suivre les dates de péremption", "desc": "Ajoutez une date de péremption lors de l'enregistrement d'un article — nous vous alerterons automatiquement." }
     },

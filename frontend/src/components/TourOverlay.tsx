@@ -10,6 +10,8 @@ interface SpotlightRect {
   height: number;
 }
 
+const TOOLTIP_EST_HEIGHT = 220; // estimated tooltip height for positioning
+
 interface TourOverlayProps {
   steps: TourStep[];
   currentStep: number;
@@ -38,8 +40,10 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
       if (!el) {
         if (attempt < 10) {
           retryRef.current = setTimeout(() => measure(attempt + 1), 150);
+        } else {
+          // Element not found after ~1.5s — auto-advance so tour doesn't silently freeze
+          onNext();
         }
-        // After 10 attempts (~1.5s), give up and leave rect null — tour remains hidden for this step
         return;
       }
       const r = el.getBoundingClientRect();
@@ -49,8 +53,9 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
         width: r.width + PADDING * 2,
         height: r.height + PADDING * 2,
       });
-      // Decide whether tooltip goes above or below
-      setTooltipAbove(r.top > window.innerHeight / 2);
+      // Decide whether tooltip goes above or below based on available space below the element
+      const spaceBelow = window.innerHeight - (r.top + r.height) - 10;
+      setTooltipAbove(spaceBelow < TOOLTIP_EST_HEIGHT);
     }
 
     setRect(null);
@@ -86,8 +91,8 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
     ...(isMobile
       ? { bottom: 0, left: 0, right: 0, borderRadius: '16px 16px 0 0' }
       : tooltipAbove
-      ? { bottom: window.innerHeight - rect.top + 10 }
-      : { top: rect.top + rect.height + 10 }),
+      ? { bottom: Math.max(8, window.innerHeight - rect.top + 10) }
+      : { top: Math.min(rect.top + rect.height + 10, window.innerHeight - TOOLTIP_EST_HEIGHT - 8) }),
   };
 
   return (

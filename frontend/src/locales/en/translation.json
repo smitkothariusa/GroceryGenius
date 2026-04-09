@@ -572,7 +572,7 @@
   },
   "tour": {
     "pantry": {
-      "add": { "title": "Add pantry items", "desc": "Type any ingredient name and tap Add to stock your pantry." },
+      "add": { "title": "Add pantry items", "desc": "Tap 'Add Item' to open the form, then type an ingredient name and save it to stock your pantry." },
       "scan": { "title": "Scan a barcode", "desc": "Use your camera to scan a product barcode and we'll add it to your pantry automatically." },
       "expiry": { "title": "Your pantry items", "desc": "All your items appear here. Items highlighted in red are expiring soon — add an expiry date when saving any item to enable tracking." }
     },

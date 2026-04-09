@@ -572,7 +572,7 @@
   },
   "tour": {
     "pantry": {
-      "add": { "title": "Añadir artículos a la despensa", "desc": "Escribe el nombre de cualquier ingrediente y pulsa Añadir para llenar tu despensa." },
+      "add": { "title": "Añadir artículos a la despensa", "desc": "Pulsa 'Añadir artículo' para abrir el formulario, escribe el nombre del ingrediente y guárdalo." },
       "scan": { "title": "Escanear un código de barras", "desc": "Usa tu cámara para escanear el código de barras de un producto y lo añadiremos automáticamente." },
       "expiry": { "title": "Seguir fechas de caducidad", "desc": "Añade una fecha de caducidad al guardar un artículo y te avisaremos cuando se acerque." }
     },

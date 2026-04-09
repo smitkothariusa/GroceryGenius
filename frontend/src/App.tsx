@@ -2754,7 +2754,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                     <label style={{ fontWeight: '700', fontSize: '0.9rem', flex: 1 }}>🥘 {t('recipes.whatIngredientsLabel')}</label>
                     {pantry.length > 0 && (
-                      <button onClick={addPantryToIngredients} style={{
+                      <button data-tour="recipes-use-pantry-btn" onClick={addPantryToIngredients} style={{
                         padding: '0.35rem 0.6rem', background: '#8b5cf6', color: 'white',
                         border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '0.75rem', whiteSpace: 'nowrap'
                       }}>📦 {t('recipes.addPantryItems')}</button>
@@ -2949,7 +2949,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       </span>
                     ))}
                   </div>
-                  <input type="text" placeholder={t('recipes.ingredientsPlaceholder')} onKeyPress={(e) => {
+                  <input data-tour="recipes-ingredient-input" type="text" placeholder={t('recipes.ingredientsPlaceholder')} onKeyPress={(e) => {
                     if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
                       const tag = (e.target as HTMLInputElement).value.trim().toLowerCase();
                       if (!ingredientTags.includes(tag)) setIngredientTags([...ingredientTags, tag]);
@@ -2961,7 +2961,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     onChange={(e) => setRecipeSearchQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && !recipeLoading && handleGetRecipes()}
                     style={{ width: '100%', padding: '1rem', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: '1rem', marginBottom: '1rem', boxSizing: 'border-box' }} />
                   <div className="recipe-controls-row" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-                    <select value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
+                    <select data-tour="recipes-dietary-filter" value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
                       style={{ padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '8px', minWidth: '200px' }}>
                       <option value="">{t('recipes.dietary.all')}</option>
                       {dietaryFilter && !PRESET_LABEL_MAP[dietaryFilter] && !customDietaryLabels.find(l => l.id === dietaryFilter) && (
@@ -3302,6 +3302,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           </>
         )}
         {currentTab === 'mealplan' && (
+        <div data-tour="mealplan-calendar">
         <MealPlanCalendar
           savedRecipes={favorites}
           translatedNames={translatedFavoriteNames}
@@ -3350,6 +3351,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             }
           }}
         />
+        </div>
         )}
         {currentTab === 'pantry' && (
           <div style={{ 
@@ -4152,8 +4154,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             </div>
 
 
-            <div style={{ display: 'grid', gap: '0.75rem' }}>
-              {sortShoppingList().map(item => (
+            <div data-tour="shopping-list" style={{ display: 'grid', gap: '0.75rem' }}>
+              {sortShoppingList().map((item, index) => (
                 <div
                   key={item.id}
                   className="card-hover shopping-item-row"
@@ -4172,6 +4174,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 >
                   <div className="item-content" style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.75rem' : '1rem', flex: 1 }}>
                     <input type="checkbox" checked={item.checked}
+                      {...(index === 0 ? { 'data-tour': 'shopping-item-checkbox' } : {})}
                       onChange={async () => {
                         try {
                           await shoppingService.update(item.id, { checked: !item.checked });
@@ -5160,9 +5163,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
                   {t('pantry.itemName')}
                 </label>
-                <input 
-                  type="text" 
-                  placeholder={t('shopping.itemPlaceholder')} 
+                <input
+                  data-tour="shopping-add-input"
+                  type="text"
+                  placeholder={t('shopping.itemPlaceholder')}
                   value={newShoppingItem.name}
                   onChange={(e) => setNewShoppingItem({...newShoppingItem, name: e.target.value})}
                   onKeyPress={(e) => {

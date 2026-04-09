@@ -2589,9 +2589,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
         <div className="mobile-drawer-footer">
           <button
             className="mobile-drawer-footer-btn"
-            onClick={() => { setShowDemoConfirm(true); setDrawerOpen(false); }}
+            onClick={() => { handleTabChange('pantry'); setTourStep(0); setShowTour(true); setDrawerOpen(false); }}
           >
-            🎬 Demo
+            ❓ {t('common.help')}
           </button>
           <button
             className="mobile-drawer-footer-btn"
@@ -2638,7 +2638,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             </button>
             {!isMobile && (
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <button onClick={() => setShowDemoConfirm(true)} style={{
+                <button onClick={() => { handleTabChange('pantry'); setTourStep(0); setShowTour(true); }} style={{
                   padding: '0.5rem 1rem',
                   background: 'linear-gradient(45deg, #8b5cf6, #6366f1)',
                   color: 'white',
@@ -2648,7 +2648,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   fontWeight: '600',
                   fontSize: '0.875rem'
                 }}>
-                  🎬 Demo
+                  ❓ {t('common.help')}
                 </button>
                 <LanguageSwitcher />
               </div>

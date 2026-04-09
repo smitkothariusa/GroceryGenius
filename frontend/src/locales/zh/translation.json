@@ -377,7 +377,8 @@
     "edit": "编辑",
     "save": "保存",
     "close": "关闭",
-    "clearAll": "全部清除"
+    "clearAll": "全部清除",
+    "help": "帮助"
   },
   "notifications": {
     "itemAdded": "已将物品添加到{{list}}！",

@@ -377,7 +377,8 @@
     "edit": "編集",
     "save": "保存",
     "close": "閉じる",
-    "clearAll": "すべてクリア"
+    "clearAll": "すべてクリア",
+    "help": "ヘルプ"
   },
   "notifications": {
     "itemAdded": "{{list}}にアイテムを追加しました！",

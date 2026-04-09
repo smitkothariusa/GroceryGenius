@@ -377,7 +377,8 @@
     "edit": "Modifier",
     "save": "Enregistrer",
     "close": "Fermer",
-    "clearAll": "Tout Effacer"
+    "clearAll": "Tout Effacer",
+    "help": "Aide"
   },
   "notifications": {
     "itemAdded": "Article ajouté à {{list}}!",

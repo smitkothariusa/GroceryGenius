@@ -377,7 +377,8 @@
     "edit": "Bearbeiten",
     "save": "Speichern",
     "close": "Schließen",
-    "clearAll": "Alles Löschen"
+    "clearAll": "Alles Löschen",
+    "help": "Hilfe"
   },
   "notifications": {
     "itemAdded": "Artikel zu {{list}} hinzugefügt!",

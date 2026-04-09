@@ -377,7 +377,8 @@
     "edit": "Edit",
     "save": "Save",
     "close": "Close",
-    "clearAll": "Clear All"
+    "clearAll": "Clear All",
+    "help": "Help"
   },
   "notifications": {
     "itemAdded": "Item added to {{list}}!",

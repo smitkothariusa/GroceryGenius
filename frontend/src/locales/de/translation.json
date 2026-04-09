@@ -84,7 +84,7 @@
     "loading": "Laden...",
     "alreadyHaveAccount": "Bereits ein Konto? Anmelden",
     "dontHaveAccount": "Kein Konto? Registrieren",
-    "checkEmail": "Prüfe deine E-Mail für den Bestätigungslink!",
+    "checkEmail": "Falls kein Konto mit dieser E-Mail existiert, erhältst du in Kürze einen Bestätigungslink.",
     "emailConfirmFailed": "E-Mail-Bestätigung fehlgeschlagen. Bitte erneut versuchen."
   },
   "recipes": {

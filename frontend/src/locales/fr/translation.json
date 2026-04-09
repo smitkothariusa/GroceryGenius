@@ -455,7 +455,7 @@
     "pleaseUploadImage": "Veuillez télécharger un fichier image",
     "imageTooLarge": "Image trop grande. Veuillez utiliser une image de moins de 10 Mo.",
     "locationGranted": "Accès à la localisation accordé ! Tri par proximité.",
-    "locationDenied": "Accès à la localisation refusé. Affichage de tous les emplacements.",
+    "locationDenied": "Accès à la localisation refusé. Pour l'activer, allez dans les paramètres du navigateur et autorisez la localisation pour ce site.",
     "geolocationUnsupported": "La géolocalisation n'est pas prise en charge par votre navigateur.",
     "estimatedPrices": "Utilisation de prix estimés. La tarification IA est temporairement indisponible.",
     "impactCopied": "Message d'impact copié dans le presse-papiers !",
@@ -589,7 +589,7 @@
     "shopping": {
       "list": { "title": "Votre liste de courses", "desc": "Les articles sont générés automatiquement à partir de votre plan de repas et des manques dans votre garde-manger." },
       "check": { "title": "Cochez au fur et à mesure", "desc": "Appuyez sur un article pour le marquer comme acheté." },
-      "add": { "title": "Ajouter des articles manuellement", "desc": "Vous pouvez toujours ajouter des articles ponctuels à votre liste ici." }
+      "add": { "title": "Ajouter des articles manuellement", "desc": "Vous pouvez toujours ajouter des articles manuellement à votre liste ici." }
     },
     "donate": {
       "expiring": { "title": "Donner les aliments qui périment", "desc": "Les aliments proches de leur date de péremption apparaissent ici pour que vous puissiez les donner avant qu'ils ne soient gaspillés." },

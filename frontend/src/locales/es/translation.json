@@ -455,7 +455,7 @@
     "pleaseUploadImage": "Por favor, sube un archivo de imagen",
     "imageTooLarge": "Imagen demasiado grande. Por favor, usa una imagen de menos de 10 MB.",
     "locationGranted": "¡Acceso a ubicación concedido! Ordenando por proximidad.",
-    "locationDenied": "Acceso a ubicación denegado. Mostrando todas las ubicaciones.",
+    "locationDenied": "Acceso a ubicación denegado. Para activarlo, ve a la configuración del navegador y permite la ubicación para este sitio.",
     "geolocationUnsupported": "Geolocalización no soportada por tu navegador.",
     "estimatedPrices": "Usando precios estimados. Los precios de IA no están disponibles temporalmente.",
     "impactCopied": "¡Mensaje de impacto copiado al portapapeles!",
@@ -589,7 +589,7 @@
     "shopping": {
       "list": { "title": "Tu lista de la compra", "desc": "Los artículos se generan automáticamente a partir de tu plan de comidas y los huecos de la despensa." },
       "check": { "title": "Marca lo que compras", "desc": "Pulsa un artículo para marcarlo como comprado." },
-      "add": { "title": "Añadir artículos manualmente", "desc": "Siempre puedes añadir artículos sueltos a tu lista aquí." }
+      "add": { "title": "Añadir artículos manualmente", "desc": "Siempre puedes añadir artículos manualmente a tu lista aquí." }
     },
     "donate": {
       "expiring": { "title": "Dona alimentos que caducan", "desc": "Los alimentos próximos a caducar aparecen aquí para que puedas donarlos antes de que se desperdicien." },

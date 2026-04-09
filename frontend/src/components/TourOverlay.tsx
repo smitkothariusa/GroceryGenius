@@ -11,6 +11,7 @@ interface SpotlightRect {
 }
 
 const TOOLTIP_EST_HEIGHT = 220; // estimated tooltip height for positioning
+const SCROLL_SETTLE_MS = 400;   // wait for smooth scroll to settle before measuring
 
 interface TourOverlayProps {
   steps: TourStep[];
@@ -35,6 +36,19 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
 
   // Measure the target element position
   useEffect(() => {
+    function applyRect(el: HTMLElement) {
+      const r = el.getBoundingClientRect();
+      setRect({
+        top: r.top - PADDING,
+        left: r.left - PADDING,
+        width: r.width + PADDING * 2,
+        height: r.height + PADDING * 2,
+      });
+      // Position tooltip above if there isn't enough space below
+      const spaceBelow = window.innerHeight - (r.top + r.height) - 10;
+      setTooltipAbove(spaceBelow < TOOLTIP_EST_HEIGHT);
+    }
+
     function measure(attempt = 0) {
       const el = document.querySelector(step.selector) as HTMLElement | null;
       if (!el) {
@@ -46,16 +60,10 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
         }
         return;
       }
-      const r = el.getBoundingClientRect();
-      setRect({
-        top: r.top - PADDING,
-        left: r.left - PADDING,
-        width: r.width + PADDING * 2,
-        height: r.height + PADDING * 2,
-      });
-      // Decide whether tooltip goes above or below based on available space below the element
-      const spaceBelow = window.innerHeight - (r.top + r.height) - 10;
-      setTooltipAbove(spaceBelow < TOOLTIP_EST_HEIGHT);
+
+      // Scroll element into view, then measure after scroll animation settles
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      retryRef.current = setTimeout(() => applyRect(el), SCROLL_SETTLE_MS);
     }
 
     setRect(null);
@@ -63,7 +71,8 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
 
     const handleResize = () => {
       if (retryRef.current) clearTimeout(retryRef.current);
-      measure();
+      const el = document.querySelector(step.selector) as HTMLElement | null;
+      if (el) applyRect(el);
     };
     window.addEventListener('resize', handleResize);
 
@@ -76,6 +85,11 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
   if (!rect) return null;
 
   const isLast = currentStep === total - 1;
+
+  // Compute tooltip top: above or below element, always clamped within viewport
+  const tooltipTop = tooltipAbove
+    ? Math.max(8, rect.top - TOOLTIP_EST_HEIGHT - 10)
+    : Math.min(rect.top + rect.height + 10, window.innerHeight - TOOLTIP_EST_HEIGHT - 8);
 
   // Tooltip box style
   const tooltipStyle: React.CSSProperties = {
@@ -90,20 +104,18 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
     zIndex: 10001,
     ...(isMobile
       ? { bottom: 0, left: 0, right: 0, borderRadius: '16px 16px 0 0' }
-      : tooltipAbove
-      ? { bottom: Math.max(8, window.innerHeight - rect.top + 10) }
-      : { top: Math.min(rect.top + rect.height + 10, window.innerHeight - TOOLTIP_EST_HEIGHT - 8) }),
+      : { top: tooltipTop }),
   };
 
   return (
     <>
-      {/* Full-screen overlay with spotlight hole via box-shadow */}
+      {/* Full-screen overlay — pointerEvents:all locks the UI; only the tooltip buttons work */}
       <div
         style={{
           position: 'fixed',
           inset: 0,
           zIndex: 10000,
-          pointerEvents: 'none',
+          pointerEvents: 'all',
         }}
       >
         <div

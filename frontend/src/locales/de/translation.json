@@ -455,7 +455,7 @@
     "pleaseUploadImage": "Bitte lade eine Bilddatei hoch",
     "imageTooLarge": "Bild zu groß. Bitte verwende ein Bild unter 10 MB.",
     "locationGranted": "Standortzugriff gewährt! Sortierung nach Entfernung.",
-    "locationDenied": "Standortzugriff verweigert. Zeige alle Standorte.",
+    "locationDenied": "Standortzugriff verweigert. Bitte erlaube den Standortzugriff in deinen Browsereinstellungen.",
     "geolocationUnsupported": "Geolokalisierung wird von deinem Browser nicht unterstützt.",
     "estimatedPrices": "Schätzpreise werden verwendet. KI-Preise vorübergehend nicht verfügbar.",
     "impactCopied": "Impact-Nachricht in die Zwischenablage kopiert!",
@@ -589,7 +589,7 @@
     "shopping": {
       "list": { "title": "Deine Einkaufsliste", "desc": "Artikel werden automatisch aus deinem Essensplan und Vorratsengpässen generiert." },
       "check": { "title": "Beim Einkaufen abhaken", "desc": "Tippe auf einen Artikel, um ihn als gekauft zu markieren." },
-      "add": { "title": "Artikel manuell hinzufügen", "desc": "Du kannst jederzeit einzelne Artikel zur Liste hinzufügen." }
+      "add": { "title": "Artikel manuell hinzufügen", "desc": "Du kannst jederzeit manuell Artikel zu deiner Liste hinzufügen." }
     },
     "donate": {
       "expiring": { "title": "Ablaufende Lebensmittel spenden", "desc": "Lebensmittel kurz vor dem Ablaufdatum erscheinen hier, damit du sie rechtzeitig spenden kannst." },

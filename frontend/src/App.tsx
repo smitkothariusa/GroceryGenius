@@ -605,6 +605,10 @@ const App: React.FC = () => {
           localStorage.removeItem('gg_recipe_mode');
           localStorage.removeItem('hasSeenTour');
           localStorage.removeItem('hasSeenMission');
+          localStorage.removeItem('locationPermission');
+          localStorage.removeItem('userLocation');
+          setUserLocation(null);
+          setLocationPermission('pending');
           setRecipeMode('loose');
         }
       });

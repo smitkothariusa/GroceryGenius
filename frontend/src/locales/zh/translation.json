@@ -455,7 +455,7 @@
     "pleaseUploadImage": "请上传图片文件",
     "imageTooLarge": "图片太大。请使用 10MB 以下的图片。",
     "locationGranted": "位置权限已授予！按距离排序。",
-    "locationDenied": "位置权限被拒绝。显示所有地点。",
+    "locationDenied": "位置权限被拒绝。请前往浏览器设置，为此网站允许位置访问。",
     "geolocationUnsupported": "您的浏览器不支持地理定位。",
     "estimatedPrices": "正在使用估算价格。AI 定价暂时不可用。",
     "impactCopied": "影响消息已复制到剪贴板！",
@@ -589,7 +589,7 @@
     "shopping": {
       "list": { "title": "您的购物清单", "desc": "根据您的膳食计划和储藏室缺口自动生成。" },
       "check": { "title": "购物时勾选", "desc": "点击任意商品将其标记为已购买。" },
-      "add": { "title": "手动添加商品", "desc": "您随时可以在此手动添加单个商品到清单。" }
+      "add": { "title": "手动添加商品", "desc": "您随时可以在此手动将商品添加到清单。" }
     },
     "donate": {
       "expiring": { "title": "捐赠即将过期食品", "desc": "即将过期的食品会显示在这里，让您在浪费前及时捐赠。" },

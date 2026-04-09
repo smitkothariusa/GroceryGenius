@@ -455,7 +455,7 @@
     "pleaseUploadImage": "Please upload an image file",
     "imageTooLarge": "Image too large. Please use an image under 10MB",
     "locationGranted": "Location access granted! Sorting by proximity.",
-    "locationDenied": "Location access denied. Showing all locations.",
+    "locationDenied": "Location access denied. To enable, go to your browser settings and allow location for this site.",
     "geolocationUnsupported": "Geolocation not supported by your browser.",
     "estimatedPrices": "Using estimated prices. AI pricing temporarily unavailable.",
     "impactCopied": "Impact message copied to clipboard!",
@@ -589,7 +589,7 @@
     "shopping": {
       "list": { "title": "Your shopping list", "desc": "Items are auto-generated from your meal plan and pantry gaps." },
       "check": { "title": "Check off as you shop", "desc": "Tap any item to mark it as bought." },
-      "add": { "title": "Add items manually", "desc": "You can always add one-off items to your list here." }
+      "add": { "title": "Add items manually", "desc": "You can always manually add items to your list here." }
     },
     "donate": {
       "expiring": { "title": "Donate expiring food", "desc": "Food near its expiry date appears here so you can donate it before it goes to waste." },

@@ -8,13 +8,15 @@ function calcRecommendedCalories(
   weightKg: number,
   heightCm: number,
   age: number,
-  sex: 'male' | 'female',
+  sex: 'male' | 'female' | 'other',
   activity: Profile['activity_level']
 ): number {
   const bmr =
     sex === 'male'
       ? 10 * weightKg + 6.25 * heightCm - 5 * age + 5
-      : 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
+      : sex === 'female'
+      ? 10 * weightKg + 6.25 * heightCm - 5 * age - 161
+      : 10 * weightKg + 6.25 * heightCm - 5 * age - 78; // 'other': average of male/female
   const multipliers: Record<string, number> = {
     sedentary: 1.2,
     light: 1.375,
@@ -50,7 +52,7 @@ const LANGUAGES = [
 interface SurveyData {
   cooking_level: Profile['cooking_level'];
   age: string;
-  biological_sex: Profile['biological_sex'];
+  biological_sex: 'male' | 'female' | 'other' | undefined;
   weightValue: string;
   weightUnit: 'lbs' | 'kg';
   heightFt: string;
@@ -80,6 +82,7 @@ const OnboardingSurvey: React.FC<OnboardingSurveyProps> = ({
   const [step, setStep] = useState(0); // 0 = welcome
   const [customDietText, setCustomDietText] = useState('');
   const [generatingLabel, setGeneratingLabel] = useState(false);
+  const [calorieMode, setCalorieMode] = useState<'recommended' | 'manual'>('recommended');
 
   const [data, setData] = useState<SurveyData>({
     cooking_level: undefined,
@@ -187,7 +190,7 @@ const OnboardingSurvey: React.FC<OnboardingSurveyProps> = ({
       weight_kg,
       height_cm,
       activity_level: data.activity_level,
-      daily_calorie_goal: data.daily_calorie_goal || rec || 2000,
+      daily_calorie_goal: calorieMode === 'recommended' && rec ? rec : (data.daily_calorie_goal || rec || 2000),
       dietary_preferences: data.dietary_preferences,
       custom_dietary_labels: data.custom_dietary_labels,
       onboarding_completed: true,
@@ -333,15 +336,16 @@ const OnboardingSurvey: React.FC<OnboardingSurveyProps> = ({
               />
             </div>
             <div>
-              <label style={{ fontSize: '0.8rem', color: '#6b7280', display: 'block', marginBottom: '0.25rem' }}>{t('survey.fields.sex')}</label>
+              <label style={{ fontSize: '0.8rem', color: '#6b7280', display: 'block', marginBottom: '0.25rem' }}>{t('survey.fields.gender')}</label>
               <select
                 value={data.biological_sex ?? ''}
-                onChange={e => setData(p => ({ ...p, biological_sex: e.target.value as Profile['biological_sex'] }))}
+                onChange={e => setData(p => ({ ...p, biological_sex: e.target.value as 'male' | 'female' | 'other' | undefined }))}
                 style={inputStyle}
               >
                 <option value="">—</option>
                 <option value="male">{t('survey.fields.male')}</option>
                 <option value="female">{t('survey.fields.female')}</option>
+                <option value="other">{t('survey.fields.other')}</option>
               </select>
             </div>
             <div>
@@ -392,17 +396,51 @@ const OnboardingSurvey: React.FC<OnboardingSurveyProps> = ({
             </select>
           </div>
           {rec && (
-            <div style={{ background: '#f0fdf4', borderRadius: '8px', padding: '0.75rem', marginBottom: '0.75rem' }}>
-              <div style={{ color: '#059669', fontWeight: '600', fontSize: '0.875rem' }}>
-                {t('survey.recommendedCalories', { calories: rec.toLocaleString() })}
-                <span style={{ color: '#9ca3af', fontWeight: '400' }}> {t('survey.tapToOverride')}</span>
+            <div style={{ marginBottom: '0.75rem' }}>
+              <label style={{ fontSize: '0.8rem', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }}>{t('survey.fields.dailyCalorieGoal')}</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <button
+                  onClick={() => setCalorieMode('recommended')}
+                  style={{
+                    padding: '0.6rem 0.75rem',
+                    border: calorieMode === 'recommended' ? '2px solid #667eea' : '1px solid #e5e7eb',
+                    background: calorieMode === 'recommended' ? '#f5f3ff' : 'white',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    fontSize: '0.875rem',
+                    fontWeight: calorieMode === 'recommended' ? '700' : '400',
+                    color: calorieMode === 'recommended' ? '#667eea' : '#374151',
+                  }}
+                >
+                  {t('survey.recommendedCalories', { calories: rec.toLocaleString() })}
+                </button>
+                <button
+                  onClick={() => setCalorieMode('manual')}
+                  style={{
+                    padding: '0.6rem 0.75rem',
+                    border: calorieMode === 'manual' ? '2px solid #667eea' : '1px solid #e5e7eb',
+                    background: calorieMode === 'manual' ? '#f5f3ff' : 'white',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    fontSize: '0.875rem',
+                    fontWeight: calorieMode === 'manual' ? '700' : '400',
+                    color: calorieMode === 'manual' ? '#667eea' : '#374151',
+                  }}
+                >
+                  {t('survey.enterManually')}
+                </button>
+                {calorieMode === 'manual' && (
+                  <input
+                    type="number"
+                    value={data.daily_calorie_goal || ''}
+                    onChange={e => setData(p => ({ ...p, daily_calorie_goal: parseInt(e.target.value) || 0 }))}
+                    placeholder="e.g. 2000"
+                    style={{ ...inputStyle, fontSize: '0.875rem' }}
+                  />
+                )}
               </div>
-              <input
-                type="number"
-                value={data.daily_calorie_goal || rec}
-                onChange={e => setData(p => ({ ...p, daily_calorie_goal: parseInt(e.target.value) || rec }))}
-                style={{ ...inputStyle, marginTop: '0.5rem', fontSize: '0.875rem' }}
-              />
             </div>
           )}
           <button style={btnPrimary} onClick={() => setStep(3)}>{t('survey.next')}</button>

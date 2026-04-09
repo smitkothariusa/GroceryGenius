@@ -7,13 +7,15 @@ function calcRecommendedCalories(
   weightKg: number,
   heightCm: number,
   age: number,
-  sex: 'male' | 'female',
+  sex: 'male' | 'female' | 'other',
   activity: Profile['activity_level']
 ): number {
   const bmr =
     sex === 'male'
       ? 10 * weightKg + 6.25 * heightCm - 5 * age + 5
-      : 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
+      : sex === 'female'
+      ? 10 * weightKg + 6.25 * heightCm - 5 * age - 161
+      : 10 * weightKg + 6.25 * heightCm - 5 * age - 78; // 'other': average of male/female
   const multipliers: Record<string, number> = {
     sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, very_active: 1.9,
   };
@@ -330,11 +332,12 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
               <input type="number" min="1" max="120" value={age} onChange={e => setAge(e.target.value)} style={inputStyle} />
             </div>
             <div>
-              <label style={{ fontSize: '0.75rem', color: '#6b7280', display: 'block', marginBottom: '0.2rem' }}>{t('survey.fields.sex')}</label>
+              <label style={{ fontSize: '0.75rem', color: '#6b7280', display: 'block', marginBottom: '0.2rem' }}>{t('survey.fields.gender')}</label>
               <select value={sex ?? ''} onChange={e => setSex(e.target.value as Profile['biological_sex'])} style={inputStyle}>
                 <option value="">—</option>
                 <option value="male">{t('survey.fields.male')}</option>
                 <option value="female">{t('survey.fields.female')}</option>
+                <option value="other">{t('survey.fields.other')}</option>
               </select>
             </div>
             <div>

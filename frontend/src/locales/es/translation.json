@@ -491,8 +491,8 @@
     "step2Title": "Cuéntanos sobre ti",
     "step3Title": "¿Qué tan cómodo estás en la cocina?",
     "step4Title": "¿Tienes preferencias dietéticas?",
-    "recommendedCalories": "Recomendado: {{calories}} cal/día",
-    "tapToOverride": "(toca para editar)",
+    "recommendedCalories": "✨ Recomendado: {{calories}} cal/día",
+    "enterManually": "Ingresar manualmente",
     "aiWillGenerate": "✨ La IA generará una etiqueta para dietas personalizadas",
     "customDietPlaceholder": "O escribe la tuya: p. ej. Mediterránea...",
     "cookingLevels": {
@@ -522,9 +522,11 @@
     },
     "fields": {
       "age": "Edad",
-      "sex": "Sexo Biológico",
+      "gender": "Género",
+      "sex": "Género",
       "male": "Masculino",
       "female": "Femenino",
+      "other": "Otro",
       "weight": "Peso",
       "height": "Altura",
       "activityLevel": "Nivel de Actividad",

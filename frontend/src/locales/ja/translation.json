@@ -491,8 +491,8 @@
     "step2Title": "あなた自身について教えてください",
     "step3Title": "料理の腕前はどのくらいですか？",
     "step4Title": "食事の好みはありますか？",
-    "recommendedCalories": "推奨: 1日{{calories}}kcal",
-    "tapToOverride": "(タップして編集)",
+    "recommendedCalories": "✨ 推奨: 1日{{calories}}kcal",
+    "enterManually": "手動で入力",
     "aiWillGenerate": "✨ AIがカスタム食事ラベルを生成します",
     "customDietPlaceholder": "独自の食事を入力: 例 地中海式...",
     "cookingLevels": {
@@ -522,9 +522,11 @@
     },
     "fields": {
       "age": "年齢",
-      "sex": "生物学的性別",
+      "gender": "性別",
+      "sex": "性別",
       "male": "男性",
       "female": "女性",
+      "other": "その他",
       "weight": "体重",
       "height": "身長",
       "activityLevel": "活動レベル",

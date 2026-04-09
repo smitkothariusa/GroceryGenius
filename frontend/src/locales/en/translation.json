@@ -491,8 +491,8 @@
     "step2Title": "Tell us about yourself",
     "step3Title": "How comfortable are you in the kitchen?",
     "step4Title": "Any dietary preferences?",
-    "recommendedCalories": "Recommended: {{calories}} cal/day",
-    "tapToOverride": "(tap to override)",
+    "recommendedCalories": "✨ Recommended: {{calories}} cal/day",
+    "enterManually": "Enter manually",
     "aiWillGenerate": "✨ AI will generate a label for custom diets",
     "customDietPlaceholder": "Or type your own: e.g. Mediterranean...",
     "cookingLevels": {
@@ -522,9 +522,11 @@
     },
     "fields": {
       "age": "Age",
-      "sex": "Biological Sex",
+      "gender": "Gender",
+      "sex": "Gender",
       "male": "Male",
       "female": "Female",
+      "other": "Other",
       "weight": "Weight",
       "height": "Height",
       "activityLevel": "Activity Level",

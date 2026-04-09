@@ -491,8 +491,8 @@
     "step2Title": "Erzählen Sie uns von sich",
     "step3Title": "Wie sicher sind Sie in der Küche?",
     "step4Title": "Haben Sie Ernährungspräferenzen?",
-    "recommendedCalories": "Empfohlen: {{calories}} kcal/Tag",
-    "tapToOverride": "(tippen zum Bearbeiten)",
+    "recommendedCalories": "✨ Empfohlen: {{calories}} kcal/Tag",
+    "enterManually": "Manuell eingeben",
     "aiWillGenerate": "✨ KI erstellt ein Label für individuelle Diäten",
     "customDietPlaceholder": "Oder eigene eingeben: z.B. Mediterran...",
     "cookingLevels": {
@@ -522,9 +522,11 @@
     },
     "fields": {
       "age": "Alter",
-      "sex": "Biologisches Geschlecht",
+      "gender": "Geschlecht",
+      "sex": "Geschlecht",
       "male": "Männlich",
       "female": "Weiblich",
+      "other": "Divers",
       "weight": "Gewicht",
       "height": "Größe",
       "activityLevel": "Aktivitätslevel",

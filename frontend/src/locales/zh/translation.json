@@ -491,8 +491,8 @@
     "step2Title": "告诉我们关于您的信息",
     "step3Title": "您在厨房里有多熟练？",
     "step4Title": "您有饮食偏好吗？",
-    "recommendedCalories": "推荐：每天{{calories}}卡路里",
-    "tapToOverride": "（点击修改）",
+    "recommendedCalories": "✨ 推荐：每天{{calories}}卡路里",
+    "enterManually": "手动输入",
     "aiWillGenerate": "✨ AI将为自定义饮食生成标签",
     "customDietPlaceholder": "或输入您的：例如地中海饮食...",
     "cookingLevels": {
@@ -522,9 +522,11 @@
     },
     "fields": {
       "age": "年龄",
-      "sex": "生理性别",
+      "gender": "性别",
+      "sex": "性别",
       "male": "男",
       "female": "女",
+      "other": "其他",
       "weight": "体重",
       "height": "身高",
       "activityLevel": "活动水平",

@@ -826,7 +826,11 @@ const App: React.FC = () => {
 
     try {
       const params = new URLSearchParams();
-      if (dietaryFilter) params.append('dietary', dietaryFilter);
+      if (dietaryFilter) {
+        // Resolve custom label UUIDs to their AI-generated description so the prompt is meaningful
+        const customLabel = customDietaryLabels.find(l => l.id === dietaryFilter);
+        params.append('dietary', customLabel ? customLabel.description : dietaryFilter);
+      }
       params.append('language', i18n.language || 'en');
       if (recipeDifficulty !== 'flexible') params.append('difficulty', recipeDifficulty);
 

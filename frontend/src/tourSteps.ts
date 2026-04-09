@@ -44,12 +44,6 @@ export const TOUR_STEPS: TourStep[] = [
   },
   {
     tab: null,
-    selector: '[data-tour="recipes-use-pantry-btn"]',
-    titleKey: 'tour.recipes.pantry.title',
-    descKey: 'tour.recipes.pantry.desc',
-  },
-  {
-    tab: null,
     selector: '[data-tour="recipes-dietary-filter"]',
     titleKey: 'tour.recipes.dietary.title',
     descKey: 'tour.recipes.dietary.desc',

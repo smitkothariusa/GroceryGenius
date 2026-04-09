@@ -600,7 +600,7 @@
       "heart": { "title": "Save a recipe", "desc": "Tap the heart on any recipe card to add it to your favorites." }
     },
     "settings": {
-      "open": { "title": "Personalise your settings", "desc": "Open settings to tailor GroceryGenius to your needs." },
+      "open": { "title": "Personalize your settings", "desc": "Open settings to tailor GroceryGenius to your needs." },
       "dietary": { "title": "Dietary preferences", "desc": "Set your dietary needs here — recipes and filters update automatically everywhere." },
       "calorie": { "title": "Daily calorie goal", "desc": "Set your daily calorie target and we'll track your progress throughout the day." }
     },

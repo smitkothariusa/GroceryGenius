@@ -61,9 +61,16 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
         return;
       }
 
-      // Scroll element into view, then measure after scroll animation settles
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      retryRef.current = setTimeout(() => applyRect(el), SCROLL_SETTLE_MS);
+      const r = el.getBoundingClientRect();
+      const alreadyVisible = r.top >= 0 && r.bottom <= window.innerHeight;
+      if (alreadyVisible) {
+        // Already on screen — apply immediately, no scroll delay
+        applyRect(el);
+      } else {
+        // Scroll element into view, then measure after scroll animation settles
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        retryRef.current = setTimeout(() => applyRect(el), SCROLL_SETTLE_MS);
+      }
     }
 
     setRect(null);

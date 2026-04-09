@@ -3308,7 +3308,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           </>
         )}
         {currentTab === 'mealplan' && (
-        <div data-tour="mealplan-calendar">
+        <div>
         <MealPlanCalendar
           savedRecipes={favorites}
           translatedNames={translatedFavoriteNames}

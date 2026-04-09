@@ -705,13 +705,13 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
           overflowX: 'auto',
           order: isMobile ? 1 : 2
         }}>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: isMobile ? `80px repeat(7, minmax(100px, 1fr))` : `120px repeat(7, 1fr)`, 
-            gap: '1px', 
-            background: '#e5e7eb', 
-            borderRadius: '12px', 
-            overflow: 'hidden', 
+          <div data-tour="mealplan-calendar" style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? `80px repeat(7, minmax(100px, 1fr))` : `120px repeat(7, 1fr)`,
+            gap: '1px',
+            background: '#e5e7eb',
+            borderRadius: '12px',
+            overflow: 'hidden',
             minWidth: isMobile ? '800px' : '900px'
           }}>
             {/* Header Row */}

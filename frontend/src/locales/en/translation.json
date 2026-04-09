@@ -84,7 +84,7 @@
     "loading": "Loading...",
     "alreadyHaveAccount": "Already have an account? Sign In",
     "dontHaveAccount": "Don't have an account? Sign Up",
-    "checkEmail": "If an account with that email doesn't exist, you'll receive a confirmation link shortly.",
+    "checkEmail": "Check your email for a confirmation link. If you don't receive one, this email address may already be registered — try signing in instead.",
     "emailConfirmFailed": "Email confirmation failed. Please try again."
   },
   "recipes": {
@@ -574,7 +574,7 @@
     "pantry": {
       "add": { "title": "Add pantry items", "desc": "Type any ingredient name and tap Add to stock your pantry." },
       "scan": { "title": "Scan a barcode", "desc": "Use your camera to scan a product barcode and we'll add it to your pantry automatically." },
-      "expiry": { "title": "Track expiry dates", "desc": "Add an expiry date when saving an item — we'll flag it automatically as it gets close." }
+      "expiry": { "title": "Your pantry items", "desc": "All your items appear here. Items highlighted in red are expiring soon — add an expiry date when saving any item to enable tracking." }
     },
     "recipes": {
       "input": { "title": "Find recipes by ingredient", "desc": "Enter what you have and our AI will find recipes that use them." },

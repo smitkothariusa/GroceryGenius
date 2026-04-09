@@ -84,7 +84,7 @@
     "loading": "加载中...",
     "alreadyHaveAccount": "已有账户？登录",
     "dontHaveAccount": "没有账户？注册",
-    "checkEmail": "如果该邮箱尚未注册，您将很快收到一封确认链接邮件。",
+    "checkEmail": "请查收确认链接邮件。如果未收到，该邮箱可能已被注册 — 请尝试直接登录。",
     "emailConfirmFailed": "邮件确认失败，请重试。"
   },
   "recipes": {

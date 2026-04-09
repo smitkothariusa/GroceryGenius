@@ -603,6 +603,8 @@ const App: React.FC = () => {
             co2Saved: 0
           });
           localStorage.removeItem('gg_recipe_mode');
+          localStorage.removeItem('hasSeenTour');
+          localStorage.removeItem('hasSeenMission');
           setRecipeMode('loose');
         }
       });
@@ -3735,7 +3737,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 </div>
                 
                 <input
-                  data-tour="pantry-expiry-input"
                   type="date"
                   value={newPantryItem.expiryDate}
                   onChange={(e) => setNewPantryItem({...newPantryItem, expiryDate: e.target.value})}
@@ -3796,7 +3797,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               </div>
             )}
 
-            <div style={{ display: 'grid', gap: '0.75rem' }}>
+            <div data-tour="pantry-expiry-input" style={{ display: 'grid', gap: '0.75rem' }}>
               {pantry.map(item => {
                 const expiring = getExpiringItems().some(e => e.id === item.id);
                 return (

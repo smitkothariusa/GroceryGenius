@@ -29,13 +29,17 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
   const step = steps[currentStep];
   const total = steps.length;
 
+  if (!step) return null;
+
   // Measure the target element position
   useEffect(() => {
-    function measure() {
+    function measure(attempt = 0) {
       const el = document.querySelector(step.selector) as HTMLElement | null;
       if (!el) {
-        // Element not yet rendered — retry once after a short delay
-        retryRef.current = setTimeout(measure, 150);
+        if (attempt < 10) {
+          retryRef.current = setTimeout(() => measure(attempt + 1), 150);
+        }
+        // After 10 attempts (~1.5s), give up and leave rect null — tour remains hidden for this step
         return;
       }
       const r = el.getBoundingClientRect();
@@ -52,8 +56,15 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
     setRect(null);
     measure();
 
+    const handleResize = () => {
+      if (retryRef.current) clearTimeout(retryRef.current);
+      measure();
+    };
+    window.addEventListener('resize', handleResize);
+
     return () => {
       if (retryRef.current) clearTimeout(retryRef.current);
+      window.removeEventListener('resize', handleResize);
     };
   }, [step.selector, currentStep]);
 
@@ -64,7 +75,7 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
   // Tooltip box style
   const tooltipStyle: React.CSSProperties = {
     position: 'fixed',
-    left: isMobile ? '12px' : Math.max(8, rect.left),
+    left: isMobile ? '12px' : Math.max(8, Math.min(rect.left, window.innerWidth - Math.min(320, window.innerWidth - 24) - 8)),
     right: isMobile ? '12px' : undefined,
     width: isMobile ? undefined : Math.min(320, window.innerWidth - 24),
     background: 'white',
@@ -120,18 +131,24 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           {/* Progress dots + step count */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            {Array.from({ length: Math.min(total, 10) }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: '50%',
-                  background: i <= Math.floor(currentStep * 10 / total) ? '#10b981' : '#d1d5db',
-                  transition: 'background 0.2s',
-                }}
-              />
-            ))}
+            {Array.from({ length: Math.min(total, 10) }).map((_, i) => {
+              const dotCount = Math.min(total, 10);
+              const filled = total === 1
+                ? true
+                : i <= Math.floor(currentStep * (dotCount - 1) / (total - 1));
+              return (
+                <div
+                  key={i}
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    background: filled ? '#10b981' : '#d1d5db',
+                    transition: 'background 0.2s',
+                  }}
+                />
+              );
+            })}
             <span style={{ fontSize: '0.75rem', color: '#9ca3af', marginLeft: 4 }}>
               {t('tour.stepOf', { current: currentStep + 1, total })}
             </span>

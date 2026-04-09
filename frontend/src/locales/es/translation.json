@@ -569,5 +569,48 @@
     "failedToGenerateLabel": "Error al generar etiqueta. Dieta añadida con texto original.",
     "failedToSave": "Error al guardar la configuración.",
     "failedToDelete": "Error al eliminar la cuenta. Por favor, inténtalo de nuevo."
+  },
+  "tour": {
+    "pantry": {
+      "add": { "title": "Añadir artículos a la despensa", "desc": "Escribe el nombre de cualquier ingrediente y pulsa Añadir para llenar tu despensa." },
+      "scan": { "title": "Escanear un código de barras", "desc": "Usa tu cámara para escanear el código de barras de un producto y lo añadiremos automáticamente." },
+      "expiry": { "title": "Seguir fechas de caducidad", "desc": "Añade una fecha de caducidad al guardar un artículo y te avisaremos cuando se acerque." }
+    },
+    "recipes": {
+      "input": { "title": "Buscar recetas por ingrediente", "desc": "Escribe lo que tienes y nuestra IA encontrará recetas que los usen." },
+      "pantry": { "title": "Usar tu despensa", "desc": "Pulsa aquí para cargar toda tu despensa como ingredientes de receta de una vez." },
+      "dietary": { "title": "Filtros dietéticos", "desc": "Filtra recetas por tus preferencias dietéticas, sincronizadas automáticamente desde tu configuración." }
+    },
+    "mealplan": {
+      "calendar": { "title": "Planifica tu semana", "desc": "Añade recetas a los días de tu calendario para planificar con antelación." },
+      "shopping": { "title": "Generar lista de la compra", "desc": "Los ingredientes que te faltan del plan de comidas se envían directamente a tu lista de la compra." }
+    },
+    "shopping": {
+      "list": { "title": "Tu lista de la compra", "desc": "Los artículos se generan automáticamente a partir de tu plan de comidas y los huecos de la despensa." },
+      "check": { "title": "Marca lo que compras", "desc": "Pulsa un artículo para marcarlo como comprado." },
+      "add": { "title": "Añadir artículos manualmente", "desc": "Siempre puedes añadir artículos sueltos a tu lista aquí." }
+    },
+    "donate": {
+      "expiring": { "title": "Dona alimentos que caducan", "desc": "Los alimentos próximos a caducar aparecen aquí para que puedas donarlos antes de que se desperdicien." },
+      "map": { "title": "Encontrar un banco de alimentos", "desc": "Descubre bancos de alimentos y puntos de entrega cercanos según tu ubicación." }
+    },
+    "favorites": {
+      "grid": { "title": "Tus recetas guardadas", "desc": "Las recetas que has marcado con un corazón están aquí para acceder rápidamente en cualquier momento." },
+      "heart": { "title": "Guardar una receta", "desc": "Pulsa el corazón de cualquier tarjeta de receta para añadirla a tus favoritos." }
+    },
+    "settings": {
+      "open": { "title": "Personaliza tu experiencia", "desc": "Abre la configuración para adaptar GroceryGenius a tus necesidades." },
+      "dietary": { "title": "Preferencias dietéticas", "desc": "Establece tus necesidades dietéticas aquí — las recetas y filtros se actualizan automáticamente en todas partes." },
+      "calorie": { "title": "Objetivo calórico diario", "desc": "Establece tu objetivo diario de calorías y haremos un seguimiento de tu progreso durante el día." }
+    },
+    "calorie": {
+      "btn": { "title": "Contador de calorías", "desc": "Pulsa este botón en cualquier momento para abrir tu contador de calorías diario." },
+      "panel": { "title": "Controla tu nutrición", "desc": "Registra tus comidas aquí y sigue tu progreso calórico y nutricional en tiempo real." }
+    },
+    "next": "Siguiente",
+    "skip": "Omitir tour",
+    "finish": "Terminar",
+    "stepOf": "{{current}} / {{total}}",
+    "allSet": "¡Todo listo! 🎉"
   }
 }

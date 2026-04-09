@@ -569,5 +569,48 @@
     "failedToGenerateLabel": "Bezeichnung konnte nicht generiert werden. Diät mit Originaltext hinzugefügt.",
     "failedToSave": "Einstellungen konnten nicht gespeichert werden.",
     "failedToDelete": "Konto konnte nicht gelöscht werden. Bitte versuche es erneut."
+  },
+  "tour": {
+    "pantry": {
+      "add": { "title": "Vorräte hinzufügen", "desc": "Gib einen Zutaten-Namen ein und tippe auf Hinzufügen, um deinen Vorrat aufzufüllen." },
+      "scan": { "title": "Barcode scannen", "desc": "Nutze deine Kamera, um einen Barcode zu scannen – wir fügen das Produkt automatisch hinzu." },
+      "expiry": { "title": "Haltbarkeit verfolgen", "desc": "Füge ein Ablaufdatum hinzu – wir warnen dich automatisch, wenn es sich nähert." }
+    },
+    "recipes": {
+      "input": { "title": "Rezepte nach Zutaten finden", "desc": "Gib ein, was du hast, und unsere KI findet passende Rezepte." },
+      "pantry": { "title": "Vorrat verwenden", "desc": "Tippe hier, um deinen gesamten Vorrat als Rezeptzutaten zu laden." },
+      "dietary": { "title": "Ernährungsfilter", "desc": "Filtere Rezepte nach deinen Ernährungspräferenzen – automatisch aus den Einstellungen synchronisiert." }
+    },
+    "mealplan": {
+      "calendar": { "title": "Deine Woche planen", "desc": "Füge Rezepte zu Tagen in deinem Kalender hinzu und plane im Voraus." },
+      "shopping": { "title": "Einkaufsliste automatisch erstellen", "desc": "Fehlende Zutaten aus deinem Essensplan werden direkt auf deine Einkaufsliste gesetzt." }
+    },
+    "shopping": {
+      "list": { "title": "Deine Einkaufsliste", "desc": "Artikel werden automatisch aus deinem Essensplan und Vorratsengpässen generiert." },
+      "check": { "title": "Beim Einkaufen abhaken", "desc": "Tippe auf einen Artikel, um ihn als gekauft zu markieren." },
+      "add": { "title": "Artikel manuell hinzufügen", "desc": "Du kannst jederzeit einzelne Artikel zur Liste hinzufügen." }
+    },
+    "donate": {
+      "expiring": { "title": "Ablaufende Lebensmittel spenden", "desc": "Lebensmittel kurz vor dem Ablaufdatum erscheinen hier, damit du sie rechtzeitig spenden kannst." },
+      "map": { "title": "Lebensmittelbank finden", "desc": "Finde nahegelegene Lebensmittelbanken und Abgabestellen in deiner Umgebung." }
+    },
+    "favorites": {
+      "grid": { "title": "Deine gespeicherten Rezepte", "desc": "Rezepte, die du mit einem Herz markiert hast, findest du hier jederzeit wieder." },
+      "heart": { "title": "Rezept speichern", "desc": "Tippe auf das Herz einer Rezeptkarte, um sie zu deinen Favoriten hinzuzufügen." }
+    },
+    "settings": {
+      "open": { "title": "Einstellungen personalisieren", "desc": "Öffne die Einstellungen, um GroceryGenius nach deinen Bedürfnissen anzupassen." },
+      "dietary": { "title": "Ernährungspräferenzen", "desc": "Lege deine Ernährungsbedürfnisse fest – Rezepte und Filter werden überall automatisch aktualisiert." },
+      "calorie": { "title": "Tägliches Kalorienziel", "desc": "Setze dein tägliches Kalorienziel und wir verfolgen deinen Fortschritt über den Tag." }
+    },
+    "calorie": {
+      "btn": { "title": "Kalorien-Tracker", "desc": "Tippe jederzeit auf diese Schaltfläche, um deinen Kalorien-Tracker zu öffnen." },
+      "panel": { "title": "Ernährung verfolgen", "desc": "Erfasse hier Mahlzeiten und verfolge deinen Kalorien- und Nährwertfortschritt in Echtzeit." }
+    },
+    "next": "Weiter",
+    "skip": "Tour überspringen",
+    "finish": "Fertig",
+    "stepOf": "{{current}} / {{total}}",
+    "allSet": "Alles bereit! 🎉"
   }
 }

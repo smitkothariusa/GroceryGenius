@@ -44,6 +44,8 @@ import IngredientSubstitution from './components/IngredientSubstitution';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import OnboardingSurvey from './components/OnboardingSurvey';
 import SettingsPanel from './components/SettingsPanel';
+import TourOverlay from './components/TourOverlay';
+import { TOUR_STEPS } from './tourSteps';
 
 
 interface PantryItem {
@@ -165,6 +167,8 @@ const App: React.FC = () => {
   const [detectedBarcode, setDetectedBarcode] = useState<string>('');
   const [detectedExpiry, setDetectedExpiry] = useState<string>('');
   const [showMissionPopup, setShowMissionPopup] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+  const [tourStep, setTourStep] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
@@ -674,6 +678,43 @@ const App: React.FC = () => {
       setIsTabChanging(false);
     }, 150);
   };
+
+  const handleTourSkip = () => {
+    setShowTour(false);
+    localStorage.setItem('hasSeenTour', 'true');
+  };
+
+  const handleTourNext = () => {
+    const step = TOUR_STEPS[tourStep];
+
+    // Run afterStep side effects for current step
+    if (step.afterStep === 'closeSettings') setShowSettings(false);
+    if (step.afterStep === 'closeCalorieTracker') setShowCalorieTracker(false);
+
+    const nextIndex = tourStep + 1;
+
+    if (nextIndex >= TOUR_STEPS.length) {
+      // Tour complete
+      setShowTour(false);
+      localStorage.setItem('hasSeenTour', 'true');
+      success(t('tour.allSet'));
+      return;
+    }
+
+    const nextStep = TOUR_STEPS[nextIndex];
+
+    // Navigate to the correct tab if needed
+    if (nextStep.tab && nextStep.tab !== currentTab) {
+      handleTabChange(nextStep.tab);
+    }
+
+    // Run beforeShow side effects for next step
+    if (nextStep.beforeShow === 'openSettings') setShowSettings(true);
+    if (nextStep.beforeShow === 'openCalorieTracker') setShowCalorieTracker(true);
+
+    setTourStep(nextIndex);
+  };
+
   const getExpiringItems = () => {
     const today = new Date();
     return pantry.filter(item => {
@@ -6559,6 +6600,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               onClick={() => {
                 setShowMissionPopup(false);
                 localStorage.setItem('hasSeenMission', 'true');
+                if (!localStorage.getItem('hasSeenTour')) {
+                  setTourStep(0);
+                  setShowTour(true);
+                }
               }}
               style={{
                 width: '100%',
@@ -6966,6 +7011,15 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           />
         ))}
       </div>
+      {showTour && (
+        <TourOverlay
+          steps={TOUR_STEPS}
+          currentStep={tourStep}
+          isMobile={isMobile}
+          onNext={handleTourNext}
+          onSkip={handleTourSkip}
+        />
+      )}
     </div>
   );
 };

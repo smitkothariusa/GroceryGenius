@@ -6611,6 +6611,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 setShowMissionPopup(false);
                 localStorage.setItem('hasSeenMission', 'true');
                 if (!localStorage.getItem('hasSeenTour')) {
+                  handleTabChange('pantry');
                   setTourStep(0);
                   setShowTour(true);
                 }

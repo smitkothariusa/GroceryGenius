@@ -2786,7 +2786,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   </div>
 
                   {/* Ingredient input */}
-                  <input type="text" placeholder={t('recipes.ingredientsPlaceholder')} onKeyPress={(e) => {
+                  <input data-tour="recipes-ingredient-input" type="text" placeholder={t('recipes.ingredientsPlaceholder')} onKeyPress={(e) => {
                     if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
                       const tag = (e.target as HTMLInputElement).value.trim().toLowerCase();
                       if (!ingredientTags.includes(tag)) setIngredientTags([...ingredientTags, tag]);
@@ -2828,7 +2828,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
                   {/* Dietary */}
                   <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' }}>{t('recipes.dietaryPreferences')}</div>
-                  <select value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
+                  <select data-tour="recipes-dietary-filter" value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
                     style={{ width: '100%', padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '10px', fontSize: '0.875rem', marginBottom: '0.75rem', boxSizing: 'border-box' }}>
                     <option value="">{t('recipes.dietary.all')}</option>
                     {dietaryFilter && !PRESET_LABEL_MAP[dietaryFilter] && !customDietaryLabels.find(l => l.id === dietaryFilter) && (

@@ -70,23 +70,11 @@ export const TOUR_STEPS: TourStep[] = [
   },
   {
     tab: null,
-    selector: '[data-tour="shopping-item-checkbox"]',
-    titleKey: 'tour.shopping.check.title',
-    descKey: 'tour.shopping.check.desc',
-  },
-  {
-    tab: null,
     selector: '[data-tour="shopping-add-input"]',
     titleKey: 'tour.shopping.add.title',
     descKey: 'tour.shopping.add.desc',
   },
   // --- Donate ---
-  {
-    tab: 'donate',
-    selector: '[data-tour="donate-expiring-list"]',
-    titleKey: 'tour.donate.expiring.title',
-    descKey: 'tour.donate.expiring.desc',
-  },
   {
     tab: null,
     selector: '[data-tour="donate-map"]',
@@ -99,12 +87,6 @@ export const TOUR_STEPS: TourStep[] = [
     selector: '[data-tour="favorites-grid"]',
     titleKey: 'tour.favorites.grid.title',
     descKey: 'tour.favorites.grid.desc',
-  },
-  {
-    tab: null,
-    selector: '[data-tour="favorites-heart-btn"]',
-    titleKey: 'tour.favorites.heart.title',
-    descKey: 'tour.favorites.heart.desc',
   },
   // --- Settings ---
   {

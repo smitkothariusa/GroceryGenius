@@ -84,7 +84,7 @@
     "loading": "Cargando...",
     "alreadyHaveAccount": "¿Ya tienes cuenta? Iniciar sesión",
     "dontHaveAccount": "¿No tienes cuenta? Registrarse",
-    "checkEmail": "Si no existe una cuenta con ese correo, recibirás un enlace de confirmación en breve.",
+    "checkEmail": "¡Revisa tu correo para el enlace de confirmación!",
     "emailConfirmFailed": "Error al confirmar el correo. Inténtalo de nuevo."
   },
   "recipes": {

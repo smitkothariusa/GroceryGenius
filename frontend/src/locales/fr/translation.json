@@ -84,7 +84,7 @@
     "loading": "Chargement...",
     "alreadyHaveAccount": "Vous avez déjà un compte ? Se connecter",
     "dontHaveAccount": "Pas encore de compte ? S'inscrire",
-    "checkEmail": "Si aucun compte n'existe avec cet e-mail, vous recevrez un lien de confirmation sous peu.",
+    "checkEmail": "Vérifiez votre e-mail pour le lien de confirmation!",
     "emailConfirmFailed": "Échec de la confirmation d'e-mail. Réessayez."
   },
   "recipes": {

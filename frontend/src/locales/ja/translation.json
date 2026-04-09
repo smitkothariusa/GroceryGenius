@@ -84,7 +84,7 @@
     "loading": "読み込み中...",
     "alreadyHaveAccount": "すでにアカウントをお持ちですか？サインイン",
     "dontHaveAccount": "アカウントをお持ちでないですか？サインアップ",
-    "checkEmail": "そのメールアドレスのアカウントが存在しない場合、まもなく確認リンクが届きます。",
+    "checkEmail": "確認リンクのメールをご確認ください！",
     "emailConfirmFailed": "メール確認に失敗しました。もう一度お試しください。"
   },
   "recipes": {

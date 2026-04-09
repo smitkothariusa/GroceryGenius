@@ -84,7 +84,7 @@
     "loading": "Loading...",
     "alreadyHaveAccount": "Already have an account? Sign In",
     "dontHaveAccount": "Don't have an account? Sign Up",
-    "checkEmail": "If an account with that email doesn't exist, you'll receive a confirmation link shortly.",
+    "checkEmail": "Check your email for confirmation link!",
     "emailConfirmFailed": "Email confirmation failed. Please try again."
   },
   "recipes": {

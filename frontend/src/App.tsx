@@ -2906,7 +2906,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
                     <label style={{ fontWeight: '600' }}>🥘 {t('recipes.whatIngredientsLabel')}</label>
                     {pantry.length > 0 && (
-                      <button onClick={addPantryToIngredients} style={{
+                      <button data-tour="recipes-use-pantry-btn" onClick={addPantryToIngredients} style={{
                         padding: '0.35rem 0.75rem', background: '#8b5cf6', color: 'white',
                         border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem'
                       }}>📦 {t('recipes.addPantryItems')}</button>
@@ -3424,6 +3424,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     </button>
                   )}
                   <button
+                    data-tour="pantry-add-input"
                     className="desktop-add-btn"
                     onClick={() => setShowAddPantry(!showAddPantry)}
                     style={{
@@ -3503,7 +3504,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         {t('pantry.itemName')}
                       </label>
                       <input
-                        data-tour="pantry-add-input"
                         type="text"
                         placeholder={t('pantry.itemPlaceholder')}
                         value={newPantryItem.name}
@@ -3602,7 +3602,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         {t('pantry.expiryDate')}
                       </label>
                       <input
-                        data-tour="pantry-expiry-input"
                         type="date"
                         value={newPantryItem.expiryDate}
                         onChange={(e) => setNewPantryItem({...newPantryItem, expiryDate: e.target.value})}
@@ -3613,7 +3612,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           borderRadius: '8px',
                           fontSize: '1rem',
                           boxSizing: 'border-box'
-                        }} 
+                        }}
                       />
                     </div>
                   </div>
@@ -3735,18 +3734,19 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   </select>
                 </div>
                 
-                <input 
-                  type="date" 
+                <input
+                  data-tour="pantry-expiry-input"
+                  type="date"
                   value={newPantryItem.expiryDate}
                   onChange={(e) => setNewPantryItem({...newPantryItem, expiryDate: e.target.value})}
-                  style={{ 
-                    gridColumn: '1 / -1', 
-                    padding: '0.75rem', 
-                    border: '1px solid #d1d5db', 
+                  style={{
+                    gridColumn: '1 / -1',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
                     borderRadius: '8px',
                     width: '100%',
                     boxSizing: 'border-box'
-                  }} 
+                  }}
                 />
                 
                 <button 
@@ -3963,6 +3963,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 justifyContent: isMobile ? 'stretch' : 'flex-start'
               }}>
                 <button
+                  data-tour="shopping-add-input"
                   className="desktop-add-btn"
                   onClick={() => setShowAddShopping(true)}
                   style={{
@@ -5166,7 +5167,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   {t('pantry.itemName')}
                 </label>
                 <input
-                  data-tour="shopping-add-input"
                   type="text"
                   placeholder={t('shopping.itemPlaceholder')}
                   value={newShoppingItem.name}

@@ -132,6 +132,7 @@ export const TOUR_STEPS: TourStep[] = [
     selector: '[data-tour="settings-calorie-goal"]',
     titleKey: 'tour.settings.calorie.title',
     descKey: 'tour.settings.calorie.desc',
+    beforeShow: 'openSettings',
     afterStep: 'closeSettings',
   },
   // --- Calorie Tracker ---

@@ -97,6 +97,23 @@ interface FavoriteRecipe extends Recipe {
   savedDate: string;
 }
 
+const PRESET_LABEL_MAP: Record<string, string> = {
+  'vegetarian': 'Vegetarian', 'vegan': 'Vegan', 'gluten-free': 'Gluten-Free',
+  'dairy-free': 'Dairy-Free', 'halal': 'Halal', 'kosher': 'Kosher',
+  'keto': 'Keto', 'low-carb': 'Low-Carb', 'nut-free': 'Nut-Free', 'paleo': 'Paleo',
+  'diabetic-friendly': 'Diabetic-Friendly', 'heart-healthy': 'Heart-Healthy',
+};
+
+function buildCombinedDietaryString(prefs: string[], customLabels: CustomDietaryLabel[]): string {
+  const parts = prefs
+    .map(p => PRESET_LABEL_MAP[p] ?? customLabels.find(l => l.id === p)?.label ?? null)
+    .filter(Boolean) as string[];
+  if (parts.length === 0) return '';
+  if (parts.length === 1) return parts[0];
+  if (parts.length === 2) return `${parts[0]} and ${parts[1]}`;
+  return `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`;
+}
+
 const App: React.FC = () => {
   const { t, i18n } = useTranslation();
   
@@ -367,7 +384,8 @@ const App: React.FC = () => {
           setUserProfile(profileResult);
           setCustomDietaryLabels(profileResult.custom_dietary_labels ?? []);
           if (profileResult.dietary_preferences && profileResult.dietary_preferences.length > 0) {
-            setDietaryFilter(profileResult.dietary_preferences[0]);
+            const combined = buildCombinedDietaryString(profileResult.dietary_preferences, profileResult.custom_dietary_labels ?? []);
+            if (combined) setDietaryFilter(combined);
           }
           if (!profileResult.onboarding_completed) {
             setShowSurvey(true);
@@ -2766,6 +2784,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   <select value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
                     style={{ width: '100%', padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '10px', fontSize: '0.875rem', marginBottom: '0.75rem', boxSizing: 'border-box' }}>
                     <option value="">{t('recipes.dietary.all')}</option>
+                    {dietaryFilter && !PRESET_LABEL_MAP[dietaryFilter] && !customDietaryLabels.find(l => l.id === dietaryFilter) && (
+                      <option value={dietaryFilter}>📋 {dietaryFilter}</option>
+                    )}
                     <option value="vegetarian">{t('recipes.dietary.vegetarian')}</option>
                     <option value="vegan">{t('recipes.dietary.vegan')}</option>
                     <option value="gluten-free">{t('recipes.dietary.glutenFree')}</option>
@@ -2902,6 +2923,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     <select value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
                       style={{ padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '8px', minWidth: '200px' }}>
                       <option value="">{t('recipes.dietary.all')}</option>
+                      {dietaryFilter && !PRESET_LABEL_MAP[dietaryFilter] && !customDietaryLabels.find(l => l.id === dietaryFilter) && (
+                        <option value={dietaryFilter}>📋 {dietaryFilter}</option>
+                      )}
                       <option value="vegetarian">{t('recipes.dietary.vegetarian')}</option>
                       <option value="vegan">{t('recipes.dietary.vegan')}</option>
                       <option value="gluten-free">{t('recipes.dietary.glutenFree')}</option>
@@ -6883,7 +6907,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               if (surveyData.daily_calorie_goal) setDailyCalorieGoal(surveyData.daily_calorie_goal);
               if (surveyData.custom_dietary_labels) setCustomDietaryLabels(surveyData.custom_dietary_labels);
               if (surveyData.dietary_preferences && surveyData.dietary_preferences.length > 0) {
-                setDietaryFilter(surveyData.dietary_preferences[0]);
+                const combined = buildCombinedDietaryString(surveyData.dietary_preferences, surveyData.custom_dietary_labels ?? []);
+                if (combined) setDietaryFilter(combined);
               }
             } else {
               console.error('Survey upsert error:', JSON.stringify(saveError));
@@ -6913,7 +6938,14 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           onSave={(updated) => {
             setUserProfile(prev => prev ? { ...prev, ...updated } : null);
             if (updated.daily_calorie_goal) setDailyCalorieGoal(updated.daily_calorie_goal);
+            const newLabels = updated.custom_dietary_labels ?? customDietaryLabels;
             if (updated.custom_dietary_labels) setCustomDietaryLabels(updated.custom_dietary_labels);
+            if (updated.dietary_preferences && updated.dietary_preferences.length > 0) {
+              const combined = buildCombinedDietaryString(updated.dietary_preferences, newLabels);
+              if (combined) setDietaryFilter(combined);
+            } else if (updated.dietary_preferences?.length === 0) {
+              setDietaryFilter('');
+            }
           }}
           onDeleteAccount={() => {
             setUser(null);

@@ -2623,7 +2623,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             </h1>
           </div>
           <div style={{ display: 'flex', gap: isMobile ? '0.5rem' : '0.75rem', alignItems: 'center' }}>
-            <button onClick={() => setShowCalorieTracker(!showCalorieTracker)} style={{
+            <button data-tour="calorie-tracker-btn" onClick={() => setShowCalorieTracker(!showCalorieTracker)} style={{
               padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 1rem',
               background: todayCalories > dailyCalorieGoal ? '#fee2e2' : '#f0fdf4',
               border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem',
@@ -2652,7 +2652,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               </div>
             )}
             {!isMobile && (
-              <button onClick={() => setShowSettings(true)} style={{
+              <button data-tour="settings-btn" onClick={() => setShowSettings(true)} style={{
                 padding: '0.5rem 1rem',
                 background: '#f3f4f6',
                 color: '#374151',
@@ -4290,8 +4290,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               margin: '0 0 2rem 0',
               fontSize: isMobile ? '1.5rem' : '2rem'
             }}>⭐ {t('favorites.title')} ({favorites.length})</h2>
-            <div style={{ display: 'grid', gap: '1rem' }}>
-              {favorites.map(recipe => (
+            <div data-tour="favorites-grid" style={{ display: 'grid', gap: '1rem' }}>
+              {favorites.map((recipe, index) => (
                 <div 
                   key={recipe.id} 
                   onClick={() => { setSelectedRecipe(recipe); setShowDetailedView(true); }}
@@ -4315,7 +4315,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         {t('favorites.savedOn')}: {new Date(recipe.savedDate).toLocaleDateString()}
                       </div>
                     </div>
-                    <button onClick={async (e) => {
+                    <button
+                      {...(index === 0 ? { 'data-tour': 'favorites-heart-btn' } : {})}
+                      onClick={async (e) => {
                       e.stopPropagation();
                       try {
                         await recipesService.delete(recipe.id);
@@ -4409,7 +4411,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
             {/* Expiring Items Alert */}
             {getExpiringItems().length > 0 && (
-              <div style={{ 
+              <div data-tour="donate-expiring-list" style={{
                 background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
                 border: '2px solid #f59e0b',
                 padding: '2rem',
@@ -4646,11 +4648,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             )}
 
             {/* Food Bank Directory */}
-            <div style={{ 
-              background: cardBg, 
-              padding: isMobile ? '1rem' : '2rem', 
-              borderRadius: '16px', 
-              marginBottom: isMobile ? '1rem' : '2rem' 
+            <div data-tour="donate-map" style={{
+              background: cardBg,
+              padding: isMobile ? '1rem' : '2rem',
+              borderRadius: '16px',
+              marginBottom: isMobile ? '1rem' : '2rem'
             }}>
               <h2 style={{
                 margin: '0 0 1rem 0',
@@ -5884,7 +5886,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             justifyContent: 'center', zIndex: 1000
           }}
         >
-          <div className="calorie-tracker-panel" style={{
+          <div className="calorie-tracker-panel" data-tour="calorie-tracker-panel" style={{
             background: cardBg,
             padding: '2rem',
             borderRadius: '16px',

@@ -595,7 +595,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
           </div>
         </div>
 
-        <button onClick={generateWeekShoppingList} disabled={generatingList} style={{
+        <button data-tour="mealplan-shopping-btn" onClick={generateWeekShoppingList} disabled={generatingList} style={{
           padding: '0.75rem 1.5rem', background: generatingList ? '#6b7280' : 'linear-gradient(45deg, #10b981, #059669)',
           color: 'white', border: 'none', borderRadius: '12px', cursor: generatingList ? 'not-allowed' : 'pointer',
           fontWeight: '600', fontSize: '1rem', width: '100%'

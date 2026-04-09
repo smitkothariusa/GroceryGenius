@@ -378,12 +378,12 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           )}
           <div>
             <label style={{ fontSize: '0.75rem', color: '#6b7280', display: 'block', marginBottom: '0.2rem' }}>{t('settings.dailyCalorieGoal')}</label>
-            <input type="number" value={calorieGoal} onChange={e => setCalorieGoal(e.target.value)} style={inputStyle} />
+            <input data-tour="settings-calorie-goal" type="number" value={calorieGoal} onChange={e => setCalorieGoal(e.target.value)} style={inputStyle} />
           </div>
         </div>
 
         {/* Dietary preferences section */}
-        <div style={sectionStyle}>
+        <div data-tour="settings-dietary" style={sectionStyle}>
           <div style={sectionHeaderStyle}>🥗 {t('settings.sections.dietary')}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.75rem' }}>
             {PRESET_DIETARY_KEYS.map(key => {

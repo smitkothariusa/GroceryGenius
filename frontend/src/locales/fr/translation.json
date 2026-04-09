@@ -569,5 +569,48 @@
     "failedToGenerateLabel": "Échec de la génération de l'étiquette. Régime ajouté avec le texte original.",
     "failedToSave": "Erreur lors de la sauvegarde.",
     "failedToDelete": "Échec de la suppression du compte. Veuillez réessayer."
+  },
+  "tour": {
+    "pantry": {
+      "add": { "title": "Ajouter des articles au garde-manger", "desc": "Saisissez le nom d'un ingrédient et appuyez sur Ajouter pour remplir votre garde-manger." },
+      "scan": { "title": "Scanner un code-barres", "desc": "Utilisez votre caméra pour scanner le code-barres d'un produit et nous l'ajouterons automatiquement." },
+      "expiry": { "title": "Suivre les dates de péremption", "desc": "Ajoutez une date de péremption lors de l'enregistrement d'un article — nous vous alerterons automatiquement." }
+    },
+    "recipes": {
+      "input": { "title": "Trouver des recettes par ingrédient", "desc": "Saisissez ce que vous avez et notre IA trouvera des recettes qui les utilisent." },
+      "pantry": { "title": "Utiliser votre garde-manger", "desc": "Appuyez ici pour charger tout votre garde-manger comme ingrédients de recette en une seule fois." },
+      "dietary": { "title": "Filtres alimentaires", "desc": "Filtrez les recettes selon vos préférences alimentaires, synchronisées automatiquement depuis vos paramètres." }
+    },
+    "mealplan": {
+      "calendar": { "title": "Planifiez votre semaine", "desc": "Ajoutez des recettes aux jours de votre calendrier pour planifier à l'avance." },
+      "shopping": { "title": "Générer la liste de courses", "desc": "Les ingrédients manquants de votre plan de repas sont envoyés directement à votre liste de courses." }
+    },
+    "shopping": {
+      "list": { "title": "Votre liste de courses", "desc": "Les articles sont générés automatiquement à partir de votre plan de repas et des manques dans votre garde-manger." },
+      "check": { "title": "Cochez au fur et à mesure", "desc": "Appuyez sur un article pour le marquer comme acheté." },
+      "add": { "title": "Ajouter des articles manuellement", "desc": "Vous pouvez toujours ajouter des articles ponctuels à votre liste ici." }
+    },
+    "donate": {
+      "expiring": { "title": "Donner les aliments qui périment", "desc": "Les aliments proches de leur date de péremption apparaissent ici pour que vous puissiez les donner avant qu'ils ne soient gaspillés." },
+      "map": { "title": "Trouver une banque alimentaire", "desc": "Découvrez les banques alimentaires et points de dépôt à proximité selon votre localisation." }
+    },
+    "favorites": {
+      "grid": { "title": "Vos recettes enregistrées", "desc": "Les recettes que vous avez aimées se trouvent ici pour un accès rapide à tout moment." },
+      "heart": { "title": "Enregistrer une recette", "desc": "Appuyez sur le cœur d'une carte de recette pour l'ajouter à vos favoris." }
+    },
+    "settings": {
+      "open": { "title": "Personnalisez vos paramètres", "desc": "Ouvrez les paramètres pour adapter GroceryGenius à vos besoins." },
+      "dietary": { "title": "Préférences alimentaires", "desc": "Définissez vos besoins alimentaires ici — les recettes et filtres se mettent à jour automatiquement partout." },
+      "calorie": { "title": "Objectif calorique quotidien", "desc": "Définissez votre objectif calorique quotidien et nous suivrons votre progression tout au long de la journée." }
+    },
+    "calorie": {
+      "btn": { "title": "Suivi des calories", "desc": "Appuyez sur ce bouton à tout moment pour ouvrir votre suivi calorique quotidien." },
+      "panel": { "title": "Suivez votre nutrition", "desc": "Enregistrez vos repas ici et suivez votre progression calorique et nutritionnelle en temps réel." }
+    },
+    "next": "Suivant",
+    "skip": "Passer la visite",
+    "finish": "Terminer",
+    "stepOf": "{{current}} / {{total}}",
+    "allSet": "Vous êtes prêt ! 🎉"
   }
 }

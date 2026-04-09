@@ -3380,6 +3380,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       setScanMode('menu'); // Reset to menu
                       setShowImageUpload(true);
                     }}
+                    data-tour="pantry-scan-btn"
                     style={{
                       padding: isMobile ? '0.75rem' : '0.75rem 1.5rem',
                       background: '#8b5cf6',
@@ -3499,19 +3500,20 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
                         {t('pantry.itemName')}
                       </label>
-                      <input 
-                        type="text" 
-                        placeholder={t('pantry.itemPlaceholder')} 
+                      <input
+                        data-tour="pantry-add-input"
+                        type="text"
+                        placeholder={t('pantry.itemPlaceholder')}
                         value={newPantryItem.name}
                         onChange={(e) => setNewPantryItem({...newPantryItem, name: e.target.value})}
-                        style={{ 
+                        style={{
                           width: '100%',
-                          padding: '0.75rem', 
-                          border: '2px solid #e5e7eb', 
+                          padding: '0.75rem',
+                          border: '2px solid #e5e7eb',
                           borderRadius: '8px',
                           fontSize: '1rem',
                           boxSizing: 'border-box'
-                        }} 
+                        }}
                       />
                     </div>
 
@@ -3597,14 +3599,15 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
                         {t('pantry.expiryDate')}
                       </label>
-                      <input 
-                        type="date" 
+                      <input
+                        data-tour="pantry-expiry-input"
+                        type="date"
                         value={newPantryItem.expiryDate}
                         onChange={(e) => setNewPantryItem({...newPantryItem, expiryDate: e.target.value})}
-                        style={{ 
+                        style={{
                           width: '100%',
-                          padding: '0.75rem', 
-                          border: '2px solid #e5e7eb', 
+                          padding: '0.75rem',
+                          border: '2px solid #e5e7eb',
                           borderRadius: '8px',
                           fontSize: '1rem',
                           boxSizing: 'border-box'

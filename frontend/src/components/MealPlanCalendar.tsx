@@ -537,51 +537,37 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
     <div style={{ padding: isMobile ? '1rem' : '2rem', maxWidth: '1400px', margin: '0 auto' }}>
       {/* Header */}
       <div style={{ marginBottom: isMobile ? '1rem' : '2rem' }}>
-        <div style={{ 
-          display: 'flex', 
-          flexDirection: isMobile ? 'column' : 'row',
-          justifyContent: 'space-between', 
-          alignItems: isMobile ? 'stretch' : 'center',
-          marginBottom: '1rem',
-          gap: isMobile ? '0.75rem' : '0'
+        <div style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1rem'
         }}>
           <h2 style={{ margin: 0, fontSize: isMobile ? '1.5rem' : '2rem', fontWeight: '700' }}>
             📅 {t('mealPlan.title')}
           </h2>
-          <div style={{ 
-            display: 'flex', 
-            gap: isMobile ? '0.5rem' : '1rem',
-            alignItems: 'center',
-            flexDirection: isMobile ? 'column' : 'row'
-          }}>
-            <div style={{ 
-              display: 'flex',
-              gap: '0.5rem',
-              width: isMobile ? '100%' : 'auto'
-            }}>
-              <button onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))} style={{
-                flex: isMobile ? '1' : 'initial',
-                padding: isMobile ? '0.75rem' : '0.5rem 1rem',
-                background: '#f3f4f6', border: 'none',
-                borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
-                fontSize: isMobile ? '0.875rem' : '1rem'
-              }}>← {isMobile ? t('mealPlan.prev') : t('mealPlan.prevWeek')}</button>
-              <button onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))} style={{
-                flex: isMobile ? '1' : 'initial',
-                padding: isMobile ? '0.75rem' : '0.5rem 1rem',
-                background: '#f3f4f6', border: 'none',
-                borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
-                fontSize: isMobile ? '0.875rem' : '1rem'
-              }}>{isMobile ? t('mealPlan.next') : t('mealPlan.nextWeek')} →</button>
+          {!isMobile && (
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))} style={{
+                  padding: '0.5rem 1rem',
+                  background: '#f3f4f6', border: 'none',
+                  borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
+                  fontSize: '1rem'
+                }}>← {t('mealPlan.prevWeek')}</button>
+                <button onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))} style={{
+                  padding: '0.5rem 1rem',
+                  background: '#f3f4f6', border: 'none',
+                  borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
+                  fontSize: '1rem'
+                }}>{t('mealPlan.nextWeek')} →</button>
+              </div>
+              <div style={{ fontWeight: '600', fontSize: '1.1rem' }}>
+                {currentWeekStart.toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })} - {addDays(currentWeekStart, 6).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric', year: 'numeric' })}
+              </div>
             </div>
-            <div style={{ 
-              fontWeight: '600', 
-              fontSize: isMobile ? '0.875rem' : '1.1rem',
-              textAlign: isMobile ? 'center' : 'left'
-            }}>
-              {currentWeekStart.toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })} - {addDays(currentWeekStart, 6).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric', year: 'numeric' })}
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Week Stats */}
@@ -616,6 +602,28 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
         }}>
           {generatingList ? `⏳ ${t('mealPlan.generatingShoppingList')}` : `🛒 ${t('mealPlan.generateShoppingList')}`}
         </button>
+
+        {isMobile && (
+          <div style={{ marginTop: '0.75rem' }}>
+            <div style={{ fontWeight: '600', fontSize: '0.875rem', textAlign: 'center', marginBottom: '0.5rem' }}>
+              {currentWeekStart.toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })} – {addDays(currentWeekStart, 6).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric', year: 'numeric' })}
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))} style={{
+                flex: 1, padding: '0.75rem',
+                background: '#f3f4f6', border: 'none',
+                borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
+                fontSize: '0.875rem'
+              }}>← {t('mealPlan.prev')}</button>
+              <button onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))} style={{
+                flex: 1, padding: '0.75rem',
+                background: '#f3f4f6', border: 'none',
+                borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
+                fontSize: '0.875rem'
+              }}>{t('mealPlan.next')} →</button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div style={{ 

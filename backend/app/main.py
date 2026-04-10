@@ -1,7 +1,7 @@
 ﻿# backend/app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import recipes, pantry, shopping, vision, donation
+from app.routers import recipes, pantry, shopping, vision, donation, profile
 # Add this import at the top
 from app.routers.barcode import router as barcode_router
 # Add this route registration with your other routers
@@ -33,6 +33,7 @@ app.include_router(pantry.router, prefix="/pantry", tags=["pantry"])
 app.include_router(shopping.router, prefix="/shopping", tags=["shopping"])
 app.include_router(vision.router, prefix="/vision", tags=["vision"])  # ← Add this
 app.include_router(donation.router, prefix="/donation", tags=["donation"])
+app.include_router(profile.router, prefix="/profile", tags=["profile"])
 @app.get("/health")
 def health():
     return {"status": "ok", "version": "1.0.0"}

@@ -20,14 +20,3 @@
     }
   }
 }
-{
-  "git": {
-    "deploymentEnabled": {
-      "main": true,
-      "dev": true
-    }
-  },
-  "github": {
-    "silent": false
-  }
-}

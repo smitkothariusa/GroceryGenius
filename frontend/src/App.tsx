@@ -232,7 +232,6 @@ const App: React.FC = () => {
   });
   const [editingPantryItem, setEditingPantryItem] = useState<PantryItem | null>(null);
   const [showEditPantry, setShowEditPantry] = useState(false);
-  const API_BASE = import.meta.env.VITE_API_URL || '/_/backend';
   // Calculate AI impact for ALL pantry items when food bank is selected
 // Calculate AI impact for ALL pantry items when food bank is selected
 // Calculate AI impact for ALL pantry items when food bank is selected

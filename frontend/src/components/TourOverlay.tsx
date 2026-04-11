@@ -11,7 +11,7 @@ interface SpotlightRect {
 }
 
 const TOOLTIP_EST_HEIGHT = 220;
-const SCROLL_SETTLE_MS = 400;
+const SCROLL_SETTLE_MS = 500; // extra headroom after instant-reset + smooth scroll
 
 interface TourOverlayProps {
   steps: TourStep[];
@@ -98,15 +98,22 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
         return;
       }
 
-      // On mobile always scroll to center so the sticky nav never occludes the element.
-      // On desktop only scroll when the element is off-screen.
-      const alreadyVisible = !isMobile && r.top >= 0 && r.bottom <= window.innerHeight;
-      if (alreadyVisible) {
-        applyRect(el);
-      } else {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        retryRef.current = setTimeout(() => applyRect(el), SCROLL_SETTLE_MS);
+      // Always reset scroll to top instantly first — ensures a consistent starting
+      // position every time so the smooth scroll covers a predictable distance and
+      // the settle timeout is always long enough.
+      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+
+      // Fixed-position elements (e.g. the mobile FAB) don't move with the page —
+      // no scrollIntoView needed; just measure after one paint tick.
+      if (getComputedStyle(el).position === 'fixed') {
+        retryRef.current = setTimeout(() => applyRect(el), 50);
+        return;
       }
+
+      // Smooth-scroll the element to the centre of the viewport, then measure
+      // once the animation has settled.
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      retryRef.current = setTimeout(() => applyRect(el), SCROLL_SETTLE_MS);
     }
 
     setRect(null);

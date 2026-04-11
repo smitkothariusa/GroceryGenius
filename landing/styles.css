@@ -47,7 +47,7 @@ a { text-decoration: none; color: inherit; }
    NAVBAR
    ============================================================ */
 .navbar {
-  background: var(--grad);
+  background: linear-gradient(135deg, #3d4fbb 0%, #4e2a82 100%);
   position: sticky;
   top: 0;
   z-index: 100;

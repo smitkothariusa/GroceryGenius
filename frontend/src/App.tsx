@@ -709,8 +709,10 @@ const App: React.FC = () => {
 
     const nextStep = TOUR_STEPS[nextIndex];
 
-    // Navigate to the correct tab if needed
+    // Navigate to the correct tab if needed; reset scroll first so the address
+    // bar is fully settled before TourOverlay starts measuring.
     if (nextStep.tab && nextStep.tab !== currentTab) {
+      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
       handleTabChange(nextStep.tab);
     }
 
@@ -2593,7 +2595,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
         <div className="mobile-drawer-footer">
           <button
             className="mobile-drawer-footer-btn"
-            onClick={() => { handleTabChange('pantry'); setTourStep(0); setShowTour(true); setDrawerOpen(false); }}
+            onClick={() => { window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior }); handleTabChange('pantry'); setTourStep(0); setShowTour(true); setDrawerOpen(false); }}
           >
             ❓ {t('common.help')}
           </button>
@@ -2642,7 +2644,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             </button>
             {!isMobile && (
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <button onClick={() => { handleTabChange('pantry'); setTourStep(0); setShowTour(true); }} style={{
+                <button onClick={() => { window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior }); handleTabChange('pantry'); setTourStep(0); setShowTour(true); }} style={{
                   padding: '0.5rem 1rem',
                   background: 'linear-gradient(45deg, #8b5cf6, #6366f1)',
                   color: 'white',
@@ -6616,6 +6618,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 setShowMissionPopup(false);
                 localStorage.setItem('hasSeenMission', 'true');
                 if (!localStorage.getItem('hasSeenTour')) {
+                  window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
                   handleTabChange('pantry');
                   setTourStep(0);
                   setShowTour(true);

@@ -98,15 +98,10 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
         return;
       }
 
-      // Always reset scroll to top instantly first — ensures a consistent starting
-      // position every time so the smooth scroll covers a predictable distance and
-      // the settle timeout is always long enough.
-      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
-
       // Fixed-position elements (e.g. the mobile FAB) don't move with the page —
-      // no scrollIntoView needed; just measure after one paint tick.
+      // no scrollIntoView needed; just measure after a short layout settle.
       if (getComputedStyle(el).position === 'fixed') {
-        retryRef.current = setTimeout(() => applyRect(el), 50);
+        retryRef.current = setTimeout(() => applyRect(el), 150);
         return;
       }
 
@@ -119,15 +114,21 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
     setRect(null);
     measure();
 
+    // Debounce resize so rapid address-bar animation events (mobile) don't cause
+    // a stale spotlight mid-transition.
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const handleResize = () => {
-      if (retryRef.current) clearTimeout(retryRef.current);
-      const el = document.querySelector(selector) as HTMLElement | null;
-      if (el) applyRect(el);
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const el = document.querySelector(selector) as HTMLElement | null;
+        if (el) applyRect(el);
+      }, 200);
     };
     window.addEventListener('resize', handleResize);
 
     return () => {
       if (retryRef.current) clearTimeout(retryRef.current);
+      if (resizeTimer) clearTimeout(resizeTimer);
       window.removeEventListener('resize', handleResize);
     };
   }, [step.selector, step.mobileSelector, step.skipOnMobile, currentStep, isMobile]);

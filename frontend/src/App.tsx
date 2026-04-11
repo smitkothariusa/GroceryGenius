@@ -5098,6 +5098,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
       {isMobile && (currentTab === 'pantry' || currentTab === 'shopping') && (
         <button
           className="mobile-fab"
+          data-tour={currentTab === 'pantry' ? 'pantry-add-mobile' : 'shopping-add-mobile'}
           onClick={() => {
             if (currentTab === 'pantry') setShowAddPantry(true);
             if (currentTab === 'shopping') setShowAddShopping(true);

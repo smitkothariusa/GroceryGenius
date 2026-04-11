@@ -55,6 +55,7 @@ interface PantryItem {
   unit: string;
   category: string;
   expiryDate?: string;
+  emoji?: string;  // NEW
 }
 
 interface ShoppingItem {
@@ -412,6 +413,7 @@ const App: React.FC = () => {
         unit: item.unit,
         category: item.category,
         expiryDate: item.expiry_date,
+        emoji: item.emoji || undefined,  // NEW
       })));
       console.log('✅ Pantry loaded:', pantryData.length, 'items');
     } catch (error) {

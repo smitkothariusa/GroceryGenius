@@ -49,6 +49,7 @@ export interface PantryItem {
   expiry_date?: string;
   added_date: string;
   updated_at: string;
+  emoji?: string;  // NEW
 }
 
 export interface ShoppingItem {

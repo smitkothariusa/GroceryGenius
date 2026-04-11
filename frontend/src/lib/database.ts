@@ -23,6 +23,7 @@ export const pantryService = {
     unit: string;
     category: string;
     expiryDate?: string;
+    emoji?: string;  // NEW
   }) {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) throw new Error('Not authenticated');
@@ -36,10 +37,11 @@ export const pantryService = {
         unit: item.unit,
         category: item.category,
         expiry_date: item.expiryDate || null,
+        emoji: item.emoji || null,  // NEW
       })
       .select()
       .single();
-    
+
     if (error) throw error;
     return data;
   },
@@ -51,6 +53,7 @@ export const pantryService = {
     unit?: string;
     category?: string;
     expiryDate?: string;
+    emoji?: string;  // NEW
   }) {
     const { data, error } = await supabase
       .from('pantry_items')
@@ -60,11 +63,12 @@ export const pantryService = {
         unit: item.unit,
         category: item.category,
         expiry_date: item.expiryDate,
+        emoji: item.emoji,  // NEW
       })
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data;
   },

@@ -99,14 +99,22 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
       }
 
       // Fixed-position elements (e.g. the mobile FAB) don't move with the page —
-      // no scrollIntoView needed; just measure after a short layout settle.
+      // no scrollIntoView needed; wait long enough for any address-bar animation
+      // (triggered by the tap that started the tour) to fully settle.
       if (getComputedStyle(el).position === 'fixed') {
-        retryRef.current = setTimeout(() => applyRect(el), 150);
+        retryRef.current = setTimeout(() => applyRect(el), 400);
         return;
       }
 
-      // Smooth-scroll the element to the centre of the viewport, then measure
-      // once the animation has settled.
+      // If the element's top edge is already inside the viewport (e.g. after a
+      // tab-change scroll reset), centering it would scroll past the tab header.
+      // Skip scrollIntoView and just measure after one paint cycle.
+      if (r.top >= 0 && r.top < window.innerHeight) {
+        retryRef.current = setTimeout(() => applyRect(el), 100);
+        return;
+      }
+
+      // Element is off-screen — smooth-scroll it to centre, then measure.
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       retryRef.current = setTimeout(() => applyRect(el), SCROLL_SETTLE_MS);
     }

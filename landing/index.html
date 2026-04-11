@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GroceryGenius — AI-Powered Meal Planning</title>
+  <meta name="description" content="Turn your pantry ingredients into amazing recipes — powered by AI. Free to use." />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="container">
+      <span class="navbar-logo">🧑‍🍳 GroceryGenius</span>
+      <a class="btn-login" href="https://app.grocerygenius.org/">Log In</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">✨ AI-Powered Meal Planning</div>
+    <h1>Stop wasting food.<br>Start cooking genius.</h1>
+    <p class="hero-sub">Turn your pantry ingredients into amazing recipes — powered by AI. Free to use.</p>
+    <div class="hero-ctas">
+      <a class="btn-primary" href="https://app.grocerygenius.org/">🚀 Start for Free</a>
+      <a class="btn-secondary" href="https://app.grocerygenius.org/">See Demo →</a>
+    </div>
+    <div class="hero-screenshot-wrap">
+      <img
+        src="images/screenshot-recipes.png"
+        alt="GroceryGenius recipe generation screen"
+        width="820"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+      />
+      <div class="screenshot-placeholder" style="display:none;">📱 App Screenshot Coming Soon</div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <p class="section-label">Everything You Need</p>
+    <h2 class="section-title">Your kitchen's smartest assistant</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🍽️</div>
+        <div class="feature-title">AI Recipe Generation</div>
+        <p class="feature-desc">3 recipe suggestions from ingredients you already have</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📦</div>
+        <div class="feature-title">Smart Pantry</div>
+        <p class="feature-desc">Track items &amp; get alerts before things expire</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛒</div>
+        <div class="feature-title">Shopping Lists</div>
+        <p class="feature-desc">Auto-built from recipes — share, print, or export</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📅</div>
+        <div class="feature-title">Meal Planning</div>
+        <p class="feature-desc">Plan your week and track calories day by day</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">Nutrition Tracking</div>
+        <p class="feature-desc">Calorie counts, health grades, and macro breakdowns</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌍</div>
+        <div class="feature-title">6 Languages</div>
+        <p class="feature-desc">Full multilingual support for global kitchens</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREENSHOTS CAROUSEL -->
+  <section class="screenshots">
+    <p class="section-label">See It In Action</p>
+    <h2 class="section-title">Built for real kitchens</h2>
+    <div class="carousel-outer">
+      <div class="carousel-window">
+        <div class="carousel-track" id="carouselTrack">
+
+          <div class="carousel-slide">
+            <img src="images/screenshot-recipes.png" alt="AI Recipe Generation screen"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+            <div class="slide-img-placeholder" style="display:none;">🍽️ Recipes Screenshot</div>
+            <div class="slide-caption">
+              <div class="slide-caption-title">AI Recipe Generation</div>
+              <p class="slide-caption-desc">Type in what you have, get genius recipes instantly. With dietary filters, servings, and health grades.</p>
+            </div>
+          </div>
+
+          <div class="carousel-slide">
+            <img src="images/screenshot-pantry.png" alt="Smart Pantry screen"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+            <div class="slide-img-placeholder" style="display:none;">📦 Pantry Screenshot</div>
+            <div class="slide-caption">
+              <div class="slide-caption-title">Smart Pantry</div>
+              <p class="slide-caption-desc">Know exactly what you have at home. Track expiry dates and scan barcodes to add items in seconds.</p>
+            </div>
+          </div>
+
+          <div class="carousel-slide">
+            <img src="images/screenshot-mealplan.png" alt="Weekly Meal Planning screen"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+            <div class="slide-img-placeholder" style="display:none;">📅 Meal Plan Screenshot</div>
+            <div class="slide-caption">
+              <div class="slide-caption-title">Weekly Meal Planning</div>
+              <p class="slide-caption-desc">Drag saved recipes onto a weekly calendar. See total calories, protein, and generate a shopping list for the week.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="carousel-dots" id="carouselDots">
+        <button class="dot active" aria-label="Slide 1"></button>
+        <button class="dot" aria-label="Slide 2"></button>
+        <button class="dot" aria-label="Slide 3"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="cta-section">
+    <h2>Ready to cook smarter?</h2>
+    <p>AI-powered recipes, pantry tracking, and meal planning — all in one place. Free to try.</p>
+    <a class="btn-primary" href="https://app.grocerygenius.org/">🚀 Sign Up Free</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <span class="footer-logo">🧑‍🍳 GroceryGenius © 2026</span>
+      <nav class="footer-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a class="open-app" href="https://app.grocerygenius.org/">Open App →</a>
+      </nav>
+    </div>
+  </footer>
+
+  <!-- CAROUSEL SCRIPT -->
+  <script>
+    (function () {
+      const track = document.getElementById('carouselTrack');
+      const dots = document.querySelectorAll('#carouselDots .dot');
+      const total = dots.length;
+      let current = 0;
+      let timer;
+
+      function goTo(n) {
+        current = (n + total) % total;
+        track.style.transform = 'translateX(-' + current * 100 + '%)';
+        dots.forEach(function (d, i) { d.classList.toggle('active', i === current); });
+      }
+
+      function startTimer() {
+        timer = setInterval(function () { goTo(current + 1); }, 3000);
+      }
+
+      dots.forEach(function (dot, i) {
+        dot.addEventListener('click', function () {
+          clearInterval(timer);
+          goTo(i);
+          startTimer();
+        });
+      });
+
+      startTimer();
+    })();
+  </script>
+
+</body>
+</html>

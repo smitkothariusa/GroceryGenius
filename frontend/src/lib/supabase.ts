@@ -31,7 +31,7 @@ export interface Profile {
   age?: number;
   weight_kg?: number;
   height_cm?: number;
-  biological_sex?: 'male' | 'female';
+  biological_sex?: 'male' | 'female' | 'other';
   activity_level?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
   onboarding_completed: boolean;
   custom_dietary_labels: CustomDietaryLabel[];

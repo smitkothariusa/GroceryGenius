@@ -84,7 +84,7 @@
     "loading": "加载中...",
     "alreadyHaveAccount": "已有账户？登录",
     "dontHaveAccount": "没有账户？注册",
-    "checkEmail": "请查看邮件中的确认链接！",
+    "checkEmail": "请查收确认链接邮件。如果未收到，该邮箱可能已被注册 — 请尝试直接登录。",
     "emailConfirmFailed": "邮件确认失败，请重试。"
   },
   "recipes": {
@@ -377,7 +377,8 @@
     "edit": "编辑",
     "save": "保存",
     "close": "关闭",
-    "clearAll": "全部清除"
+    "clearAll": "全部清除",
+    "help": "帮助"
   },
   "notifications": {
     "itemAdded": "已将物品添加到{{list}}！",
@@ -454,7 +455,7 @@
     "pleaseUploadImage": "请上传图片文件",
     "imageTooLarge": "图片太大。请使用 10MB 以下的图片。",
     "locationGranted": "位置权限已授予！按距离排序。",
-    "locationDenied": "位置权限被拒绝。显示所有地点。",
+    "locationDenied": "位置权限被拒绝。请前往浏览器设置，为此网站允许位置访问。",
     "geolocationUnsupported": "您的浏览器不支持地理定位。",
     "estimatedPrices": "正在使用估算价格。AI 定价暂时不可用。",
     "impactCopied": "影响消息已复制到剪贴板！",
@@ -491,8 +492,8 @@
     "step2Title": "告诉我们关于您的信息",
     "step3Title": "您在厨房里有多熟练？",
     "step4Title": "您有饮食偏好吗？",
-    "recommendedCalories": "推荐：每天{{calories}}卡路里",
-    "tapToOverride": "（点击修改）",
+    "recommendedCalories": "✨ 推荐：每天{{calories}}卡路里",
+    "enterManually": "手动输入",
     "aiWillGenerate": "✨ AI将为自定义饮食生成标签",
     "customDietPlaceholder": "或输入您的：例如地中海饮食...",
     "cookingLevels": {
@@ -522,9 +523,11 @@
     },
     "fields": {
       "age": "年龄",
-      "sex": "生理性别",
+      "gender": "性别",
+      "sex": "性别",
       "male": "男",
       "female": "女",
+      "other": "其他",
       "weight": "体重",
       "height": "身高",
       "activityLevel": "活动水平",
@@ -567,5 +570,48 @@
     "failedToGenerateLabel": "生成标签失败。已使用原始文字添加饮食。",
     "failedToSave": "保存设置失败。",
     "failedToDelete": "删除账户失败，请重试。"
+  },
+  "tour": {
+    "pantry": {
+      "add": { "title": "添加食材", "desc": "点击「添加食材」打开表单，输入食材名称并保存即可充实您的储藏室。" },
+      "scan": { "title": "扫描条形码", "desc": "使用摄像头扫描商品条形码，我们将自动将其添加到您的储藏室。" },
+      "expiry": { "title": "追踪保质期", "desc": "保存食材时添加保质期，我们将在临近时自动提醒您。" }
+    },
+    "recipes": {
+      "input": { "title": "按食材搜索食谱", "desc": "输入您拥有的食材，我们的AI将为您推荐合适的食谱。" },
+      "pantry": { "title": "使用储藏室食材", "desc": "点击此处，一键将整个储藏室的食材加载为食谱配料。" },
+      "dietary": { "title": "饮食偏好筛选", "desc": "根据您的饮食偏好过滤食谱，自动从设置中同步。" }
+    },
+    "mealplan": {
+      "calendar": { "title": "规划您的一周", "desc": "将食谱添加到日历上的不同日期，提前规划饮食。" },
+      "shopping": { "title": "自动生成购物清单", "desc": "膳食计划中缺少的食材将直接发送到您的购物清单。" }
+    },
+    "shopping": {
+      "list": { "title": "您的购物清单", "desc": "根据您的膳食计划和储藏室缺口自动生成。" },
+      "check": { "title": "购物时勾选", "desc": "点击任意商品将其标记为已购买。" },
+      "add": { "title": "手动添加商品", "desc": "您随时可以在此手动将商品添加到清单。" }
+    },
+    "donate": {
+      "expiring": { "title": "捐赠即将过期食品", "desc": "即将过期的食品会显示在这里，让您在浪费前及时捐赠。" },
+      "map": { "title": "寻找食物银行", "desc": "根据您的位置，发现附近的食物银行和捐赠点。" }
+    },
+    "favorites": {
+      "grid": { "title": "您收藏的食谱", "desc": "您收藏的食谱都在这里，随时快速访问。" },
+      "heart": { "title": "收藏食谱", "desc": "点击任意食谱卡片上的爱心，将其添加到收藏夹。" }
+    },
+    "settings": {
+      "open": { "title": "个性化设置", "desc": "打开设置，根据您的需求定制GroceryGenius。" },
+      "dietary": { "title": "饮食偏好", "desc": "在此设置您的饮食需求——食谱和筛选器将在所有页面自动更新。" },
+      "calorie": { "title": "每日卡路里目标", "desc": "设置您的每日卡路里目标，我们将全天追踪您的进度。" }
+    },
+    "calorie": {
+      "btn": { "title": "卡路里追踪器", "desc": "随时点击此按钮打开您的每日卡路里追踪器。" },
+      "panel": { "title": "追踪您的营养", "desc": "在此记录餐食，实时查看卡路里和营养进度。" }
+    },
+    "next": "下一步",
+    "skip": "跳过导览",
+    "finish": "完成",
+    "stepOf": "{{current}} / {{total}}",
+    "allSet": "一切就绪！🎉"
   }
 }

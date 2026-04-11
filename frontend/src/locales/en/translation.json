@@ -84,7 +84,7 @@
     "loading": "Loading...",
     "alreadyHaveAccount": "Already have an account? Sign In",
     "dontHaveAccount": "Don't have an account? Sign Up",
-    "checkEmail": "Check your email for confirmation link!",
+    "checkEmail": "Check your email for a confirmation link. If you don't receive one, this email address may already be registered — try signing in instead.",
     "emailConfirmFailed": "Email confirmation failed. Please try again."
   },
   "recipes": {
@@ -377,7 +377,8 @@
     "edit": "Edit",
     "save": "Save",
     "close": "Close",
-    "clearAll": "Clear All"
+    "clearAll": "Clear All",
+    "help": "Help"
   },
   "notifications": {
     "itemAdded": "Item added to {{list}}!",
@@ -454,7 +455,7 @@
     "pleaseUploadImage": "Please upload an image file",
     "imageTooLarge": "Image too large. Please use an image under 10MB",
     "locationGranted": "Location access granted! Sorting by proximity.",
-    "locationDenied": "Location access denied. Showing all locations.",
+    "locationDenied": "Location access denied. To enable, go to your browser settings and allow location for this site.",
     "geolocationUnsupported": "Geolocation not supported by your browser.",
     "estimatedPrices": "Using estimated prices. AI pricing temporarily unavailable.",
     "impactCopied": "Impact message copied to clipboard!",
@@ -491,8 +492,8 @@
     "step2Title": "Tell us about yourself",
     "step3Title": "How comfortable are you in the kitchen?",
     "step4Title": "Any dietary preferences?",
-    "recommendedCalories": "Recommended: {{calories}} cal/day",
-    "tapToOverride": "(tap to override)",
+    "recommendedCalories": "✨ Recommended: {{calories}} cal/day",
+    "enterManually": "Enter manually",
     "aiWillGenerate": "✨ AI will generate a label for custom diets",
     "customDietPlaceholder": "Or type your own: e.g. Mediterranean...",
     "cookingLevels": {
@@ -522,9 +523,11 @@
     },
     "fields": {
       "age": "Age",
-      "sex": "Biological Sex",
+      "gender": "Gender",
+      "sex": "Gender",
       "male": "Male",
       "female": "Female",
+      "other": "Other",
       "weight": "Weight",
       "height": "Height",
       "activityLevel": "Activity Level",
@@ -567,5 +570,48 @@
     "failedToGenerateLabel": "Failed to generate label. Diet added with original text.",
     "failedToSave": "Failed to save settings.",
     "failedToDelete": "Failed to delete account. Please try again."
+  },
+  "tour": {
+    "pantry": {
+      "add": { "title": "Add pantry items", "desc": "Tap 'Add Item' to open the form, then type an ingredient name and save it to stock your pantry." },
+      "scan": { "title": "Scan a barcode", "desc": "Use your camera to scan a product barcode and we'll add it to your pantry automatically." },
+      "expiry": { "title": "Your pantry items", "desc": "All your items appear here. Items highlighted in red are expiring soon — add an expiry date when saving any item to enable tracking." }
+    },
+    "recipes": {
+      "input": { "title": "Find recipes by ingredient", "desc": "Enter what you have and our AI will find recipes that use them." },
+      "pantry": { "title": "Use your pantry", "desc": "Tap this to load your entire pantry as recipe ingredients in one go." },
+      "dietary": { "title": "Dietary filters", "desc": "Filter recipes by your dietary preferences — synced automatically from your settings." }
+    },
+    "mealplan": {
+      "calendar": { "title": "Plan your week", "desc": "Browse recipes and add them to days on your calendar to plan ahead." },
+      "shopping": { "title": "Auto-build your shopping list", "desc": "Missing ingredients from your meal plan are sent straight to your Shopping list." }
+    },
+    "shopping": {
+      "list": { "title": "Your shopping list", "desc": "Items are auto-generated from your meal plan and pantry gaps." },
+      "check": { "title": "Check off as you shop", "desc": "Tap any item to mark it as bought." },
+      "add": { "title": "Add items manually", "desc": "You can always manually add items to your list here." }
+    },
+    "donate": {
+      "expiring": { "title": "Donate expiring food", "desc": "Food near its expiry date appears here so you can donate it before it goes to waste." },
+      "map": { "title": "Find a food bank", "desc": "Discover nearby food banks and drop-off points based on your location." }
+    },
+    "favorites": {
+      "grid": { "title": "Your saved recipes", "desc": "Recipes you've hearted live here for quick access any time." },
+      "heart": { "title": "Save a recipe", "desc": "Tap the heart on any recipe card to add it to your favorites." }
+    },
+    "settings": {
+      "open": { "title": "Personalize your settings", "desc": "Open settings to tailor GroceryGenius to your needs." },
+      "dietary": { "title": "Dietary preferences", "desc": "Set your dietary needs here — recipes and filters update automatically everywhere." },
+      "calorie": { "title": "Daily calorie goal", "desc": "Set your daily calorie target and we'll track your progress throughout the day." }
+    },
+    "calorie": {
+      "btn": { "title": "Calorie tracker", "desc": "Tap this button any time to open your daily calorie tracker." },
+      "panel": { "title": "Track your nutrition", "desc": "Log meals here and watch your calorie and nutrition progress in real time." }
+    },
+    "next": "Next",
+    "skip": "Skip tour",
+    "finish": "Finish",
+    "stepOf": "{{current}} / {{total}}",
+    "allSet": "You're all set! 🎉"
   }
 }

@@ -84,7 +84,7 @@
     "loading": "Cargando...",
     "alreadyHaveAccount": "¿Ya tienes cuenta? Iniciar sesión",
     "dontHaveAccount": "¿No tienes cuenta? Registrarse",
-    "checkEmail": "¡Revisa tu correo para el enlace de confirmación!",
+    "checkEmail": "Revisa tu correo para encontrar el enlace de confirmación. Si no recibes nada, es posible que este correo ya esté registrado — intenta iniciar sesión.",
     "emailConfirmFailed": "Error al confirmar el correo. Inténtalo de nuevo."
   },
   "recipes": {
@@ -377,7 +377,8 @@
     "edit": "Editar",
     "save": "Guardar",
     "close": "Cerrar",
-    "clearAll": "Limpiar Todo"
+    "clearAll": "Limpiar Todo",
+    "help": "Ayuda"
   },
   "notifications": {
     "itemAdded": "¡Artículo agregado a {{list}}!",
@@ -454,7 +455,7 @@
     "pleaseUploadImage": "Por favor, sube un archivo de imagen",
     "imageTooLarge": "Imagen demasiado grande. Por favor, usa una imagen de menos de 10 MB.",
     "locationGranted": "¡Acceso a ubicación concedido! Ordenando por proximidad.",
-    "locationDenied": "Acceso a ubicación denegado. Mostrando todas las ubicaciones.",
+    "locationDenied": "Acceso a ubicación denegado. Para activarlo, ve a la configuración del navegador y permite la ubicación para este sitio.",
     "geolocationUnsupported": "Geolocalización no soportada por tu navegador.",
     "estimatedPrices": "Usando precios estimados. Los precios de IA no están disponibles temporalmente.",
     "impactCopied": "¡Mensaje de impacto copiado al portapapeles!",
@@ -491,8 +492,8 @@
     "step2Title": "Cuéntanos sobre ti",
     "step3Title": "¿Qué tan cómodo estás en la cocina?",
     "step4Title": "¿Tienes preferencias dietéticas?",
-    "recommendedCalories": "Recomendado: {{calories}} cal/día",
-    "tapToOverride": "(toca para editar)",
+    "recommendedCalories": "✨ Recomendado: {{calories}} cal/día",
+    "enterManually": "Ingresar manualmente",
     "aiWillGenerate": "✨ La IA generará una etiqueta para dietas personalizadas",
     "customDietPlaceholder": "O escribe la tuya: p. ej. Mediterránea...",
     "cookingLevels": {
@@ -522,9 +523,11 @@
     },
     "fields": {
       "age": "Edad",
-      "sex": "Sexo Biológico",
+      "gender": "Género",
+      "sex": "Género",
       "male": "Masculino",
       "female": "Femenino",
+      "other": "Otro",
       "weight": "Peso",
       "height": "Altura",
       "activityLevel": "Nivel de Actividad",
@@ -567,5 +570,48 @@
     "failedToGenerateLabel": "Error al generar etiqueta. Dieta añadida con texto original.",
     "failedToSave": "Error al guardar la configuración.",
     "failedToDelete": "Error al eliminar la cuenta. Por favor, inténtalo de nuevo."
+  },
+  "tour": {
+    "pantry": {
+      "add": { "title": "Añadir artículos a la despensa", "desc": "Pulsa 'Añadir artículo' para abrir el formulario, escribe el nombre del ingrediente y guárdalo." },
+      "scan": { "title": "Escanear un código de barras", "desc": "Usa tu cámara para escanear el código de barras de un producto y lo añadiremos automáticamente." },
+      "expiry": { "title": "Seguir fechas de caducidad", "desc": "Añade una fecha de caducidad al guardar un artículo y te avisaremos cuando se acerque." }
+    },
+    "recipes": {
+      "input": { "title": "Buscar recetas por ingrediente", "desc": "Escribe lo que tienes y nuestra IA encontrará recetas que los usen." },
+      "pantry": { "title": "Usar tu despensa", "desc": "Pulsa aquí para cargar toda tu despensa como ingredientes de receta de una vez." },
+      "dietary": { "title": "Filtros dietéticos", "desc": "Filtra recetas por tus preferencias dietéticas, sincronizadas automáticamente desde tu configuración." }
+    },
+    "mealplan": {
+      "calendar": { "title": "Planifica tu semana", "desc": "Añade recetas a los días de tu calendario para planificar con antelación." },
+      "shopping": { "title": "Generar lista de la compra", "desc": "Los ingredientes que te faltan del plan de comidas se envían directamente a tu lista de la compra." }
+    },
+    "shopping": {
+      "list": { "title": "Tu lista de la compra", "desc": "Los artículos se generan automáticamente a partir de tu plan de comidas y los huecos de la despensa." },
+      "check": { "title": "Marca lo que compras", "desc": "Pulsa un artículo para marcarlo como comprado." },
+      "add": { "title": "Añadir artículos manualmente", "desc": "Siempre puedes añadir artículos manualmente a tu lista aquí." }
+    },
+    "donate": {
+      "expiring": { "title": "Dona alimentos que caducan", "desc": "Los alimentos próximos a caducar aparecen aquí para que puedas donarlos antes de que se desperdicien." },
+      "map": { "title": "Encontrar un banco de alimentos", "desc": "Descubre bancos de alimentos y puntos de entrega cercanos según tu ubicación." }
+    },
+    "favorites": {
+      "grid": { "title": "Tus recetas guardadas", "desc": "Las recetas que has marcado con un corazón están aquí para acceder rápidamente en cualquier momento." },
+      "heart": { "title": "Guardar una receta", "desc": "Pulsa el corazón de cualquier tarjeta de receta para añadirla a tus favoritos." }
+    },
+    "settings": {
+      "open": { "title": "Personaliza tu experiencia", "desc": "Abre la configuración para adaptar GroceryGenius a tus necesidades." },
+      "dietary": { "title": "Preferencias dietéticas", "desc": "Establece tus necesidades dietéticas aquí — las recetas y filtros se actualizan automáticamente en todas partes." },
+      "calorie": { "title": "Objetivo calórico diario", "desc": "Establece tu objetivo diario de calorías y haremos un seguimiento de tu progreso durante el día." }
+    },
+    "calorie": {
+      "btn": { "title": "Contador de calorías", "desc": "Pulsa este botón en cualquier momento para abrir tu contador de calorías diario." },
+      "panel": { "title": "Controla tu nutrición", "desc": "Registra tus comidas aquí y sigue tu progreso calórico y nutricional en tiempo real." }
+    },
+    "next": "Siguiente",
+    "skip": "Omitir tour",
+    "finish": "Terminar",
+    "stepOf": "{{current}} / {{total}}",
+    "allSet": "¡Todo listo! 🎉"
   }
 }

@@ -375,7 +375,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
         setDeductLoading(true);
 
         try {
-          const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+          const API_BASE = import.meta.env.VITE_API_URL || '/_/backend';
           const response = await fetch(`${API_BASE}/pantry/match-ingredients`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -493,7 +493,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
 
     setGeneratingList(true);
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const API_BASE = import.meta.env.VITE_API_URL || '/_/backend';
       const response = await fetch(`${API_BASE}/recipes/parse-ingredients`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -595,7 +595,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
           </div>
         </div>
 
-        <button onClick={generateWeekShoppingList} disabled={generatingList} style={{
+        <button data-tour="mealplan-shopping-btn" onClick={generateWeekShoppingList} disabled={generatingList} style={{
           padding: '0.75rem 1.5rem', background: generatingList ? '#6b7280' : 'linear-gradient(45deg, #10b981, #059669)',
           color: 'white', border: 'none', borderRadius: '12px', cursor: generatingList ? 'not-allowed' : 'pointer',
           fontWeight: '600', fontSize: '1rem', width: '100%'
@@ -705,13 +705,13 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
           overflowX: 'auto',
           order: isMobile ? 1 : 2
         }}>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: isMobile ? `80px repeat(7, minmax(100px, 1fr))` : `120px repeat(7, 1fr)`, 
-            gap: '1px', 
-            background: '#e5e7eb', 
-            borderRadius: '12px', 
-            overflow: 'hidden', 
+          <div data-tour="mealplan-calendar" style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? `80px repeat(7, minmax(100px, 1fr))` : `120px repeat(7, 1fr)`,
+            gap: '1px',
+            background: '#e5e7eb',
+            borderRadius: '12px',
+            overflow: 'hidden',
             minWidth: isMobile ? '800px' : '900px'
           }}>
             {/* Header Row */}

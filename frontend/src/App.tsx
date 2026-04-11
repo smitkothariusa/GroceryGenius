@@ -44,6 +44,8 @@ import IngredientSubstitution from './components/IngredientSubstitution';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import OnboardingSurvey from './components/OnboardingSurvey';
 import SettingsPanel from './components/SettingsPanel';
+import TourOverlay from './components/TourOverlay';
+import { TOUR_STEPS } from './tourSteps';
 
 
 interface PantryItem {
@@ -97,6 +99,23 @@ interface FavoriteRecipe extends Recipe {
   savedDate: string;
 }
 
+const PRESET_LABEL_MAP: Record<string, string> = {
+  'vegetarian': 'Vegetarian', 'vegan': 'Vegan', 'gluten-free': 'Gluten-Free',
+  'dairy-free': 'Dairy-Free', 'halal': 'Halal', 'kosher': 'Kosher',
+  'keto': 'Keto', 'low-carb': 'Low-Carb', 'nut-free': 'Nut-Free', 'paleo': 'Paleo',
+  'diabetic-friendly': 'Diabetic-Friendly', 'heart-healthy': 'Heart-Healthy',
+};
+
+function buildCombinedDietaryString(prefs: string[], customLabels: CustomDietaryLabel[]): string {
+  const parts = prefs
+    .map(p => PRESET_LABEL_MAP[p] ?? customLabels.find(l => l.id === p)?.label ?? null)
+    .filter(Boolean) as string[];
+  if (parts.length === 0) return '';
+  if (parts.length === 1) return parts[0];
+  if (parts.length === 2) return `${parts[0]} and ${parts[1]}`;
+  return `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`;
+}
+
 const App: React.FC = () => {
   const { t, i18n } = useTranslation();
   
@@ -148,6 +167,8 @@ const App: React.FC = () => {
   const [detectedBarcode, setDetectedBarcode] = useState<string>('');
   const [detectedExpiry, setDetectedExpiry] = useState<string>('');
   const [showMissionPopup, setShowMissionPopup] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+  const [tourStep, setTourStep] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
@@ -213,7 +234,7 @@ const App: React.FC = () => {
   }>({ amazon: 0, walmart: 0, loading: false });
   const { toasts, removeToast, success, error, warning, info } = useToast();
   const [isTabChanging, setIsTabChanging] = useState(false);
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  const API_BASE = import.meta.env.VITE_API_URL || '/_/backend';
   const bgColor = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
   const cardBg = 'rgba(255, 255, 255, 0.95)';
   const textColor = '#1f2937';
@@ -255,7 +276,7 @@ const App: React.FC = () => {
 
       try {
         // Calculate impact for ALL pantry items at once
-        const impactResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/donation/calculate-impact`, {
+        const impactResponse = await fetch(`${import.meta.env.VITE_API_URL || '/_/backend'}/donation/calculate-impact`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -367,7 +388,8 @@ const App: React.FC = () => {
           setUserProfile(profileResult);
           setCustomDietaryLabels(profileResult.custom_dietary_labels ?? []);
           if (profileResult.dietary_preferences && profileResult.dietary_preferences.length > 0) {
-            setDietaryFilter(profileResult.dietary_preferences[0]);
+            const combined = buildCombinedDietaryString(profileResult.dietary_preferences, profileResult.custom_dietary_labels ?? []);
+            if (combined) setDietaryFilter(combined);
           }
           if (!profileResult.onboarding_completed) {
             setShowSurvey(true);
@@ -581,6 +603,12 @@ const App: React.FC = () => {
             co2Saved: 0
           });
           localStorage.removeItem('gg_recipe_mode');
+          localStorage.removeItem('hasSeenTour');
+          localStorage.removeItem('hasSeenMission');
+          localStorage.removeItem('locationPermission');
+          localStorage.removeItem('userLocation');
+          setUserLocation(null);
+          setLocationPermission('pending');
           setRecipeMode('loose');
         }
       });
@@ -617,7 +645,7 @@ const App: React.FC = () => {
     const currentRecipes = recipesRef.current;
     if (currentRecipes.length === 0) return;
     setRecipeLoading(true);
-    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const API_BASE_URL = import.meta.env.VITE_API_URL || '/_/backend';
     fetch(`${API_BASE_URL}/recipes/translate-full`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -656,6 +684,43 @@ const App: React.FC = () => {
       setIsTabChanging(false);
     }, 150);
   };
+
+  const handleTourSkip = () => {
+    setShowTour(false);
+    localStorage.setItem('hasSeenTour', 'true');
+  };
+
+  const handleTourNext = () => {
+    const step = TOUR_STEPS[tourStep];
+
+    // Run afterStep side effects for current step
+    if (step.afterStep === 'closeSettings') setShowSettings(false);
+    if (step.afterStep === 'closeCalorieTracker') setShowCalorieTracker(false);
+
+    const nextIndex = tourStep + 1;
+
+    if (nextIndex >= TOUR_STEPS.length) {
+      // Tour complete
+      setShowTour(false);
+      localStorage.setItem('hasSeenTour', 'true');
+      success(t('tour.allSet'));
+      return;
+    }
+
+    const nextStep = TOUR_STEPS[nextIndex];
+
+    // Navigate to the correct tab if needed
+    if (nextStep.tab && nextStep.tab !== currentTab) {
+      handleTabChange(nextStep.tab);
+    }
+
+    // Run beforeShow side effects for next step
+    if (nextStep.beforeShow === 'openSettings') setShowSettings(true);
+    if (nextStep.beforeShow === 'openCalorieTracker') setShowCalorieTracker(true);
+
+    setTourStep(nextIndex);
+  };
+
   const getExpiringItems = () => {
     const today = new Date();
     return pantry.filter(item => {
@@ -826,7 +891,11 @@ const App: React.FC = () => {
 
     try {
       const params = new URLSearchParams();
-      if (dietaryFilter) params.append('dietary', dietaryFilter);
+      if (dietaryFilter) {
+        // Resolve custom label UUIDs to their AI-generated description so the prompt is meaningful
+        const customLabel = customDietaryLabels.find(l => l.id === dietaryFilter);
+        params.append('dietary', customLabel ? customLabel.description : dietaryFilter);
+      }
       params.append('language', i18n.language || 'en');
       if (recipeDifficulty !== 'flexible') params.append('difficulty', recipeDifficulty);
 
@@ -2524,9 +2593,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
         <div className="mobile-drawer-footer">
           <button
             className="mobile-drawer-footer-btn"
-            onClick={() => { setShowDemoConfirm(true); setDrawerOpen(false); }}
+            onClick={() => { handleTabChange('pantry'); setTourStep(0); setShowTour(true); setDrawerOpen(false); }}
           >
-            🎬 Demo
+            ❓ {t('common.help')}
           </button>
           <button
             className="mobile-drawer-footer-btn"
@@ -2560,7 +2629,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             </h1>
           </div>
           <div style={{ display: 'flex', gap: isMobile ? '0.5rem' : '0.75rem', alignItems: 'center' }}>
-            <button onClick={() => setShowCalorieTracker(!showCalorieTracker)} style={{
+            <button data-tour="calorie-tracker-btn" onClick={() => setShowCalorieTracker(!showCalorieTracker)} style={{
               padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 1rem',
               background: todayCalories > dailyCalorieGoal ? '#fee2e2' : '#f0fdf4',
               border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem',
@@ -2573,7 +2642,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             </button>
             {!isMobile && (
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <button onClick={() => setShowDemoConfirm(true)} style={{
+                <button onClick={() => { handleTabChange('pantry'); setTourStep(0); setShowTour(true); }} style={{
                   padding: '0.5rem 1rem',
                   background: 'linear-gradient(45deg, #8b5cf6, #6366f1)',
                   color: 'white',
@@ -2583,13 +2652,13 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   fontWeight: '600',
                   fontSize: '0.875rem'
                 }}>
-                  🎬 Demo
+                  ❓ {t('common.help')}
                 </button>
                 <LanguageSwitcher />
               </div>
             )}
             {!isMobile && (
-              <button onClick={() => setShowSettings(true)} style={{
+              <button data-tour="settings-btn" onClick={() => setShowSettings(true)} style={{
                 padding: '0.5rem 1rem',
                 background: '#f3f4f6',
                 color: '#374151',
@@ -2691,7 +2760,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                     <label style={{ fontWeight: '700', fontSize: '0.9rem', flex: 1 }}>🥘 {t('recipes.whatIngredientsLabel')}</label>
                     {pantry.length > 0 && (
-                      <button onClick={addPantryToIngredients} style={{
+                      <button data-tour="recipes-use-pantry-btn" onClick={addPantryToIngredients} style={{
                         padding: '0.35rem 0.6rem', background: '#8b5cf6', color: 'white',
                         border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '0.75rem', whiteSpace: 'nowrap'
                       }}>📦 {t('recipes.addPantryItems')}</button>
@@ -2717,7 +2786,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   </div>
 
                   {/* Ingredient input */}
-                  <input type="text" placeholder={t('recipes.ingredientsPlaceholder')} onKeyPress={(e) => {
+                  <input data-tour="recipes-ingredient-input" type="text" placeholder={t('recipes.ingredientsPlaceholder')} onKeyPress={(e) => {
                     if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
                       const tag = (e.target as HTMLInputElement).value.trim().toLowerCase();
                       if (!ingredientTags.includes(tag)) setIngredientTags([...ingredientTags, tag]);
@@ -2759,9 +2828,12 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
                   {/* Dietary */}
                   <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' }}>{t('recipes.dietaryPreferences')}</div>
-                  <select value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
+                  <select data-tour="recipes-dietary-filter" value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
                     style={{ width: '100%', padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '10px', fontSize: '0.875rem', marginBottom: '0.75rem', boxSizing: 'border-box' }}>
                     <option value="">{t('recipes.dietary.all')}</option>
+                    {dietaryFilter && !PRESET_LABEL_MAP[dietaryFilter] && !customDietaryLabels.find(l => l.id === dietaryFilter) && (
+                      <option value={dietaryFilter}>📋 {dietaryFilter}</option>
+                    )}
                     <option value="vegetarian">{t('recipes.dietary.vegetarian')}</option>
                     <option value="vegan">{t('recipes.dietary.vegan')}</option>
                     <option value="gluten-free">{t('recipes.dietary.glutenFree')}</option>
@@ -2840,7 +2912,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
                     <label style={{ fontWeight: '600' }}>🥘 {t('recipes.whatIngredientsLabel')}</label>
                     {pantry.length > 0 && (
-                      <button onClick={addPantryToIngredients} style={{
+                      <button data-tour="recipes-use-pantry-btn" onClick={addPantryToIngredients} style={{
                         padding: '0.35rem 0.75rem', background: '#8b5cf6', color: 'white',
                         border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem'
                       }}>📦 {t('recipes.addPantryItems')}</button>
@@ -2883,7 +2955,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       </span>
                     ))}
                   </div>
-                  <input type="text" placeholder={t('recipes.ingredientsPlaceholder')} onKeyPress={(e) => {
+                  <input data-tour="recipes-ingredient-input" type="text" placeholder={t('recipes.ingredientsPlaceholder')} onKeyPress={(e) => {
                     if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
                       const tag = (e.target as HTMLInputElement).value.trim().toLowerCase();
                       if (!ingredientTags.includes(tag)) setIngredientTags([...ingredientTags, tag]);
@@ -2895,9 +2967,12 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     onChange={(e) => setRecipeSearchQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && !recipeLoading && handleGetRecipes()}
                     style={{ width: '100%', padding: '1rem', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: '1rem', marginBottom: '1rem', boxSizing: 'border-box' }} />
                   <div className="recipe-controls-row" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-                    <select value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
+                    <select data-tour="recipes-dietary-filter" value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
                       style={{ padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '8px', minWidth: '200px' }}>
                       <option value="">{t('recipes.dietary.all')}</option>
+                      {dietaryFilter && !PRESET_LABEL_MAP[dietaryFilter] && !customDietaryLabels.find(l => l.id === dietaryFilter) && (
+                        <option value={dietaryFilter}>📋 {dietaryFilter}</option>
+                      )}
                       <option value="vegetarian">{t('recipes.dietary.vegetarian')}</option>
                       <option value="vegan">{t('recipes.dietary.vegan')}</option>
                       <option value="gluten-free">{t('recipes.dietary.glutenFree')}</option>
@@ -3233,6 +3308,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           </>
         )}
         {currentTab === 'mealplan' && (
+        <div>
         <MealPlanCalendar
           savedRecipes={favorites}
           translatedNames={translatedFavoriteNames}
@@ -3281,6 +3357,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             }
           }}
         />
+        </div>
         )}
         {currentTab === 'pantry' && (
           <div style={{ 
@@ -3311,6 +3388,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       setScanMode('menu'); // Reset to menu
                       setShowImageUpload(true);
                     }}
+                    data-tour="pantry-scan-btn"
                     style={{
                       padding: isMobile ? '0.75rem' : '0.75rem 1.5rem',
                       background: '#8b5cf6',
@@ -3352,6 +3430,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     </button>
                   )}
                   <button
+                    data-tour="pantry-add-input"
                     className="desktop-add-btn"
                     onClick={() => setShowAddPantry(!showAddPantry)}
                     style={{
@@ -3430,19 +3509,19 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
                         {t('pantry.itemName')}
                       </label>
-                      <input 
-                        type="text" 
-                        placeholder={t('pantry.itemPlaceholder')} 
+                      <input
+                        type="text"
+                        placeholder={t('pantry.itemPlaceholder')}
                         value={newPantryItem.name}
                         onChange={(e) => setNewPantryItem({...newPantryItem, name: e.target.value})}
-                        style={{ 
+                        style={{
                           width: '100%',
-                          padding: '0.75rem', 
-                          border: '2px solid #e5e7eb', 
+                          padding: '0.75rem',
+                          border: '2px solid #e5e7eb',
                           borderRadius: '8px',
                           fontSize: '1rem',
                           boxSizing: 'border-box'
-                        }} 
+                        }}
                       />
                     </div>
 
@@ -3528,18 +3607,18 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
                         {t('pantry.expiryDate')}
                       </label>
-                      <input 
-                        type="date" 
+                      <input
+                        type="date"
                         value={newPantryItem.expiryDate}
                         onChange={(e) => setNewPantryItem({...newPantryItem, expiryDate: e.target.value})}
-                        style={{ 
+                        style={{
                           width: '100%',
-                          padding: '0.75rem', 
-                          border: '2px solid #e5e7eb', 
+                          padding: '0.75rem',
+                          border: '2px solid #e5e7eb',
                           borderRadius: '8px',
                           fontSize: '1rem',
                           boxSizing: 'border-box'
-                        }} 
+                        }}
                       />
                     </div>
                   </div>
@@ -3661,18 +3740,18 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   </select>
                 </div>
                 
-                <input 
-                  type="date" 
+                <input
+                  type="date"
                   value={newPantryItem.expiryDate}
                   onChange={(e) => setNewPantryItem({...newPantryItem, expiryDate: e.target.value})}
-                  style={{ 
-                    gridColumn: '1 / -1', 
-                    padding: '0.75rem', 
-                    border: '1px solid #d1d5db', 
+                  style={{
+                    gridColumn: '1 / -1',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
                     borderRadius: '8px',
                     width: '100%',
                     boxSizing: 'border-box'
-                  }} 
+                  }}
                 />
                 
                 <button 
@@ -3722,7 +3801,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               </div>
             )}
 
-            <div style={{ display: 'grid', gap: '0.75rem' }}>
+            <div data-tour="pantry-expiry-input" style={{ display: 'grid', gap: '0.75rem' }}>
               {pantry.map(item => {
                 const expiring = getExpiringItems().some(e => e.id === item.id);
                 return (
@@ -3889,6 +3968,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 justifyContent: isMobile ? 'stretch' : 'flex-start'
               }}>
                 <button
+                  data-tour="shopping-add-input"
                   className="desktop-add-btn"
                   onClick={() => setShowAddShopping(true)}
                   style={{
@@ -4080,8 +4160,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             </div>
 
 
-            <div style={{ display: 'grid', gap: '0.75rem' }}>
-              {sortShoppingList().map(item => (
+            <div data-tour="shopping-list" style={{ display: 'grid', gap: '0.75rem' }}>
+              {sortShoppingList().map((item, index) => (
                 <div
                   key={item.id}
                   className="card-hover shopping-item-row"
@@ -4100,6 +4180,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 >
                   <div className="item-content" style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.75rem' : '1rem', flex: 1 }}>
                     <input type="checkbox" checked={item.checked}
+                      {...(index === 0 ? { 'data-tour': 'shopping-item-checkbox' } : {})}
                       onChange={async () => {
                         try {
                           await shoppingService.update(item.id, { checked: !item.checked });
@@ -4215,8 +4296,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               margin: '0 0 2rem 0',
               fontSize: isMobile ? '1.5rem' : '2rem'
             }}>⭐ {t('favorites.title')} ({favorites.length})</h2>
-            <div style={{ display: 'grid', gap: '1rem' }}>
-              {favorites.map(recipe => (
+            <div data-tour="favorites-grid" style={{ display: 'grid', gap: '1rem' }}>
+              {favorites.map((recipe, index) => (
                 <div 
                   key={recipe.id} 
                   onClick={() => { setSelectedRecipe(recipe); setShowDetailedView(true); }}
@@ -4240,7 +4321,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         {t('favorites.savedOn')}: {new Date(recipe.savedDate).toLocaleDateString()}
                       </div>
                     </div>
-                    <button onClick={async (e) => {
+                    <button
+                      {...(index === 0 ? { 'data-tour': 'favorites-heart-btn' } : {})}
+                      onClick={async (e) => {
                       e.stopPropagation();
                       try {
                         await recipesService.delete(recipe.id);
@@ -4334,7 +4417,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
             {/* Expiring Items Alert */}
             {getExpiringItems().length > 0 && (
-              <div style={{ 
+              <div data-tour="donate-expiring-list" style={{
                 background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
                 border: '2px solid #f59e0b',
                 padding: '2rem',
@@ -4571,11 +4654,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             )}
 
             {/* Food Bank Directory */}
-            <div style={{ 
-              background: cardBg, 
-              padding: isMobile ? '1rem' : '2rem', 
-              borderRadius: '16px', 
-              marginBottom: isMobile ? '1rem' : '2rem' 
+            <div data-tour="donate-map" style={{
+              background: cardBg,
+              padding: isMobile ? '1rem' : '2rem',
+              borderRadius: '16px',
+              marginBottom: isMobile ? '1rem' : '2rem'
             }}>
               <h2 style={{
                 margin: '0 0 1rem 0',
@@ -5088,9 +5171,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
                   {t('pantry.itemName')}
                 </label>
-                <input 
-                  type="text" 
-                  placeholder={t('shopping.itemPlaceholder')} 
+                <input
+                  type="text"
+                  placeholder={t('shopping.itemPlaceholder')}
                   value={newShoppingItem.name}
                   onChange={(e) => setNewShoppingItem({...newShoppingItem, name: e.target.value})}
                   onKeyPress={(e) => {
@@ -5808,7 +5891,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             justifyContent: 'center', zIndex: 1000
           }}
         >
-          <div className="calorie-tracker-panel" style={{
+          <div className="calorie-tracker-panel" data-tour="calorie-tracker-panel" style={{
             background: cardBg,
             padding: '2rem',
             borderRadius: '16px',
@@ -6531,6 +6614,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               onClick={() => {
                 setShowMissionPopup(false);
                 localStorage.setItem('hasSeenMission', 'true');
+                if (!localStorage.getItem('hasSeenTour')) {
+                  handleTabChange('pantry');
+                  setTourStep(0);
+                  setShowTour(true);
+                }
               }}
               style={{
                 width: '100%',
@@ -6879,7 +6967,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               if (surveyData.daily_calorie_goal) setDailyCalorieGoal(surveyData.daily_calorie_goal);
               if (surveyData.custom_dietary_labels) setCustomDietaryLabels(surveyData.custom_dietary_labels);
               if (surveyData.dietary_preferences && surveyData.dietary_preferences.length > 0) {
-                setDietaryFilter(surveyData.dietary_preferences[0]);
+                const combined = buildCombinedDietaryString(surveyData.dietary_preferences, surveyData.custom_dietary_labels ?? []);
+                if (combined) setDietaryFilter(combined);
               }
             } else {
               console.error('Survey upsert error:', JSON.stringify(saveError));
@@ -6909,7 +6998,14 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           onSave={(updated) => {
             setUserProfile(prev => prev ? { ...prev, ...updated } : null);
             if (updated.daily_calorie_goal) setDailyCalorieGoal(updated.daily_calorie_goal);
+            const newLabels = updated.custom_dietary_labels ?? customDietaryLabels;
             if (updated.custom_dietary_labels) setCustomDietaryLabels(updated.custom_dietary_labels);
+            if (updated.dietary_preferences && updated.dietary_preferences.length > 0) {
+              const combined = buildCombinedDietaryString(updated.dietary_preferences, newLabels);
+              if (combined) setDietaryFilter(combined);
+            } else if (updated.dietary_preferences?.length === 0) {
+              setDietaryFilter('');
+            }
           }}
           onDeleteAccount={() => {
             setUser(null);
@@ -6930,6 +7026,15 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           />
         ))}
       </div>
+      {showTour && (
+        <TourOverlay
+          steps={TOUR_STEPS}
+          currentStep={tourStep}
+          isMobile={isMobile}
+          onNext={handleTourNext}
+          onSkip={handleTourSkip}
+        />
+      )}
     </div>
   );
 };

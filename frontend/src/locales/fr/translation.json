@@ -84,7 +84,7 @@
     "loading": "Chargement...",
     "alreadyHaveAccount": "Vous avez déjà un compte ? Se connecter",
     "dontHaveAccount": "Pas encore de compte ? S'inscrire",
-    "checkEmail": "Vérifiez votre e-mail pour le lien de confirmation!",
+    "checkEmail": "Vérifiez votre e-mail pour trouver le lien de confirmation. Si vous n'en recevez pas, cette adresse est peut-être déjà enregistrée — essayez de vous connecter.",
     "emailConfirmFailed": "Échec de la confirmation d'e-mail. Réessayez."
   },
   "recipes": {
@@ -377,7 +377,8 @@
     "edit": "Modifier",
     "save": "Enregistrer",
     "close": "Fermer",
-    "clearAll": "Tout Effacer"
+    "clearAll": "Tout Effacer",
+    "help": "Aide"
   },
   "notifications": {
     "itemAdded": "Article ajouté à {{list}}!",
@@ -454,7 +455,7 @@
     "pleaseUploadImage": "Veuillez télécharger un fichier image",
     "imageTooLarge": "Image trop grande. Veuillez utiliser une image de moins de 10 Mo.",
     "locationGranted": "Accès à la localisation accordé ! Tri par proximité.",
-    "locationDenied": "Accès à la localisation refusé. Affichage de tous les emplacements.",
+    "locationDenied": "Accès à la localisation refusé. Pour l'activer, allez dans les paramètres du navigateur et autorisez la localisation pour ce site.",
     "geolocationUnsupported": "La géolocalisation n'est pas prise en charge par votre navigateur.",
     "estimatedPrices": "Utilisation de prix estimés. La tarification IA est temporairement indisponible.",
     "impactCopied": "Message d'impact copié dans le presse-papiers !",
@@ -491,8 +492,8 @@
     "step2Title": "Parlez-nous de vous",
     "step3Title": "À quel point êtes-vous à l'aise en cuisine ?",
     "step4Title": "Avez-vous des préférences alimentaires ?",
-    "recommendedCalories": "Recommandé : {{calories}} cal/jour",
-    "tapToOverride": "(appuyer pour modifier)",
+    "recommendedCalories": "✨ Recommandé : {{calories}} cal/jour",
+    "enterManually": "Saisir manuellement",
     "aiWillGenerate": "✨ L'IA générera une étiquette pour les régimes personnalisés",
     "customDietPlaceholder": "Ou tapez le vôtre : ex. Méditerranéen...",
     "cookingLevels": {
@@ -522,9 +523,11 @@
     },
     "fields": {
       "age": "Âge",
-      "sex": "Sexe Biologique",
+      "gender": "Genre",
+      "sex": "Genre",
       "male": "Masculin",
       "female": "Féminin",
+      "other": "Autre",
       "weight": "Poids",
       "height": "Taille",
       "activityLevel": "Niveau d'Activité",
@@ -567,5 +570,48 @@
     "failedToGenerateLabel": "Échec de la génération de l'étiquette. Régime ajouté avec le texte original.",
     "failedToSave": "Erreur lors de la sauvegarde.",
     "failedToDelete": "Échec de la suppression du compte. Veuillez réessayer."
+  },
+  "tour": {
+    "pantry": {
+      "add": { "title": "Ajouter des articles au garde-manger", "desc": "Appuyez sur 'Ajouter un article' pour ouvrir le formulaire, saisissez le nom d'un ingrédient et enregistrez-le." },
+      "scan": { "title": "Scanner un code-barres", "desc": "Utilisez votre caméra pour scanner le code-barres d'un produit et nous l'ajouterons automatiquement." },
+      "expiry": { "title": "Suivre les dates de péremption", "desc": "Ajoutez une date de péremption lors de l'enregistrement d'un article — nous vous alerterons automatiquement." }
+    },
+    "recipes": {
+      "input": { "title": "Trouver des recettes par ingrédient", "desc": "Saisissez ce que vous avez et notre IA trouvera des recettes qui les utilisent." },
+      "pantry": { "title": "Utiliser votre garde-manger", "desc": "Appuyez ici pour charger tout votre garde-manger comme ingrédients de recette en une seule fois." },
+      "dietary": { "title": "Filtres alimentaires", "desc": "Filtrez les recettes selon vos préférences alimentaires, synchronisées automatiquement depuis vos paramètres." }
+    },
+    "mealplan": {
+      "calendar": { "title": "Planifiez votre semaine", "desc": "Ajoutez des recettes aux jours de votre calendrier pour planifier à l'avance." },
+      "shopping": { "title": "Générer la liste de courses", "desc": "Les ingrédients manquants de votre plan de repas sont envoyés directement à votre liste de courses." }
+    },
+    "shopping": {
+      "list": { "title": "Votre liste de courses", "desc": "Les articles sont générés automatiquement à partir de votre plan de repas et des manques dans votre garde-manger." },
+      "check": { "title": "Cochez au fur et à mesure", "desc": "Appuyez sur un article pour le marquer comme acheté." },
+      "add": { "title": "Ajouter des articles manuellement", "desc": "Vous pouvez toujours ajouter des articles manuellement à votre liste ici." }
+    },
+    "donate": {
+      "expiring": { "title": "Donner les aliments qui périment", "desc": "Les aliments proches de leur date de péremption apparaissent ici pour que vous puissiez les donner avant qu'ils ne soient gaspillés." },
+      "map": { "title": "Trouver une banque alimentaire", "desc": "Découvrez les banques alimentaires et points de dépôt à proximité selon votre localisation." }
+    },
+    "favorites": {
+      "grid": { "title": "Vos recettes enregistrées", "desc": "Les recettes que vous avez aimées se trouvent ici pour un accès rapide à tout moment." },
+      "heart": { "title": "Enregistrer une recette", "desc": "Appuyez sur le cœur d'une carte de recette pour l'ajouter à vos favoris." }
+    },
+    "settings": {
+      "open": { "title": "Personnalisez vos paramètres", "desc": "Ouvrez les paramètres pour adapter GroceryGenius à vos besoins." },
+      "dietary": { "title": "Préférences alimentaires", "desc": "Définissez vos besoins alimentaires ici — les recettes et filtres se mettent à jour automatiquement partout." },
+      "calorie": { "title": "Objectif calorique quotidien", "desc": "Définissez votre objectif calorique quotidien et nous suivrons votre progression tout au long de la journée." }
+    },
+    "calorie": {
+      "btn": { "title": "Suivi des calories", "desc": "Appuyez sur ce bouton à tout moment pour ouvrir votre suivi calorique quotidien." },
+      "panel": { "title": "Suivez votre nutrition", "desc": "Enregistrez vos repas ici et suivez votre progression calorique et nutritionnelle en temps réel." }
+    },
+    "next": "Suivant",
+    "skip": "Passer la visite",
+    "finish": "Terminer",
+    "stepOf": "{{current}} / {{total}}",
+    "allSet": "Vous êtes prêt ! 🎉"
   }
 }

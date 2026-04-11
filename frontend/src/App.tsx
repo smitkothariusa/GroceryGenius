@@ -3841,12 +3841,14 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           borderRadius: '8px',
                           border: '1px solid #e5e7eb'
                         }}>
-                          {item.category === 'produce' ? '🥬' :
-                          item.category === 'dairy' ? '🥛' :
-                          item.category === 'meat' ? '🍖' :
-                          item.category === 'canned' ? '🥫' :
-                          item.category === 'grains' ? '🌾' :
-                          item.category === 'breakfast' ? '🥞' : '📦'}
+                          {item.emoji ?? (
+                            item.category === 'produce' ? '🥬' :
+                            item.category === 'dairy' ? '🥛' :
+                            item.category === 'meat' ? '🍖' :
+                            item.category === 'canned' ? '🥫' :
+                            item.category === 'grains' ? '🌾' :
+                            item.category === 'breakfast' ? '🥞' : '📦'
+                          )}
                         </div>
                         <div>
                           <span className="item-name" style={{ fontWeight: '600', fontSize: '1.05rem', color: '#1f2937' }}>

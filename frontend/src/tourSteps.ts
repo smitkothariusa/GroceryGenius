@@ -3,6 +3,10 @@
 export interface TourStep {
   /** CSS selector using data-tour attribute */
   selector: string;
+  /** Alternative selector to use on mobile (overrides selector when isMobile is true) */
+  mobileSelector?: string;
+  /** Skip this step entirely on mobile (e.g. desktop-only elements) */
+  skipOnMobile?: boolean;
   /** Which app tab to navigate to before showing this step (null = no tab change) */
   tab: 'pantry' | 'recipes' | 'mealplan' | 'shopping' | 'donate' | 'favorites' | null;
   /** i18n key for tooltip title */
@@ -20,6 +24,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     tab: 'pantry',
     selector: '[data-tour="pantry-add-input"]',
+    mobileSelector: '[data-tour="pantry-add-mobile"]',
     titleKey: 'tour.pantry.add.title',
     descKey: 'tour.pantry.add.desc',
   },
@@ -71,15 +76,9 @@ export const TOUR_STEPS: TourStep[] = [
   {
     tab: null,
     selector: '[data-tour="shopping-add-input"]',
+    mobileSelector: '[data-tour="shopping-add-mobile"]',
     titleKey: 'tour.shopping.add.title',
     descKey: 'tour.shopping.add.desc',
-  },
-  // --- Donate ---
-  {
-    tab: null,
-    selector: '[data-tour="donate-map"]',
-    titleKey: 'tour.donate.map.title',
-    descKey: 'tour.donate.map.desc',
   },
   // --- Favorites ---
   {
@@ -92,6 +91,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     tab: null,
     selector: '[data-tour="settings-btn"]',
+    skipOnMobile: true,
     titleKey: 'tour.settings.open.title',
     descKey: 'tour.settings.open.desc',
     afterStep: 'closeSettings',

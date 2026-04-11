@@ -11,7 +11,7 @@ interface SpotlightRect {
 }
 
 const TOOLTIP_EST_HEIGHT = 220;
-const SCROLL_SETTLE_MS = 400;
+const SCROLL_SETTLE_MS = 500; // extra headroom after instant-reset + smooth scroll
 
 interface TourOverlayProps {
   steps: TourStep[];
@@ -23,6 +23,8 @@ interface TourOverlayProps {
 
 const PADDING = 6;
 
+const SCROLL_BLOCK_KEYS = ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', ' '];
+
 export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSkip }: TourOverlayProps) {
   const { t } = useTranslation();
   const [rect, setRect] = useState<SpotlightRect | null>(null);
@@ -32,9 +34,34 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
   const step = steps[currentStep];
   const total = steps.length;
 
+  // Lock all user-initiated scrolling for the lifetime of the overlay.
+  // Programmatic scrollIntoView is unaffected — it does not fire these events.
+  useEffect(() => {
+    const preventScroll = (e: Event) => e.preventDefault();
+    const preventScrollKeys = (e: KeyboardEvent) => {
+      if (SCROLL_BLOCK_KEYS.includes(e.key)) e.preventDefault();
+    };
+    document.addEventListener('wheel', preventScroll, { passive: false });
+    document.addEventListener('touchmove', preventScroll, { passive: false });
+    document.addEventListener('keydown', preventScrollKeys);
+    return () => {
+      document.removeEventListener('wheel', preventScroll);
+      document.removeEventListener('touchmove', preventScroll);
+      document.removeEventListener('keydown', preventScrollKeys);
+    };
+  }, []);
+
   if (!step) return null;
 
   useEffect(() => {
+    // Handle skipOnMobile immediately — no DOM lookup needed
+    if (isMobile && step.skipOnMobile) {
+      onNext();
+      return;
+    }
+
+    const selector = isMobile && step.mobileSelector ? step.mobileSelector : step.selector;
+
     function applyRect(el: HTMLElement) {
       const r = el.getBoundingClientRect();
       setRect({
@@ -43,14 +70,14 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
         width: r.width + PADDING * 2,
         height: r.height + PADDING * 2,
       });
-      // On mobile: flip tooltip above when element is in the lower half of the screen
-      // On desktop: flip above when not enough space below
+      // Mobile: flip tooltip above when element is in the lower 45% of the screen
+      // Desktop: flip above when there isn't enough space below
       const spaceBelow = window.innerHeight - (r.top + r.height) - 10;
       setTooltipAbove(isMobile ? r.top > window.innerHeight * 0.45 : spaceBelow < TOOLTIP_EST_HEIGHT);
     }
 
     function measure(attempt = 0) {
-      const el = document.querySelector(step.selector) as HTMLElement | null;
+      const el = document.querySelector(selector) as HTMLElement | null;
       if (!el) {
         if (attempt < 10) {
           retryRef.current = setTimeout(() => measure(attempt + 1), 150);
@@ -61,7 +88,7 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
       }
 
       const r = el.getBoundingClientRect();
-      // Element is display:none or hidden — treat as not found
+      // Element is CSS-hidden (display:none) — treat as not found
       if (r.width === 0 && r.height === 0) {
         if (attempt < 10) {
           retryRef.current = setTimeout(() => measure(attempt + 1), 150);
@@ -71,35 +98,63 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
         return;
       }
 
-      const alreadyVisible = r.top >= 0 && r.bottom <= window.innerHeight;
-      if (alreadyVisible) {
-        applyRect(el);
-      } else {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        retryRef.current = setTimeout(() => applyRect(el), SCROLL_SETTLE_MS);
+      // Fixed-position elements (e.g. the mobile FAB) don't move with the page —
+      // no scrollIntoView needed. Schedule a fallback measurement; if a resize
+      // fires first (mobile address-bar animation from the tap), the resize
+      // handler will cancel this timer and take over — preventing a stale first
+      // paint followed by a correct second paint ("midway then bottom").
+      if (getComputedStyle(el).position === 'fixed') {
+        retryRef.current = setTimeout(() => applyRect(el), 500);
+        return;
       }
+
+      // For tall elements (taller than half the viewport) whose top is already
+      // anchored near the top of the screen — e.g. favorites-grid or the meal
+      // plan calendar after a tab-change scroll reset — calling
+      // scrollIntoView({ block:'center' }) would scroll DOWN past the tab
+      // header. Just measure from where we are.
+      const alreadyAnchored =
+        r.top >= 0 &&
+        r.top < window.innerHeight * 0.35 &&
+        r.height > window.innerHeight * 0.5;
+
+      if (alreadyAnchored) {
+        retryRef.current = setTimeout(() => applyRect(el), 100);
+        return;
+      }
+
+      // Everything else: smooth-scroll to centre then measure.
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      retryRef.current = setTimeout(() => applyRect(el), SCROLL_SETTLE_MS);
     }
 
     setRect(null);
     measure();
 
+    // When resize fires (e.g. mobile address-bar animation), cancel any pending
+    // measurement timer so we don't get a stale first paint. The debounce fires
+    // applyRect 300 ms after the animation stops — one source of truth.
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const handleResize = () => {
-      if (retryRef.current) clearTimeout(retryRef.current);
-      const el = document.querySelector(step.selector) as HTMLElement | null;
-      if (el) applyRect(el);
+      if (retryRef.current) { clearTimeout(retryRef.current); retryRef.current = null; }
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const el = document.querySelector(selector) as HTMLElement | null;
+        if (el) applyRect(el);
+      }, 300);
     };
     window.addEventListener('resize', handleResize);
 
     return () => {
       if (retryRef.current) clearTimeout(retryRef.current);
+      if (resizeTimer) clearTimeout(resizeTimer);
       window.removeEventListener('resize', handleResize);
     };
-  }, [step.selector, currentStep]);
+  }, [step.selector, step.mobileSelector, step.skipOnMobile, currentStep, isMobile]);
 
   const isLast = currentStep === total - 1;
 
-  // Mobile tooltip: dock to top or bottom depending on element position
-  // Desktop tooltip: position above or below element, clamped within viewport
+  // Tooltip positioning
   let tooltipStyle: React.CSSProperties;
   if (isMobile) {
     tooltipStyle = {
@@ -133,7 +188,7 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
 
   return (
     <>
-      {/* Full-screen blocking backdrop — always rendered so screen stays locked between steps */}
+      {/* Full-screen backdrop — always rendered so the screen stays locked between steps */}
       <div
         style={{
           position: 'fixed',

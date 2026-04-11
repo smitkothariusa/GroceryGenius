@@ -18,7 +18,7 @@
   budget_tip?: string;
 };
 
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = import.meta.env.VITE_API_URL || '/_/backend';
 
 export async function fetchRecipes(ingredients: string[], dietary?: string): Promise<Recipe[]> {
   const url = new URL(`${BASE_URL}/recipes/`);

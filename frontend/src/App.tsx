@@ -234,7 +234,7 @@ const App: React.FC = () => {
   }>({ amazon: 0, walmart: 0, loading: false });
   const { toasts, removeToast, success, error, warning, info } = useToast();
   const [isTabChanging, setIsTabChanging] = useState(false);
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  const API_BASE = import.meta.env.VITE_API_URL || '/_/backend';
   const bgColor = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
   const cardBg = 'rgba(255, 255, 255, 0.95)';
   const textColor = '#1f2937';
@@ -276,7 +276,7 @@ const App: React.FC = () => {
 
       try {
         // Calculate impact for ALL pantry items at once
-        const impactResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/donation/calculate-impact`, {
+        const impactResponse = await fetch(`${import.meta.env.VITE_API_URL || '/_/backend'}/donation/calculate-impact`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -645,7 +645,7 @@ const App: React.FC = () => {
     const currentRecipes = recipesRef.current;
     if (currentRecipes.length === 0) return;
     setRecipeLoading(true);
-    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const API_BASE_URL = import.meta.env.VITE_API_URL || '/_/backend';
     fetch(`${API_BASE_URL}/recipes/translate-full`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

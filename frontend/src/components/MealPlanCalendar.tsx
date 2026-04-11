@@ -375,7 +375,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
         setDeductLoading(true);
 
         try {
-          const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+          const API_BASE = import.meta.env.VITE_API_URL || '/_/backend';
           const response = await fetch(`${API_BASE}/pantry/match-ingredients`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -493,7 +493,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
 
     setGeneratingList(true);
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const API_BASE = import.meta.env.VITE_API_URL || '/_/backend';
       const response = await fetch(`${API_BASE}/recipes/parse-ingredients`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

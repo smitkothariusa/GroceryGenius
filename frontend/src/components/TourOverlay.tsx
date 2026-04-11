@@ -99,22 +99,31 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
       }
 
       // Fixed-position elements (e.g. the mobile FAB) don't move with the page —
-      // no scrollIntoView needed; wait long enough for any address-bar animation
-      // (triggered by the tap that started the tour) to fully settle.
+      // no scrollIntoView needed. Schedule a fallback measurement; if a resize
+      // fires first (mobile address-bar animation from the tap), the resize
+      // handler will cancel this timer and take over — preventing a stale first
+      // paint followed by a correct second paint ("midway then bottom").
       if (getComputedStyle(el).position === 'fixed') {
-        retryRef.current = setTimeout(() => applyRect(el), 400);
+        retryRef.current = setTimeout(() => applyRect(el), 500);
         return;
       }
 
-      // If the element's top edge is already inside the viewport (e.g. after a
-      // tab-change scroll reset), centering it would scroll past the tab header.
-      // Skip scrollIntoView and just measure after one paint cycle.
-      if (r.top >= 0 && r.top < window.innerHeight) {
+      // For tall elements (taller than half the viewport) whose top is already
+      // anchored near the top of the screen — e.g. favorites-grid or the meal
+      // plan calendar after a tab-change scroll reset — calling
+      // scrollIntoView({ block:'center' }) would scroll DOWN past the tab
+      // header. Just measure from where we are.
+      const alreadyAnchored =
+        r.top >= 0 &&
+        r.top < window.innerHeight * 0.35 &&
+        r.height > window.innerHeight * 0.5;
+
+      if (alreadyAnchored) {
         retryRef.current = setTimeout(() => applyRect(el), 100);
         return;
       }
 
-      // Element is off-screen — smooth-scroll it to centre, then measure.
+      // Everything else: smooth-scroll to centre then measure.
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       retryRef.current = setTimeout(() => applyRect(el), SCROLL_SETTLE_MS);
     }
@@ -122,15 +131,17 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
     setRect(null);
     measure();
 
-    // Debounce resize so rapid address-bar animation events (mobile) don't cause
-    // a stale spotlight mid-transition.
+    // When resize fires (e.g. mobile address-bar animation), cancel any pending
+    // measurement timer so we don't get a stale first paint. The debounce fires
+    // applyRect 300 ms after the animation stops — one source of truth.
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const handleResize = () => {
+      if (retryRef.current) { clearTimeout(retryRef.current); retryRef.current = null; }
       if (resizeTimer) clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         const el = document.querySelector(selector) as HTMLElement | null;
         if (el) applyRect(el);
-      }, 200);
+      }, 300);
     };
     window.addEventListener('resize', handleResize);
 

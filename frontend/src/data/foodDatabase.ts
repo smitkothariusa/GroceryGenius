@@ -840,3 +840,37 @@ export function getFoodDisplayName(entry: FoodEntry, lang: string): string {
   const langCode = (['en', 'es', 'fr', 'de', 'zh', 'ja'].includes(lang) ? lang : 'en') as LangCode;
   return (entry.names[langCode]?.[0]) ?? entry.names.en[0];
 }
+
+const UNIT_SUGGESTIONS_BY_DEFAULT: Record<string, string[]> = {
+  'carton': ['carton', 'liter', 'ml', 'cups', 'oz'],
+  'pieces': ['pieces', 'lbs', 'kg', 'g', 'bunch'],
+  'dozen': ['dozen', 'pieces', 'pack', 'box'],
+  'block': ['block', 'g', 'oz', 'lbs', 'slice'],
+  'container': ['container', 'g', 'oz', 'cups', 'ml'],
+  'bag': ['bag', 'lbs', 'kg', 'g', 'pieces'],
+  'bunch': ['bunch', 'pieces', 'lbs', 'g'],
+  'head': ['head', 'pieces', 'clove', 'bunch'],
+  'lbs': ['lbs', 'kg', 'g', 'oz', 'pieces'],
+  'kg': ['kg', 'lbs', 'g', 'oz'],
+  'jar': ['jar', 'oz', 'g', 'cups', 'tbsp'],
+  'loaf': ['loaf', 'slice', 'pieces', 'pack'],
+  'cans': ['cans', 'oz', 'g', 'ml', 'pieces'],
+  'bottle': ['bottle', 'ml', 'liter', 'oz', 'cups'],
+  'box': ['box', 'pieces', 'g', 'oz', 'pack'],
+  'pack': ['pack', 'pieces', 'box', 'bag', 'dozen'],
+  'sachet': ['sachet', 'pack', 'pieces', 'g', 'tbsp'],
+  'fillet': ['fillet', 'pieces', 'lbs', 'kg', 'g'],
+  'breast': ['breast', 'pieces', 'lbs', 'kg', 'g'],
+  'leg': ['leg', 'pieces', 'lbs', 'kg'],
+  'rack': ['rack', 'pieces', 'lbs', 'kg'],
+  'clove': ['clove', 'head', 'pieces', 'g', 'tsp'],
+  'slice': ['slice', 'pieces', 'g', 'oz', 'lbs'],
+  'roll': ['roll', 'pieces', 'pack', 'bag'],
+  'bar': ['bar', 'pieces', 'g', 'oz', 'pack'],
+};
+
+export function getSuggestedUnits(defaultUnit: string): string[] {
+  const suggestions = UNIT_SUGGESTIONS_BY_DEFAULT[defaultUnit];
+  if (suggestions) return suggestions;
+  return [defaultUnit, 'pieces', 'lbs', 'kg', 'g'];
+}

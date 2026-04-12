@@ -97,7 +97,10 @@
     "smartExpiry": "推奨期限",
     "smartExpiryDays": "+{{count}}日",
     "changeUnit": "単位を変更",
-    "quantityRequired": "数量を入力してください"
+    "quantityRequired": "数量を入力してください",
+    "enterManually": "手動で入力",
+    "otherUnit": "その他（入力）",
+    "customUnit": "カスタム単位"
   },
   "auth": {
     "aiPoweredMealPlanning": "AIによる食事プランニング",
@@ -403,7 +406,8 @@
     "save": "保存",
     "close": "閉じる",
     "clearAll": "すべてクリア",
-    "help": "ヘルプ"
+    "help": "ヘルプ",
+    "or": "または"
   },
   "notifications": {
     "itemAdded": "{{list}}にアイテムを追加しました！",

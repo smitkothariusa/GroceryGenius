@@ -97,7 +97,10 @@
     "smartExpiry": "Smart expiry",
     "smartExpiryDays": "+{{count}} days",
     "changeUnit": "Change unit",
-    "quantityRequired": "Enter a quantity to add"
+    "quantityRequired": "Enter a quantity to add",
+    "enterManually": "Enter manually",
+    "otherUnit": "Other (type your own)",
+    "customUnit": "Custom unit"
   },
   "auth": {
     "aiPoweredMealPlanning": "AI-Powered Meal Planning",
@@ -403,7 +406,8 @@
     "save": "Save",
     "close": "Close",
     "clearAll": "Clear All",
-    "help": "Help"
+    "help": "Help",
+    "or": "or"
   },
   "notifications": {
     "itemAdded": "Item added to {{list}}!",

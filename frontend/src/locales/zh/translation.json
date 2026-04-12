@@ -97,7 +97,10 @@
     "smartExpiry": "建议保质期",
     "smartExpiryDays": "+{{count}}天",
     "changeUnit": "更改单位",
-    "quantityRequired": "请输入数量"
+    "quantityRequired": "请输入数量",
+    "enterManually": "手动输入",
+    "otherUnit": "其他（自行输入）",
+    "customUnit": "自定义单位"
   },
   "auth": {
     "aiPoweredMealPlanning": "AI驱动的膳食计划",
@@ -403,7 +406,8 @@
     "save": "保存",
     "close": "关闭",
     "clearAll": "全部清除",
-    "help": "帮助"
+    "help": "帮助",
+    "or": "或"
   },
   "notifications": {
     "itemAdded": "已将物品添加到{{list}}！",

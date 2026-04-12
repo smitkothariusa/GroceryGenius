@@ -97,7 +97,10 @@
     "smartExpiry": "Expiration estimée",
     "smartExpiryDays": "+{{count}} jours",
     "changeUnit": "Changer l'unité",
-    "quantityRequired": "Entrez une quantité"
+    "quantityRequired": "Entrez une quantité",
+    "enterManually": "Saisir manuellement",
+    "otherUnit": "Autre (tapez le vôtre)",
+    "customUnit": "Unité personnalisée"
   },
   "auth": {
     "aiPoweredMealPlanning": "Planification de repas par IA",
@@ -403,7 +406,8 @@
     "save": "Enregistrer",
     "close": "Fermer",
     "clearAll": "Tout Effacer",
-    "help": "Aide"
+    "help": "Aide",
+    "or": "ou"
   },
   "notifications": {
     "itemAdded": "Article ajouté à {{list}}!",

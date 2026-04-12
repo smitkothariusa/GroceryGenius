@@ -97,7 +97,10 @@
     "smartExpiry": "Geschätztes Ablaufdatum",
     "smartExpiryDays": "+{{count}} Tage",
     "changeUnit": "Einheit ändern",
-    "quantityRequired": "Bitte Menge eingeben"
+    "quantityRequired": "Bitte Menge eingeben",
+    "enterManually": "Manuell eingeben",
+    "otherUnit": "Andere (eigene eingeben)",
+    "customUnit": "Benutzerdefinierte Einheit"
   },
   "auth": {
     "aiPoweredMealPlanning": "KI-gestützte Mahlzeitenplanung",
@@ -403,7 +406,8 @@
     "save": "Speichern",
     "close": "Schließen",
     "clearAll": "Alles Löschen",
-    "help": "Hilfe"
+    "help": "Hilfe",
+    "or": "oder"
   },
   "notifications": {
     "itemAdded": "Artikel zu {{list}} hinzugefügt!",

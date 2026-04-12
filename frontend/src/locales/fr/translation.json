@@ -91,7 +91,9 @@
       "fillet": "filet",
       "breast": "blanc",
       "leg": "cuisse",
-      "rack": "carré"
+      "rack": "carré",
+      "liter": "litre",
+      "box": "boîte"
     },
     "smartSearch": "Rechercher des aliments…",
     "smartExpiry": "Expiration estimée",

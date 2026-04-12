@@ -91,7 +91,9 @@
       "fillet": "Filet",
       "breast": "Brust",
       "leg": "Keule",
-      "rack": "Rippenstück"
+      "rack": "Rippenstück",
+      "liter": "Liter",
+      "box": "Schachtel"
     },
     "smartSearch": "Lebensmittel suchen…",
     "smartExpiry": "Geschätztes Ablaufdatum",

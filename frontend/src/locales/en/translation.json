@@ -91,7 +91,9 @@
       "fillet": "fillet",
       "breast": "breast",
       "leg": "leg",
-      "rack": "rack"
+      "rack": "rack",
+      "liter": "liter",
+      "box": "box"
     },
     "smartSearch": "Search foods…",
     "smartExpiry": "Smart expiry",

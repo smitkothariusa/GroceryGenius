@@ -129,6 +129,7 @@ export const FOOD_DATABASE: FoodEntry[] = [
 
   // ─── CANNED GOODS ────────────────────────────────────────────────────────
   { id: 'canned_tomatoes', emoji: '🥫', defaultUnit: 'cans', shelfLife: 365, category: 'canned', names: { en: ['Canned Tomatoes','diced tomatoes'], es: ['Tomates en lata'], fr: ['Tomates en boîte'], de: ['Dosentomaten'], zh: ['番茄罐头'], ja: ['缶詰トマト'] } },
+  { id: 'tomato_soup', emoji: '🥫', defaultUnit: 'cans', shelfLife: 365, category: 'canned', names: { en: ['Tomato Soup','canned tomato soup'], es: ['Sopa de tomate','crema de tomate'], fr: ['Soupe de tomate','velouté de tomate'], de: ['Tomatensuppe'], zh: ['番茄汤','番茄浓汤'], ja: ['トマトスープ'] } },
   { id: 'canned_tuna', emoji: '🥫', defaultUnit: 'cans', shelfLife: 365, category: 'canned', names: { en: ['Canned Tuna','tuna in water'], es: ['Atún en lata'], fr: ['Thon en boîte'], de: ['Thunfisch in Dose'], zh: ['金枪鱼罐头'], ja: ['ツナ缶'] } },
   { id: 'canned_black_beans', emoji: '🥫', defaultUnit: 'cans', shelfLife: 365, category: 'canned', names: { en: ['Canned Black Beans','black beans'], es: ['Frijoles negros enlatados'], fr: ['Haricots noirs en boîte'], de: ['Schwarze Bohnen in Dose'], zh: ['黑豆罐头'], ja: ['缶詰黒豆'] } },
   { id: 'canned_chickpeas', emoji: '🥫', defaultUnit: 'cans', shelfLife: 365, category: 'canned', names: { en: ['Canned Chickpeas','garbanzo beans'], es: ['Garbanzos en lata'], fr: ['Pois chiches en boîte'], de: ['Kichererbsen in Dose'], zh: ['鹰嘴豆罐头'], ja: ['缶詰ひよこ豆'] } },

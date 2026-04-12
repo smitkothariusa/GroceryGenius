@@ -91,7 +91,9 @@
       "fillet": "切れ",
       "breast": "胸肉",
       "leg": "もも肉",
-      "rack": "ラック"
+      "rack": "ラック",
+      "liter": "リットル",
+      "box": "箱"
     },
     "smartSearch": "食品を検索…",
     "smartExpiry": "推奨期限",

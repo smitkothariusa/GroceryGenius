@@ -91,7 +91,9 @@
       "fillet": "filete",
       "breast": "pechuga",
       "leg": "muslo",
-      "rack": "costillar"
+      "rack": "costillar",
+      "liter": "litro",
+      "box": "caja"
     },
     "smartSearch": "Buscar alimentos…",
     "smartExpiry": "Vencimiento estimado",

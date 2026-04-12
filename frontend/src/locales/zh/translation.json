@@ -91,7 +91,9 @@
       "fillet": "片",
       "breast": "胸",
       "leg": "腿",
-      "rack": "排"
+      "rack": "排",
+      "liter": "升",
+      "box": "盒"
     },
     "smartSearch": "搜索食物…",
     "smartExpiry": "建议保质期",

@@ -100,7 +100,8 @@
     "quantityRequired": "Entrez une quantité",
     "enterManually": "Saisir manuellement",
     "otherUnit": "Autre (tapez le vôtre)",
-    "customUnit": "Unité personnalisée"
+    "customUnit": "Unité personnalisée",
+    "expiryHint": "Appuyez sur le bouton ci-dessus pour utiliser la date suggérée ou choisissez la vôtre."
   },
   "auth": {
     "aiPoweredMealPlanning": "Planification de repas par IA",

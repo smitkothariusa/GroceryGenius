@@ -1219,27 +1219,39 @@ const App: React.FC = () => {
     setNewPantryItem({ name: '', quantity: 1, unit: 'pc', category: 'other', expiryDate: '', emoji: undefined });
   };
 
-  const handleSaveEditPantryItem = () => {
+  const handleSaveEditPantryItem = async () => {
     if (!editingPantryItem || !newPantryItem.name.trim()) return;
     const quantity = typeof newPantryItem.quantity === 'number' ? newPantryItem.quantity : 1;
-    
-    setPantry(prev => prev.map(item => 
-      item.id === editingPantryItem.id 
-        ? {
-            ...item,
-            name: newPantryItem.name.trim(),
-            quantity: quantity,
+    try {
+      await pantryService.update(editingPantryItem.id, {
+        name: newPantryItem.name.trim(),
+        quantity,
+        unit: newPantryItem.unit,
+        category: newPantryItem.category,
+        expiryDate: newPantryItem.expiryDate || undefined,
+        emoji: newPantryItem.emoji,
+      });
+      setPantry(prev => prev.map(item =>
+        item.id === editingPantryItem.id
+          ? {
+              ...item,
+              name: newPantryItem.name.trim(),
+              quantity,
               unit: newPantryItem.unit,
               category: newPantryItem.category,
-              expiryDate: newPantryItem.expiryDate || undefined
+              expiryDate: newPantryItem.expiryDate || undefined,
+              emoji: newPantryItem.emoji,
             }
           : item
       ));
-    
-    success(t('toasts.pantryItemUpdated'));
+      success(t('toasts.pantryItemUpdated'));
+    } catch (err) {
+      console.error('Error updating pantry item:', err);
+      warning(t('toasts.failedAddItem'));
+    }
     setShowEditPantry(false);
     setEditingPantryItem(null);
-    setNewPantryItem({ name: '', quantity: 1, unit: 'pc', category: 'other', expiryDate: '' });
+    setNewPantryItem({ name: '', quantity: 1, unit: 'pc', category: 'other', expiryDate: '', emoji: undefined });
   };
   const sortShoppingList = () => {
     const sorted = [...shoppingList];
@@ -3673,11 +3685,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                               }}
                             >
                               {getSuggestedUnits(newPantryItem.unit).map(u => (
-                                <option key={u} value={u}>{t(`pantry.units.${u}`) || u}</option>
+                                <option key={u} value={u}>{t(`pantry.units.${u}`, { defaultValue: u })}</option>
                               ))}
                               {/* Also include current unit if not in suggestions */}
                               {!getSuggestedUnits(newPantryItem.unit).includes(newPantryItem.unit) && newPantryItem.unit && (
-                                <option value={newPantryItem.unit}>{t(`pantry.units.${newPantryItem.unit}`) || newPantryItem.unit}</option>
+                                <option value={newPantryItem.unit}>{t(`pantry.units.${newPantryItem.unit}`, { defaultValue: newPantryItem.unit })}</option>
                               )}
                               <option value="__other__">{t('pantry.otherUnit')}</option>
                             </select>
@@ -3815,17 +3827,18 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 {/* ── Two-input row: smart search | or | manual ── */}
                 {!selectedFood && (
                   <div style={{
-                    display: 'flex', alignItems: 'center', gap: '0.75rem',
-                    opacity: 1,
+                    display: 'flex',
+                    flexDirection: isMobile ? 'column' : 'row',
+                    alignItems: isMobile ? 'stretch' : 'center',
+                    gap: isMobile ? '0.5rem' : '0.75rem',
                   }}>
-                    {/* Smart search box — shrinks when manual is active */}
+                    {/* Smart search box — hidden when manual is active */}
                     <div
                       ref={smartSearchRef}
                       style={{
                         position: 'relative',
-                        flex: manualQuery.length > 0 ? 0 : 1,
-                        display: manualQuery.length > 0 ? 'none' : 'block',
-                        transition: 'flex 0.2s',
+                        flex: (!isMobile && manualQuery.length > 0) ? 0 : 1,
+                        display: (!isMobile && manualQuery.length > 0) ? 'none' : (isMobile && manualQuery.length > 0 ? 'none' : 'block'),
                       }}
                     >
                       <input
@@ -3884,16 +3897,20 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
                     {/* "or" separator — hidden when either side is active */}
                     {smartSearchQuery.length === 0 && manualQuery.length === 0 && (
-                      <span style={{ color: '#9ca3af', fontWeight: 500, fontSize: '0.85rem', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                      <span style={{
+                        color: '#9ca3af', fontWeight: 500, fontSize: '0.85rem',
+                        whiteSpace: 'nowrap', flexShrink: 0,
+                        textAlign: isMobile ? 'center' : 'left',
+                        padding: isMobile ? '0.1rem 0' : '0',
+                      }}>
                         {t('common.or')}
                       </span>
                     )}
 
-                    {/* Manual name box — shrinks when smart search is active */}
+                    {/* Manual name box — hidden when smart search is active */}
                     <div style={{
                       flex: smartSearchQuery.length > 0 ? 0 : 1,
                       display: smartSearchQuery.length > 0 ? 'none' : 'block',
-                      transition: 'flex 0.2s',
                     }}>
                       <input
                         type="text"
@@ -4001,7 +4018,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                             }}
                           >
                             {getSuggestedUnits(selectedFood.defaultUnit).map(u => (
-                              <option key={u} value={u}>{t(`pantry.units.${u}`) || u}</option>
+                              <option key={u} value={u}>{t(`pantry.units.${u}`, { defaultValue: u })}</option>
                             ))}
                             <option value="__other__">{t('pantry.otherUnit')}</option>
                           </select>
@@ -4018,14 +4035,17 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         type="button"
                         onClick={handleAcceptSmartExpiry}
                         style={{
-                          display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                          display: 'flex', alignItems: 'center', gap: '0.35rem',
+                          width: '100%', maxWidth: '100%', boxSizing: 'border-box',
                           background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a',
-                          borderRadius: '6px', padding: '0.3rem 0.65rem', fontSize: '0.8rem',
-                          fontWeight: 600, cursor: 'pointer', marginBottom: '0.4rem',
+                          borderRadius: '6px', padding: '0.5rem 0.75rem', fontSize: '0.82rem',
+                          fontWeight: 600, cursor: 'pointer', marginBottom: '0.5rem',
+                          textAlign: 'left', flexWrap: 'wrap',
                         }}
                       >
-                        ✨ {t('pantry.smartExpiry')}: {getSmartExpiryDate(selectedFood).split('-').slice(1).join('/')}
-                        {' '}({t('pantry.smartExpiryDays', { count: selectedFood.shelfLife })})
+                        <span>✨</span>
+                        <span>{t('pantry.smartExpiry')}: {getSmartExpiryDate(selectedFood)}</span>
+                        <span style={{ color: '#b45309' }}>({t('pantry.smartExpiryDays', { count: selectedFood.shelfLife })})</span>
                       </button>
                       <input
                         type="date"
@@ -4037,6 +4057,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           fontSize: '0.95rem', boxSizing: 'border-box',
                         }}
                       />
+                      <p style={{ margin: '0.3rem 0 0', fontSize: '0.72rem', color: '#9ca3af' }}>
+                        {t('pantry.expiryHint')}
+                      </p>
                     </div>
 
                     {/* Add button */}

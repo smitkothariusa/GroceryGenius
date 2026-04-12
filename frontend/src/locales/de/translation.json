@@ -100,7 +100,8 @@
     "quantityRequired": "Bitte Menge eingeben",
     "enterManually": "Manuell eingeben",
     "otherUnit": "Andere (eigene eingeben)",
-    "customUnit": "Benutzerdefinierte Einheit"
+    "customUnit": "Benutzerdefinierte Einheit",
+    "expiryHint": "Tippe auf den Chip oben, um das vorgeschlagene Datum zu verwenden, oder wähle ein eigenes."
   },
   "auth": {
     "aiPoweredMealPlanning": "KI-gestützte Mahlzeitenplanung",

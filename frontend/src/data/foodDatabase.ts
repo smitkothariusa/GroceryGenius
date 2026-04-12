@@ -813,11 +813,14 @@ export function searchFoods(query: string, lang: string, limit = 8): FoodEntry[]
   const contains: FoodEntry[] = [];
 
   for (const entry of FOOD_DATABASE) {
-    const terms = (entry.names[langCode] ?? entry.names.en).map(t => t.toLowerCase());
-    const matchesStartsWith = terms.some(t => t.startsWith(q));
-    const matchesContains = !matchesStartsWith && terms.some(t => t.includes(q));
-    if (matchesStartsWith) startsWith.push(entry);
-    else if (matchesContains) contains.push(entry);
+    const terms = (entry.names[langCode] ?? entry.names.en).map(n => n.toLowerCase());
+    const canonical = terms[0];
+    // Only the canonical (first) name gets the starts-with boost.
+    // Alternate names matching starts-with are treated as regular contains.
+    const canonicalStartsWith = canonical.startsWith(q);
+    const anyContains = terms.some(n => n.includes(q));
+    if (canonicalStartsWith) startsWith.push(entry);
+    else if (anyContains) contains.push(entry);
     if (startsWith.length + contains.length >= limit * 2) break;
   }
 

@@ -100,7 +100,8 @@
     "quantityRequired": "Enter a quantity to add",
     "enterManually": "Enter manually",
     "otherUnit": "Other (type your own)",
-    "customUnit": "Custom unit"
+    "customUnit": "Custom unit",
+    "expiryHint": "Tap the chip above to use the suggested date, or pick your own."
   },
   "auth": {
     "aiPoweredMealPlanning": "AI-Powered Meal Planning",

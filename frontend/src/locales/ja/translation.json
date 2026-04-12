@@ -100,7 +100,8 @@
     "quantityRequired": "数量を入力してください",
     "enterManually": "手動で入力",
     "otherUnit": "その他（入力）",
-    "customUnit": "カスタム単位"
+    "customUnit": "カスタム単位",
+    "expiryHint": "上のボタンをタップして提案日を使うか、自分で日付を選んでください。"
   },
   "auth": {
     "aiPoweredMealPlanning": "AIによる食事プランニング",

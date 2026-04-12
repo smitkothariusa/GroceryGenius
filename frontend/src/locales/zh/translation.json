@@ -100,7 +100,8 @@
     "quantityRequired": "请输入数量",
     "enterManually": "手动输入",
     "otherUnit": "其他（自行输入）",
-    "customUnit": "自定义单位"
+    "customUnit": "自定义单位",
+    "expiryHint": "点击上方按钮使用建议日期，或自行选择。"
   },
   "auth": {
     "aiPoweredMealPlanning": "AI驱动的膳食计划",

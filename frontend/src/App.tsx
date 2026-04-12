@@ -3938,6 +3938,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   <div style={{
                     background: 'white', border: '1.5px solid #8b5cf6', borderRadius: '10px',
                     padding: isMobile ? '0.9rem' : '1rem', boxShadow: '0 2px 8px rgba(139,92,246,0.08)',
+                    overflow: 'hidden',
+                    minWidth: 0,
                   }}>
                     {/* Header with reset */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', paddingBottom: '0.75rem', borderBottom: '1px solid #f3f4f6' }}>
@@ -4027,7 +4029,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     </div>
 
                     {/* Smart expiry chip + date picker */}
-                    <div style={{ marginBottom: '0.75rem' }}>
+                    <div style={{ marginBottom: '0.75rem', minWidth: 0 }}>
                       <label style={{ display: 'block', fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.35rem', fontWeight: 600 }}>
                         {t('pantry.expiryDate')}
                       </label>
@@ -4035,24 +4037,22 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         type="button"
                         onClick={handleAcceptSmartExpiry}
                         style={{
-                          display: 'flex', alignItems: 'center', gap: '0.35rem',
-                          width: '100%', maxWidth: '100%', boxSizing: 'border-box',
+                          display: 'block', width: '100%', boxSizing: 'border-box',
                           background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a',
                           borderRadius: '6px', padding: '0.5rem 0.75rem', fontSize: '0.82rem',
                           fontWeight: 600, cursor: 'pointer', marginBottom: '0.5rem',
-                          textAlign: 'left', flexWrap: 'wrap',
+                          textAlign: 'left', wordBreak: 'break-word',
                         }}
                       >
-                        <span>✨</span>
-                        <span>{t('pantry.smartExpiry')}: {getSmartExpiryDate(selectedFood)}</span>
-                        <span style={{ color: '#b45309' }}>({t('pantry.smartExpiryDays', { count: selectedFood.shelfLife })})</span>
+                        ✨ {t('pantry.smartExpiry')}: {getSmartExpiryDate(selectedFood)}
+                        {' '}<span style={{ color: '#b45309' }}>({t('pantry.smartExpiryDays', { count: selectedFood.shelfLife })})</span>
                       </button>
                       <input
                         type="date"
                         value={newPantryItem.expiryDate}
                         onChange={(e) => setNewPantryItem(prev => ({ ...prev, expiryDate: e.target.value }))}
                         style={{
-                          display: 'block', width: '100%', padding: '0.6rem',
+                          display: 'block', width: '100%', minWidth: 0, padding: '0.6rem',
                           border: '1.5px solid #e5e7eb', borderRadius: '8px',
                           fontSize: '0.95rem', boxSizing: 'border-box',
                         }}

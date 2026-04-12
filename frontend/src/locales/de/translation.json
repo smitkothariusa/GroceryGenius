@@ -206,7 +206,16 @@
     "emptyStatePrompt": "Füge Zutaten hinzu oder suche nach einem bestimmten Rezept um loszulegen!",
     "emptyStateTip": "Versuche: \"Apfelkuchen\", \"Hühnernudeln\", oder füge Zutaten wie \"Tomaten\", \"Hühnchen\" hinzu",
     "keyIngredients": "Hauptzutaten",
-    "moreIngredients": "weitere..."
+    "moreIngredients": "weitere...",
+    "subTabIngredient": "Nach Zutat",
+    "subTabName": "Nach Name",
+    "filtersButton": "Filter",
+    "clearFilters": "Filter löschen",
+    "resetAll": "Alles zurücksetzen",
+    "extraIngredients": "Zusätzliche Zutaten",
+    "searchByNamePlaceholder": "z.B. Pasta Primavera…",
+    "searchByNameLabel": "Rezeptname",
+    "searchRecipes": "Rezepte suchen"
   },
   "mealPlan": {
     "title": "Wöchentlicher Essensplan",

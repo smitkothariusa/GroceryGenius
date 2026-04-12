@@ -919,8 +919,12 @@ const App: React.FC = () => {
   };
 
   const handleGetRecipes = async () => {
-    if (ingredientTags.length === 0 && !recipeSearchQuery.trim()) {
-      setErrorMsg('Please add ingredients or enter a recipe search.');
+    if (recipeSubTab === 'ingredient' && ingredientTags.length === 0) {
+      setErrorMsg(t('recipes.emptyStatePrompt'));
+      return;
+    }
+    if (recipeSubTab === 'name' && !recipeSearchQuery.trim()) {
+      setErrorMsg(t('recipes.emptyStatePrompt'));
       return;
     }
 
@@ -941,8 +945,8 @@ const App: React.FC = () => {
       params.append('language', i18n.language || 'en');
       if (recipeDifficulty !== 'flexible') params.append('difficulty', recipeDifficulty);
 
-      const allIngredients = recipeSearchQuery.trim()
-        ? [recipeSearchQuery, ...ingredientTags]
+      const allIngredients = recipeSubTab === 'name'
+        ? [recipeSearchQuery.trim()]
         : ingredientTags;
 
       const response = await fetch(`${API_BASE}/recipes?${params.toString()}`, {

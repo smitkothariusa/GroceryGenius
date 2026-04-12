@@ -2969,7 +2969,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               {isMobile ? (
                 <>
                   {/* Sub-tab toggle */}
-                  <div style={{ display: 'flex', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '10px', padding: '3px', marginBottom: '0.85rem' }}>
+                  <div role="tablist" style={{ display: 'flex', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '10px', padding: '3px', marginBottom: '0.85rem' }}>
                     {(['ingredient', 'name'] as const).map(tab => (
                       <button
                         key={tab}
@@ -3125,6 +3125,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.4)' }}
                       />
                       <div
+                        id="recipe-filter-panel"
                         role="dialog"
                         aria-modal="true"
                         aria-label={t('recipes.filtersButton')}
@@ -3138,7 +3139,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                               style={{ background: 'none', border: 'none', color: '#7c3aed', fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem' }}>
                               {t('recipes.resetAll')}
                             </button>
-                            <button onClick={() => setShowFilters(false)}
+                            <button autoFocus onClick={() => setShowFilters(false)}
                               style={{ background: '#f3f4f6', border: 'none', borderRadius: '6px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#374151' }}>✕</button>
                           </div>
                         </div>

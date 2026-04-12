@@ -490,6 +490,23 @@ export const setupAuthListener = (onAuthSuccess: () => void) => {
 // PROFILE SERVICE
 // ============================================
 
+// ============================================
+// FEEDBACK FUNCTIONS
+// ============================================
+
+export const feedbackService = {
+  async submit(userId: string, category: string, message: string) {
+    const { error } = await supabase
+      .from('feedback')
+      .insert([{ user_id: userId, category, message }]);
+    return { error };
+  },
+};
+
+// ============================================
+// PROFILE SERVICE
+// ============================================
+
 export const profileService = {
   async getProfile(userId: string): Promise<Profile | null> {
     const { data, error } = await supabase

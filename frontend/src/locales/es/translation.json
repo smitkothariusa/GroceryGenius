@@ -660,6 +660,7 @@
     "messageLabel": "Tu mensaje",
     "messagePlaceholder": "Cuéntanos qué piensas…",
     "submit": "Enviar comentarios",
-    "thankYou": "¡Gracias por tus comentarios!"
+    "thankYou": "¡Gracias por tus comentarios!",
+    "submitError": "Algo salió mal. Por favor, inténtalo de nuevo."
   }
 }

@@ -660,6 +660,7 @@
     "messageLabel": "Votre message",
     "messagePlaceholder": "Dites-nous ce que vous pensez…",
     "submit": "Envoyer l'avis",
-    "thankYou": "Merci pour votre retour !"
+    "thankYou": "Merci pour votre retour !",
+    "submitError": "Une erreur s'est produite. Veuillez réessayer."
   }
 }

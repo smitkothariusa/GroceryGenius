@@ -660,6 +660,7 @@
     "messageLabel": "Ihre Nachricht",
     "messagePlaceholder": "Was liegt Ihnen auf dem Herzen…",
     "submit": "Feedback senden",
-    "thankYou": "Vielen Dank für Ihr Feedback!"
+    "thankYou": "Vielen Dank für Ihr Feedback!",
+    "submitError": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
   }
 }

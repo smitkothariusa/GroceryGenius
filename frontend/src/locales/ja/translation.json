@@ -660,6 +660,7 @@
     "messageLabel": "メッセージ",
     "messagePlaceholder": "ご意見をお聞かせください…",
     "submit": "送信する",
-    "thankYou": "フィードバックありがとうございます！"
+    "thankYou": "フィードバックありがとうございます！",
+    "submitError": "エラーが発生しました。もう一度お試しください。"
   }
 }

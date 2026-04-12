@@ -660,6 +660,7 @@
     "messageLabel": "您的留言",
     "messagePlaceholder": "告诉我们您的想法…",
     "submit": "发送反馈",
-    "thankYou": "感谢您的反馈！"
+    "thankYou": "感谢您的反馈！",
+    "submitError": "出现了问题，请重试。"
   }
 }

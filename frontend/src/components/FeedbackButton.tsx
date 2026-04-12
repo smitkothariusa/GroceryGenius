@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { feedbackService, supabase } from '../lib/supabase';
 
 type FeedbackCategory = 'bug' | 'suggestion' | 'complaint' | 'compliment';
 
@@ -14,27 +15,49 @@ const CATEGORIES: { key: FeedbackCategory; emoji: string }[] = [
   { key: 'compliment', emoji: '👍' },
 ];
 
-const FEEDBACK_EMAIL = 'feedback@grocerygenius.org';
+// Flag icon SVG (Material Design "flag" symbol)
+const FlagIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    width="22"
+    height="22"
+    aria-hidden="true"
+  >
+    <path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z" />
+  </svg>
+);
 
 const FeedbackButton: React.FC<FeedbackButtonProps> = ({ isMobile }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState<FeedbackCategory>('suggestion');
   const [message, setMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!message.trim()) return;
-    const subject = encodeURIComponent(`[GroceryGenius] ${t(`feedback.categories.${category}`)}`);
-    const body = encodeURIComponent(`${t(`feedback.categories.${category}`)}\n\n${message}`);
-    window.location.href = `mailto:${FEEDBACK_EMAIL}?subject=${subject}&body=${body}`;
-    setSubmitted(true);
-    setTimeout(() => {
-      setOpen(false);
-      setSubmitted(false);
-      setMessage('');
-      setCategory('suggestion');
-    }, 2500);
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('not authenticated');
+      const { error } = await feedbackService.submit(user.id, category, message.trim());
+      if (error) throw error;
+      setSubmitted(true);
+      setTimeout(() => {
+        setOpen(false);
+        setSubmitted(false);
+        setMessage('');
+        setCategory('suggestion');
+      }, 2500);
+    } catch {
+      setSubmitError(t('feedback.submitError'));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleClose = () => {
@@ -42,10 +65,12 @@ const FeedbackButton: React.FC<FeedbackButtonProps> = ({ isMobile }) => {
     setMessage('');
     setCategory('suggestion');
     setSubmitted(false);
+    setSubmitError('');
   };
 
   return (
     <>
+      {/* FAB — white with purple flag icon, contrasts the purple-blue app gradient */}
       <button
         onClick={() => setOpen(true)}
         aria-label={t('feedback.buttonLabel')}
@@ -58,12 +83,11 @@ const FeedbackButton: React.FC<FeedbackButtonProps> = ({ isMobile }) => {
           width: '48px',
           height: '48px',
           borderRadius: '50%',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'white',
           border: 'none',
-          color: 'white',
-          fontSize: '1.35rem',
+          color: '#667eea',
           cursor: 'pointer',
-          boxShadow: '0 4px 16px rgba(102, 126, 234, 0.5)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.18)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -71,14 +95,14 @@ const FeedbackButton: React.FC<FeedbackButtonProps> = ({ isMobile }) => {
         }}
         onMouseEnter={e => {
           (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.1)';
-          (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.65)';
+          (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 20px rgba(0,0,0,0.25)';
         }}
         onMouseLeave={e => {
           (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)';
-          (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 16px rgba(102, 126, 234, 0.5)';
+          (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 16px rgba(0,0,0,0.18)';
         }}
       >
-        💬
+        <FlagIcon />
       </button>
 
       {open && (
@@ -123,7 +147,9 @@ const FeedbackButton: React.FC<FeedbackButtonProps> = ({ isMobile }) => {
               alignItems: 'center',
               flexShrink: 0,
             }}>
-              <span style={{ fontWeight: '700', fontSize: '1rem' }}>💬 {t('feedback.title')}</span>
+              <span style={{ fontWeight: '700', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <FlagIcon /> {t('feedback.title')}
+              </span>
               <button
                 onClick={handleClose}
                 aria-label={t('feedback.close')}
@@ -197,22 +223,28 @@ const FeedbackButton: React.FC<FeedbackButtonProps> = ({ isMobile }) => {
                   />
                 </div>
 
+                {submitError && (
+                  <div style={{ fontSize: '0.82rem', color: '#dc2626', background: '#fee2e2', padding: '0.5rem 0.75rem', borderRadius: '8px' }}>
+                    {submitError}
+                  </div>
+                )}
+
                 {/* Submit */}
                 <button
                   onClick={handleSubmit}
-                  disabled={!message.trim()}
+                  disabled={!message.trim() || submitting}
                   style={{
                     padding: '0.7rem',
-                    background: message.trim() ? 'linear-gradient(45deg, #667eea, #764ba2)' : '#e5e7eb',
-                    color: message.trim() ? 'white' : '#9ca3af',
+                    background: message.trim() && !submitting ? 'linear-gradient(45deg, #667eea, #764ba2)' : '#e5e7eb',
+                    color: message.trim() && !submitting ? 'white' : '#9ca3af',
                     border: 'none',
                     borderRadius: '10px',
                     fontWeight: '700',
                     fontSize: '0.95rem',
-                    cursor: message.trim() ? 'pointer' : 'not-allowed',
+                    cursor: message.trim() && !submitting ? 'pointer' : 'not-allowed',
                   }}
                 >
-                  {t('feedback.submit')}
+                  {submitting ? '…' : t('feedback.submit')}
                 </button>
               </div>
             )}

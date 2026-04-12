@@ -660,6 +660,7 @@
     "messageLabel": "Your message",
     "messagePlaceholder": "Tell us what's on your mind…",
     "submit": "Send Feedback",
-    "thankYou": "Thanks for your feedback!"
+    "thankYou": "Thanks for your feedback!",
+    "submitError": "Something went wrong. Please try again."
   }
 }

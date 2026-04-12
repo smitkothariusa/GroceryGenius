@@ -141,8 +141,11 @@ const App: React.FC = () => {
   const [recipeSearchQuery, setRecipeSearchQuery] = useState('');
   const [recipeServings, setRecipeServings] = useState<number | ''>(2);
   const [recipeDifficulty, setRecipeDifficulty] = useState<'flexible' | 'easy' | 'medium' | 'hard'>('flexible');
+  const [recipeSubTab, setRecipeSubTab] = useState<'ingredient' | 'name'>('ingredient');
+  const [showFilters, setShowFilters] = useState(false);
   const [ingredientTags, setIngredientTags] = useState<string[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const filterPanelRef = useRef<HTMLDivElement>(null);
   const recipesRef = useRef<Recipe[]>([]);
   recipesRef.current = recipes;
   const [errorMsg, setErrorMsg] = useState('');
@@ -664,6 +667,17 @@ const App: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    if (!showFilters || isMobile) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (filterPanelRef.current && !filterPanelRef.current.contains(e.target as Node)) {
+        setShowFilters(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showFilters, isMobile]);
+
   // When language changes: translate existing recipe cards in-place
   useEffect(() => {
     setSelectedRecipe(null);
@@ -985,6 +999,113 @@ const App: React.FC = () => {
     setRecipeMode(mode);
     localStorage.setItem('gg_recipe_mode', mode);
   };
+
+  const activeFilterCount = [
+    dietaryFilter !== '',
+    recipeDifficulty !== 'flexible',
+    typeof recipeServings === 'number' && recipeServings !== 2,
+    recipeMode !== 'loose',
+  ].filter(Boolean).length;
+
+  const handleResetFilters = () => {
+    setDietaryFilter('');
+    setRecipeDifficulty('flexible');
+    setRecipeServings(2);
+    handleRecipeModeChange('loose');
+    setShowFilters(false);
+  };
+
+  const renderFilterControls = () => (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.9rem' }}>
+      {/* Dietary Preference */}
+      <div>
+        <div style={{ fontSize: '0.63rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
+          {t('recipes.dietaryPreferences')}
+        </div>
+        <select
+          data-tour="recipes-dietary-filter"
+          value={dietaryFilter}
+          onChange={e => setDietaryFilter(e.target.value)}
+          style={{ width: '100%', padding: '0.42rem 0.5rem', border: '1.5px solid #e5e7eb', borderRadius: '7px', fontSize: '0.8rem', background: 'white', boxSizing: 'border-box' as const }}
+        >
+          <option value="">{t('recipes.dietary.all')}</option>
+          {dietaryFilter && !PRESET_LABEL_MAP[dietaryFilter] && !customDietaryLabels.find(l => l.id === dietaryFilter) && (
+            <option value={dietaryFilter}>📋 {dietaryFilter}</option>
+          )}
+          <option value="vegetarian">{t('recipes.dietary.vegetarian')}</option>
+          <option value="vegan">{t('recipes.dietary.vegan')}</option>
+          <option value="gluten-free">{t('recipes.dietary.glutenFree')}</option>
+          <option value="keto">{t('recipes.dietary.keto')}</option>
+          <option value="diabetic-friendly">{t('recipes.dietary.diabeticFriendly')}</option>
+          <option value="heart-healthy">{t('recipes.dietary.heartHealthy')}</option>
+          {customDietaryLabels.map(custom => (
+            <option key={custom.id} value={custom.id}>✨ {custom.label}</option>
+          ))}
+        </select>
+      </div>
+      {/* Servings */}
+      <div>
+        <div style={{ fontSize: '0.63rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
+          {t('recipes.servings')}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', background: '#f3f4f6', borderRadius: '7px', padding: '0.3rem 0.55rem', width: 'fit-content' }}>
+          <button
+            onClick={() => setRecipeServings(Math.max(1, (typeof recipeServings === 'number' ? recipeServings : 2) - 1))}
+            style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: '5px', width: '24px', height: '24px', cursor: 'pointer', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >−</button>
+          <span style={{ fontWeight: 700, fontSize: '0.9rem', minWidth: '20px', textAlign: 'center' as const }}>{recipeServings}</span>
+          <button
+            onClick={() => setRecipeServings(Math.min(12, (typeof recipeServings === 'number' ? recipeServings : 2) + 1))}
+            style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: '5px', width: '24px', height: '24px', cursor: 'pointer', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >+</button>
+        </div>
+      </div>
+      {/* Difficulty */}
+      <div>
+        <div style={{ fontSize: '0.63rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
+          {t('recipes.difficulty')}
+        </div>
+        <div style={{ display: 'flex', gap: '0.18rem', background: '#f3f4f6', borderRadius: '7px', padding: '0.16rem' }}>
+          {(['flexible', 'easy', 'medium', 'hard'] as const).map(level => (
+            <button key={level} aria-pressed={recipeDifficulty === level} onClick={() => setRecipeDifficulty(level)}
+              style={{
+                flex: 1, padding: '0.3rem 0',
+                background: recipeDifficulty === level ? 'linear-gradient(45deg, #10b981, #059669)' : 'transparent',
+                color: recipeDifficulty === level ? 'white' : '#6b7280',
+                border: 'none', borderRadius: '5px', cursor: 'pointer',
+                fontWeight: recipeDifficulty === level ? 700 : 500, fontSize: '0.68rem',
+                transition: 'background 0.2s, color 0.2s',
+              }}
+            >
+              {t(`recipes.difficultyLevelShort.${level}`)}
+            </button>
+          ))}
+        </div>
+      </div>
+      {/* Extra Ingredients (Strict/Loose) */}
+      <div>
+        <div style={{ fontSize: '0.63rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
+          {t('recipes.extraIngredients')}
+        </div>
+        <div style={{ display: 'flex', gap: '0.18rem', background: '#f3f4f6', borderRadius: '7px', padding: '0.16rem' }}>
+          {(['loose', 'strict'] as const).map(mode => (
+            <button key={mode} aria-pressed={recipeMode === mode} onClick={() => handleRecipeModeChange(mode)}
+              style={{
+                flex: 1, padding: '0.3rem 0',
+                background: recipeMode === mode ? 'linear-gradient(45deg, #10b981, #059669)' : 'transparent',
+                color: recipeMode === mode ? 'white' : '#6b7280',
+                border: 'none', borderRadius: '5px', cursor: 'pointer',
+                fontWeight: recipeMode === mode ? 700 : 500, fontSize: '0.68rem',
+                transition: 'background 0.2s, color 0.2s',
+              }}
+            >
+              {mode === 'loose' ? t('recipes.modeLoose') : t('recipes.modeStrict')}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   const addPantryToIngredients = () => {
     const names = pantry.map(item => item.name.toLowerCase());

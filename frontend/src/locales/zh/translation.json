@@ -645,5 +645,21 @@
     "finish": "完成",
     "stepOf": "{{current}} / {{total}}",
     "allSet": "一切就绪！🎉"
+  },
+  "feedback": {
+    "buttonLabel": "发送反馈",
+    "title": "发送反馈",
+    "close": "关闭",
+    "categoryLabel": "反馈类型",
+    "categories": {
+      "bug": "报告错误",
+      "suggestion": "建议",
+      "complaint": "投诉",
+      "compliment": "表扬"
+    },
+    "messageLabel": "您的留言",
+    "messagePlaceholder": "告诉我们您的想法…",
+    "submit": "发送反馈",
+    "thankYou": "感谢您的反馈！"
   }
 }

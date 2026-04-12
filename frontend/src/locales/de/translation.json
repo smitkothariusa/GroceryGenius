@@ -645,5 +645,21 @@
     "finish": "Fertig",
     "stepOf": "{{current}} / {{total}}",
     "allSet": "Alles bereit! 🎉"
+  },
+  "feedback": {
+    "buttonLabel": "Feedback senden",
+    "title": "Feedback senden",
+    "close": "Schließen",
+    "categoryLabel": "Was für ein Feedback?",
+    "categories": {
+      "bug": "Fehler melden",
+      "suggestion": "Vorschlag",
+      "complaint": "Beschwerde",
+      "compliment": "Lob"
+    },
+    "messageLabel": "Ihre Nachricht",
+    "messagePlaceholder": "Was liegt Ihnen auf dem Herzen…",
+    "submit": "Feedback senden",
+    "thankYou": "Vielen Dank für Ihr Feedback!"
   }
 }

@@ -645,5 +645,21 @@
     "finish": "Finish",
     "stepOf": "{{current}} / {{total}}",
     "allSet": "You're all set! 🎉"
+  },
+  "feedback": {
+    "buttonLabel": "Send feedback",
+    "title": "Send Feedback",
+    "close": "Close",
+    "categoryLabel": "What kind of feedback?",
+    "categories": {
+      "bug": "Bug Report",
+      "suggestion": "Suggestion",
+      "complaint": "Complaint",
+      "compliment": "Compliment"
+    },
+    "messageLabel": "Your message",
+    "messagePlaceholder": "Tell us what's on your mind…",
+    "submit": "Send Feedback",
+    "thankYou": "Thanks for your feedback!"
   }
 }

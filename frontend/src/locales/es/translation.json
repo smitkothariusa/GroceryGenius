@@ -645,5 +645,21 @@
     "finish": "Terminar",
     "stepOf": "{{current}} / {{total}}",
     "allSet": "¡Todo listo! 🎉"
+  },
+  "feedback": {
+    "buttonLabel": "Enviar comentarios",
+    "title": "Enviar comentarios",
+    "close": "Cerrar",
+    "categoryLabel": "¿Qué tipo de comentario?",
+    "categories": {
+      "bug": "Reportar error",
+      "suggestion": "Sugerencia",
+      "complaint": "Queja",
+      "compliment": "Cumplido"
+    },
+    "messageLabel": "Tu mensaje",
+    "messagePlaceholder": "Cuéntanos qué piensas…",
+    "submit": "Enviar comentarios",
+    "thankYou": "¡Gracias por tus comentarios!"
   }
 }

@@ -645,5 +645,21 @@
     "finish": "Terminer",
     "stepOf": "{{current}} / {{total}}",
     "allSet": "Vous êtes prêt ! 🎉"
+  },
+  "feedback": {
+    "buttonLabel": "Envoyer un avis",
+    "title": "Envoyer un avis",
+    "close": "Fermer",
+    "categoryLabel": "Quel type d'avis ?",
+    "categories": {
+      "bug": "Signaler un bug",
+      "suggestion": "Suggestion",
+      "complaint": "Réclamation",
+      "compliment": "Compliment"
+    },
+    "messageLabel": "Votre message",
+    "messagePlaceholder": "Dites-nous ce que vous pensez…",
+    "submit": "Envoyer l'avis",
+    "thankYou": "Merci pour votre retour !"
   }
 }

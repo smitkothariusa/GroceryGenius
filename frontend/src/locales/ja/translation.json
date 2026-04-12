@@ -645,5 +645,21 @@
     "finish": "完了",
     "stepOf": "{{current}} / {{total}}",
     "allSet": "準備完了！🎉"
+  },
+  "feedback": {
+    "buttonLabel": "フィードバックを送る",
+    "title": "フィードバックを送る",
+    "close": "閉じる",
+    "categoryLabel": "フィードバックの種類",
+    "categories": {
+      "bug": "バグ報告",
+      "suggestion": "提案",
+      "complaint": "苦情",
+      "compliment": "称賛"
+    },
+    "messageLabel": "メッセージ",
+    "messagePlaceholder": "ご意見をお聞かせください…",
+    "submit": "送信する",
+    "thankYou": "フィードバックありがとうございます！"
   }
 }

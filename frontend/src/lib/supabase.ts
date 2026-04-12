@@ -49,6 +49,7 @@ export interface PantryItem {
   expiry_date?: string;
   added_date: string;
   updated_at: string;
+  emoji?: string;  // NEW
 }
 
 export interface ShoppingItem {
@@ -483,6 +484,23 @@ export const setupAuthListener = (onAuthSuccess: () => void) => {
       console.log('Password recovery');
     }
   });
+};
+
+// ============================================
+// PROFILE SERVICE
+// ============================================
+
+// ============================================
+// FEEDBACK FUNCTIONS
+// ============================================
+
+export const feedbackService = {
+  async submit(userId: string, category: string, message: string) {
+    const { error } = await supabase
+      .from('feedback')
+      .insert([{ user_id: userId, category, message }]);
+    return { error };
+  },
 };
 
 // ============================================

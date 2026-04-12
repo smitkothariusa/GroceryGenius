@@ -71,8 +71,39 @@
       "tsp": "茶匙",
       "bottles": "瓶",
       "cans": "罐",
-      "boxes": "盒"
-    }
+      "boxes": "盒",
+      "carton": "盒",
+      "bunch": "束",
+      "bag": "袋",
+      "jar": "罐",
+      "loaf": "条",
+      "dozen": "打",
+      "pack": "包",
+      "bottle": "瓶",
+      "head": "个",
+      "clove": "瓣",
+      "slice": "片",
+      "container": "盒",
+      "roll": "卷",
+      "bar": "条",
+      "block": "块",
+      "sachet": "袋",
+      "fillet": "片",
+      "breast": "胸",
+      "leg": "腿",
+      "rack": "排",
+      "liter": "升",
+      "box": "盒"
+    },
+    "smartSearch": "搜索食物…",
+    "smartExpiry": "建议保质期",
+    "smartExpiryDays": "+{{count}}天",
+    "changeUnit": "更改单位",
+    "quantityRequired": "请输入数量",
+    "enterManually": "手动输入",
+    "otherUnit": "其他（自行输入）",
+    "customUnit": "自定义单位",
+    "expiryHint": "点击上方按钮使用建议日期，或自行选择。"
   },
   "auth": {
     "aiPoweredMealPlanning": "AI驱动的膳食计划",
@@ -378,7 +409,8 @@
     "save": "保存",
     "close": "关闭",
     "clearAll": "全部清除",
-    "help": "帮助"
+    "help": "帮助",
+    "or": "或"
   },
   "notifications": {
     "itemAdded": "已将物品添加到{{list}}！",
@@ -613,5 +645,22 @@
     "finish": "完成",
     "stepOf": "{{current}} / {{total}}",
     "allSet": "一切就绪！🎉"
+  },
+  "feedback": {
+    "buttonLabel": "发送反馈",
+    "title": "发送反馈",
+    "close": "关闭",
+    "categoryLabel": "反馈类型",
+    "categories": {
+      "bug": "报告错误",
+      "suggestion": "建议",
+      "complaint": "投诉",
+      "compliment": "表扬"
+    },
+    "messageLabel": "您的留言",
+    "messagePlaceholder": "告诉我们您的想法…",
+    "submit": "发送反馈",
+    "thankYou": "感谢您的反馈！",
+    "submitError": "出现了问题，请重试。"
   }
 }

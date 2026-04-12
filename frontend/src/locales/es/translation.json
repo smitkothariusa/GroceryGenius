@@ -71,8 +71,39 @@
       "tsp": "cdta",
       "bottles": "botellas",
       "cans": "latas",
-      "boxes": "cajas"
-    }
+      "boxes": "cajas",
+      "carton": "cartón",
+      "bunch": "manojo",
+      "bag": "bolsa",
+      "jar": "frasco",
+      "loaf": "hogaza",
+      "dozen": "docena",
+      "pack": "paquete",
+      "bottle": "botella",
+      "head": "cabeza",
+      "clove": "diente",
+      "slice": "rebanada",
+      "container": "envase",
+      "roll": "rollo",
+      "bar": "barra",
+      "block": "bloque",
+      "sachet": "sobre",
+      "fillet": "filete",
+      "breast": "pechuga",
+      "leg": "muslo",
+      "rack": "costillar",
+      "liter": "litro",
+      "box": "caja"
+    },
+    "smartSearch": "Buscar alimentos…",
+    "smartExpiry": "Vencimiento estimado",
+    "smartExpiryDays": "+{{count}} días",
+    "changeUnit": "Cambiar unidad",
+    "quantityRequired": "Ingresa una cantidad",
+    "enterManually": "Ingresar manualmente",
+    "otherUnit": "Otro (escribe el tuyo)",
+    "customUnit": "Unidad personalizada",
+    "expiryHint": "Toca el chip de arriba para usar la fecha sugerida o elige la tuya."
   },
   "auth": {
     "aiPoweredMealPlanning": "Planificación de comidas con IA",
@@ -378,7 +409,8 @@
     "save": "Guardar",
     "close": "Cerrar",
     "clearAll": "Limpiar Todo",
-    "help": "Ayuda"
+    "help": "Ayuda",
+    "or": "o"
   },
   "notifications": {
     "itemAdded": "¡Artículo agregado a {{list}}!",
@@ -613,5 +645,22 @@
     "finish": "Terminar",
     "stepOf": "{{current}} / {{total}}",
     "allSet": "¡Todo listo! 🎉"
+  },
+  "feedback": {
+    "buttonLabel": "Enviar comentarios",
+    "title": "Enviar comentarios",
+    "close": "Cerrar",
+    "categoryLabel": "¿Qué tipo de comentario?",
+    "categories": {
+      "bug": "Reportar error",
+      "suggestion": "Sugerencia",
+      "complaint": "Queja",
+      "compliment": "Cumplido"
+    },
+    "messageLabel": "Tu mensaje",
+    "messagePlaceholder": "Cuéntanos qué piensas…",
+    "submit": "Enviar comentarios",
+    "thankYou": "¡Gracias por tus comentarios!",
+    "submitError": "Algo salió mal. Por favor, inténtalo de nuevo."
   }
 }

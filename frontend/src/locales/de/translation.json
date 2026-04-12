@@ -71,8 +71,39 @@
       "tsp": "TL",
       "bottles": "Flaschen",
       "cans": "Dosen",
-      "boxes": "Schachteln"
-    }
+      "boxes": "Schachteln",
+      "carton": "Karton",
+      "bunch": "Bund",
+      "bag": "Tüte",
+      "jar": "Glas",
+      "loaf": "Laib",
+      "dozen": "Dutzend",
+      "pack": "Packung",
+      "bottle": "Flasche",
+      "head": "Kopf",
+      "clove": "Zehe",
+      "slice": "Scheibe",
+      "container": "Behälter",
+      "roll": "Rolle",
+      "bar": "Riegel",
+      "block": "Block",
+      "sachet": "Beutel",
+      "fillet": "Filet",
+      "breast": "Brust",
+      "leg": "Keule",
+      "rack": "Rippenstück",
+      "liter": "Liter",
+      "box": "Schachtel"
+    },
+    "smartSearch": "Lebensmittel suchen…",
+    "smartExpiry": "Geschätztes Ablaufdatum",
+    "smartExpiryDays": "+{{count}} Tage",
+    "changeUnit": "Einheit ändern",
+    "quantityRequired": "Bitte Menge eingeben",
+    "enterManually": "Manuell eingeben",
+    "otherUnit": "Andere (eigene eingeben)",
+    "customUnit": "Benutzerdefinierte Einheit",
+    "expiryHint": "Tippe auf den Chip oben, um das vorgeschlagene Datum zu verwenden, oder wähle ein eigenes."
   },
   "auth": {
     "aiPoweredMealPlanning": "KI-gestützte Mahlzeitenplanung",
@@ -378,7 +409,8 @@
     "save": "Speichern",
     "close": "Schließen",
     "clearAll": "Alles Löschen",
-    "help": "Hilfe"
+    "help": "Hilfe",
+    "or": "oder"
   },
   "notifications": {
     "itemAdded": "Artikel zu {{list}} hinzugefügt!",
@@ -613,5 +645,22 @@
     "finish": "Fertig",
     "stepOf": "{{current}} / {{total}}",
     "allSet": "Alles bereit! 🎉"
+  },
+  "feedback": {
+    "buttonLabel": "Feedback senden",
+    "title": "Feedback senden",
+    "close": "Schließen",
+    "categoryLabel": "Was für ein Feedback?",
+    "categories": {
+      "bug": "Fehler melden",
+      "suggestion": "Vorschlag",
+      "complaint": "Beschwerde",
+      "compliment": "Lob"
+    },
+    "messageLabel": "Ihre Nachricht",
+    "messagePlaceholder": "Was liegt Ihnen auf dem Herzen…",
+    "submit": "Feedback senden",
+    "thankYou": "Vielen Dank für Ihr Feedback!",
+    "submitError": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
   }
 }

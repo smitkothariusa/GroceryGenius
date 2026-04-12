@@ -4225,7 +4225,14 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       gap: isMobile ? '0.75rem' : '0'
                     }}
                   >
-                    <div className="item-content" style={{ flex: 1 }}>
+                    <div
+                      className="item-content"
+                      style={{ flex: 1 }}
+                      onClick={isMobile ? () => handleEditPantryItem(item) : undefined}
+                      role={isMobile ? 'button' : undefined}
+                      tabIndex={isMobile ? 0 : undefined}
+                      onKeyDown={isMobile ? (e) => e.key === 'Enter' && handleEditPantryItem(item) : undefined}
+                    >
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',

@@ -1,5 +1,6 @@
 ﻿import { FoodBank, DonationRecord, DonationImpact } from './types/donation';
 import { foodBanks, calculateMeals } from './data/foodBanks';
+import { searchFoods, getSmartExpiryDate, getFoodDisplayName, type FoodEntry } from './data/foodDatabase';
 import { useTranslation } from 'react-i18next';
 
 interface DropOffSite {
@@ -149,19 +150,25 @@ const App: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [pantry, setPantry] = useState<PantryItem[]>([]);
   const [showAddPantry, setShowAddPantry] = useState(false);
-  const [newPantryItem, setNewPantryItem] = useState<{ 
+  const [newPantryItem, setNewPantryItem] = useState<{
     name: string;
     quantity: number | '';
     unit: string;
     category: string;
     expiryDate: string;
-  }>({ 
-  name: '', 
+    emoji?: string;
+  }>({
+  name: '',
   quantity: 1,
-    unit: 'pc', 
+    unit: 'pc',
     category: 'other',
-    expiryDate: ''
+    expiryDate: '',
+    emoji: undefined,
   });
+  const [smartSearchQuery, setSmartSearchQuery] = useState('');
+  const [smartSearchResults, setSmartSearchResults] = useState<FoodEntry[]>([]);
+  const [selectedFood, setSelectedFood] = useState<FoodEntry | null>(null);
+  const smartSearchRef = useRef<HTMLDivElement>(null);
   const [scanMode, setScanMode] = useState<'menu' | 'camera' | 'barcode' | 'expiry' | 'upload'>('menu');
   const [barcodeScanning, setBarcodeScanning] = useState(false);
   const [expiryScanning, setExpiryScanning] = useState(false);
@@ -536,6 +543,17 @@ const App: React.FC = () => {
     const interval = setInterval(checkDailyReset, 60000);
     return () => clearInterval(interval);
   }, [lastResetDate]);
+  // Close smart search dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (smartSearchRef.current && !smartSearchRef.current.contains(e.target as Node)) {
+        setSmartSearchResults([]);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // Save calorie goal to Supabase when it changes
   useEffect(() => {
     const saveCalorieGoal = async () => {
@@ -1147,6 +1165,47 @@ const App: React.FC = () => {
       expiryDate: item.expiryDate || ''
     });
     setShowEditPantry(true);
+  };
+
+  const handleSmartSearchChange = (query: string) => {
+    setSmartSearchQuery(query);
+    setSelectedFood(null);
+    if (query.length >= 2) {
+      const lang = i18n.language || 'en';
+      setSmartSearchResults(searchFoods(query, lang));
+    } else {
+      setSmartSearchResults([]);
+    }
+  };
+
+  const handleSelectFood = (food: FoodEntry) => {
+    const lang = i18n.language || 'en';
+    const displayName = getFoodDisplayName(food, lang);
+    setSelectedFood(food);
+    setSmartSearchQuery(displayName);
+    setSmartSearchResults([]);
+    setNewPantryItem(prev => ({
+      ...prev,
+      name: displayName,
+      quantity: '' as any,
+      unit: food.defaultUnit,
+      category: food.category,
+      expiryDate: '',
+      emoji: food.emoji,
+    }));
+  };
+
+  const handleAcceptSmartExpiry = () => {
+    if (!selectedFood) return;
+    const date = getSmartExpiryDate(selectedFood);
+    setNewPantryItem(prev => ({ ...prev, expiryDate: date }));
+  };
+
+  const handleResetSmartSearch = () => {
+    setSmartSearchQuery('');
+    setSmartSearchResults([]);
+    setSelectedFood(null);
+    setNewPantryItem({ name: '', quantity: 1, unit: 'pc', category: 'other', expiryDate: '', emoji: undefined });
   };
 
   const handleSaveEditPantryItem = () => {
@@ -3436,7 +3495,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   <button
                     data-tour="pantry-add-input"
                     className="desktop-add-btn"
-                    onClick={() => setShowAddPantry(!showAddPantry)}
+                    onClick={() => {
+                      if (showAddPantry) handleResetSmartSearch();
+                      setShowAddPantry(!showAddPantry);
+                    }}
                     style={{
                       padding: isMobile ? '0.75rem' : '0.75rem 1.5rem',
                       background: '#10b981',
@@ -3670,138 +3732,269 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               </div>
             )}
             {showAddPantry && (
-              <div style={{ 
-                background: '#f9fafb', 
-                padding: isMobile ? '1rem' : '1.5rem', 
-                borderRadius: '12px', 
-                marginBottom: '2rem', 
-                display: 'grid', 
-                gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr 1fr', 
-                gap: isMobile ? '0.75rem' : '1rem' 
-              }}>
-                <input 
-                  type="text" 
-                  placeholder={t('pantry.itemName')} 
-                  value={newPantryItem.name}
-                  onChange={(e) => setNewPantryItem({...newPantryItem, name: e.target.value})}
-                  style={{ 
-                    padding: '0.75rem', 
-                    border: '1px solid #d1d5db', 
-                    borderRadius: '8px',
-                    width: '100%',
-                    boxSizing: 'border-box'
-                  }} 
-                />
-                
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr', 
-                  gap: isMobile ? '0.75rem' : '0',
-                  gridColumn: isMobile ? '1' : 'auto'
-                }}>
-                  <input 
-                    type="number" 
-                    min="1" 
-                    placeholder={t('pantry.quantity')}
-                    value={newPantryItem.quantity}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === '') {
-                        setNewPantryItem({...newPantryItem, quantity: '' as any});
-                      } else {
-                        setNewPantryItem({...newPantryItem, quantity: Math.max(1, parseInt(val) || 1)});
-                      }
-                    }}
-                    onBlur={(e) => {
-                      if (e.target.value === '' || parseInt(e.target.value) < 1) {
-                        setNewPantryItem({...newPantryItem, quantity: 1});
-                      }
-                    }}
-                    style={{ 
-                      padding: '0.75rem', 
-                      border: '1px solid #d1d5db', 
-                      borderRadius: '8px',
+              <div style={{ background: '#f9fafb', padding: isMobile ? '1rem' : '1.5rem', borderRadius: '12px', marginBottom: '2rem' }}>
+
+                {/* ── Smart search input ── */}
+                <div ref={smartSearchRef} style={{ position: 'relative', marginBottom: selectedFood ? '0.75rem' : '0' }}>
+                  <input
+                    type="text"
+                    placeholder={t('pantry.smartSearch')}
+                    value={smartSearchQuery}
+                    autoFocus
+                    onChange={(e) => handleSmartSearchChange(e.target.value)}
+                    style={{
                       width: '100%',
-                      boxSizing: 'border-box'
-                    }} 
+                      padding: '0.75rem 2.5rem 0.75rem 0.75rem',
+                      border: '2px solid #8b5cf6',
+                      borderRadius: '8px',
+                      fontSize: '1rem',
+                      boxSizing: 'border-box',
+                    }}
                   />
-                  
-                  <select 
-                    value={newPantryItem.unit} 
-                    onChange={(e) => setNewPantryItem({...newPantryItem, unit: e.target.value})}
-                    style={{ 
-                      padding: '0.75rem', 
-                      border: '1px solid #d1d5db', 
-                      borderRadius: '8px',
-                      width: '100%',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <option value="pc">{t('pantry.units.pieces')}</option>
-                    <option value="kg">{t('pantry.units.kg')}</option>
-                    <option value="lbs">{t('pantry.units.lbs')}</option>
-                    <option value="cups">{t('pantry.units.cups')}</option>
-                  </select>
+                  {smartSearchQuery.length > 0 && (
+                    <button
+                      onClick={handleResetSmartSearch}
+                      style={{
+                        position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)',
+                        background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#9ca3af',
+                        padding: '0.25rem', lineHeight: 1,
+                      }}
+                      aria-label={t('common.cancel')}
+                    >×</button>
+                  )}
+
+                  {/* Dropdown */}
+                  {smartSearchResults.length > 0 && (
+                    <div style={{
+                      position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100,
+                      background: 'white', border: '1px solid #e5e7eb', borderRadius: '8px',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.12)', marginTop: '2px', overflow: 'hidden',
+                    }}>
+                      {smartSearchResults.map((food) => (
+                        <button
+                          key={food.id}
+                          onClick={() => handleSelectFood(food)}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: '0.75rem',
+                            width: '100%', padding: '0.75rem 1rem', background: 'none',
+                            border: 'none', borderBottom: '1px solid #f3f4f6', cursor: 'pointer',
+                            textAlign: 'left', fontSize: '0.95rem', minHeight: '44px',
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f3ff')}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
+                        >
+                          <span style={{ fontSize: '1.3rem', width: '1.5rem', textAlign: 'center' }}>{food.emoji}</span>
+                          <span style={{ fontWeight: 500 }}>{getFoodDisplayName(food, i18n.language || 'en')}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                
-                <input
-                  type="date"
-                  value={newPantryItem.expiryDate}
-                  onChange={(e) => setNewPantryItem({...newPantryItem, expiryDate: e.target.value})}
-                  style={{
-                    gridColumn: '1 / -1',
-                    padding: '0.75rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    width: '100%',
-                    boxSizing: 'border-box'
-                  }}
-                />
-                
-                <button 
-                  onClick={async () => {
-                    if (!newPantryItem.name.trim()) return;
-                    const quantity = typeof newPantryItem.quantity === 'number' ? newPantryItem.quantity : 1;
-                    
-                    try {
-                      const savedItem = await pantryService.add({
-                        name: newPantryItem.name.trim(),
-                        quantity: quantity,
-                        unit: newPantryItem.unit,
-                        category: newPantryItem.category,
-                        expiryDate: newPantryItem.expiryDate || undefined
-                      });
 
-                      setPantry(prev => [...prev, {
-                        id: savedItem.id,
-                        name: savedItem.name,
-                        quantity: savedItem.quantity,
-                        unit: savedItem.unit,
-                        category: savedItem.category,
-                        expiryDate: savedItem.expiry_date || undefined
-                      }]);
+                {/* ── Compact card confirm (after food selected) ── */}
+                {selectedFood && (
+                  <div style={{
+                    background: 'white', border: '1.5px solid #8b5cf6', borderRadius: '10px',
+                    padding: isMobile ? '0.9rem' : '1rem', boxShadow: '0 2px 8px rgba(139,92,246,0.08)',
+                    marginTop: '0.5rem',
+                  }}>
+                    {/* Header */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', paddingBottom: '0.75rem', borderBottom: '1px solid #f3f4f6' }}>
+                      <span style={{ fontSize: '1.5rem' }}>{selectedFood.emoji}</span>
+                      <span style={{ fontWeight: 700, fontSize: '1rem' }}>{getFoodDisplayName(selectedFood, i18n.language || 'en')}</span>
+                      <span style={{ marginLeft: 'auto', background: '#f5f3ff', color: '#7c3aed', borderRadius: '6px', padding: '0.15rem 0.5rem', fontSize: '0.75rem', fontWeight: 600 }}>
+                        {t(`pantry.categories.${selectedFood.category}`) || selectedFood.category}
+                      </span>
+                    </div>
 
-                      setNewPantryItem({ name: '', quantity: 1, unit: 'pc', category: 'other', expiryDate: '' });
-                      setShowAddPantry(false);
-                      success(t('toasts.itemAddedToPantry'));
-                    } catch (error) {
-                      console.error('Error adding pantry item:', error);
-                      warning(t('toasts.failedAddItem'));
-                    }
-                  }}
-                  style={{
-                    gridColumn: '1 / -1', 
-                    padding: '0.75rem', 
-                    background: '#10b981', 
-                    color: 'white',
-                    border: 'none', 
-                    borderRadius: '8px', 
-                    cursor: 'pointer', 
-                    fontWeight: '600'
-                  }}
-                >
-                  {t('pantry.addToPantry')}
-                </button>
+                    {/* Quantity + Unit row */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem', fontWeight: 600 }}>
+                          {t('pantry.quantity')}
+                        </label>
+                        <input
+                          type="number"
+                          min="0.1"
+                          step="any"
+                          placeholder="0"
+                          autoFocus
+                          value={newPantryItem.quantity === '' ? '' : newPantryItem.quantity}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setNewPantryItem(prev => ({ ...prev, quantity: val === '' ? '' as any : parseFloat(val) || '' as any }));
+                          }}
+                          style={{
+                            width: '100%', padding: '0.6rem', border: '1.5px solid #e5e7eb',
+                            borderRadius: '8px', fontSize: '1rem', boxSizing: 'border-box',
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem', fontWeight: 600 }}>
+                          {t('pantry.unit')}
+                        </label>
+                        <select
+                          value={newPantryItem.unit}
+                          onChange={(e) => setNewPantryItem(prev => ({ ...prev, unit: e.target.value }))}
+                          style={{
+                            width: '100%', padding: '0.6rem', border: '1.5px solid #e5e7eb',
+                            borderRadius: '8px', fontSize: '0.9rem', boxSizing: 'border-box', cursor: 'pointer',
+                          }}
+                        >
+                          {(['carton','dozen','pieces','lbs','kg','g','oz','cups','cup','ml','l','tbsp','tsp',
+                            'bag','bottle','box','cans','bottles','boxes','bunch','jar','loaf','pack',
+                            'head','clove','slice','container','roll','bar','block','sachet','fillet'
+                          ] as const).map(u => (
+                            <option key={u} value={u}>{t(`pantry.units.${u}`) || u}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Smart expiry chip + date picker */}
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.35rem', fontWeight: 600 }}>
+                        {t('pantry.expiryDate')}
+                      </label>
+                      <button
+                        type="button"
+                        onClick={handleAcceptSmartExpiry}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                          background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a',
+                          borderRadius: '6px', padding: '0.3rem 0.65rem', fontSize: '0.8rem',
+                          fontWeight: 600, cursor: 'pointer', marginBottom: '0.4rem',
+                        }}
+                      >
+                        ✨ {t('pantry.smartExpiry')}: {getSmartExpiryDate(selectedFood).split('-').slice(1).join('/')}
+                        {' '}({t('pantry.smartExpiryDays', { count: selectedFood.shelfLife })})
+                      </button>
+                      <input
+                        type="date"
+                        value={newPantryItem.expiryDate}
+                        onChange={(e) => {
+                          setNewPantryItem(prev => ({ ...prev, expiryDate: e.target.value }));
+                        }}
+                        style={{
+                          display: 'block', width: '100%', padding: '0.6rem',
+                          border: '1.5px solid #e5e7eb', borderRadius: '8px',
+                          fontSize: '0.95rem', boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+
+                    {/* Add button */}
+                    <button
+                      disabled={!newPantryItem.quantity || newPantryItem.quantity === ('' as any)}
+                      onClick={async () => {
+                        if (!newPantryItem.name.trim()) return;
+                        const quantity = typeof newPantryItem.quantity === 'number' ? newPantryItem.quantity : 1;
+                        try {
+                          const savedItem = await pantryService.add({
+                            name: newPantryItem.name.trim(),
+                            quantity,
+                            unit: newPantryItem.unit,
+                            category: newPantryItem.category,
+                            expiryDate: newPantryItem.expiryDate || undefined,
+                            emoji: newPantryItem.emoji,
+                          });
+                          setPantry(prev => [...prev, {
+                            id: savedItem.id,
+                            name: savedItem.name,
+                            quantity: savedItem.quantity,
+                            unit: savedItem.unit,
+                            category: savedItem.category,
+                            expiryDate: savedItem.expiry_date || undefined,
+                            emoji: savedItem.emoji || undefined,
+                          }]);
+                          handleResetSmartSearch();
+                          setShowAddPantry(false);
+                          success(t('toasts.itemAddedToPantry'));
+                        } catch (error) {
+                          console.error('Error adding pantry item:', error);
+                          warning(t('toasts.failedAddItem'));
+                        }
+                      }}
+                      style={{
+                        width: '100%', padding: '0.75rem',
+                        background: (!newPantryItem.quantity || newPantryItem.quantity === ('' as any)) ? '#e5e7eb' : 'linear-gradient(45deg,#8b5cf6,#6d28d9)',
+                        color: (!newPantryItem.quantity || newPantryItem.quantity === ('' as any)) ? '#9ca3af' : 'white',
+                        border: 'none', borderRadius: '8px',
+                        cursor: (!newPantryItem.quantity || newPantryItem.quantity === ('' as any)) ? 'not-allowed' : 'pointer',
+                        fontWeight: 700, fontSize: '1rem',
+                      }}
+                    >
+                      {(!newPantryItem.quantity || newPantryItem.quantity === ('' as any))
+                        ? t('pantry.quantityRequired')
+                        : t('pantry.addToPantry')}
+                    </button>
+                  </div>
+                )}
+
+                {/* ── Manual fallback (no food selected, no query) ── */}
+                {!selectedFood && smartSearchQuery.length === 0 && (
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr 1fr', gap: isMobile ? '0.75rem' : '1rem', marginTop: '0.75rem' }}>
+                    <input
+                      type="text"
+                      placeholder={t('pantry.itemPlaceholder') || t('pantry.itemName')}
+                      value={newPantryItem.name}
+                      onChange={(e) => setNewPantryItem({...newPantryItem, name: e.target.value})}
+                      style={{ padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '8px', boxSizing: 'border-box' }}
+                    />
+                    <input
+                      type="number" min="1" placeholder={t('pantry.quantity')}
+                      value={newPantryItem.quantity}
+                      onChange={(e) => setNewPantryItem({...newPantryItem, quantity: parseInt(e.target.value) || 1})}
+                      style={{ padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '8px', boxSizing: 'border-box' }}
+                    />
+                    <select
+                      value={newPantryItem.unit}
+                      onChange={(e) => setNewPantryItem({...newPantryItem, unit: e.target.value})}
+                      style={{ padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '8px', boxSizing: 'border-box' }}
+                    >
+                      <option value="pc">{t('pantry.units.pieces')}</option>
+                      <option value="kg">{t('pantry.units.kg')}</option>
+                      <option value="lbs">{t('pantry.units.lbs')}</option>
+                      <option value="cups">{t('pantry.units.cups')}</option>
+                      <option value="g">{t('pantry.units.grams') || 'g'}</option>
+                      <option value="oz">{t('pantry.units.oz') || 'oz'}</option>
+                    </select>
+                    <input
+                      type="date"
+                      value={newPantryItem.expiryDate}
+                      onChange={(e) => setNewPantryItem({...newPantryItem, expiryDate: e.target.value})}
+                      style={{ gridColumn: '1 / -1', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '8px', boxSizing: 'border-box' }}
+                    />
+                    <button
+                      onClick={async () => {
+                        if (!newPantryItem.name.trim()) return;
+                        const quantity = typeof newPantryItem.quantity === 'number' ? newPantryItem.quantity : 1;
+                        try {
+                          const savedItem = await pantryService.add({
+                            name: newPantryItem.name.trim(), quantity,
+                            unit: newPantryItem.unit, category: newPantryItem.category,
+                            expiryDate: newPantryItem.expiryDate || undefined,
+                          });
+                          setPantry(prev => [...prev, {
+                            id: savedItem.id, name: savedItem.name, quantity: savedItem.quantity,
+                            unit: savedItem.unit, category: savedItem.category,
+                            expiryDate: savedItem.expiry_date || undefined,
+                          }]);
+                          setNewPantryItem({ name: '', quantity: 1, unit: 'pc', category: 'other', expiryDate: '', emoji: undefined });
+                          setShowAddPantry(false);
+                          success(t('toasts.itemAddedToPantry'));
+                        } catch (error) {
+                          console.error('Error adding pantry item:', error);
+                          warning(t('toasts.failedAddItem'));
+                        }
+                      }}
+                      style={{ gridColumn: '1 / -1', padding: '0.75rem', background: '#10b981', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}
+                    >
+                      {t('pantry.addToPantry')}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 

@@ -54,13 +54,16 @@ When any filter is non-default, chips render below the toolbar row (above the in
 
 Chip style: `background: #ede9fe`, `color: #6d28d9`, pill shape.
 
-### Desktop: Inline Slide-Down Panel
+### Desktop: Floating Popover
 
 - Toggled open/closed by the Filters button.
-- Renders directly below the toolbar row, above the ingredient/name input area.
-- Layout: 2×2 grid (`grid-template-columns: 1fr 1fr`).
-- Closes when: Filters button clicked again, or user clicks outside the panel.
+- Rendered with `position: absolute` anchored to the Filters button — does **not** push any page content down.
+- Aligned to the right edge of the Filters button, appearing below it with a small caret/tail pointing up at the button.
+- Width: `320px`. Layout: 2×2 grid (`grid-template-columns: 1fr 1fr`).
+- `z-index` high enough to float over the ingredient input and tag rows below.
+- Closes when: Filters button clicked again, or user clicks outside the popover.
 - State variable: `const [showFilters, setShowFilters] = useState(false)`
+- The Filters button's parent container must be `position: relative` so the popover positions correctly.
 
 ### Mobile: Bottom Sheet
 

@@ -3191,46 +3191,45 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                       </button>
                     )}
 
-                    {/* Filters button + floating popover */}
-                    <div ref={filterPanelRef} style={{ position: 'relative' }}>
-                      <button
-                        aria-expanded={showFilters}
-                        aria-controls="recipe-filter-panel"
-                        onClick={() => setShowFilters(v => !v)}
-                        style={{ background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '8px', padding: '0.4rem 0.9rem', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
-                      >
-                        ⚙️ {t('recipes.filtersButton')}
-                        {activeFilterCount > 0 && (
-                          <span style={{ background: 'rgba(255,255,255,0.25)', borderRadius: '10px', padding: '0.05rem 0.4rem', fontSize: '0.72rem' }}>{activeFilterCount}</span>
-                        )}
-                      </button>
-
-                      {showFilters && (
-                        <div
-                          id="recipe-filter-panel"
-                          role="region"
-                          aria-label={t('recipes.filtersButton')}
-                          style={{
-                            position: 'absolute', top: 'calc(100% + 10px)', right: 0,
-                            width: '320px', background: 'white',
-                            border: '1.5px solid #e5e7eb', borderRadius: '12px',
-                            padding: '1rem', zIndex: 100,
-                            boxShadow: '0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06)',
-                          }}
-                        >
-                          {/* Caret tail */}
-                          <div style={{
-                            position: 'absolute', top: '-7px', right: '18px',
-                            width: '12px', height: '12px', background: 'white',
-                            borderLeft: '1.5px solid #e5e7eb', borderTop: '1.5px solid #e5e7eb',
-                            transform: 'rotate(45deg)',
-                          }} />
-                          {renderFilterControls()}
-                        </div>
-                      )}
-                    </div>
-
                     <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      {/* Filters button + floating popover — inside right-side group so popover anchors correctly */}
+                      <div ref={filterPanelRef} style={{ position: 'relative' }}>
+                        <button
+                          aria-expanded={showFilters}
+                          aria-controls="recipe-filter-panel"
+                          onClick={() => setShowFilters(v => !v)}
+                          style={{ background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '8px', padding: '0.4rem 0.9rem', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                        >
+                          ⚙️ {t('recipes.filtersButton')}
+                          {activeFilterCount > 0 && (
+                            <span style={{ background: 'rgba(255,255,255,0.25)', borderRadius: '10px', padding: '0.05rem 0.4rem', fontSize: '0.72rem' }}>{activeFilterCount}</span>
+                          )}
+                        </button>
+
+                        {showFilters && (
+                          <div
+                            id="recipe-filter-panel"
+                            role="region"
+                            aria-label={t('recipes.filtersButton')}
+                            style={{
+                              position: 'absolute', top: 'calc(100% + 10px)', right: 0,
+                              width: '320px', background: 'white',
+                              border: '1.5px solid #e5e7eb', borderRadius: '12px',
+                              padding: '1rem', zIndex: 100,
+                              boxShadow: '0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06)',
+                            }}
+                          >
+                            {/* Caret tail */}
+                            <div style={{
+                              position: 'absolute', top: '-7px', right: '18px',
+                              width: '12px', height: '12px', background: 'white',
+                              borderLeft: '1.5px solid #e5e7eb', borderTop: '1.5px solid #e5e7eb',
+                              transform: 'rotate(45deg)',
+                            }} />
+                            {renderFilterControls()}
+                          </div>
+                        )}
+                      </div>
                       <button onClick={handleGetRecipes} disabled={recipeLoading}
                         style={{ padding: '0.4rem 1.5rem', background: recipeLoading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 700, cursor: recipeLoading ? 'not-allowed' : 'pointer', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
                         {recipeLoading

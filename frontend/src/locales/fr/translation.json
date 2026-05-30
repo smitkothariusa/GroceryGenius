@@ -206,7 +206,16 @@
     "emptyStatePrompt": "Ajoutez des ingrédients ou recherchez une recette spécifique pour commencer !",
     "emptyStateTip": "Essayez : \"tarte aux pommes\", \"pâtes au poulet\", ou ajoutez des ingrédients comme \"tomates\", \"poulet\"",
     "keyIngredients": "Ingrédients Clés",
-    "moreIngredients": "de plus..."
+    "moreIngredients": "de plus...",
+    "subTabIngredient": "Par Ingrédient",
+    "subTabName": "Par Nom",
+    "filtersButton": "Filtres",
+    "clearFilters": "Effacer les filtres",
+    "resetAll": "Tout réinitialiser",
+    "extraIngredients": "Ingrédients supplémentaires",
+    "searchByNamePlaceholder": "ex. pasta primavera…",
+    "searchByNameLabel": "Nom de la recette",
+    "searchRecipes": "Rechercher des recettes"
   },
   "mealPlan": {
     "title": "Plan de Repas Hebdomadaire",

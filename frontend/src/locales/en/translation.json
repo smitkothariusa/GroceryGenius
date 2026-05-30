@@ -206,7 +206,16 @@
     "emptyStatePrompt": "Add ingredients or search for a specific recipe to get started!",
     "emptyStateTip": "Try: \"apple pie\", \"chicken pasta\", or add ingredients like \"tomatoes\", \"chicken\"",
     "keyIngredients": "Key Ingredients",
-    "moreIngredients": "more..."
+    "moreIngredients": "more...",
+    "subTabIngredient": "By Ingredient",
+    "subTabName": "By Name",
+    "filtersButton": "Filters",
+    "clearFilters": "Clear filters",
+    "resetAll": "Reset all",
+    "extraIngredients": "Extra Ingredients",
+    "searchByNamePlaceholder": "e.g. pasta primavera…",
+    "searchByNameLabel": "Recipe Name",
+    "searchRecipes": "Search Recipes"
   },
   "mealPlan": {
     "title": "Weekly Meal Plan",

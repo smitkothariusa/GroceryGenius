@@ -206,7 +206,16 @@
     "emptyStatePrompt": "添加食材或搜索特定食谱以开始！",
     "emptyStateTip": "试试：\u201c苹果派\u201d、\u201c鸡肉意面\u201d，或添加食材如\u201c西红柿\u201d、\u201c鸡肉\u201d",
     "keyIngredients": "主要食材",
-    "moreIngredients": "更多..."
+    "moreIngredients": "更多...",
+    "subTabIngredient": "按食材",
+    "subTabName": "按名称",
+    "filtersButton": "筛选",
+    "clearFilters": "清除筛选",
+    "resetAll": "全部重置",
+    "extraIngredients": "额外食材",
+    "searchByNamePlaceholder": "例如：意大利面…",
+    "searchByNameLabel": "菜谱名称",
+    "searchRecipes": "搜索菜谱"
   },
   "mealPlan": {
     "title": "每周膳食计划",

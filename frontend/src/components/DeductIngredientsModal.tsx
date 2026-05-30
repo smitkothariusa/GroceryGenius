@@ -89,7 +89,12 @@ const DeductIngredientsModal: React.FC<DeductIngredientsModalProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {matches.map((m, idx) => {
                 const isMatch = m.pantry_id !== null;
-                const isDepleted = isMatch && m.remainder !== null && m.remainder <= 0;
+                // Compute remainder locally so it matches what the deduction will actually do.
+                // The AI's m.remainder field is unreliable (wrong math, null, or missing).
+                const remainder = (isMatch && m.pantry_quantity != null && m.quantity != null)
+                  ? m.pantry_quantity - m.quantity
+                  : null;
+                const isDepleted = remainder !== null && remainder <= 0;
                 return (
                   <label key={idx} style={{
                     display: 'flex', alignItems: 'flex-start', gap: '0.75rem',
@@ -119,7 +124,7 @@ const DeductIngredientsModal: React.FC<DeductIngredientsModalProps> = ({
                             : t('mealPlan.deductModal.matchFound', {
                                 quantity: m.quantity, unit: m.unit,
                                 pantryQuantity: m.pantry_quantity, pantryUnit: m.pantry_unit,
-                                remainder: Math.round(m.remainder! * 100) / 100,
+                                remainder: Math.round((remainder ?? 0) * 100) / 100,
                               })
                           : t('mealPlan.deductModal.notInPantry')}
                       </div>

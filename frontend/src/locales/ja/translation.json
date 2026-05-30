@@ -206,7 +206,16 @@
     "emptyStatePrompt": "食材を追加するか特定のレシピを検索して始めましょう！",
     "emptyStateTip": "試してみてください：「アップルパイ」、「チキンパスタ」、または「トマト」「鶏肉」などの食材を追加",
     "keyIngredients": "主な食材",
-    "moreIngredients": "他..."
+    "moreIngredients": "他...",
+    "subTabIngredient": "食材で検索",
+    "subTabName": "名前で検索",
+    "filtersButton": "フィルター",
+    "clearFilters": "フィルターをクリア",
+    "resetAll": "すべてリセット",
+    "extraIngredients": "追加食材",
+    "searchByNamePlaceholder": "例：パスタプリマベーラ…",
+    "searchByNameLabel": "レシピ名",
+    "searchRecipes": "レシピを検索"
   },
   "mealPlan": {
     "title": "週間食事プラン",

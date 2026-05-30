@@ -410,17 +410,27 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
     const toDelete: string[] = [];
     const toUpdate: { id: string; quantity: number }[] = [];
 
+    console.log('[Deduct] checkedPantryIds:', checkedPantryIds);
+    console.log('[Deduct] deductModal.matches:', deductModal?.matches);
+
     checkedPantryIds.forEach(pantryId => {
       const match = deductModal?.matches.find(m => m.pantry_id === pantryId);
-      if (!match || match.pantry_quantity == null || match.quantity == null) return;
+      console.log(`[Deduct] pantryId=${pantryId} → match=`, match);
+      if (!match || match.pantry_quantity == null || match.quantity == null) {
+        console.log(`[Deduct] skipping ${pantryId}: match=${!!match}, pantry_quantity=${match?.pantry_quantity}, quantity=${match?.quantity}`);
+        return;
+      }
       // Compute remainder locally — don't rely on AI arithmetic (can be null, wrong, or missing).
       const remainder = match.pantry_quantity - match.quantity;
+      console.log(`[Deduct] ${pantryId}: pantry_quantity=${match.pantry_quantity} - quantity=${match.quantity} = remainder=${remainder}`);
       if (remainder <= 0) {
         toDelete.push(pantryId);
       } else {
         toUpdate.push({ id: pantryId, quantity: remainder });
       }
     });
+
+    console.log('[Deduct] toDelete:', toDelete, 'toUpdate:', toUpdate);
 
     try {
       await Promise.all([

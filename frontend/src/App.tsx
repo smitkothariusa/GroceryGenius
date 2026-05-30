@@ -3185,10 +3185,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   {/* ── By Name: label + input ── */}
                   {recipeSubTab === 'name' && (
                     <>
-                      {activeFilterCount > 0 && <div style={{ borderTop: '1px solid #f3f4f6', margin: '0.25rem 0 0.5rem' }} />}
-                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: '0.35rem' }}>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
                         {t('recipes.searchByNameLabel')}
                       </div>
+                      {activeFilterCount > 0 && <div style={{ borderTop: '1px solid #f3f4f6', margin: '0.35rem 0 0.6rem' }} />}
                       <div style={{ position: 'relative' }}>
                         <span style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', fontSize: '1rem', pointerEvents: 'none', color: '#9ca3af' }}>🔍</span>
                         <input
@@ -3410,7 +3410,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           ))}
                         </div>
                       )}
-                      {activeFilterCount > 0 && <div style={{ borderTop: '1px solid #f3f4f6', margin: '0.25rem 0 0.5rem' }} />}
+                      {activeFilterCount > 0 && <div style={{ borderTop: '1px solid #f3f4f6', margin: '0.35rem 0 0.75rem' }} />}
                       <div style={{ position: 'relative' }}>
                         <span style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', fontSize: '1rem', pointerEvents: 'none', color: '#9ca3af' }}>🥘</span>
                         <input
@@ -3441,10 +3441,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   {/* ── By Name: label + input ── */}
                   {recipeSubTab === 'name' && (
                     <>
-                      {activeFilterCount > 0 && <div style={{ borderTop: '1px solid #f3f4f6', margin: '0.25rem 0 0.5rem' }} />}
-                      <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: '0.35rem' }}>
+                      <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: '0.5rem' }}>
                         {t('recipes.searchByNameLabel')}
                       </div>
+                      {activeFilterCount > 0 && <div style={{ borderTop: '1px solid #f3f4f6', margin: '0.35rem 0 0.75rem' }} />}
                       <div style={{ position: 'relative' }}>
                         <span style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', fontSize: '1rem', pointerEvents: 'none', color: '#9ca3af' }}>🔍</span>
                         <input

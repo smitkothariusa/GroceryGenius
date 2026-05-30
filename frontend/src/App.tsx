@@ -143,6 +143,8 @@ const App: React.FC = () => {
   const [recipeDifficulty, setRecipeDifficulty] = useState<'flexible' | 'easy' | 'medium' | 'hard'>('flexible');
   const [recipeSubTab, setRecipeSubTab] = useState<'ingredient' | 'name'>('ingredient');
   const [showFilters, setShowFilters] = useState(false);
+  const [ingredientInputFocused, setIngredientInputFocused] = useState(false);
+  const [nameInputFocused, setNameInputFocused] = useState(false);
   const [ingredientTags, setIngredientTags] = useState<string[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const filterPanelRef = useRef<HTMLDivElement>(null);
@@ -2968,7 +2970,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             <div style={{ background: cardBg, padding: isMobile ? '1rem' : '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
               {isMobile ? (
                 <>
-                  {/* Sub-tab toggle */}
+                  {/* ── Tab switcher (iOS segmented control) ── */}
                   <div role="tablist" style={{ display: 'flex', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '10px', padding: '3px', marginBottom: '0.85rem' }}>
                     {(['ingredient', 'name'] as const).map(tab => (
                       <button
@@ -2977,12 +2979,13 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         aria-selected={recipeSubTab === tab}
                         onClick={() => setRecipeSubTab(tab)}
                         style={{
-                          flex: 1, padding: '0.38rem 0',
-                          background: recipeSubTab === tab ? 'linear-gradient(45deg, #10b981, #059669)' : 'transparent',
-                          color: recipeSubTab === tab ? 'white' : '#6b7280',
+                          flex: 1, minHeight: '44px', padding: '0.38rem 0',
+                          background: recipeSubTab === tab ? 'white' : 'transparent',
+                          color: recipeSubTab === tab ? '#111827' : '#6b7280',
                           border: 'none', borderRadius: '7px', cursor: 'pointer',
-                          fontSize: '0.8rem', fontWeight: recipeSubTab === tab ? 700 : 500,
-                          transition: 'background 0.15s, color 0.15s',
+                          fontSize: '0.85rem', fontWeight: recipeSubTab === tab ? 700 : 500,
+                          boxShadow: recipeSubTab === tab ? '0 1px 4px rgba(0,0,0,0.15)' : 'none',
+                          transition: 'all 0.2s ease',
                         }}
                       >
                         {tab === 'ingredient' ? `🥘 ${t('recipes.subTabIngredient')}` : `🔍 ${t('recipes.subTabName')}`}
@@ -2990,77 +2993,159 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     ))}
                   </div>
 
-                  {/* Toolbar: pantry (ingredient tab only) + filters button + clear */}
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    {recipeSubTab === 'ingredient' && pantry.length > 0 && (
-                      <button data-tour="recipes-use-pantry-btn" onClick={addPantryToIngredients} style={{
-                        padding: '0.42rem 0.65rem', background: '#8b5cf6', color: 'white',
-                        border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.78rem', whiteSpace: 'nowrap'
-                      }}>📦 {t('recipes.addPantryItems')}</button>
-                    )}
-                    <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                      <button
-                        aria-expanded={showFilters}
-                        aria-controls="recipe-filter-panel"
-                        onClick={() => setShowFilters(v => !v)}
-                        style={{ background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '8px', padding: '0.42rem 0.75rem', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                      >
-                        ⚙️ {t('recipes.filtersButton')}
-                        {activeFilterCount > 0 && (
-                          <span style={{ background: 'rgba(255,255,255,0.25)', borderRadius: '10px', padding: '0.05rem 0.4rem', fontSize: '0.7rem' }}>{activeFilterCount}</span>
+                  {/* ── Stacked toolbar — By Ingredient ── */}
+                  {recipeSubTab === 'ingredient' && (
+                    <>
+                      {/* Row 1: Add Pantry + Scan */}
+                      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        {pantry.length > 0 && (
+                          <button data-tour="recipes-use-pantry-btn" onClick={addPantryToIngredients} style={{
+                            flex: 1, minHeight: '44px', padding: '0.5rem 0.65rem',
+                            background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '10px',
+                            cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem',
+                          }}>📦 {t('recipes.addPantryItems')}</button>
                         )}
+                        <button onClick={() => { setCameraSource('recipes'); setShowImageUpload(true); }} style={{
+                          flex: 1, minHeight: '44px', padding: '0.5rem 0.65rem',
+                          background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '10px',
+                          cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem',
+                        }}>📷 {t('recipes.scanIngredients')}</button>
+                      </div>
+                      {/* Row 2: Filters + Get Recipes */}
+                      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        <button
+                          aria-expanded={showFilters}
+                          aria-controls="recipe-filter-panel"
+                          onClick={() => setShowFilters(v => !v)}
+                          style={{
+                            flex: 1, minHeight: '44px', position: 'relative',
+                            background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '10px',
+                            cursor: 'pointer', fontWeight: 700, fontSize: '0.82rem',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem',
+                          }}
+                        >
+                          ⚙️ {t('recipes.filtersButton')}
+                          {activeFilterCount > 0 && (
+                            <span style={{
+                              position: 'absolute', top: '-6px', right: '-6px',
+                              minWidth: '18px', height: '18px', background: '#ef4444', color: 'white',
+                              borderRadius: '9px', fontSize: '0.65rem', fontWeight: 700,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px',
+                            }}>{activeFilterCount}</span>
+                          )}
+                        </button>
+                        <button onClick={handleGetRecipes} disabled={recipeLoading} style={{
+                          flex: 1, minHeight: '44px', padding: '0.5rem',
+                          background: recipeLoading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)',
+                          color: 'white', border: 'none', borderRadius: '10px',
+                          fontWeight: 700, cursor: recipeLoading ? 'not-allowed' : 'pointer', fontSize: '0.85rem',
+                        }}>
+                          {recipeLoading ? `⏳ ${t('recipes.generating')}` : `🍳 ${t('recipes.getRecipes')}`}
+                        </button>
+                      </div>
+                      {/* Row 3: Clear All ghost */}
+                      <button onClick={() => { setRecipes([]); setIngredientTags([]); setRecipeSearchQuery(''); setErrorMsg(''); }} style={{
+                        width: '100%', minHeight: '44px', padding: '0.5rem',
+                        background: 'transparent', border: '1px solid #d1d5db', borderRadius: '10px',
+                        cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, color: '#6b7280',
+                        marginBottom: '0.5rem',
+                      }}>
+                        {t('common.clearAll')}
                       </button>
-                      <button onClick={() => { setRecipes([]); setIngredientTags([]); setRecipeSearchQuery(''); setErrorMsg(''); }}
-                        style={{ padding: '0.42rem 0.6rem', background: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: '8px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, color: '#6b7280', whiteSpace: 'nowrap' }}>
-                        ✕ {t('common.clearAll')}
-                      </button>
-                    </div>
-                  </div>
+                    </>
+                  )}
 
-                  {/* Active filter chips */}
+                  {/* ── Stacked toolbar — By Name ── */}
+                  {recipeSubTab === 'name' && (
+                    <>
+                      {/* Row 1: Filters + Search Recipes */}
+                      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        <button
+                          aria-expanded={showFilters}
+                          aria-controls="recipe-filter-panel"
+                          onClick={() => setShowFilters(v => !v)}
+                          style={{
+                            flex: 1, minHeight: '44px', position: 'relative',
+                            background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '10px',
+                            cursor: 'pointer', fontWeight: 700, fontSize: '0.82rem',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem',
+                          }}
+                        >
+                          ⚙️ {t('recipes.filtersButton')}
+                          {activeFilterCount > 0 && (
+                            <span style={{
+                              position: 'absolute', top: '-6px', right: '-6px',
+                              minWidth: '18px', height: '18px', background: '#ef4444', color: 'white',
+                              borderRadius: '9px', fontSize: '0.65rem', fontWeight: 700,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px',
+                            }}>{activeFilterCount}</span>
+                          )}
+                        </button>
+                        <button onClick={handleGetRecipes} disabled={recipeLoading} style={{
+                          flex: 1, minHeight: '44px', padding: '0.5rem',
+                          background: recipeLoading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)',
+                          color: 'white', border: 'none', borderRadius: '10px',
+                          fontWeight: 700, cursor: recipeLoading ? 'not-allowed' : 'pointer', fontSize: '0.85rem',
+                        }}>
+                          {recipeLoading ? `⏳ ${t('recipes.generating')}` : `🔍 ${t('recipes.searchRecipes')}`}
+                        </button>
+                      </div>
+                      {/* Row 2: Clear All ghost */}
+                      <button onClick={() => { setRecipes([]); setIngredientTags([]); setRecipeSearchQuery(''); setErrorMsg(''); }} style={{
+                        width: '100%', minHeight: '44px', padding: '0.5rem',
+                        background: 'transparent', border: '1px solid #d1d5db', borderRadius: '10px',
+                        cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, color: '#6b7280',
+                        marginBottom: '0.5rem',
+                      }}>
+                        {t('common.clearAll')}
+                      </button>
+                    </>
+                  )}
+
+                  {/* ── Active filter chips ── */}
                   {activeFilterCount > 0 && (
                     <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
                       {dietaryFilter && (
-                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.18rem 0.55rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.25rem 0.65rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', border: '1px solid #c4b5fd' }}>
                           {customDietaryLabels.find(l => l.id === dietaryFilter)?.label || PRESET_LABEL_MAP[dietaryFilter] || dietaryFilter}
-                          <button onClick={() => setDietaryFilter('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '0.9rem', padding: 0, lineHeight: 1 }}>×</button>
+                          <button onClick={() => setDietaryFilter('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '1rem', padding: 0, lineHeight: 1 }}>×</button>
                         </span>
                       )}
                       {recipeDifficulty !== 'flexible' && (
-                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.18rem 0.55rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.25rem 0.65rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', border: '1px solid #c4b5fd' }}>
                           {t(`recipes.difficultyLevel.${recipeDifficulty}`)}
-                          <button onClick={() => setRecipeDifficulty('flexible')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '0.9rem', padding: 0, lineHeight: 1 }}>×</button>
+                          <button onClick={() => setRecipeDifficulty('flexible')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '1rem', padding: 0, lineHeight: 1 }}>×</button>
                         </span>
                       )}
                       {typeof recipeServings === 'number' && recipeServings !== 2 && (
-                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.18rem 0.55rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.25rem 0.65rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', border: '1px solid #c4b5fd' }}>
                           {recipeServings} {t('recipes.servings')}
-                          <button onClick={() => setRecipeServings(2)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '0.9rem', padding: 0, lineHeight: 1 }}>×</button>
+                          <button onClick={() => setRecipeServings(2)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '1rem', padding: 0, lineHeight: 1 }}>×</button>
                         </span>
                       )}
                       {recipeMode !== 'loose' && (
-                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.18rem 0.55rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.25rem 0.65rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', border: '1px solid #c4b5fd' }}>
                           {t('recipes.modeStrict')}
-                          <button onClick={() => handleRecipeModeChange('loose')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '0.9rem', padding: 0, lineHeight: 1 }}>×</button>
+                          <button onClick={() => handleRecipeModeChange('loose')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '1rem', padding: 0, lineHeight: 1 }}>×</button>
                         </span>
                       )}
-                      <button onClick={handleResetFilters}
-                        style={{ background: '#f3f4f6', color: '#6b7280', padding: '0.18rem 0.55rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 500, border: 'none', cursor: 'pointer' }}>
+                      <button onClick={handleResetFilters} style={{ background: '#f3f4f6', color: '#6b7280', padding: '0.25rem 0.65rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 500, border: 'none', cursor: 'pointer' }}>
                         {t('recipes.clearFilters')}
                       </button>
                     </div>
                   )}
 
-                  {/* BY INGREDIENT content */}
+                  {/* ── By Ingredient: tags + input ── */}
                   {recipeSubTab === 'ingredient' && (
                     <>
-                      {/* Ingredient tag chips */}
                       {ingredientTags.length > 0 && (
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.6rem' }}>
                           {ingredientTags.map(tag => (
                             <span key={tag} style={{
                               background: 'linear-gradient(45deg, #10b981, #059669)', color: 'white',
-                              padding: '0.4rem 0.75rem', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem'
+                              padding: '0.4rem 0.75rem', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem',
                             }}>
                               {tag}
                               <button onClick={() => setIngredientTags(ingredientTags.filter(t => t !== tag))}
@@ -3069,61 +3154,69 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           ))}
                         </div>
                       )}
-                      {/* Ingredient input */}
-                      <input data-tour="recipes-ingredient-input" type="text" placeholder={t('recipes.ingredientsPlaceholder')}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
-                            const tag = (e.target as HTMLInputElement).value.trim().toLowerCase();
-                            if (!ingredientTags.includes(tag)) setIngredientTags([...ingredientTags, tag]);
-                            (e.target as HTMLInputElement).value = '';
-                          }
-                        }}
-                        style={{ width: '100%', padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '10px', fontSize: '0.875rem', marginBottom: '0.75rem', boxSizing: 'border-box' as const }}
-                      />
-                      {/* Action buttons */}
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button onClick={() => { setCameraSource('recipes'); setShowImageUpload(true); }}
-                          style={{ padding: '0.75rem 0.9rem', background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap' }}>
-                          📷 {t('recipes.scanIngredients')}
-                        </button>
-                        <button onClick={handleGetRecipes} disabled={recipeLoading}
-                          style={{ flex: 1, padding: '0.75rem', background: recipeLoading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 700, cursor: recipeLoading ? 'not-allowed' : 'pointer', fontSize: '0.875rem' }}>
-                          {recipeLoading ? `⏳ ${t('recipes.generating')}` : `🍳 ${t('recipes.getRecipes')}`}
-                        </button>
+                      {activeFilterCount > 0 && <div style={{ borderTop: '1px solid #f3f4f6', margin: '0.35rem 0 0.6rem' }} />}
+                      <div style={{ position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', fontSize: '1rem', pointerEvents: 'none', color: '#9ca3af' }}>🥘</span>
+                        <input
+                          data-tour="recipes-ingredient-input"
+                          type="text"
+                          placeholder={t('recipes.ingredientsPlaceholder')}
+                          onFocus={() => setIngredientInputFocused(true)}
+                          onBlur={() => setIngredientInputFocused(false)}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
+                              const tag = (e.target as HTMLInputElement).value.trim().toLowerCase();
+                              if (!ingredientTags.includes(tag)) setIngredientTags([...ingredientTags, tag]);
+                              (e.target as HTMLInputElement).value = '';
+                            }
+                          }}
+                          style={{
+                            width: '100%', height: '56px', paddingLeft: '2.75rem', paddingRight: '1rem',
+                            border: ingredientInputFocused ? '2px solid #10b981' : '2px solid #e5e7eb',
+                            boxShadow: ingredientInputFocused ? '0 0 0 3px rgba(16,185,129,0.15)' : 'none',
+                            borderRadius: '12px', fontSize: '1rem', boxSizing: 'border-box' as const,
+                            transition: 'border-color 0.15s, box-shadow 0.15s', outline: 'none',
+                          }}
+                        />
                       </div>
                     </>
                   )}
 
-                  {/* BY NAME content */}
+                  {/* ── By Name: label + input ── */}
                   {recipeSubTab === 'name' && (
                     <>
-                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.35rem' }}>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
                         {t('recipes.searchByNameLabel')}
                       </div>
-                      <input
-                        type="text"
-                        placeholder={t('recipes.searchByNamePlaceholder')}
-                        value={recipeSearchQuery}
-                        onChange={e => setRecipeSearchQuery(e.target.value)}
-                        onKeyPress={e => e.key === 'Enter' && !recipeLoading && handleGetRecipes()}
-                        style={{ width: '100%', padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '10px', fontSize: '0.875rem', marginBottom: '0.75rem', boxSizing: 'border-box' as const }}
-                      />
-                      <button onClick={handleGetRecipes} disabled={recipeLoading}
-                        style={{ width: '100%', padding: '0.75rem', background: recipeLoading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 700, cursor: recipeLoading ? 'not-allowed' : 'pointer', fontSize: '0.875rem' }}>
-                        {recipeLoading ? `⏳ ${t('recipes.generating')}` : `🔍 ${t('recipes.searchRecipes')}`}
-                      </button>
+                      {activeFilterCount > 0 && <div style={{ borderTop: '1px solid #f3f4f6', margin: '0.35rem 0 0.6rem' }} />}
+                      <div style={{ position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', fontSize: '1rem', pointerEvents: 'none', color: '#9ca3af' }}>🔍</span>
+                        <input
+                          type="text"
+                          placeholder={t('recipes.searchByNamePlaceholder')}
+                          value={recipeSearchQuery}
+                          onChange={e => setRecipeSearchQuery(e.target.value)}
+                          onFocus={() => setNameInputFocused(true)}
+                          onBlur={() => setNameInputFocused(false)}
+                          onKeyPress={e => e.key === 'Enter' && !recipeLoading && handleGetRecipes()}
+                          style={{
+                            width: '100%', height: '56px', paddingLeft: '2.75rem', paddingRight: '1rem',
+                            border: nameInputFocused ? '2px solid #10b981' : '2px solid #e5e7eb',
+                            boxShadow: nameInputFocused ? '0 0 0 3px rgba(16,185,129,0.15)' : 'none',
+                            borderRadius: '12px', fontSize: '1rem', boxSizing: 'border-box' as const,
+                            transition: 'border-color 0.15s, box-shadow 0.15s', outline: 'none',
+                          }}
+                        />
+                      </div>
                     </>
                   )}
 
                   {errorMsg && <div style={{ background: '#fee2e2', color: '#dc2626', padding: '0.75rem', borderRadius: '8px', borderLeft: '4px solid #dc2626', marginTop: '0.75rem' }}>{errorMsg}</div>}
 
-                  {/* Mobile bottom sheet for filters */}
+                  {/* ── Mobile bottom sheet for filters (unchanged) ── */}
                   {showFilters && (
                     <>
-                      <div
-                        onClick={() => setShowFilters(false)}
-                        style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.4)' }}
-                      />
+                      <div onClick={() => setShowFilters(false)} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.4)' }} />
                       <div
                         id="recipe-filter-panel"
                         role="dialog"
@@ -3135,12 +3228,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                           <span style={{ fontWeight: 700, fontSize: '1rem' }}>{t('recipes.filtersButton')}</span>
                           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                            <button onClick={handleResetFilters}
-                              style={{ background: 'none', border: 'none', color: '#7c3aed', fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem' }}>
+                            <button onClick={handleResetFilters} style={{ background: 'none', border: 'none', color: '#7c3aed', fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem' }}>
                               {t('recipes.resetAll')}
                             </button>
-                            <button autoFocus onClick={() => setShowFilters(false)}
-                              style={{ background: '#f3f4f6', border: 'none', borderRadius: '6px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#374151' }}>✕</button>
+                            <button autoFocus onClick={() => setShowFilters(false)} style={{ background: '#f3f4f6', border: 'none', borderRadius: '6px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#374151' }}>✕</button>
                           </div>
                         </div>
                         {renderFilterControls()}
@@ -3150,7 +3241,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 </>
               ) : (
                 <>
-                  {/* Sub-tab toggle */}
+                  {/* ── Tab switcher (iOS segmented control) ── */}
                   <div role="tablist" style={{ display: 'flex', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '10px', padding: '3px', width: 'fit-content', marginBottom: '0.85rem' }}>
                     {(['ingredient', 'name'] as const).map(tab => (
                       <button
@@ -3159,13 +3250,13 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         aria-selected={recipeSubTab === tab}
                         onClick={() => setRecipeSubTab(tab)}
                         style={{
-                          padding: '0.3rem 1.1rem',
-                          background: recipeSubTab === tab ? 'linear-gradient(45deg, #10b981, #059669)' : 'transparent',
-                          color: recipeSubTab === tab ? 'white' : '#6b7280',
+                          padding: '0.35rem 1.25rem',
+                          background: recipeSubTab === tab ? 'white' : 'transparent',
+                          color: recipeSubTab === tab ? '#111827' : '#6b7280',
                           border: 'none', borderRadius: '7px', cursor: 'pointer',
                           fontSize: '0.85rem', fontWeight: recipeSubTab === tab ? 700 : 500,
-                          transition: 'background 0.15s, color 0.15s',
-                          whiteSpace: 'nowrap',
+                          boxShadow: recipeSubTab === tab ? '0 1px 4px rgba(0,0,0,0.15)' : 'none',
+                          transition: 'all 0.2s ease', whiteSpace: 'nowrap',
                         }}
                       >
                         {tab === 'ingredient' ? `🥘 ${t('recipes.subTabIngredient')}` : `🔍 ${t('recipes.subTabName')}`}
@@ -3173,38 +3264,54 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     ))}
                   </div>
 
-                  {/* Toolbar row: ingredient label / pantry / scan / filters (with popover) / get-recipes / clear */}
+                  {/* ── Toolbar row ── */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
                     {recipeSubTab === 'ingredient' && (
                       <label style={{ fontWeight: 600 }}>🥘 {t('recipes.whatIngredientsLabel')}</label>
                     )}
                     {recipeSubTab === 'ingredient' && pantry.length > 0 && (
                       <button data-tour="recipes-use-pantry-btn" onClick={addPantryToIngredients} style={{
-                        padding: '0.35rem 0.75rem', background: '#8b5cf6', color: 'white',
-                        border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem'
+                        padding: '0.4rem 0.85rem', background: '#8b5cf6', color: 'white',
+                        border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)', transition: 'all 0.15s',
                       }}>📦 {t('recipes.addPantryItems')}</button>
                     )}
                     {recipeSubTab === 'ingredient' && (
-                      <button onClick={() => { setCameraSource('recipes'); setShowImageUpload(true); }}
-                        style={{ padding: '0.35rem 0.75rem', background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <button onClick={() => { setCameraSource('recipes'); setShowImageUpload(true); }} style={{
+                        padding: '0.4rem 0.85rem', background: '#8b5cf6', color: 'white', border: 'none',
+                        borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
+                        display: 'flex', alignItems: 'center', gap: '0.4rem',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)', transition: 'all 0.15s',
+                      }}>
                         📷 {t('recipes.scanIngredients')}
                       </button>
                     )}
 
                     <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                      {/* Filters button + floating popover — inside right-side group so popover anchors correctly */}
-                      <div ref={filterPanelRef} style={{ position: 'relative' }}>
+                      {/* Filters + popover — badge as floating red bubble */}
+                      <div ref={filterPanelRef} style={{ position: 'relative', display: 'inline-flex' }}>
                         <button
                           aria-expanded={showFilters}
                           aria-controls="recipe-filter-panel"
                           onClick={() => setShowFilters(v => !v)}
-                          style={{ background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '8px', padding: '0.4rem 0.9rem', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                          style={{
+                            background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '8px',
+                            padding: '0.4rem 0.9rem', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', gap: '0.35rem',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)', transition: 'all 0.15s',
+                          }}
                         >
                           ⚙️ {t('recipes.filtersButton')}
-                          {activeFilterCount > 0 && (
-                            <span style={{ background: 'rgba(255,255,255,0.25)', borderRadius: '10px', padding: '0.05rem 0.4rem', fontSize: '0.72rem' }}>{activeFilterCount}</span>
-                          )}
                         </button>
+                        {activeFilterCount > 0 && (
+                          <span style={{
+                            position: 'absolute', top: '-6px', right: '-6px',
+                            minWidth: '18px', height: '18px', background: '#ef4444', color: 'white',
+                            borderRadius: '9px', fontSize: '0.65rem', fontWeight: 700,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            padding: '0 4px', pointerEvents: 'none',
+                          }}>{activeFilterCount}</span>
+                        )}
 
                         {showFilters && (
                           <div
@@ -3219,7 +3326,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                               boxShadow: '0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06)',
                             }}
                           >
-                            {/* Caret tail */}
                             <div style={{
                               position: 'absolute', top: '-7px', right: '18px',
                               width: '12px', height: '12px', background: 'white',
@@ -3230,95 +3336,134 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                           </div>
                         )}
                       </div>
-                      <button onClick={handleGetRecipes} disabled={recipeLoading}
-                        style={{ padding: '0.4rem 1.5rem', background: recipeLoading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 700, cursor: recipeLoading ? 'not-allowed' : 'pointer', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+
+                      <button onClick={handleGetRecipes} disabled={recipeLoading} style={{
+                        padding: '0.4rem 1.5rem',
+                        background: recipeLoading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)',
+                        color: 'white', border: 'none', borderRadius: '8px', fontWeight: 700,
+                        cursor: recipeLoading ? 'not-allowed' : 'pointer', fontSize: '0.85rem', whiteSpace: 'nowrap',
+                        boxShadow: recipeLoading ? 'none' : '0 1px 3px rgba(0,0,0,0.1)', transition: 'all 0.15s',
+                      }}>
                         {recipeLoading
                           ? `⏳ ${t('recipes.generating')}`
                           : recipeSubTab === 'name'
                             ? `🔍 ${t('recipes.searchRecipes')}`
                             : `🍳 ${t('recipes.getRecipes')}`}
                       </button>
-                      <button onClick={() => { setRecipes([]); setIngredientTags([]); setRecipeSearchQuery(''); setErrorMsg(''); }}
-                        style={{ padding: '0.4rem 0.75rem', background: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, color: '#6b7280', whiteSpace: 'nowrap' }}>
+                      <button onClick={() => { setRecipes([]); setIngredientTags([]); setRecipeSearchQuery(''); setErrorMsg(''); }} style={{
+                        padding: '0.4rem 0.75rem', background: '#f3f4f6', border: '1px solid #d1d5db',
+                        borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
+                        color: '#6b7280', whiteSpace: 'nowrap', transition: 'all 0.15s',
+                      }}>
                         {t('common.clearAll')}
                       </button>
                     </div>
                   </div>
 
-                  {/* Active filter chips */}
+                  {/* ── Active filter chips ── */}
                   {activeFilterCount > 0 && (
                     <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
                       {dietaryFilter && (
-                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.18rem 0.55rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.25rem 0.65rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', border: '1px solid #c4b5fd' }}>
                           {customDietaryLabels.find(l => l.id === dietaryFilter)?.label || PRESET_LABEL_MAP[dietaryFilter] || dietaryFilter}
-                          <button onClick={() => setDietaryFilter('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '0.9rem', padding: 0, lineHeight: 1 }}>×</button>
+                          <button onClick={() => setDietaryFilter('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '1rem', padding: 0, lineHeight: 1 }}>×</button>
                         </span>
                       )}
                       {recipeDifficulty !== 'flexible' && (
-                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.18rem 0.55rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.25rem 0.65rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', border: '1px solid #c4b5fd' }}>
                           {t(`recipes.difficultyLevel.${recipeDifficulty}`)}
-                          <button onClick={() => setRecipeDifficulty('flexible')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '0.9rem', padding: 0, lineHeight: 1 }}>×</button>
+                          <button onClick={() => setRecipeDifficulty('flexible')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '1rem', padding: 0, lineHeight: 1 }}>×</button>
                         </span>
                       )}
                       {typeof recipeServings === 'number' && recipeServings !== 2 && (
-                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.18rem 0.55rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.25rem 0.65rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', border: '1px solid #c4b5fd' }}>
                           {recipeServings} {t('recipes.servings')}
-                          <button onClick={() => setRecipeServings(2)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '0.9rem', padding: 0, lineHeight: 1 }}>×</button>
+                          <button onClick={() => setRecipeServings(2)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '1rem', padding: 0, lineHeight: 1 }}>×</button>
                         </span>
                       )}
                       {recipeMode !== 'loose' && (
-                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.18rem 0.55rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.25rem 0.65rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', border: '1px solid #c4b5fd' }}>
                           {t('recipes.modeStrict')}
-                          <button onClick={() => handleRecipeModeChange('loose')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '0.9rem', padding: 0, lineHeight: 1 }}>×</button>
+                          <button onClick={() => handleRecipeModeChange('loose')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '1rem', padding: 0, lineHeight: 1 }}>×</button>
                         </span>
                       )}
-                      <button onClick={handleResetFilters}
-                        style={{ background: '#f3f4f6', color: '#6b7280', padding: '0.18rem 0.55rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 500, border: 'none', cursor: 'pointer' }}>
+                      <button onClick={handleResetFilters} style={{ background: '#f3f4f6', color: '#6b7280', padding: '0.25rem 0.65rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 500, border: 'none', cursor: 'pointer' }}>
                         {t('recipes.clearFilters')}
                       </button>
                     </div>
                   )}
 
-                  {/* BY INGREDIENT content */}
+                  {/* ── By Ingredient: tags + input ── */}
                   {recipeSubTab === 'ingredient' && (
                     <>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                        {ingredientTags.map(tag => (
-                          <span key={tag} style={{
-                            background: 'linear-gradient(45deg, #10b981, #059669)', color: 'white',
-                            padding: '0.5rem 1rem', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '0.5rem'
-                          }}>
-                            {tag}
-                            <button onClick={() => setIngredientTags(ingredientTags.filter(t => t !== tag))}
-                              style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.25rem' }}>×</button>
-                          </span>
-                        ))}
+                      {ingredientTags.length > 0 && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                          {ingredientTags.map(tag => (
+                            <span key={tag} style={{
+                              background: 'linear-gradient(45deg, #10b981, #059669)', color: 'white',
+                              padding: '0.5rem 1rem', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '0.5rem',
+                            }}>
+                              {tag}
+                              <button onClick={() => setIngredientTags(ingredientTags.filter(t => t !== tag))}
+                                style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.25rem' }}>×</button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {activeFilterCount > 0 && <div style={{ borderTop: '1px solid #f3f4f6', margin: '0.35rem 0 0.75rem' }} />}
+                      <div style={{ position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', fontSize: '1rem', pointerEvents: 'none', color: '#9ca3af' }}>🥘</span>
+                        <input
+                          data-tour="recipes-ingredient-input"
+                          type="text"
+                          placeholder={t('recipes.ingredientsPlaceholder')}
+                          onFocus={() => setIngredientInputFocused(true)}
+                          onBlur={() => setIngredientInputFocused(false)}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
+                              const tag = (e.target as HTMLInputElement).value.trim().toLowerCase();
+                              if (!ingredientTags.includes(tag)) setIngredientTags([...ingredientTags, tag]);
+                              (e.target as HTMLInputElement).value = '';
+                            }
+                          }}
+                          style={{
+                            width: '100%', height: '52px', paddingLeft: '2.75rem', paddingRight: '1rem',
+                            border: ingredientInputFocused ? '2px solid #10b981' : '2px solid #e5e7eb',
+                            boxShadow: ingredientInputFocused ? '0 0 0 3px rgba(16,185,129,0.15)' : 'none',
+                            borderRadius: '12px', fontSize: '1rem', marginBottom: '1rem',
+                            boxSizing: 'border-box' as const, transition: 'border-color 0.15s, box-shadow 0.15s', outline: 'none',
+                          }}
+                        />
                       </div>
-                      <input data-tour="recipes-ingredient-input" type="text" placeholder={t('recipes.ingredientsPlaceholder')}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
-                            const tag = (e.target as HTMLInputElement).value.trim().toLowerCase();
-                            if (!ingredientTags.includes(tag)) setIngredientTags([...ingredientTags, tag]);
-                            (e.target as HTMLInputElement).value = '';
-                          }
-                        }}
-                        style={{ width: '100%', padding: '1rem', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: '1rem', marginBottom: '1rem', boxSizing: 'border-box' as const }}
-                      />
                     </>
                   )}
 
-                  {/* BY NAME content */}
+                  {/* ── By Name: label + input ── */}
                   {recipeSubTab === 'name' && (
                     <>
-                      <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>🔍 {t('recipes.searchByNameLabel')}</label>
-                      <input
-                        type="text"
-                        placeholder={t('recipes.searchByNamePlaceholder')}
-                        value={recipeSearchQuery}
-                        onChange={e => setRecipeSearchQuery(e.target.value)}
-                        onKeyPress={e => e.key === 'Enter' && !recipeLoading && handleGetRecipes()}
-                        style={{ width: '100%', padding: '1rem', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: '1rem', marginBottom: '1rem', boxSizing: 'border-box' as const }}
-                      />
+                      <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: '0.5rem' }}>
+                        {t('recipes.searchByNameLabel')}
+                      </div>
+                      {activeFilterCount > 0 && <div style={{ borderTop: '1px solid #f3f4f6', margin: '0.35rem 0 0.75rem' }} />}
+                      <div style={{ position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', fontSize: '1rem', pointerEvents: 'none', color: '#9ca3af' }}>🔍</span>
+                        <input
+                          type="text"
+                          placeholder={t('recipes.searchByNamePlaceholder')}
+                          value={recipeSearchQuery}
+                          onChange={e => setRecipeSearchQuery(e.target.value)}
+                          onFocus={() => setNameInputFocused(true)}
+                          onBlur={() => setNameInputFocused(false)}
+                          onKeyPress={e => e.key === 'Enter' && !recipeLoading && handleGetRecipes()}
+                          style={{
+                            width: '100%', height: '52px', paddingLeft: '2.75rem', paddingRight: '1rem',
+                            border: nameInputFocused ? '2px solid #10b981' : '2px solid #e5e7eb',
+                            boxShadow: nameInputFocused ? '0 0 0 3px rgba(16,185,129,0.15)' : 'none',
+                            borderRadius: '12px', fontSize: '1rem', marginBottom: '1rem',
+                            boxSizing: 'border-box' as const, transition: 'border-color 0.15s, box-shadow 0.15s', outline: 'none',
+                          }}
+                        />
+                      </div>
                     </>
                   )}
 

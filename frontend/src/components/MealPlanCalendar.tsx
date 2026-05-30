@@ -412,11 +412,13 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
 
     checkedPantryIds.forEach(pantryId => {
       const match = deductModal?.matches.find(m => m.pantry_id === pantryId);
-      if (!match || match.remainder === null) return;
-      if (match.remainder <= 0) {
+      if (!match || match.pantry_quantity == null || match.quantity == null) return;
+      // Compute remainder locally — don't rely on AI arithmetic (can be null, wrong, or missing).
+      const remainder = match.pantry_quantity - match.quantity;
+      if (remainder <= 0) {
         toDelete.push(pantryId);
       } else {
-        toUpdate.push({ id: pantryId, quantity: match.remainder });
+        toUpdate.push({ id: pantryId, quantity: remainder });
       }
     });
 

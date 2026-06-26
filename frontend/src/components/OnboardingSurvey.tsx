@@ -267,7 +267,7 @@ const OnboardingSurvey: React.FC<OnboardingSurveyProps> = ({
       <div style={overlayStyle}>
         <div style={cardStyle}>
           <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>👨‍🍳</div>
+            <img src="/icons/logo-icon.svg" alt="GroceryGenius" style={{ height: '3rem', margin: '0 auto 0.5rem', display: 'block' }} />
             <h2 style={{ margin: 0, color: '#667eea', fontSize: '1.5rem' }}>{t('survey.title')}</h2>
             <p style={{ color: '#6b7280', marginTop: '0.5rem' }}>{t('survey.subtitle')}</p>
           </div>

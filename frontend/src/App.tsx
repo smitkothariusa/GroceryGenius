@@ -2763,7 +2763,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
         justifyContent: 'center',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
       }}>
-        <div style={{ fontSize: '3rem' }}>👨‍🍳</div>
+        <img src="/icons/logo-icon.svg" alt="GroceryGenius" style={{ height: '3rem' }} />
       </div>
     );
   }
@@ -2782,7 +2782,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
       {/* Mobile slide-out drawer */}
       <div className={`mobile-drawer ${drawerOpen ? 'open' : ''}`}>
         <div className="mobile-drawer-header">
-          <span style={{ fontSize: '1.4rem' }}>👨‍🍳</span>
+          <img src="/icons/logo-icon.svg" alt="" style={{ height: '1.4rem' }} />
           <h2 className="mobile-drawer-header-title">GroceryGenius</h2>
         </div>
 
@@ -2842,7 +2842,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1200px', margin: '0 auto' }}>
           <div className="mobile-header-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>👨‍🍳</span>
+            <img src="/icons/logo-icon.svg" alt="" style={{ height: isMobile ? '1.25rem' : '1.5rem' }} />
             <h1 className="mobile-page-title" style={{ margin: 0, color: '#10b981', fontSize: isMobile ? '1.25rem' : '1.8rem', fontWeight: '700' }}>
               {t('app.name')}
             </h1>
@@ -6247,7 +6247,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
             <div style={{ marginBottom: '2rem' }}>
               <h3 style={{ fontSize: '1.5rem', fontWeight: '600', borderBottom: '2px solid #10b981', paddingBottom: '0.5rem' }}>
-                👨‍🍳 {t('recipes.instructionsHeading')}
+                <img src="/icons/logo-icon.svg" alt="" style={{ height: '1.2em', verticalAlign: 'middle', marginRight: '0.35em' }} />{t('recipes.instructionsHeading')}
               </h3>
               <div style={{ 
                 lineHeight: '2', 
@@ -7041,7 +7041,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           >
             {/* Hero Section */}
             <div style={{ textAlign: 'center', marginBottom: isMobile ? '1.5rem' : '2rem' }}>
-              <div style={{ fontSize: isMobile ? '3rem' : '4rem', marginBottom: isMobile ? '0.5rem' : '1rem' }}>👨‍🍳❤️</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', marginBottom: isMobile ? '0.5rem' : '1rem' }}>
+                <img src="/icons/logo-icon.svg" alt="" style={{ height: isMobile ? '3rem' : '4rem' }} />
+                <span style={{ fontSize: isMobile ? '3rem' : '4rem' }}>❤️</span>
+              </div>
               <h1 style={{ 
                 margin: '0 0 1rem 0', 
                 fontSize: isMobile ? '1.75rem' : '2.5rem', 

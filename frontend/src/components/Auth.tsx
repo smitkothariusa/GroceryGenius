@@ -103,7 +103,7 @@ useEffect(() => {
         boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👨‍🍳</div>
+          <img src="/icons/logo-icon.svg" alt="GroceryGenius" style={{ height: '3rem', margin: '0 auto 1rem' }} />
           <h1 style={{ margin: 0, color: '#10b981', fontSize: '2rem' }}>GroceryGenius</h1>
           <p style={{ color: '#6b7280', marginTop: '0.5rem' }}>
             {t('auth.aiPoweredMealPlanning')}

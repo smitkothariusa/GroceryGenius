@@ -68,6 +68,16 @@ a { text-decoration: none; color: inherit; }
   font-size: 1.35rem;
   color: #fff;
   letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.navbar-logo-img {
+  height: 1.6rem;
+  width: auto;
+  display: inline-block;
+  filter: brightness(0) invert(1);
 }
 
 .btn-login {
@@ -384,6 +394,9 @@ a { text-decoration: none; color: inherit; }
   font-weight: 800;
   font-size: 0.9rem;
   color: #9ca3af;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .footer-links {

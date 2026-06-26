@@ -141,23 +141,27 @@ const OnboardingSurvey: React.FC<OnboardingSurveyProps> = ({
   const handleAddCustomDiet = async () => {
     const text = customDietText.trim();
     if (!text) return;
+    // Split on commas so "vegan, gluten-free, and no bananas" creates 3 separate labels
+    const parts = text
+      .split(',')
+      .map(s => s.replace(/^\s*(and|or)\s+/i, '').trim())
+      .filter(s => s.length > 0);
     setGeneratingLabel(true);
     try {
-      const res = await fetch(`${apiBase}/profile/dietary-label`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
-      });
-      const labelData = await res.json();
-      const newLabel: CustomDietaryLabel = {
-        id: uuidv4(),
-        label: labelData.label,
-        description: labelData.description,
-      };
+      const newLabels: CustomDietaryLabel[] = [];
+      for (const part of parts) {
+        const res = await fetch(`${apiBase}/profile/dietary-label`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: part }),
+        });
+        const labelData = await res.json();
+        newLabels.push({ id: uuidv4(), label: labelData.label, description: labelData.description });
+      }
       setData(prev => ({
         ...prev,
-        custom_dietary_labels: [...prev.custom_dietary_labels, newLabel],
-        dietary_preferences: [...prev.dietary_preferences, newLabel.id],
+        custom_dietary_labels: [...prev.custom_dietary_labels, ...newLabels],
+        dietary_preferences: [...prev.dietary_preferences, ...newLabels.map(l => l.id)],
       }));
       setCustomDietText('');
     } finally {
@@ -267,7 +271,7 @@ const OnboardingSurvey: React.FC<OnboardingSurveyProps> = ({
       <div style={overlayStyle}>
         <div style={cardStyle}>
           <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>👨‍🍳</div>
+            <img src="/icons/logo-icon.svg" alt="GroceryGenius" style={{ height: '3rem', margin: '0 auto 0.5rem', display: 'block' }} />
             <h2 style={{ margin: 0, color: '#667eea', fontSize: '1.5rem' }}>{t('survey.title')}</h2>
             <p style={{ color: '#6b7280', marginTop: '0.5rem' }}>{t('survey.subtitle')}</p>
           </div>

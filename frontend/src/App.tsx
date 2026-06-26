@@ -109,6 +109,8 @@ const PRESET_LABEL_MAP: Record<string, string> = {
   'diabetic-friendly': 'Diabetic-Friendly', 'heart-healthy': 'Heart-Healthy',
 };
 
+const COMBINED_PROFILE_KEY = '__combined__';
+
 function buildCombinedDietaryString(prefs: string[], customLabels: CustomDietaryLabel[]): string {
   const parts = prefs
     .map(p => PRESET_LABEL_MAP[p] ?? customLabels.find(l => l.id === p)?.label ?? null)
@@ -190,6 +192,7 @@ const App: React.FC = () => {
   const [showSurvey, setShowSurvey] = useState(false);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [customDietaryLabels, setCustomDietaryLabels] = useState<CustomDietaryLabel[]>([]);
+  const [savedProfilePrefs, setSavedProfilePrefs] = useState<string[]>([]);
   const [showDemoConfirm, setShowDemoConfirm] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([]);
@@ -404,10 +407,10 @@ const App: React.FC = () => {
         if (profileResult) {
           setUserProfile(profileResult);
           setCustomDietaryLabels(profileResult.custom_dietary_labels ?? []);
-          if (profileResult.dietary_preferences && profileResult.dietary_preferences.length > 0) {
-            const combined = buildCombinedDietaryString(profileResult.dietary_preferences, profileResult.custom_dietary_labels ?? []);
-            if (combined) setDietaryFilter(combined);
-          }
+          const prefs0 = profileResult.dietary_preferences ?? [];
+          setSavedProfilePrefs(prefs0);
+          if (prefs0.length > 1) setDietaryFilter(COMBINED_PROFILE_KEY);
+          else if (prefs0.length === 1) setDietaryFilter(prefs0[0]);
           if (!profileResult.onboarding_completed) {
             setShowSurvey(true);
           }
@@ -945,9 +948,16 @@ const App: React.FC = () => {
     try {
       const params = new URLSearchParams();
       if (dietaryFilter) {
-        // Resolve custom label UUIDs to their AI-generated description so the prompt is meaningful
-        const customLabel = customDietaryLabels.find(l => l.id === dietaryFilter);
-        params.append('dietary', customLabel ? customLabel.description : dietaryFilter);
+        if (dietaryFilter === COMBINED_PROFILE_KEY) {
+          const parts = savedProfilePrefs.map(p => {
+            const cl = customDietaryLabels.find(l => l.id === p);
+            return cl ? (cl.description || cl.label) : p;
+          }).filter(Boolean);
+          params.append('dietary', parts.join(', '));
+        } else {
+          const customLabel = customDietaryLabels.find(l => l.id === dietaryFilter);
+          params.append('dietary', customLabel ? customLabel.description : dietaryFilter);
+        }
       }
       params.append('language', i18n.language || 'en');
       if (recipeDifficulty !== 'flexible') params.append('difficulty', recipeDifficulty);
@@ -1040,8 +1050,8 @@ const App: React.FC = () => {
           style={{ width: '100%', padding: '0.42rem 0.5rem', border: '1.5px solid #e5e7eb', borderRadius: '7px', fontSize: '0.8rem', background: 'white', boxSizing: 'border-box' as const }}
         >
           <option value="">{t('recipes.dietary.all')}</option>
-          {dietaryFilter && !PRESET_LABEL_MAP[dietaryFilter] && !customDietaryLabels.find(l => l.id === dietaryFilter) && (
-            <option value={dietaryFilter}>📋 {dietaryFilter}</option>
+          {savedProfilePrefs.length > 1 && (
+            <option value={COMBINED_PROFILE_KEY}>📋 {buildCombinedDietaryString(savedProfilePrefs, customDietaryLabels)}</option>
           )}
           <option value="vegetarian">{t('recipes.dietary.vegetarian')}</option>
           <option value="vegan">{t('recipes.dietary.vegan')}</option>
@@ -2763,7 +2773,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
         justifyContent: 'center',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
       }}>
-        <div style={{ fontSize: '3rem' }}>👨‍🍳</div>
+        <img src="/icons/logo-icon.svg" alt="GroceryGenius" style={{ height: '3rem' }} />
       </div>
     );
   }
@@ -2782,7 +2792,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
       {/* Mobile slide-out drawer */}
       <div className={`mobile-drawer ${drawerOpen ? 'open' : ''}`}>
         <div className="mobile-drawer-header">
-          <span style={{ fontSize: '1.4rem' }}>👨‍🍳</span>
+          <img src="/icons/logo-icon.svg" alt="" style={{ height: '1.4rem' }} />
           <h2 className="mobile-drawer-header-title">GroceryGenius</h2>
         </div>
 
@@ -2842,7 +2852,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1200px', margin: '0 auto' }}>
           <div className="mobile-header-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>👨‍🍳</span>
+            <img src="/icons/logo-icon.svg" alt="" style={{ height: isMobile ? '1.25rem' : '1.5rem' }} />
             <h1 className="mobile-page-title" style={{ margin: 0, color: '#10b981', fontSize: isMobile ? '1.25rem' : '1.8rem', fontWeight: '700' }}>
               {t('app.name')}
             </h1>
@@ -3114,7 +3124,9 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
                       {dietaryFilter && (
                         <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.25rem 0.65rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', border: '1px solid #c4b5fd' }}>
-                          {customDietaryLabels.find(l => l.id === dietaryFilter)?.label || PRESET_LABEL_MAP[dietaryFilter] || dietaryFilter}
+                          {dietaryFilter === COMBINED_PROFILE_KEY
+                            ? buildCombinedDietaryString(savedProfilePrefs, customDietaryLabels)
+                            : (customDietaryLabels.find(l => l.id === dietaryFilter)?.label || PRESET_LABEL_MAP[dietaryFilter] || dietaryFilter)}
                           <button onClick={() => setDietaryFilter('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '1rem', padding: 0, lineHeight: 1 }}>×</button>
                         </span>
                       )}
@@ -3286,8 +3298,8 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                     <select data-tour="recipes-dietary-filter" value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
                       style={{ padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '8px', minWidth: '200px' }}>
                       <option value="">{t('recipes.dietary.all')}</option>
-                      {dietaryFilter && !PRESET_LABEL_MAP[dietaryFilter] && !customDietaryLabels.find(l => l.id === dietaryFilter) && (
-                        <option value={dietaryFilter}>📋 {dietaryFilter}</option>
+                      {savedProfilePrefs.length > 1 && (
+                        <option value={COMBINED_PROFILE_KEY}>📋 {buildCombinedDietaryString(savedProfilePrefs, customDietaryLabels)}</option>
                       )}
                       <option value="vegetarian">{t('recipes.dietary.vegetarian')}</option>
                       <option value="vegan">{t('recipes.dietary.vegan')}</option>
@@ -6247,7 +6259,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
             <div style={{ marginBottom: '2rem' }}>
               <h3 style={{ fontSize: '1.5rem', fontWeight: '600', borderBottom: '2px solid #10b981', paddingBottom: '0.5rem' }}>
-                👨‍🍳 {t('recipes.instructionsHeading')}
+                <img src="/icons/logo-icon.svg" alt="" style={{ height: '1.2em', verticalAlign: 'middle', marginRight: '0.35em' }} />{t('recipes.instructionsHeading')}
               </h3>
               <div style={{ 
                 lineHeight: '2', 
@@ -7041,7 +7053,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           >
             {/* Hero Section */}
             <div style={{ textAlign: 'center', marginBottom: isMobile ? '1.5rem' : '2rem' }}>
-              <div style={{ fontSize: isMobile ? '3rem' : '4rem', marginBottom: isMobile ? '0.5rem' : '1rem' }}>👨‍🍳❤️</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', marginBottom: isMobile ? '0.5rem' : '1rem' }}>
+                <img src="/icons/logo-icon.svg" alt="" style={{ height: isMobile ? '3rem' : '4rem' }} />
+                <span style={{ fontSize: isMobile ? '3rem' : '4rem' }}>❤️</span>
+              </div>
               <h1 style={{ 
                 margin: '0 0 1rem 0', 
                 fontSize: isMobile ? '1.75rem' : '2.5rem', 
@@ -7611,10 +7626,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               setUserProfile(prev => prev ? { ...prev, ...surveyData, onboarding_completed: true } : null);
               if (surveyData.daily_calorie_goal) setDailyCalorieGoal(surveyData.daily_calorie_goal);
               if (surveyData.custom_dietary_labels) setCustomDietaryLabels(surveyData.custom_dietary_labels);
-              if (surveyData.dietary_preferences && surveyData.dietary_preferences.length > 0) {
-                const combined = buildCombinedDietaryString(surveyData.dietary_preferences, surveyData.custom_dietary_labels ?? []);
-                if (combined) setDietaryFilter(combined);
-              }
+              const prefs1 = surveyData.dietary_preferences ?? [];
+              setSavedProfilePrefs(prefs1);
+              if (prefs1.length > 1) setDietaryFilter(COMBINED_PROFILE_KEY);
+              else if (prefs1.length === 1) setDietaryFilter(prefs1[0]);
+              else setDietaryFilter('');
             } else {
               console.error('Survey upsert error:', JSON.stringify(saveError));
               error('Failed to save your preferences. Please update them in Settings.');
@@ -7643,14 +7659,12 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           onSave={(updated) => {
             setUserProfile(prev => prev ? { ...prev, ...updated } : null);
             if (updated.daily_calorie_goal) setDailyCalorieGoal(updated.daily_calorie_goal);
-            const newLabels = updated.custom_dietary_labels ?? customDietaryLabels;
             if (updated.custom_dietary_labels) setCustomDietaryLabels(updated.custom_dietary_labels);
-            if (updated.dietary_preferences && updated.dietary_preferences.length > 0) {
-              const combined = buildCombinedDietaryString(updated.dietary_preferences, newLabels);
-              if (combined) setDietaryFilter(combined);
-            } else if (updated.dietary_preferences?.length === 0) {
-              setDietaryFilter('');
-            }
+            const prefs2 = updated.dietary_preferences ?? [];
+            setSavedProfilePrefs(prefs2);
+            if (prefs2.length > 1) setDietaryFilter(COMBINED_PROFILE_KEY);
+            else if (prefs2.length === 1) setDietaryFilter(prefs2[0]);
+            else setDietaryFilter('');
           }}
           onDeleteAccount={() => {
             setUser(null);

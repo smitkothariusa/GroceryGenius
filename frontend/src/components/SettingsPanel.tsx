@@ -124,23 +124,28 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   const handleAddCustomDiet = async () => {
     const text = customDietText.trim();
     if (!text) return;
+    // Split on commas so "vegan, gluten-free, and no bananas" creates 3 separate labels
+    const parts = text
+      .split(',')
+      .map(s => s.replace(/^\s*(and|or)\s+/i, '').trim())
+      .filter(s => s.length > 0);
     setGeneratingLabel(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
-      const res = await fetch(`${apiBase}/profile/dietary-label`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ text }),
-      });
-      if (!res.ok) throw new Error('server error');
-      const labelData = await res.json();
-      const newLabel: CustomDietaryLabel = { id: uuidv4(), label: labelData.label, description: labelData.description };
-      setCustomLabels(prev => [...prev, newLabel]);
-      setDietaryPrefs(prev => [...prev, newLabel.id]);
+      const newLabels: CustomDietaryLabel[] = [];
+      for (const part of parts) {
+        const res = await fetch(`${apiBase}/profile/dietary-label`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ text: part }),
+        });
+        if (!res.ok) throw new Error('server error');
+        const labelData = await res.json();
+        newLabels.push({ id: uuidv4(), label: labelData.label, description: labelData.description });
+      }
+      setCustomLabels(prev => [...prev, ...newLabels]);
+      setDietaryPrefs(prev => [...prev, ...newLabels.map(l => l.id)]);
       setCustomDietText('');
     } catch {
       showError(t('settings.failedToGenerateLabel'));

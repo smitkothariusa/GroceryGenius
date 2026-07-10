@@ -678,6 +678,7 @@
       "description": "从主屏幕快速访问 GroceryGenius。",
       "addButton": "添加到主屏幕",
       "iosInstruction": "点击下方共享按钮，然后选择添加到主屏幕。",
+      "iosChromeInstruction": "在 Safari 中打开此页面，点击共享按钮，然后选择添加到主屏幕。",
       "dismiss": "关闭",
       "gotIt": "好的"
     }

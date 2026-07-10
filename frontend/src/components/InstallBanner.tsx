@@ -8,6 +8,7 @@ interface BeforeInstallPromptEvent extends Event {
 
 const DISMISSED_KEY = 'gg_install_dismissed';
 const SHOW_DELAY_MS = 30_000;
+const DEBUG = new URLSearchParams(window.location.search).has('install');
 
 function isMobileDevice(): boolean {
   return window.innerWidth < 768 && 'ontouchstart' in window;
@@ -36,11 +37,11 @@ const InstallBanner: React.FC = () => {
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    if (
+    if (!DEBUG && (
       !isMobileDevice() ||
       isAlreadyInstalled() ||
       localStorage.getItem(DISMISSED_KEY)
-    ) {
+    )) {
       return;
     }
 
@@ -58,7 +59,7 @@ const InstallBanner: React.FC = () => {
     window.addEventListener('appinstalled', handleAppInstalled);
 
     const timer = setTimeout(() => {
-      if (localStorage.getItem(DISMISSED_KEY)) return;
+      if (!DEBUG && localStorage.getItem(DISMISSED_KEY)) return;
 
       if (deferredPrompt.current) {
         setPlatform('android');
@@ -67,11 +68,14 @@ const InstallBanner: React.FC = () => {
         setPlatform('ios');
         setVisible(true);
       } else if (isIOS()) {
-        // Chrome/Firefox on iOS — can't install directly, tell them to open in Safari
+        setPlatform('ios-other');
+        setVisible(true);
+      } else if (DEBUG) {
+        // Desktop debug mode — show ios-other as a representative example
         setPlatform('ios-other');
         setVisible(true);
       }
-    }, SHOW_DELAY_MS);
+    }, DEBUG ? 500 : SHOW_DELAY_MS);
 
     return () => {
       clearTimeout(timer);

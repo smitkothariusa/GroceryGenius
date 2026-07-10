@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { logError } from './errorService';
 
 // ============================================
 // PANTRY ITEMS
@@ -42,7 +43,10 @@ export const pantryService = {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      logError(error, 'api:pantry.add');
+      throw error;
+    }
     return data;
   },
 
@@ -69,7 +73,10 @@ export const pantryService = {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      logError(error, 'api:pantry.update');
+      throw error;
+    }
     return data;
   },
 
@@ -125,8 +132,11 @@ export const shoppingService = {
       })
       .select()
       .single();
-    
-    if (error) throw error;
+
+    if (error) {
+      logError(error, 'api:shopping.add');
+      throw error;
+    }
     return data;
   },
 
@@ -224,8 +234,11 @@ export const recipesService = {
       })
       .select()
       .single();
-    
-    if (error) throw error;
+
+    if (error) {
+      logError(error, 'api:recipes.add');
+      throw error;
+    }
     return data;
   },
 
@@ -293,8 +306,11 @@ export const mealPlansService = {
         })
         .select()
         .single();
-    
-    if (error) throw error;
+
+    if (error) {
+      logError(error, 'api:mealplans.add');
+      throw error;
+    }
     return data;
     },
 

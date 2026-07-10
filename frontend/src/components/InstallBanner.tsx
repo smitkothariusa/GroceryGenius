@@ -32,7 +32,7 @@ function isIOSSafari(): boolean {
 const InstallBanner: React.FC = () => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
-  const [platform, setPlatform] = useState<'android' | 'ios' | null>(null);
+  const [platform, setPlatform] = useState<'android' | 'ios' | 'ios-other' | null>(null);
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
@@ -66,8 +66,11 @@ const InstallBanner: React.FC = () => {
       } else if (isIOSSafari()) {
         setPlatform('ios');
         setVisible(true);
+      } else if (isIOS()) {
+        // Chrome/Firefox on iOS — can't install directly, tell them to open in Safari
+        setPlatform('ios-other');
+        setVisible(true);
       }
-      // Other mobile browsers (Chrome on iOS, etc.) — skip, no reliable install path
     }, SHOW_DELAY_MS);
 
     return () => {
@@ -124,6 +127,8 @@ const InstallBanner: React.FC = () => {
         <div style={{ fontSize: '0.8rem', opacity: 0.9, lineHeight: 1.4 }}>
           {platform === 'ios'
             ? t('install.banner.iosInstruction')
+            : platform === 'ios-other'
+            ? t('install.banner.iosChromeInstruction')
             : t('install.banner.description')}
         </div>
 
@@ -147,7 +152,7 @@ const InstallBanner: React.FC = () => {
           </button>
         )}
 
-        {platform === 'ios' && (
+        {(platform === 'ios' || platform === 'ios-other') && (
           <button
             onClick={handleDismiss}
             style={{

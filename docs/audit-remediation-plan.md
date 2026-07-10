@@ -22,11 +22,15 @@ file references). Status legend: ✅ done · 🔲 open.
   (`backend/app/services/openai_client.py` logged `key[:10]` at import time).
 - ✅ CORS wildcard removed (`backend/app/main.py` had `"*"` +
   `allow_credentials=True`); now explicit origins + regex for Vercel previews.
-- ✅ Account-deletion integrity: migration `20260710200000_cascade_user_fks.sql`
-  adds `ON DELETE CASCADE` FKs from **all** user tables to `auth.users`
-  (none existed). `DELETE /profile/account`'s final `auth.admin.delete_user()`
-  now removes everything atomically, including the 4 tables its hand-written
-  list missed (donation_history, donation_impact, feedback, error_logs).
+- ✅ Account-deletion integrity (audit critical #3): **verified NOT an issue.**
+  All 10 user tables already have FKs to `auth.users` — 8 with ON DELETE
+  CASCADE; `feedback` and `error_logs` with ON DELETE SET NULL (deliberate:
+  keeps anonymized telemetry). The endpoint's final `auth.admin.delete_user()`
+  therefore removes/anonymizes everything regardless of its table list.
+  Pitfall for future sessions: `information_schema` **hides** FKs that
+  reference `auth.users` (privilege filtering) — query `pg_constraint`
+  instead. A redundant cascade migration was briefly added and removed the
+  same day when this was discovered.
 - ✅ Removed committed `frontend/.env.production` (values live in Vercel env
   vars, confirmed present); `.gitignore` now has `.env*`.
 - ✅ Deleted dead duplicates: `backend/app/models/openai_service.py`,

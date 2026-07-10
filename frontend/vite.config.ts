@@ -10,18 +10,19 @@ export default defineConfig({
       includeAssets: ['icons/*.png'],
       manifest: {
         name: 'GroceryGenius',
-        short_name: 'GroceryGenius',
+        short_name: 'GroceryG',
         theme_color: '#667eea',
         background_color: '#667eea',
         display: 'standalone',
+        start_url: '/',
         icons: [
           {
-            src: '/icons/icon-192x192.png',
+            src: '/icons/web-app-manifest-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/icons/icon-512x512.png',
+            src: '/icons/web-app-manifest-512x512.png',
             sizes: '512x512',
             type: 'image/png'
           }

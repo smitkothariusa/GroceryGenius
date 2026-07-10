@@ -677,9 +677,10 @@
       "title": "Agregar a la pantalla de inicio",
       "description": "Accede rápidamente a GroceryGenius desde tu pantalla de inicio.",
       "addButton": "Agregar a inicio",
-      "iosInstruction": "Toca el botón Compartir y elige «Agregar a pantalla de inicio».",
-      "iosChromeInstruction": "Agrega GroceryGenius a tu pantalla de inicio desde Safari.",
-      "openInSafari": "Abrir en Safari",
+      "iosInstruction": "Toca el icono ↑ compartir en la parte inferior de Safari y luego «Agregar a pantalla de inicio».",
+      "iosChromeInstruction": "Copia el enlace, ábrelo en Safari y toca Compartir → Agregar a pantalla de inicio.",
+      "copyLink": "Copiar enlace",
+      "copied": "¡Copiado!",
       "dismiss": "Cerrar",
       "gotIt": "Entendido"
     }

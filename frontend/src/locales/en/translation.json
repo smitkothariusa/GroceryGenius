@@ -677,9 +677,10 @@
       "title": "Add to Home Screen",
       "description": "Get quick access to GroceryGenius from your home screen.",
       "addButton": "Add to Home Screen",
-      "iosInstruction": "Tap the Share button below, then choose \"Add to Home Screen\".",
-      "iosChromeInstruction": "Add GroceryGenius to your home screen via Safari.",
-      "openInSafari": "Open in Safari",
+      "iosInstruction": "Tap the ↑ share icon at the bottom of Safari, then tap \"Add to Home Screen\".",
+      "iosChromeInstruction": "Copy the link, open Safari, and paste it — then tap Share → Add to Home Screen.",
+      "copyLink": "Copy Link",
+      "copied": "Copied!",
       "dismiss": "Dismiss install banner",
       "gotIt": "Got it"
     }

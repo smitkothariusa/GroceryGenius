@@ -671,5 +671,15 @@
     "submit": "Envoyer l'avis",
     "thankYou": "Merci pour votre retour !",
     "submitError": "Une erreur s'est produite. Veuillez réessayer."
+  },
+  "install": {
+    "banner": {
+      "title": "Ajouter à l'écran d'accueil",
+      "description": "Accédez rapidement à GroceryGenius depuis votre écran d'accueil.",
+      "addButton": "Ajouter à l'accueil",
+      "iosInstruction": "Appuyez sur Partager puis choisissez « Ajouter à l'écran d'accueil ».",
+      "dismiss": "Fermer",
+      "gotIt": "Compris"
+    }
   }
 }

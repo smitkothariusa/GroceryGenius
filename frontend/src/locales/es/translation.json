@@ -671,5 +671,15 @@
     "submit": "Enviar comentarios",
     "thankYou": "¡Gracias por tus comentarios!",
     "submitError": "Algo salió mal. Por favor, inténtalo de nuevo."
+  },
+  "install": {
+    "banner": {
+      "title": "Agregar a la pantalla de inicio",
+      "description": "Accede rápidamente a GroceryGenius desde tu pantalla de inicio.",
+      "addButton": "Agregar a inicio",
+      "iosInstruction": "Toca el botón Compartir y elige «Agregar a pantalla de inicio».",
+      "dismiss": "Cerrar",
+      "gotIt": "Entendido"
+    }
   }
 }

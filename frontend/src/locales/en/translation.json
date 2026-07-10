@@ -671,5 +671,15 @@
     "submit": "Send Feedback",
     "thankYou": "Thanks for your feedback!",
     "submitError": "Something went wrong. Please try again."
+  },
+  "install": {
+    "banner": {
+      "title": "Add to Home Screen",
+      "description": "Get quick access to GroceryGenius from your home screen.",
+      "addButton": "Add to Home Screen",
+      "iosInstruction": "Tap the Share button below, then choose \"Add to Home Screen\".",
+      "dismiss": "Dismiss install banner",
+      "gotIt": "Got it"
+    }
   }
 }

@@ -671,5 +671,15 @@
     "submit": "送信する",
     "thankYou": "フィードバックありがとうございます！",
     "submitError": "エラーが発生しました。もう一度お試しください。"
+  },
+  "install": {
+    "banner": {
+      "title": "ホーム画面に追加",
+      "description": "ホーム画面から GroceryGenius にすばやくアクセスできます。",
+      "addButton": "ホームに追加",
+      "iosInstruction": "下の共有ボタンをタップしてホーム画面に追加を選択してください。",
+      "dismiss": "閉じる",
+      "gotIt": "了解"
+    }
   }
 }

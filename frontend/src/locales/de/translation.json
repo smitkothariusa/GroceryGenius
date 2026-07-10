@@ -671,5 +671,15 @@
     "submit": "Feedback senden",
     "thankYou": "Vielen Dank für Ihr Feedback!",
     "submitError": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+  },
+  "install": {
+    "banner": {
+      "title": "Zum Startbildschirm hinzufügen",
+      "description": "Schnellzugriff auf GroceryGenius von Ihrem Startbildschirm.",
+      "addButton": "Zum Start hinzufügen",
+      "iosInstruction": "Tippen Sie auf das Teilen-Symbol und wählen Sie Zum Startbildschirm.",
+      "dismiss": "Schließen",
+      "gotIt": "Verstanden"
+    }
   }
 }

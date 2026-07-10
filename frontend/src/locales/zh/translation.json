@@ -671,5 +671,15 @@
     "submit": "发送反馈",
     "thankYou": "感谢您的反馈！",
     "submitError": "出现了问题，请重试。"
+  },
+  "install": {
+    "banner": {
+      "title": "添加到主屏幕",
+      "description": "从主屏幕快速访问 GroceryGenius。",
+      "addButton": "添加到主屏幕",
+      "iosInstruction": "点击下方共享按钮，然后选择添加到主屏幕。",
+      "dismiss": "关闭",
+      "gotIt": "好的"
+    }
   }
 }

@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
 import { Profile, CustomDietaryLabel } from '../lib/supabase';
+import { authFetch } from '../lib/apiClient';
 
 // Calorie calculation: Mifflin-St Jeor + TDEE multiplier
 function calcRecommendedCalories(
@@ -150,7 +151,7 @@ const OnboardingSurvey: React.FC<OnboardingSurveyProps> = ({
     try {
       const newLabels: CustomDietaryLabel[] = [];
       for (const part of parts) {
-        const res = await fetch(`${apiBase}/profile/dietary-label`, {
+        const res = await authFetch(`${apiBase}/profile/dietary-label`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text: part }),

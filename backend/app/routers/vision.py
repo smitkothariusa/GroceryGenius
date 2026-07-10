@@ -1,16 +1,16 @@
 # backend/app/routers/vision.py
-from fastapi import APIRouter, File, UploadFile, HTTPException
+from fastapi import APIRouter, File, Request, UploadFile, HTTPException
 from typing import List
 import base64
 import os
 from openai import OpenAI
+from app.services.auth import limiter, AI_HEAVY_LIMIT
 
 router = APIRouter()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 @router.post("/analyze-ingredients")
-async def analyze_ingredients(file: UploadFile = File(...)):
+@limiter.limit(AI_HEAVY_LIMIT)
+async def analyze_ingredients(request: Request, file: UploadFile = File(...)):
     """
     Analyze an image and extract visible ingredients using GPT-4 Vision
     """
@@ -20,8 +20,9 @@ async def analyze_ingredients(file: UploadFile = File(...)):
         
         # Convert to base64
         base64_image = base64.b64encode(contents).decode('utf-8')
-        
+
         # Call GPT-4 Vision API
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[

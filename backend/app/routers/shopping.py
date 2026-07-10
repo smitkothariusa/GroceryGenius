@@ -1,9 +1,10 @@
 # backend/app/routers/shopping.py
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from typing import List, Optional
 from pydantic import BaseModel
 import uuid
 import json
+from app.services.auth import limiter, AI_HEAVY_LIMIT
 from app.services.openai_client import call_chat_completion
 
 router = APIRouter()
@@ -85,12 +86,13 @@ class PriceComparisonRequest(BaseModel):
     items: List[dict]  # [{name: str, quantity: int, unit: str}, ...]
 
 @router.post("/ai-price-comparison")
-async def ai_price_comparison(request: PriceComparisonRequest):
+@limiter.limit(AI_HEAVY_LIMIT)
+async def ai_price_comparison(request: Request, payload: PriceComparisonRequest):
     """
     AI-powered price comparison for Amazon vs Walmart using GPT-4o-mini.
     Returns estimated total prices for the shopping list.
     """
-    items = request.items
+    items = payload.items
     
     if not items:
         return {"amazon_total": 0, "walmart_total": 0}

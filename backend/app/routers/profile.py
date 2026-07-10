@@ -1,14 +1,14 @@
 import json
 import os
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
+from app.services.auth import get_current_user, limiter, AI_LIGHT_LIMIT
 from app.services.openai_client import call_chat_completion
 from supabase import create_client
 
 router = APIRouter()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 
 DIETARY_LABEL_SYSTEM_PROMPT = (
@@ -30,7 +30,8 @@ class DietaryLabelResponse(BaseModel):
 
 
 @router.post("/dietary-label", response_model=DietaryLabelResponse)
-async def generate_dietary_label(payload: DietaryLabelRequest):
+@limiter.limit(AI_LIGHT_LIMIT)
+async def generate_dietary_label(request: Request, payload: DietaryLabelRequest, user=Depends(get_current_user)):
     text = payload.text.strip()
     if not text:
         raise HTTPException(status_code=422, detail="text must not be empty")
@@ -53,28 +54,13 @@ async def generate_dietary_label(payload: DietaryLabelRequest):
 
 
 @router.delete("/account")
-async def delete_account(authorization: str = Header(...)):
+async def delete_account(user=Depends(get_current_user)):
     """
     Delete all user data from all tables, then delete the Supabase auth user.
-    Reads the Bearer token from the Authorization header to identify and verify the user.
+    The shared auth dependency verifies the Bearer token and identifies the user.
     Requires SUPABASE_SERVICE_ROLE_KEY env var (not the anon key).
     """
-    if not authorization.lower().startswith("bearer "):
-        raise HTTPException(status_code=401, detail="Invalid authorization header format")
-    token = authorization[7:].strip()
-
-    print(f"[delete_account] SUPABASE_URL set: {bool(SUPABASE_URL)}, ANON_KEY set: {bool(SUPABASE_ANON_KEY)}, SERVICE_KEY set: {bool(SUPABASE_SERVICE_KEY)}")
-    sb_anon = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
-    try:
-        user_response = sb_anon.auth.get_user(token)
-        print(f"[delete_account] get_user succeeded: {bool(user_response and user_response.user)}")
-    except Exception as exc:
-        print(f"[delete_account] get_user failed: {exc}")
-        raise HTTPException(status_code=401, detail=f"Invalid or expired token: {exc}")
-    if not user_response or not user_response.user:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-    user_id = user_response.user.id
-    print(f"[delete_account] user_id: {user_id}")
+    user_id = user.id
 
     if not SUPABASE_SERVICE_KEY:
         raise HTTPException(status_code=500, detail="Supabase service credentials not configured")

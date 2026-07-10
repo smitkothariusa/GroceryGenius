@@ -37,6 +37,7 @@ import Toast from './components/Toast';
 import { useToast } from './hooks/useToast';
 import { useState, useEffect, useRef } from 'react';
 import { authService, supabase, profileService, CustomDietaryLabel, Profile } from './lib/supabase';
+import { authFetch } from './lib/apiClient';
 import { calorieService } from './lib/database';
 import { pantryService, shoppingService, recipesService, mealPlansService, donationService } from './lib/database';
 import Auth from './components/Auth';
@@ -690,7 +691,7 @@ const App: React.FC = () => {
     if (currentRecipes.length === 0) return;
     setRecipeLoading(true);
     const API_BASE_URL = import.meta.env.VITE_API_URL || '/_/backend';
-    fetch(`${API_BASE_URL}/recipes/translate-full`, {
+    authFetch(`${API_BASE_URL}/recipes/translate-full`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ recipes: currentRecipes, language: i18n.language }),
@@ -706,7 +707,7 @@ const App: React.FC = () => {
     if (favorites.length === 0) { setTranslatedFavoriteNames({}); return; }
     const lang = i18n.language.split('-')[0];
     const names = favorites.map(f => f.name);
-    fetch(`${API_BASE}/recipes/translate-names`, {
+    authFetch(`${API_BASE}/recipes/translate-names`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ names, language: lang }),
@@ -967,7 +968,7 @@ const App: React.FC = () => {
         ? (recipeSubTab === 'name' ? [recipeSearchQuery.trim()] : ingredientTags)
         : (recipeSearchQuery.trim() ? [recipeSearchQuery.trim(), ...ingredientTags] : ingredientTags);
 
-      const response = await fetch(`${API_BASE}/recipes?${params.toString()}`, {
+      const response = await authFetch(`${API_BASE}/recipes?${params.toString()}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ingredients: allIngredients, strict: recipeMode === 'strict' }),
@@ -1516,7 +1517,7 @@ const App: React.FC = () => {
               const formData = new FormData();
               formData.append('file', blob, 'camera-capture.jpg');
 
-              const response = await fetch(`${API_BASE}/vision/analyze-ingredients`, {
+              const response = await authFetch(`${API_BASE}/vision/analyze-ingredients`, {
                 method: 'POST',
                 body: formData
               });
@@ -1710,7 +1711,7 @@ const App: React.FC = () => {
       // Vision AI (FIRST - Most accurate with actual product image)
       try {
         console.log('👁️ Using GPT-4 Vision to identify product...');
-        const visionResponse = await fetch(`${API_BASE}/barcode/vision-lookup`, {
+        const visionResponse = await authFetch(`${API_BASE}/barcode/vision-lookup`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1782,7 +1783,7 @@ const App: React.FC = () => {
       // Method 1: OpenAI (FIRST - Most reliable for product identification)
       try {
         console.log('🤖 Trying OpenAI first...');
-        const aiResponse = await fetch(`${API_BASE}/barcode/ai-lookup`, {
+        const aiResponse = await authFetch(`${API_BASE}/barcode/ai-lookup`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -2432,7 +2433,7 @@ const App: React.FC = () => {
       formData.append('file', file);
 
       // Send to backend
-      const response = await fetch(`${API_BASE}/vision/analyze-ingredients`, {
+      const response = await authFetch(`${API_BASE}/vision/analyze-ingredients`, {
         method: 'POST',
         body: formData
       });
@@ -2564,7 +2565,7 @@ const App: React.FC = () => {
     
     try {
       // Call backend API for AI-powered price comparison
-      const response = await fetch(`${API_BASE}/shopping/ai-price-comparison`, {
+      const response = await authFetch(`${API_BASE}/shopping/ai-price-comparison`, {
         signal: controller.signal,
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

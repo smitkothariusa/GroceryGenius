@@ -1,12 +1,13 @@
 # backend/app/routers/barcode.py
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 import os
 import base64
 import json
 import httpx
 from openai import OpenAI
+from app.services.auth import limiter, AI_LIGHT_LIMIT
 
 try:
     import zxingcpp
@@ -156,7 +157,8 @@ async def _lookup_product_by_number(barcode: str) -> dict:
 
 
 @router.post("/barcode/vision-lookup")
-async def vision_barcode_lookup(request: BarcodeImageRequest):
+@limiter.limit(AI_LIGHT_LIMIT)
+async def vision_barcode_lookup(request: Request, payload: BarcodeImageRequest):
     """
     Decode a barcode from an image, then look up the product.
 
@@ -168,7 +170,7 @@ async def vision_barcode_lookup(request: BarcodeImageRequest):
       Uses _lookup_product_by_number (Open Food Facts → GPT-4o)
     """
     try:
-        base64_image = request.image
+        base64_image = payload.image
         if "," in base64_image:
             base64_image = base64_image.split(",")[1]
 
@@ -248,10 +250,11 @@ async def vision_barcode_lookup(request: BarcodeImageRequest):
 
 
 @router.post("/barcode/ai-lookup")
-async def ai_barcode_lookup(request: BarcodeRequest):
+@limiter.limit(AI_LIGHT_LIMIT)
+async def ai_barcode_lookup(request: Request, payload: BarcodeRequest):
     """Look up a product by its barcode number (Open Food Facts → GPT-4o)."""
     try:
-        result = await _lookup_product_by_number(request.barcode)
+        result = await _lookup_product_by_number(payload.barcode)
         result["source"] = "ai"
         return result
     except Exception as e:

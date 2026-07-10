@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { mealPlansService, pantryService } from '../lib/database';
+import { authFetch } from '../lib/apiClient';
 import DeductIngredientsModal, { MatchResult } from './DeductIngredientsModal';
 interface Recipe {
   id: string;
@@ -376,7 +377,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
 
         try {
           const API_BASE = import.meta.env.VITE_API_URL || '/_/backend';
-          const response = await fetch(`${API_BASE}/pantry/match-ingredients`, {
+          const response = await authFetch(`${API_BASE}/pantry/match-ingredients`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -506,7 +507,7 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
     setGeneratingList(true);
     try {
       const API_BASE = import.meta.env.VITE_API_URL || '/_/backend';
-      const response = await fetch(`${API_BASE}/recipes/parse-ingredients`, {
+      const response = await authFetch(`${API_BASE}/recipes/parse-ingredients`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lines: allLines }),

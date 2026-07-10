@@ -298,7 +298,7 @@ const App: React.FC = () => {
 
       try {
         // Calculate impact for ALL pantry items at once
-        const impactResponse = await fetch(`${import.meta.env.VITE_API_URL || '/_/backend'}/donation/calculate-impact`, {
+        const impactResponse = await authFetch(`${import.meta.env.VITE_API_URL || '/_/backend'}/donation/calculate-impact`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

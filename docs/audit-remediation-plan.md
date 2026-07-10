@@ -58,6 +58,9 @@ Shipped via `fix/ai-endpoint-auth`:
 - Tests: `backend/test_auth.py` (dependency, tokenless-401 sweep across all
   routes, 429 after limit); `test_profile.py` updated for the refactor.
 
+> **Items 2, 3, and 5 are batched as the next work unit — detailed spec in
+> [audit-batch2-plan.md](audit-batch2-plan.md).**
+
 ### 2. 🟠 Backend logging overhaul (audit "Logging & Monitoring" section)
 Replace ad-hoc `print()` (typical of every router) with Python `logging`:
 request IDs, auth events, OpenAI latency + token usage/cost tracking, and
@@ -81,9 +84,17 @@ Escape HTML entities for every interpolated value (small shared helper).
 
 ### 5. 🟡 Dead code & API surface cleanup
 - `backend/app/models/schemas.py` — not imported anywhere; likely dead.
-- `backend/app/routers/donation.py` — no frontend call site found
-  (`API_BASE}/donation` appears nowhere in frontend/src); verify then remove
-  or document.
+- ~~`backend/app/routers/donation.py` — no frontend call site found~~
+  **CORRECTION 2026-07-10: donation.py is LIVE.** App.tsx ~line 301 calls
+  `/donation/calculate-impact` via an *inline* `VITE_API_URL` fetch (not the
+  `API_BASE` variable), which is why the original grep missed it. Lesson:
+  grep `VITE_API_URL`, not `API_BASE`, when hunting backend call sites.
+  (This briefly broke the donation modal when auth shipped — fixed same day
+  by switching the call to `authFetch`.)
+- `frontend/src/services/recipeService.ts` — `fetchRecipes()` is dead (only
+  the `Recipe` type is imported, by RecipeList/RecipeCard); it still uses a
+  tokenless `fetch` and would 401 if ever revived. Delete the function,
+  keep/move the type.
 - `backend/test.py` — scratch file at repo root of backend.
 - Frontend demo/sample data blocks in App.tsx (~line 1550) — verify unused.
 

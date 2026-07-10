@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 OPENAI_API_KEY=os.getenv("OPENAI_API_KEY")
-print(f"🔑 API Key loaded: {'✅ Found' if OPENAI_API_KEY else '❌ Missing'}")
-print(f"🔑 Key starts with: {OPENAI_API_KEY[:10]}..." if OPENAI_API_KEY else "🔑 Key is None/empty")
+# Never log any part of the key itself — logs are retained by the host.
+print(f"🔑 OPENAI_API_KEY configured: {'yes' if OPENAI_API_KEY else 'NO — AI endpoints will fail'}")
  
 OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions"
 MODEL = "gpt-4o-mini"  # Better at math and calculations

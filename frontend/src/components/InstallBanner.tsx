@@ -6,9 +6,14 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+declare global {
+  interface Window {
+    __gg_install_prompt?: BeforeInstallPromptEvent;
+  }
+}
+
 const DISMISSED_KEY = 'gg_install_dismissed';
 const SHOW_DELAY_MS = 30_000;
-const DEBUG = new URLSearchParams(window.location.search).has('install');
 
 function isMobileDevice(): boolean {
   return window.innerWidth < 768 && 'ontouchstart' in window;
@@ -30,14 +35,44 @@ function isIOSSafari(): boolean {
   );
 }
 
+const btnPrimary: React.CSSProperties = {
+  marginTop: '0.75rem',
+  background: 'white',
+  color: '#667eea',
+  border: 'none',
+  borderRadius: '8px',
+  padding: '0.45rem 1rem',
+  fontWeight: 700,
+  fontSize: '0.85rem',
+  cursor: 'pointer',
+  fontFamily: 'system-ui, -apple-system, sans-serif',
+};
+
+const btnSecondary: React.CSSProperties = {
+  marginTop: '0.5rem',
+  background: 'rgba(255,255,255,0.2)',
+  color: 'white',
+  border: 'none',
+  borderRadius: '8px',
+  padding: '0.4rem 1rem',
+  fontWeight: 600,
+  fontSize: '0.85rem',
+  cursor: 'pointer',
+  fontFamily: 'system-ui, -apple-system, sans-serif',
+};
+
 const InstallBanner: React.FC = () => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [platform, setPlatform] = useState<'android' | 'ios' | 'ios-other' | null>(null);
-  const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
+  const [copied, setCopied] = useState(false);
+  const promptRef = useRef<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    if (!DEBUG && (
+    // Read debug flag at runtime so service-worker-cached pages still pick it up
+    const debug = new URLSearchParams(window.location.search).has('install');
+
+    if (!debug && (
       !isMobileDevice() ||
       isAlreadyInstalled() ||
       localStorage.getItem(DISMISSED_KEY)
@@ -45,23 +80,19 @@ const InstallBanner: React.FC = () => {
       return;
     }
 
-    const handleBeforeInstall = (e: Event) => {
-      e.preventDefault();
-      deferredPrompt.current = e as BeforeInstallPromptEvent;
-    };
-
     const handleAppInstalled = () => {
       localStorage.setItem(DISMISSED_KEY, 'true');
       setVisible(false);
     };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
     window.addEventListener('appinstalled', handleAppInstalled);
 
     const timer = setTimeout(() => {
-      if (!DEBUG && localStorage.getItem(DISMISSED_KEY)) return;
+      if (!debug && localStorage.getItem(DISMISSED_KEY)) return;
 
-      if (deferredPrompt.current) {
+      // Use the prompt captured globally in main.tsx before React mounted
+      const captured = window.__gg_install_prompt;
+      if (captured) {
+        promptRef.current = captured;
         setPlatform('android');
         setVisible(true);
       } else if (isIOSSafari()) {
@@ -70,16 +101,15 @@ const InstallBanner: React.FC = () => {
       } else if (isIOS()) {
         setPlatform('ios-other');
         setVisible(true);
-      } else if (DEBUG) {
-        // Desktop debug mode — show ios-other as a representative example
-        setPlatform('ios-other');
+      } else if (debug) {
+        // Desktop fallback for visual testing
+        setPlatform('ios');
         setVisible(true);
       }
-    }, DEBUG ? 500 : SHOW_DELAY_MS);
+    }, debug ? 500 : SHOW_DELAY_MS);
 
     return () => {
       clearTimeout(timer);
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
@@ -89,25 +119,26 @@ const InstallBanner: React.FC = () => {
     setVisible(false);
   };
 
-  const handleOpenInSafari = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'GroceryGenius', url: window.location.href });
-      } catch {
-        // user cancelled share sheet — do nothing
-      }
-    }
-  };
-
   const handleInstall = async () => {
-    if (!deferredPrompt.current) return;
-    await deferredPrompt.current.prompt();
-    const { outcome } = await deferredPrompt.current.userChoice;
+    if (!promptRef.current) return;
+    await promptRef.current.prompt();
+    const { outcome } = await promptRef.current.userChoice;
     if (outcome === 'accepted') {
       localStorage.setItem(DISMISSED_KEY, 'true');
     }
-    deferredPrompt.current = null;
+    promptRef.current = null;
+    window.__gg_install_prompt = undefined;
     setVisible(false);
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.origin + window.location.pathname);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+    } catch {
+      // clipboard not available — do nothing
+    }
   };
 
   if (!visible || !platform) return null;
@@ -138,72 +169,38 @@ const InstallBanner: React.FC = () => {
         <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.25rem' }}>
           {t('install.banner.title')}
         </div>
-        <div style={{ fontSize: '0.8rem', opacity: 0.9, lineHeight: 1.4 }}>
-          {platform === 'ios'
-            ? t('install.banner.iosInstruction')
-            : platform === 'ios-other'
-            ? t('install.banner.iosChromeInstruction')
-            : t('install.banner.description')}
-        </div>
-
-        {platform === 'ios-other' && (
-          <button
-            onClick={handleOpenInSafari}
-            style={{
-              marginTop: '0.75rem',
-              background: 'white',
-              color: '#667eea',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '0.45rem 1rem',
-              fontWeight: 700,
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              fontFamily: 'system-ui, -apple-system, sans-serif',
-            }}
-          >
-            {t('install.banner.openInSafari')}
-          </button>
-        )}
 
         {platform === 'android' && (
-          <button
-            onClick={handleInstall}
-            style={{
-              marginTop: '0.75rem',
-              background: 'white',
-              color: '#667eea',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '0.45rem 1rem',
-              fontWeight: 700,
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              fontFamily: 'system-ui, -apple-system, sans-serif',
-            }}
-          >
-            {t('install.banner.addButton')}
-          </button>
+          <>
+            <div style={{ fontSize: '0.8rem', opacity: 0.9, lineHeight: 1.4 }}>
+              {t('install.banner.description')}
+            </div>
+            <button onClick={handleInstall} style={btnPrimary}>
+              {t('install.banner.addButton')}
+            </button>
+          </>
         )}
 
         {platform === 'ios' && (
-          <button
-            onClick={handleDismiss}
-            style={{
-              marginTop: '0.5rem',
-              background: 'rgba(255,255,255,0.2)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '0.4rem 1rem',
-              fontWeight: 600,
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              fontFamily: 'system-ui, -apple-system, sans-serif',
-            }}
-          >
-            {t('install.banner.gotIt')}
-          </button>
+          <>
+            <div style={{ fontSize: '0.8rem', opacity: 0.9, lineHeight: 1.4 }}>
+              {t('install.banner.iosInstruction')}
+            </div>
+            <button onClick={handleDismiss} style={btnSecondary}>
+              {t('install.banner.gotIt')}
+            </button>
+          </>
+        )}
+
+        {platform === 'ios-other' && (
+          <>
+            <div style={{ fontSize: '0.8rem', opacity: 0.9, lineHeight: 1.4 }}>
+              {t('install.banner.iosChromeInstruction')}
+            </div>
+            <button onClick={handleCopyLink} style={btnPrimary}>
+              {copied ? t('install.banner.copied') : t('install.banner.copyLink')}
+            </button>
+          </>
         )}
       </div>
 

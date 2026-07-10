@@ -1,10 +1,11 @@
 # backend/app/routers/pantry.py
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
 import uuid
 import json
+from app.services.auth import limiter, AI_LIGHT_LIMIT
 from app.services.openai_client import call_chat_completion
 
 router = APIRouter()
@@ -76,7 +77,8 @@ class MatchIngredientsRequest(BaseModel):
     pantry_items: List[PantryItemInput]
 
 @router.post("/match-ingredients")
-async def match_ingredients(payload: MatchIngredientsRequest):
+@limiter.limit(AI_LIGHT_LIMIT)
+async def match_ingredients(request: Request, payload: MatchIngredientsRequest):
     """AI-match recipe ingredient lines against pantry items."""
     lines = [l.strip() for l in payload.ingredient_lines if l.strip()]
     if not lines or not payload.pantry_items:

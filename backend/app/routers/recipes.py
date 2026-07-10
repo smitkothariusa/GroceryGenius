@@ -1,8 +1,9 @@
 ﻿# backend/app/routers/recipes.py
 import json
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from typing import List, Optional
 from pydantic import BaseModel
+from app.services.auth import limiter, AI_HEAVY_LIMIT, AI_LIGHT_LIMIT
 from app.services.openai_client import call_chat_completion
 from app.services.recipe_parser import parse_recipes_text
 
@@ -18,7 +19,8 @@ LANGUAGE_NAMES = {
 }
 
 @router.post("/", response_model=List[dict])
-async def generate_recipes(payload: Ingredients, dietary: Optional[str] = Query(None), language: Optional[str] = Query(None), difficulty: Optional[str] = Query(None)):
+@limiter.limit(AI_HEAVY_LIMIT)
+async def generate_recipes(request: Request, payload: Ingredients, dietary: Optional[str] = Query(None), language: Optional[str] = Query(None), difficulty: Optional[str] = Query(None)):
     ingredients = [i.strip() for i in payload.ingredients if i.strip()]
     if not ingredients:
         return [{"name": "No ingredients provided", "instructions": "Please provide at least one ingredient."}]
@@ -133,7 +135,8 @@ class TranslateNamesRequest(BaseModel):
     language: str
 
 @router.post("/translate-names", response_model=List[str])
-async def translate_recipe_names(payload: TranslateNamesRequest):
+@limiter.limit(AI_LIGHT_LIMIT)
+async def translate_recipe_names(request: Request, payload: TranslateNamesRequest):
     """Translate a list of recipe names to the target language using OpenAI."""
     if not payload.names:
         return []
@@ -166,7 +169,8 @@ class TranslateFullRecipesRequest(BaseModel):
     language: str
 
 @router.post("/translate-full")
-async def translate_full_recipes(payload: TranslateFullRecipesRequest):
+@limiter.limit(AI_HEAVY_LIMIT)
+async def translate_full_recipes(request: Request, payload: TranslateFullRecipesRequest):
     """Translate all text fields of recipe objects to the target language."""
     if not payload.recipes:
         return []
@@ -208,7 +212,8 @@ class IngredientParseRequest(BaseModel):
     lines: List[str]
 
 @router.post("/parse-ingredients")
-async def parse_ingredients(payload: IngredientParseRequest):
+@limiter.limit(AI_LIGHT_LIMIT)
+async def parse_ingredients(request: Request, payload: IngredientParseRequest):
     """Use AI to parse raw ingredient lines into structured name/quantity/unit objects."""
     lines = [l.strip() for l in payload.lines if l.strip()]
     if not lines:

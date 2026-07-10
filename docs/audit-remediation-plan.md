@@ -39,22 +39,24 @@ file references). Status legend: ✅ done · 🔲 open.
 
 ## Open items, highest priority first
 
-### 1. 🔴 Auth + rate limiting on AI endpoints (audit critical #5 — confirmed)
-`backend/app/routers/recipes.py`, `vision.py`, `barcode.py`, `pantry.py`,
-`shopping.py`, `donation.py` have **zero authentication** — anyone can call
-`POST /recipes` and burn OpenAI budget. Plan:
-- Add a FastAPI dependency that validates the Supabase JWT from the
-  `Authorization` header (same pattern `profile.py:delete_account` already
-  uses via `sb_anon.auth.get_user(token)`; extract into a shared
-  `Depends(get_current_user)` in `app/services/`).
-- Frontend must then send the session token on `API_BASE` fetches — call
-  sites: App.tsx lines ~709/970 (recipes), ~1519/2435 (vision), ~1713/1785
-  (barcode), ~2567 (shopping); MealPlanCalendar.tsx ~379/509.
-- Add rate limiting (slowapi) per user/IP on the OpenAI-backed routes.
-- **Blocker: the backend deploys on Render and no Render CLI/API access is
-  set up** (see memory: dev-environment-clis). Get dashboard/CLI access or
-  have the user smoke-test after deploy. Test locally with uvicorn first;
-  `backend/test_profile.py` shows the existing mock-based test pattern.
+### 1. ✅ Auth + rate limiting on AI endpoints (audit critical #5 — done 2026-07-10)
+Shipped via `fix/ai-endpoint-auth`:
+- Shared `Depends(get_current_user)` in `backend/app/services/auth.py`
+  (validates Supabase JWT via `sb_anon.auth.get_user`; 401 on missing/bad
+  token). Applied router-wide to recipes, vision, barcode, pantry, shopping,
+  donation; `profile.py` uses it per-route (`dietary-label` was also
+  unauthenticated OpenAI — now covered; `delete_account` refactored onto it).
+- Per-user rate limiting (slowapi, keyed on user id, IP fallback):
+  10/min on heavy routes (recipe gen, translate-full, vision, price
+  comparison), 30/min on light ones (barcode, parse/match, translate-names,
+  dietary-label). Limits live in `app/services/auth.py`.
+- Frontend sends the session token via `authFetch` (`frontend/src/lib/apiClient.ts`)
+  on all `API_BASE` calls (App.tsx, MealPlanCalendar, OnboardingSurvey;
+  SettingsPanel already attached it manually).
+- Also fixed: `vision.py` built its OpenAI client at import time, crashing
+  any import of `app.main` without `OPENAI_API_KEY`; now created per-request.
+- Tests: `backend/test_auth.py` (dependency, tokenless-401 sweep across all
+  routes, 429 after limit); `test_profile.py` updated for the refactor.
 
 ### 2. 🟠 Backend logging overhaul (audit "Logging & Monitoring" section)
 Replace ad-hoc `print()` (typical of every router) with Python `logging`:

@@ -107,6 +107,8 @@
   },
   "auth": {
     "aiPoweredMealPlanning": "AI-Powered Meal Planning",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "fullName": "Full Name",
     "email": "Email",
     "password": "Password",
@@ -510,6 +512,7 @@
     "switchedToMealPlan": "Switched to Meal Plan! Drag this recipe onto your calendar.",
     "addedCalories": "Added {{calories}} calories from {{name}}",
     "failedAddCalories": "Failed to add calories",
+    "enterCalorieAmount": "Enter a calorie amount first",
     "itemAddedToPantry": "Item added to pantry!",
     "failedAddItem": "Failed to add item. Please try again.",
     "itemRemoved": "Item removed",

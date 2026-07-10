@@ -1004,6 +1004,12 @@ const App: React.FC = () => {
       });
       
       setRecipes(scaledRecipes);
+
+      // Results render below the ingredient list; scroll them into view so
+      // users get clear feedback that generation completed.
+      setTimeout(() => {
+        document.querySelector('.recipe-card-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     } catch (err: any) {
       clearTimeout(timeoutId);
       console.error('Recipe generation error:', err);
@@ -1397,6 +1403,37 @@ const App: React.FC = () => {
     setEditingPantryItem(null);
     setNewPantryItem({ name: '', quantity: 1, unit: 'pc', category: 'other', expiryDate: '', emoji: undefined });
   };
+
+  // Persist scanned items to the database so they survive navigation and can
+  // be edited later (local-only Date.now() ids break pantryService.update).
+  const addScannedItemsToPantry = async (names: string[]) => {
+    try {
+      const savedItems = await Promise.all(names.map(name =>
+        pantryService.add({ name, quantity: 1, unit: 'pc', category: 'other' })
+      ));
+      setPantry(prev => [...prev, ...savedItems.map(item => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        category: item.category,
+        expiryDate: item.expiry_date || undefined,
+        emoji: item.emoji || undefined,
+      }))]);
+      success(t('toasts.addedItemsToPantry', { count: names.length }));
+    } catch (err) {
+      // Keep the scan results visible locally so they aren't lost outright,
+      // but tell the user the save failed.
+      setPantry(prev => [...prev, ...names.map(name => ({
+        id: `${Date.now()}-${Math.random()}`,
+        name,
+        quantity: 1,
+        unit: 'pc',
+        category: 'other',
+      }))]);
+      warning(t('toasts.failedAddItem'));
+    }
+  };
   const sortShoppingList = () => {
     const sorted = [...shoppingList];
     if (sortShoppingBy === 'category') {
@@ -1490,17 +1527,8 @@ const App: React.FC = () => {
 
               if (data.success && data.ingredients.length > 0) {
                 if (cameraSource === 'pantry') {
-                  // Add to pantry
-                  const newPantryItems: PantryItem[] = data.ingredients.map((ing: string) => ({
-                    id: `${Date.now()}-${Math.random()}`,
-                    name: ing,
-                    quantity: 1,
-                    unit: 'pc',
-                    category: 'other'
-                  }));
-                  
-                  setPantry(prev => [...prev, ...newPantryItems]);
-                  success(t('toasts.addedItemsToPantry', { count: data.ingredients.length }));
+                  // Add to pantry (persisted to the database)
+                  await addScannedItemsToPantry(data.ingredients);
 
                   // Switch to pantry tab
                   setCurrentTab('pantry');
@@ -2417,17 +2445,8 @@ const App: React.FC = () => {
 
       if (data.success && data.ingredients.length > 0) {
         if (cameraSource === 'pantry') {
-          // Add to pantry
-          const newPantryItems: PantryItem[] = data.ingredients.map((ing: string) => ({
-            id: `${Date.now()}-${Math.random()}`,
-            name: ing,
-            quantity: 1,
-            unit: 'pc',
-            category: 'other'
-          }));
-          
-          setPantry(prev => [...prev, ...newPantryItems]);
-          success(t('toasts.addedItemsToPantry', { count: data.ingredients.length }));
+          // Add to pantry (persisted to the database)
+          await addScannedItemsToPantry(data.ingredients);
 
           // Close modal and switch to pantry tab
           setShowImageUpload(false);
@@ -5834,22 +5853,34 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   placeholder={t('shopping.itemPlaceholder')}
                   value={newShoppingItem.name}
                   onChange={(e) => setNewShoppingItem({...newShoppingItem, name: e.target.value})}
-                  onKeyPress={(e) => {
+                  onKeyPress={async (e) => {
                   if (e.key === 'Enter' && newShoppingItem.name.trim()) {
                     const quantity = typeof newShoppingItem.quantity === 'number' ? newShoppingItem.quantity : 1;
-                    const item: ShoppingItem = {
-                      id: `${Date.now()}-${Math.random()}`,
-                      name: newShoppingItem.name.trim(),
-                      quantity: quantity,
+                    try {
+                      const savedItem = await shoppingService.add({
+                        name: newShoppingItem.name.trim(),
+                        quantity: quantity,
                         unit: newShoppingItem.unit,
-                        checked: false,
                         category: newShoppingItem.category,
+                        checked: false,
                         priority: 'medium'
-                      };
-                      setShoppingList(prev => [...prev, item]);
+                      });
+                      setShoppingList(prev => [...prev, {
+                        id: savedItem.id,
+                        name: savedItem.name,
+                        quantity: savedItem.quantity,
+                        unit: savedItem.unit,
+                        category: savedItem.category,
+                        checked: savedItem.checked,
+                        priority: savedItem.priority as 'high' | 'medium' | 'low',
+                      }]);
                       success(t('toasts.addedToShoppingList', { name: newShoppingItem.name }));
                       setNewShoppingItem({ name: '', quantity: 1, unit: 'pc', category: 'other' });
                       setShowAddShopping(false);
+                    } catch (err) {
+                      console.error('Error adding shopping item:', err);
+                      warning(t('toasts.failedAddItem'));
+                    }
                     }
                   }}
                   autoFocus
@@ -6589,8 +6620,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               />
               <button onClick={async () => {
                 const amount = parseInt(manualCalorieInput);
-                if (isNaN(amount) || amount === 0) return;
-                
+                if (isNaN(amount) || amount === 0) {
+                  warning(t('toasts.enterCalorieAmount'));
+                  return;
+                }
+
                 try {
                   // Log to Supabase
                   await calorieService.logCalories(amount, 'manual', 'Manual entry');
@@ -6615,7 +6649,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               }}>+</button>
               <button onClick={async () => {
                 const amount = parseInt(manualCalorieInput);
-                if (isNaN(amount) || amount === 0) return;
+                if (isNaN(amount) || amount === 0) {
+                  warning(t('toasts.enterCalorieAmount'));
+                  return;
+                }
 
                 try {
                   // Log negative to Supabase

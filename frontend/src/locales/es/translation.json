@@ -107,6 +107,8 @@
   },
   "auth": {
     "aiPoweredMealPlanning": "Planificación de comidas con IA",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
     "fullName": "Nombre completo",
     "email": "Correo electrónico",
     "password": "Contraseña",
@@ -510,6 +512,7 @@
     "switchedToMealPlan": "¡Cambiado al Plan de Comidas! Arrastra esta receta a tu calendario.",
     "addedCalories": "Se agregaron {{calories}} calorías de {{name}}",
     "failedAddCalories": "Error al agregar calorías",
+    "enterCalorieAmount": "Primero ingresa una cantidad de calorías",
     "itemAddedToPantry": "¡Artículo agregado a la despensa!",
     "failedAddItem": "Error al agregar el artículo. Por favor, intenta de nuevo.",
     "itemRemoved": "Artículo eliminado",

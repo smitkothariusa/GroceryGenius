@@ -107,6 +107,8 @@
   },
   "auth": {
     "aiPoweredMealPlanning": "AI驱动的膳食计划",
+    "showPassword": "显示密码",
+    "hidePassword": "隐藏密码",
     "fullName": "全名",
     "email": "电子邮件",
     "password": "密码",
@@ -510,6 +512,7 @@
     "switchedToMealPlan": "已切换到餐食计划！将此食谱拖到您的日历上。",
     "addedCalories": "已从 {{name}} 添加 {{calories}} 卡路里",
     "failedAddCalories": "添加卡路里失败",
+    "enterCalorieAmount": "请先输入卡路里数量",
     "itemAddedToPantry": "物品已添加到储藏室！",
     "failedAddItem": "添加物品失败。请重试。",
     "itemRemoved": "物品已删除",

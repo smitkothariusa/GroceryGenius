@@ -5,6 +5,7 @@ import './mobile.css'
 import './mobile-responsive.css'
 import './i18n'
 import { initGlobalErrorHandlers } from './lib/errorService'
+import { registerSW } from 'virtual:pwa-register'
 
 // Capture beforeinstallprompt before React mounts — the event fires early
 // and would be missed if we only listen inside a useEffect.
@@ -14,6 +15,13 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 initGlobalErrorHandlers()
+
+registerSW({
+  onRegisterError(error) {
+    // Webviews/privacy extensions can reject SW registration; not actionable.
+    console.warn('Service worker registration failed:', error)
+  },
+})
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

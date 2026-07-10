@@ -7,6 +7,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Registration lives in main.tsx (virtual:pwa-register) so rejection is
+      // handled — the auto-injected registerSW.js registers unguarded and
+      // spams error_logs from webviews that stub out serviceWorker.register.
+      injectRegister: false,
       includeAssets: ['icons/*.png'],
       manifest: {
         name: 'GroceryGenius',

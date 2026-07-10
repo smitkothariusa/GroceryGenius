@@ -107,6 +107,8 @@
   },
   "auth": {
     "aiPoweredMealPlanning": "KI-gestützte Mahlzeitenplanung",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen",
     "fullName": "Vollständiger Name",
     "email": "E-Mail",
     "password": "Passwort",
@@ -510,6 +512,7 @@
     "switchedToMealPlan": "Zum Mahlzeitenplan gewechselt! Ziehe dieses Rezept auf deinen Kalender.",
     "addedCalories": "{{calories}} Kalorien von {{name}} hinzugefügt",
     "failedAddCalories": "Kalorien konnten nicht hinzugefügt werden",
+    "enterCalorieAmount": "Bitte zuerst eine Kalorienmenge eingeben",
     "itemAddedToPantry": "Artikel zur Vorratskammer hinzugefügt!",
     "failedAddItem": "Artikel konnte nicht hinzugefügt werden. Bitte versuche es erneut.",
     "itemRemoved": "Artikel entfernt",

@@ -678,7 +678,8 @@
       "description": "ホーム画面から GroceryGenius にすばやくアクセスできます。",
       "addButton": "ホームに追加",
       "iosInstruction": "下の共有ボタンをタップしてホーム画面に追加を選択してください。",
-      "iosChromeInstruction": "Safari でこのページを開き、共有ボタンをタップしてホーム画面に追加を選択してください。",
+      "iosChromeInstruction": "Safari 経由で GroceryGenius をホーム画面に追加できます。",
+      "openInSafari": "Safari で開く",
       "dismiss": "閉じる",
       "gotIt": "了解"
     }

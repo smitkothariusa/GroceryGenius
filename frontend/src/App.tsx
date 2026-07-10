@@ -45,6 +45,7 @@ import IngredientSubstitution from './components/IngredientSubstitution';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import OnboardingSurvey from './components/OnboardingSurvey';
 import FeedbackButton from './components/FeedbackButton';
+import InstallBanner from './components/InstallBanner';
 import SettingsPanel from './components/SettingsPanel';
 import TourOverlay from './components/TourOverlay';
 import { TOUR_STEPS } from './tourSteps';
@@ -7695,6 +7696,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
         />
       )}
       <FeedbackButton isMobile={isMobile} />
+      <InstallBanner />
     </div>
   );
 };

@@ -678,7 +678,8 @@
       "description": "Accédez rapidement à GroceryGenius depuis votre écran d'accueil.",
       "addButton": "Ajouter à l'accueil",
       "iosInstruction": "Appuyez sur Partager puis choisissez « Ajouter à l'écran d'accueil ».",
-      "iosChromeInstruction": "Ouvrez cette page dans Safari, appuyez sur Partager puis choisissez « Ajouter à l'écran d'accueil ».",
+      "iosChromeInstruction": "Ajoutez GroceryGenius à votre écran d'accueil via Safari.",
+      "openInSafari": "Ouvrir dans Safari",
       "dismiss": "Fermer",
       "gotIt": "Compris"
     }

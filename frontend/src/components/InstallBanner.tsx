@@ -85,6 +85,16 @@ const InstallBanner: React.FC = () => {
     setVisible(false);
   };
 
+  const handleOpenInSafari = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'GroceryGenius', url: window.location.href });
+      } catch {
+        // user cancelled share sheet — do nothing
+      }
+    }
+  };
+
   const handleInstall = async () => {
     if (!deferredPrompt.current) return;
     await deferredPrompt.current.prompt();
@@ -132,6 +142,26 @@ const InstallBanner: React.FC = () => {
             : t('install.banner.description')}
         </div>
 
+        {platform === 'ios-other' && (
+          <button
+            onClick={handleOpenInSafari}
+            style={{
+              marginTop: '0.75rem',
+              background: 'white',
+              color: '#667eea',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '0.45rem 1rem',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+            }}
+          >
+            {t('install.banner.openInSafari')}
+          </button>
+        )}
+
         {platform === 'android' && (
           <button
             onClick={handleInstall}
@@ -152,7 +182,7 @@ const InstallBanner: React.FC = () => {
           </button>
         )}
 
-        {(platform === 'ios' || platform === 'ios-other') && (
+        {platform === 'ios' && (
           <button
             onClick={handleDismiss}
             style={{

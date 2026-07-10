@@ -18,10 +18,13 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "https://grocery-genius-hj3w6xvnt-smit-kotharis-projects.vercel.app",
-        "https://*.vercel.app",
-        "*"  # Temporarily allow all for demo
+        "https://grocerygenius.org",
+        "https://www.grocerygenius.org",
+        "https://app.grocerygenius.org",
+        "https://dev.grocerygenius.org",
     ],
+    # Vercel preview deployments get per-deploy hostnames
+    allow_origin_regex=r"https://grocery-genius-[a-z0-9]+-smit-kotharis-projects\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

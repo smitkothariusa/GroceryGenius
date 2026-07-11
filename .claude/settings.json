@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(export PATH=*)",
+      "Bash(code --list-extensions*)"
+    ]
+  }
+}

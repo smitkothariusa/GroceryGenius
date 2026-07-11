@@ -13,11 +13,11 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 class ShoppingItem(BaseModel):
-    id: Optional[str] = None
-    name: str
-    quantity: int = 1
-    unit: str = "pc"
-    category: str = "other"
+    id: Optional[str] = Field(default=None, max_length=100)
+    name: str = Field(min_length=1, max_length=200)
+    quantity: int = Field(default=1, ge=1, le=100_000)
+    unit: str = Field(default="pc", max_length=20)
+    category: str = Field(default="other", max_length=50)
     checked: bool = False
 
 class ShoppingList(BaseModel):
@@ -68,25 +68,35 @@ def delete_shopping_item(item_id: str):
     shopping_storage = [item for item in shopping_storage if item["id"] != item_id]
     return {"message": "Item deleted successfully"}
 
+class BatchShoppingItems(BaseModel):
+    items: List[ShoppingItem] = Field(max_length=200)
+
+
 @router.post("/batch")
-def add_batch_items(items: List[ShoppingItem]):
+def add_batch_items(payload: BatchShoppingItems):
     """Add multiple items to shopping list"""
     added_items = []
-    
-    for item in items:
+
+    for item in payload.items:
         item_dict = item.dict()
         item_dict["id"] = str(uuid.uuid4())
         shopping_storage.append(item_dict)
         added_items.append(ShoppingItem(**item_dict))
-    
+
     return {"added_items": added_items, "count": len(added_items)}
 
 # ============================================
 # NEW: AI-POWERED PRICE COMPARISON
 # ============================================
 
+class PriceItem(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    quantity: float = Field(ge=0, le=100_000)
+    unit: str = Field(default="pc", max_length=20)
+
+
 class PriceComparisonRequest(BaseModel):
-    items: List[dict] = Field(max_length=100)  # [{name: str, quantity: int, unit: str}, ...]
+    items: List[PriceItem] = Field(max_length=100)
 
 @router.post("/ai-price-comparison")
 @limiter.limit(AI_HEAVY_LIMIT)
@@ -102,7 +112,7 @@ async def ai_price_comparison(request: Request, payload: PriceComparisonRequest)
     
     # Format items for AI prompt
     items_list = ", ".join([
-        f"{item['quantity']} {item['unit']} {item['name']}" 
+        f"{item.quantity} {item.unit} {item.name}"
         for item in items
     ])
     
@@ -167,7 +177,7 @@ Return ONLY: {{"amazon": total_price, "walmart": total_price}}"""
     except Exception:
         logger.error("Error in AI price comparison, using fallback estimate", exc_info=True)
         # Fallback to simple estimation
-        item_count = sum(item.get('quantity', 1) for item in items)
+        item_count = sum(item.quantity for item in items)
         return {
             "amazon_total": round(item_count * 3.5, 2),
             "walmart_total": round(item_count * 2.8, 2)

@@ -473,6 +473,7 @@
     "viewAgain": "Voir la Mission à Nouveau"
   },
   "toasts": {
+    "rateLimited": "Vous envoyez des requêtes trop rapidement. Merci de patienter un instant avant de réessayer.",
     "addedIngredientsToShopping": "{{count}} ingrédients ajoutés à la liste de courses !",
     "shoppingListCopied": "Liste de courses copiée dans le presse-papiers !",
     "pantryItemUpdated": "Article du garde-manger mis à jour !",

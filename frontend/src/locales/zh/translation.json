@@ -473,6 +473,7 @@
     "viewAgain": "再次查看使命"
   },
   "toasts": {
+    "rateLimited": "您的请求发送得太快了，请稍等片刻后再试。",
     "addedIngredientsToShopping": "已将 {{count}} 种食材添加到购物清单！",
     "shoppingListCopied": "购物清单已复制到剪贴板！",
     "pantryItemUpdated": "储藏室物品已更新！",

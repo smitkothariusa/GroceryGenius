@@ -424,7 +424,8 @@
     "close": "閉じる",
     "clearAll": "すべてクリア",
     "help": "ヘルプ",
-    "or": "または"
+    "or": "または",
+    "loadMore": "もっと読み込む"
   },
   "notifications": {
     "itemAdded": "{{list}}にアイテムを追加しました！",

@@ -424,7 +424,8 @@
     "close": "关闭",
     "clearAll": "全部清除",
     "help": "帮助",
-    "or": "或"
+    "or": "或",
+    "loadMore": "加载更多"
   },
   "notifications": {
     "itemAdded": "已将物品添加到{{list}}！",

@@ -154,6 +154,34 @@ def test_price_comparison_rejects_oversized_items_list(client):
     assert response.status_code == 422
 
 
+def test_price_comparison_uses_low_temperature_for_deterministic_estimates(client, monkeypatch):
+    """
+    Price estimates should be stable across repeated calls for the same
+    basket, not the high-variance sampling appropriate for creative text.
+    Guards against a regression back to temperature=0.8.
+    """
+    import app.routers.shopping as shopping_module
+
+    captured = {}
+
+    async def fake_call_chat_completion(**kwargs):
+        captured.update(kwargs)
+        return '{"amazon": 12.5, "walmart": 10.0}'
+
+    monkeypatch.setattr(shopping_module, "call_chat_completion", fake_call_chat_completion)
+
+    response = client.post(
+        "/shopping/ai-price-comparison",
+        json={"items": [{"name": "Apples", "quantity": 2, "unit": "pc"}]},
+    )
+
+    assert response.status_code == 200
+    assert captured["temperature"] <= 0.3
+    body = response.json()
+    assert body["amazon_total"] == 12.5
+    assert body["walmart_total"] == 10.0
+
+
 # ---------------------------------------------------------------------------
 # donation.py
 # ---------------------------------------------------------------------------

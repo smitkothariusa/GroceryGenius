@@ -26,6 +26,13 @@ React/Vite frontend + FastAPI backend + Supabase (auth, Postgres, RLS).
    "ship it", "release it", "go live", "deploy prod", or an unambiguous
    equivalent all count. The authorization is per-instance, not standing —
    it must be said fresh each time, not inferred from a past conversation.
+   **Exception (user-approved 2026-07-11):** if the `dev` changes are not a
+   new user-facing feature the user would want to try on dev.grocerygenius.org
+   first — e.g. bug fixes, backend-only logic, refactors, test additions,
+   config/infra changes — and you are ≥95% confident the change is correct
+   (tests pass, verified on dev, low blast radius), release to `main` without
+   waiting for the phrase. Still ask/wait for real new features, and still
+   announce the target branch per the Safety Reminders below either way.
 2. Default branch for all work is `dev`. Features/fixes: branch off `dev`,
    PR back to `dev`. Docs-only changes may commit directly to `dev`.
 3. Merging your own PR into `dev` is standing authorization — no need to ask

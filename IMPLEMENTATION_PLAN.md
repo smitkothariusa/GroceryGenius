@@ -9,10 +9,12 @@ Workflow for each task: `.claude/skills/implement-task/SKILL.md`
 
 ## Current Task
 
-None actively in progress. Next candidate: **[6 — Refactor App.tsx into
-feature modules](docs/tasks/06-app-tsx-refactor.md)**, now that 14's test
-coverage has landed as a regression safety net — but it's XL/multi-day and
-needs an explicit kickoff, not auto-started.
+**[6 — Refactor App.tsx into feature modules](docs/tasks/06-app-tsx-refactor.md)**
+— IN PROGRESS as of 2026-07-11, kicked off per explicit user go-ahead.
+Per the spec's recommended extraction order, doing this as a sequence of
+small PRs rather than one giant change: Favorites → MealPlanCalendar wiring
+→ Donation → Recipes → Scanning+Pantry (last, most entangled). First step:
+Favorites extraction.
 
 Tasks 03, 12, 13, 15 (PRs #39–#42) and **9, 14, 16, 17 (PRs #44–#47)** are
 **all released to production** as of 2026-07-11 (main 728ecc2) — verified
@@ -58,7 +60,7 @@ changes the calculus).
 
 | # | Task | Effort | Status | Spec |
 |---|---|---|---|---|
-| 6 | Refactor App.tsx into feature modules | XL (multi-day) | NOT STARTED | [spec](docs/tasks/06-app-tsx-refactor.md) |
+| 6 | Refactor App.tsx into feature modules | XL (multi-day) | IN PROGRESS | [spec](docs/tasks/06-app-tsx-refactor.md) |
 | 7 | Redis-backed rate limiting for multi-instance | M (1d) | NOT STARTED | [spec](docs/tasks/07-redis-rate-limiting.md) |
 | 8 | Recipe caching (Redis, 24h TTL) | M (1d) | NOT STARTED | [spec](docs/tasks/08-recipe-caching.md) |
 | 9 | Investigate & fix pantry expiry boundary logic | S (0.5d) | DONE | [spec](docs/tasks/09-pantry-expiry-boundary.md) |

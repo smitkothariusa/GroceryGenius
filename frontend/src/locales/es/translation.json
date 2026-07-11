@@ -704,5 +704,17 @@
       "dismiss": "Cerrar",
       "gotIt": "Entendido"
     }
+  },
+  "errorBoundary": {
+    "root": {
+      "title": "Algo salió mal",
+      "message": "GroceryGenius encontró un problema inesperado. Recargar la aplicación suele solucionarlo.",
+      "reload": "Recargar aplicación"
+    },
+    "section": {
+      "title": "Esta sección tuvo un problema",
+      "message": "Algo salió mal aquí, pero el resto de la aplicación sigue funcionando.",
+      "tryAgain": "Intentar de nuevo"
+    }
   }
 }

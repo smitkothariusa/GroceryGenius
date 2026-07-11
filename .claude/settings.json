@@ -2,7 +2,15 @@
   "permissions": {
     "allow": [
       "Bash(export PATH=*)",
-      "Bash(code --list-extensions*)"
+      "Bash(code --list-extensions*)",
+      "Bash(vercel inspect *)",
+      "Bash(vercel ls *)",
+      "Bash(vercel env ls *)",
+      "Bash(gh pr checks *)",
+      "Bash(gh pr view *)",
+      "Bash(supabase projects list*)",
+      "Bash(supabase projects api-keys*)",
+      "Bash(npx tsc --noEmit*)"
     ]
   }
 }

@@ -21,9 +21,11 @@ React/Vite frontend + FastAPI backend + Supabase (auth, Postgres, RLS).
 | `dev` | Integration | dev.grocerygenius.org + grocerygenius-dev.onrender.com |
 | `feature/*`, `fix/*` | Work branches off `dev` | Vercel preview URLs |
 
-1. **NEVER push to `main`** unless the user explicitly says "push to main",
-   "merge to main", or "deploy to production" — that phrase is the release
-   trigger and it is per-instance, not standing.
+1. **NEVER push to `main`** unless the user explicitly says so in that turn —
+   phrases like "push to main", "merge to main", "deploy to production",
+   "ship it", "release it", "go live", "deploy prod", or an unambiguous
+   equivalent all count. The authorization is per-instance, not standing —
+   it must be said fresh each time, not inferred from a past conversation.
 2. Default branch for all work is `dev`. Features/fixes: branch off `dev`,
    PR back to `dev`. Docs-only changes may commit directly to `dev`.
 3. Merging your own PR into `dev` is standing authorization — no need to ask

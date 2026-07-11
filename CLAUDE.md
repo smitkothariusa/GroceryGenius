@@ -26,8 +26,9 @@ React/Vite frontend + FastAPI backend + Supabase (auth, Postgres, RLS).
    trigger and it is per-instance, not standing.
 2. Default branch for all work is `dev`. Features/fixes: branch off `dev`,
    PR back to `dev`. Docs-only changes may commit directly to `dev`.
-3. Merging your own PR into `dev` needs the user's go-ahead (they usually
-   grant it in the task prompt).
+3. Merging your own PR into `dev` is standing authorization — no need to ask
+   first or wait for a go-ahead. `main` is the only branch that needs the
+   explicit release phrase (see #1).
 4. Never force-push `main` or `dev`. Never `--no-verify`.
 5. Production release (user-initiated only):
    `git checkout main && git pull && git merge dev --no-ff && git push origin main`

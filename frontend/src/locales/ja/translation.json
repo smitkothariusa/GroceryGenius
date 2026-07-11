@@ -52,7 +52,8 @@
       "pantryItems": "パントリー品",
       "beverages": "飲料",
       "snacks": "スナック",
-      "bakery": "ベーカリー"
+      "bakery": "ベーカリー",
+      "condiments": "調味料"
     },
     "units": {
       "pieces": "個",
@@ -451,8 +452,17 @@
     "expiryScannerDesc": "「賞味期限」や「使用期限」の日付に向けて自動取得",
     "aiScannerTitle": "AIアイテムスキャナー",
     "aiScannerDesc": "任意の食品を撮影してAI識別と栄養情報を取得",
-    "receiptUploadTitle": "レシートアップロード",
-    "receiptUploadDesc": "スーパーのレシートをアップロードして複数のアイテムを一度に自動追加"
+    "receiptUploadTitle": "レシートスキャナー",
+    "receiptUploadDesc": "カメラでレシートをスキャンして複数のアイテムを一度に自動追加",
+    "readingReceipt": "レシートを読み取り中...",
+    "receiptReviewTitle": "アイテムを確認",
+    "receiptReviewDesc": "パントリーに追加する前に、レシートで見つかったアイテムを確認してください",
+    "receiptRejectedLines": "{{count}} 件の非アイテム行をスキップしました（税金、合計、割引など）",
+    "confidenceHigh": "高い信頼度",
+    "confidenceMedium": "中程度の信頼度",
+    "confidenceLow": "低い信頼度",
+    "addSelectedItems": "{{count}} 件のアイテムをパントリーに追加",
+    "qtyPlaceholder": "数量"
   },
   "mission": {
     "welcomeTitle": "GroceryGeniusへようこそ！🎉",
@@ -523,6 +533,9 @@
     "addedToShoppingList": "{{name}} をショッピングリストに追加しました！",
     "failedAddItemSimple": "アイテムの追加に失敗しました",
     "failedAddSomeItems": "一部のアイテムの追加に失敗しました",
+    "noReceiptItemsDetected": "レシートにアイテムが見つかりませんでした。より鮮明で明るい写真をお試しください。",
+    "failedAnalyzeReceipt": "レシートの解析に失敗しました。もう一度お試しください。",
+    "receiptMissingQuantity": "パントリーに追加する前に、{{count}} 件のアイテムの数量を入力してください。",
     "alreadyHaveIngredients": "すべての食材がすでにあります！"
   },
   "survey": {

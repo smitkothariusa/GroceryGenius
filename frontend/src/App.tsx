@@ -74,6 +74,18 @@ interface ShoppingItem {
   priority?: 'high' | 'medium' | 'low';
 }
 
+interface ReceiptItem {
+  id: string;
+  name: string;
+  quantity: number | null;
+  unit: string;
+  category: string;
+  confidence: 'high' | 'medium' | 'low';
+  rawText: string;
+  selected: boolean;
+  emoji?: string;
+}
+
 interface Recipe {
   name: string;
   ingredients: string;
@@ -188,11 +200,15 @@ const App: React.FC = () => {
   const [isCustomUnit, setIsCustomUnit] = useState(false);
   const [editCustomUnit, setEditCustomUnit] = useState('');
   const [isEditCustomUnit, setIsEditCustomUnit] = useState(false);
-  const [scanMode, setScanMode] = useState<'menu' | 'camera' | 'barcode' | 'expiry' | 'upload'>('menu');
+  const [scanMode, setScanMode] = useState<'menu' | 'camera' | 'barcode' | 'expiry' | 'upload' | 'receipt'>('menu');
   const [barcodeScanning, setBarcodeScanning] = useState(false);
   const [expiryScanning, setExpiryScanning] = useState(false);
+  const [receiptScanning, setReceiptScanning] = useState(false);
   const [detectedBarcode, setDetectedBarcode] = useState<string>('');
   const [detectedExpiry, setDetectedExpiry] = useState<string>('');
+  const [receiptItems, setReceiptItems] = useState<ReceiptItem[]>([]);
+  const [showReceiptReview, setShowReceiptReview] = useState(false);
+  const [receiptRejectedCount, setReceiptRejectedCount] = useState(0);
   const [showMissionPopup, setShowMissionPopup] = useState(false);
   const [showTour, setShowTour] = useState(false);
   const [tourStep, setTourStep] = useState(0);
@@ -2378,6 +2394,169 @@ const App: React.FC = () => {
       setRecipeLoading(false);
       // Reset file input
       e.target.value = '';
+    }
+  };
+  const analyzeReceiptImage = async (canvas: HTMLCanvasElement) => {
+    setRecipeLoading(true);
+    try {
+      const blob: Blob | null = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.92));
+      if (!blob) {
+        throw new Error('Failed to capture image from camera');
+      }
+
+      const formData = new FormData();
+      formData.append('file', blob, 'receipt.jpg');
+
+      const response = await authFetch(`${API_BASE}/vision/analyze-receipt`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.items?.length > 0) {
+        setReceiptItems(data.items.map((item: any) => {
+          const matchedFood = searchFoods(item.name, i18n.language || 'en', 1)[0];
+          return {
+            id: `${Date.now()}-${Math.random()}`,
+            name: item.name,
+            quantity: item.quantity ?? null,
+            unit: item.unit,
+            category: item.category,
+            confidence: item.confidence,
+            rawText: item.raw_text || '',
+            selected: item.confidence !== 'low',
+            emoji: matchedFood?.emoji,
+          };
+        }));
+        setReceiptRejectedCount(data.rejected_lines_count || 0);
+        setShowReceiptReview(true);
+      } else {
+        warning(t('toasts.noReceiptItemsDetected'));
+      }
+    } catch (err) {
+      console.error('Receipt analysis error:', err);
+      error(t('toasts.failedAnalyzeReceipt'));
+    } finally {
+      setRecipeLoading(false);
+      setShowImageUpload(false);
+    }
+  };
+  const handleReceiptScanner = async () => {
+    try {
+      setReceiptScanning(true);
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+      });
+
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.autoplay = true;
+      video.playsInline = true;
+
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;';
+
+      video.style.cssText = 'max-width:90%;max-height:60vh;border-radius:12px;';
+
+      const instructions = document.createElement('div');
+      instructions.style.cssText = 'color:white;text-align:center;margin-bottom:1rem;font-size:1.1rem;font-weight:600;';
+      instructions.innerHTML = '🧾 Position the receipt in frame';
+
+      const buttonContainer = document.createElement('div');
+      buttonContainer.style.cssText = 'display:flex;gap:1rem;margin-top:1rem;';
+
+      const captureBtn = document.createElement('button');
+      captureBtn.textContent = '📸 Scan Receipt';
+      captureBtn.style.cssText = 'padding:1rem 2rem;background:#ec4899;color:white;border:none;border-radius:12px;font-weight:600;cursor:pointer;font-size:1rem;';
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.style.cssText = 'padding:1rem 2rem;background:#ef4444;color:white;border:none;border-radius:12px;font-weight:600;cursor:pointer;font-size:1rem;';
+
+      const cleanup = () => {
+        stream.getTracks().forEach(track => track.stop());
+        document.body.removeChild(modal);
+        setReceiptScanning(false);
+        setShowImageUpload(false);
+        setScanMode('menu');
+      };
+
+      captureBtn.onclick = async () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(video, 0, 0);
+
+        cleanup();
+        await analyzeReceiptImage(canvas);
+      };
+
+      cancelBtn.onclick = cleanup;
+
+      modal.appendChild(instructions);
+      modal.appendChild(video);
+      buttonContainer.appendChild(captureBtn);
+      buttonContainer.appendChild(cancelBtn);
+      modal.appendChild(buttonContainer);
+      document.body.appendChild(modal);
+
+    } catch (err) {
+      console.error('Camera access error:', err);
+      error(t('toasts.cameraAccessDenied'));
+      setReceiptScanning(false);
+    }
+  };
+  const confirmReceiptItems = async () => {
+    const selected = receiptItems.filter(item => item.selected);
+    if (selected.length === 0) {
+      setShowReceiptReview(false);
+      setReceiptItems([]);
+      setScanMode('menu');
+      return;
+    }
+
+    const missingQuantity = selected.filter(item => !item.quantity || item.quantity <= 0);
+    if (missingQuantity.length > 0) {
+      warning(t('toasts.receiptMissingQuantity', { count: missingQuantity.length }));
+      return;
+    }
+
+    try {
+      const savedItems = await Promise.all(selected.map(item =>
+        pantryService.add({
+          name: item.name,
+          quantity: item.quantity as number,
+          unit: item.unit,
+          category: item.category,
+          emoji: item.emoji,
+        })
+      ));
+      setPantry(prev => [...prev, ...savedItems.map(item => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        category: item.category,
+        expiryDate: item.expiry_date || undefined,
+        emoji: item.emoji || undefined,
+      }))]);
+      success(t('toasts.addedItemsToPantry', { count: savedItems.length }));
+      setCurrentTab('pantry');
+    } catch (err) {
+      console.error('Failed to save receipt items:', err);
+      error(t('toasts.failedAddSomeItems'));
+    } finally {
+      setShowReceiptReview(false);
+      setReceiptItems([]);
+      setReceiptRejectedCount(0);
+      setScanMode('menu');
     }
   };
   const requestUserLocation = () => {
@@ -6275,7 +6454,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               marginTop: 0,
               fontSize: isMobile ? '1.25rem' : '1.5rem'
             }}>
-              {scanMode === 'menu' ? `📷 ${t('scan.scanItems')}` : scanMode === 'barcode' ? `📊 ${t('scan.barcodeScanner')}` : scanMode === 'expiry' ? `📅 ${t('scan.expiryDateScanner')}` : `📷 ${t('scan.aiScanner')}`}
+              {scanMode === 'menu' ? `📷 ${t('scan.scanItems')}` : scanMode === 'barcode' ? `📊 ${t('scan.barcodeScanner')}` : scanMode === 'expiry' ? `📅 ${t('scan.expiryDateScanner')}` : scanMode === 'receipt' ? `🧾 ${t('scan.receiptUploadTitle')}` : `📷 ${t('scan.aiScanner')}`}
             </h3>
             <p style={{ color: mutedText, fontSize: isMobile ? '0.875rem' : '1rem' }}>
               {scanMode === 'menu' && (cameraSource === 'pantry'
@@ -6285,6 +6464,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               {scanMode === 'barcode' && t('scan.barcodeScannerDesc')}
               {scanMode === 'expiry' && t('scan.expiryScannerDesc')}
               {scanMode === 'upload' && t('scan.aiScannerDesc')}
+              {scanMode === 'receipt' && t('scan.receiptUploadDesc')}
             </p>
 
             {recipeLoading && (
@@ -6299,6 +6479,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 <div style={{ fontWeight: '600', color: '#1e40af' }}>
                   {scanMode === 'barcode' ? t('scan.lookingUp') :
                   scanMode === 'expiry' ? t('scan.readingExpiry') :
+                  scanMode === 'receipt' ? t('scan.readingReceipt') :
                   t('scan.analyzing')}
                 </div>
                 <div style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.5rem' }}>
@@ -6447,6 +6628,42 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   />
                 </label>
 
+                {/* Receipt Scanner Button (pantry only — receipts always add to pantry) */}
+                {cameraSource === 'pantry' && (
+                  <button
+                    onClick={() => {
+                      setScanMode('receipt');
+                      handleReceiptScanner();
+                    }}
+                    disabled={recipeLoading}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '1rem',
+                      background: '#ec4899',
+                      color: 'white',
+                      borderRadius: '8px',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      border: 'none',
+                      opacity: recipeLoading ? 0.5 : 1,
+                      pointerEvents: recipeLoading ? 'none' : 'auto',
+                      fontSize: isMobile ? '0.9rem' : '1rem'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <span style={{ fontSize: '1.5rem' }}>🧾</span>
+                      <div>
+                        <div style={{ fontWeight: '700' }}>{t('scan.receiptUploadTitle')}</div>
+                        <div style={{ fontSize: '0.8rem', opacity: 0.9, fontWeight: '400' }}>
+                          {t('scan.receiptUploadDesc')}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                )}
+
                 <button
                   onClick={() => {
                     setShowImageUpload(false);
@@ -6470,6 +6687,173 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {showReceiptReview && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', zIndex: 1000, padding: isMobile ? '1rem' : 0
+        }}>
+          <div style={{
+            background: cardBg,
+            padding: isMobile ? '1.25rem' : '2rem',
+            borderRadius: isMobile ? '12px' : '16px',
+            maxWidth: isMobile ? '95vw' : '560px',
+            width: isMobile ? '95vw' : '90%',
+            maxHeight: '85vh',
+            display: 'flex',
+            flexDirection: 'column',
+            animation: 'scaleIn 0.3s ease-out'
+          }}>
+            <h3 style={{ marginTop: 0, fontSize: isMobile ? '1.15rem' : '1.4rem' }}>
+              🧾 {t('scan.receiptReviewTitle')}
+            </h3>
+            <p style={{ color: mutedText, fontSize: isMobile ? '0.85rem' : '0.95rem', marginTop: 0 }}>
+              {t('scan.receiptReviewDesc')}
+            </p>
+            {receiptRejectedCount > 0 && (
+              <p style={{ color: mutedText, fontSize: '0.8rem', marginTop: '-0.5rem' }}>
+                {t('scan.receiptRejectedLines', { count: receiptRejectedCount })}
+              </p>
+            )}
+
+            <div style={{ overflowY: 'auto', flex: 1, margin: '0.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {receiptItems.length === 0 && (
+                <p style={{ color: mutedText, textAlign: 'center', padding: '1rem' }}>
+                  {t('toasts.noReceiptItemsDetected')}
+                </p>
+              )}
+              {receiptItems.map(item => {
+                const confidenceColor = item.confidence === 'high' ? '#10b981' : item.confidence === 'medium' ? '#f59e0b' : '#ef4444';
+                const categoryEmoji: Record<string, string> = {
+                  produce: '🥬', dairy: '🥛', meat: '🍖', canned: '🥫', grains: '🌾',
+                  breakfast: '🥞', beverages: '🥤', snacks: '🍿', frozen: '🧊',
+                  bakery: '🍞', condiments: '🧂', other: '📦'
+                };
+                const displayEmoji = item.emoji || categoryEmoji[item.category] || '📦';
+                const needsQuantity = item.selected && (item.quantity === null || item.quantity <= 0);
+                return (
+                  <div key={item.id} style={{
+                    border: `1px solid ${item.selected ? confidenceColor : '#e5e7eb'}`,
+                    borderRadius: '10px',
+                    padding: '0.75rem',
+                    opacity: item.selected ? 1 : 0.55,
+                    background: '#fafafa'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
+                      <input
+                        type="checkbox"
+                        checked={item.selected}
+                        onChange={(e) => setReceiptItems(prev => prev.map(it =>
+                          it.id === item.id ? { ...it, selected: e.target.checked } : it
+                        ))}
+                        style={{ marginTop: '0.6rem', width: '18px', height: '18px', cursor: 'pointer', flexShrink: 0 }}
+                      />
+                      <span style={{ fontSize: '1.4rem', marginTop: '0.3rem', flexShrink: 0 }}>{displayEmoji}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                          <input
+                            type="text"
+                            value={item.name}
+                            onChange={(e) => setReceiptItems(prev => prev.map(it =>
+                              it.id === item.id ? { ...it, name: e.target.value } : it
+                            ))}
+                            style={{
+                              flex: 1, padding: '0.5rem', border: '1px solid #e5e7eb',
+                              borderRadius: '6px', fontSize: '0.9rem', fontWeight: 600, minWidth: 0
+                            }}
+                          />
+                          <span title={t(`scan.confidence${item.confidence.charAt(0).toUpperCase()}${item.confidence.slice(1)}`)} style={{
+                            fontSize: '0.7rem', fontWeight: 700, color: confidenceColor,
+                            border: `1px solid ${confidenceColor}`, borderRadius: '999px',
+                            padding: '0.15rem 0.5rem', whiteSpace: 'nowrap', flexShrink: 0
+                          }}>
+                            {t(`scan.confidence${item.confidence.charAt(0).toUpperCase()}${item.confidence.slice(1)}`)}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={item.quantity ?? ''}
+                            placeholder={t('scan.qtyPlaceholder')}
+                            onChange={(e) => setReceiptItems(prev => prev.map(it =>
+                              it.id === item.id ? { ...it, quantity: e.target.value === '' ? null : parseFloat(e.target.value) } : it
+                            ))}
+                            style={{
+                              width: '70px', padding: '0.4rem',
+                              border: needsQuantity ? '1px solid #ef4444' : '1px solid #e5e7eb',
+                              background: needsQuantity ? '#fef2f2' : 'white',
+                              borderRadius: '6px', fontSize: '0.85rem'
+                            }}
+                          />
+                          <input
+                            type="text"
+                            value={item.unit}
+                            onChange={(e) => setReceiptItems(prev => prev.map(it =>
+                              it.id === item.id ? { ...it, unit: e.target.value } : it
+                            ))}
+                            style={{ width: '70px', padding: '0.4rem', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '0.85rem' }}
+                          />
+                          <select
+                            value={item.category}
+                            onChange={(e) => setReceiptItems(prev => prev.map(it =>
+                              it.id === item.id ? { ...it, category: e.target.value } : it
+                            ))}
+                            style={{ flex: 1, padding: '0.4rem', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '0.85rem', cursor: 'pointer', minWidth: '110px' }}
+                          >
+                            <option value="produce">🥬 {t('pantry.categories.produce')}</option>
+                            <option value="dairy">🥛 {t('pantry.categories.dairy')}</option>
+                            <option value="meat">🍖 {t('pantry.categories.meat')}</option>
+                            <option value="canned">🥫 {t('pantry.categories.canned')}</option>
+                            <option value="grains">🌾 {t('pantry.categories.grains')}</option>
+                            <option value="breakfast">🥞 {t('pantry.categories.breakfast')}</option>
+                            <option value="beverages">🥤 {t('pantry.categories.beverages')}</option>
+                            <option value="snacks">🍿 {t('pantry.categories.snacks')}</option>
+                            <option value="frozen">🧊 {t('pantry.categories.frozen')}</option>
+                            <option value="bakery">🍞 {t('pantry.categories.bakery')}</option>
+                            <option value="condiments">🧂 {t('pantry.categories.condiments')}</option>
+                            <option value="other">📦 {t('pantry.categories.other')}</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button
+                onClick={() => {
+                  setShowReceiptReview(false);
+                  setReceiptItems([]);
+                  setReceiptRejectedCount(0);
+                  setScanMode('menu');
+                }}
+                style={{
+                  flex: 1, padding: '0.85rem', background: '#f3f4f6', border: 'none',
+                  borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: isMobile ? '0.9rem' : '1rem'
+                }}
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={confirmReceiptItems}
+                disabled={receiptItems.filter(i => i.selected).length === 0}
+                style={{
+                  flex: 2, padding: '0.85rem', background: '#8b5cf6', color: 'white', border: 'none',
+                  borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: isMobile ? '0.9rem' : '1rem',
+                  opacity: receiptItems.filter(i => i.selected).length === 0 ? 0.5 : 1
+                }}
+              >
+                {t('scan.addSelectedItems', { count: receiptItems.filter(i => i.selected).length })}
+              </button>
+            </div>
           </div>
         </div>
       )}

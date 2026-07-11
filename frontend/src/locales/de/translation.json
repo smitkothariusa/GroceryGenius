@@ -52,7 +52,8 @@
       "pantryItems": "Vorratsartikel",
       "beverages": "Getränke",
       "snacks": "Snacks",
-      "bakery": "Bäckerei"
+      "bakery": "Bäckerei",
+      "condiments": "Gewürze"
     },
     "units": {
       "pieces": "Stücke",
@@ -451,8 +452,17 @@
     "expiryScannerDesc": "Zeigen Sie auf ein Ablaufdatum um es automatisch zu erfassen",
     "aiScannerTitle": "KI-Artikel-Scanner",
     "aiScannerDesc": "Machen Sie ein Foto eines Lebensmittels für die KI-Identifikation",
-    "receiptUploadTitle": "Kassenbon hochladen",
-    "receiptUploadDesc": "Laden Sie einen Kassenbon hoch um mehrere Artikel auf einmal hinzuzufügen"
+    "receiptUploadTitle": "Kassenbon-Scanner",
+    "receiptUploadDesc": "Scannen Sie einen Kassenbon mit Ihrer Kamera, um automatisch mehrere Artikel auf einmal hinzuzufügen",
+    "readingReceipt": "Kassenbon wird gelesen...",
+    "receiptReviewTitle": "Artikel überprüfen",
+    "receiptReviewDesc": "Bestätigen Sie die auf Ihrem Kassenbon gefundenen Artikel, bevor sie zur Speisekammer hinzugefügt werden",
+    "receiptRejectedLines": "{{count}} Nicht-Artikel-Zeilen übersprungen (Steuern, Summen, Rabatte usw.)",
+    "confidenceHigh": "Hohe Zuverlässigkeit",
+    "confidenceMedium": "Mittlere Zuverlässigkeit",
+    "confidenceLow": "Niedrige Zuverlässigkeit",
+    "addSelectedItems": "{{count}} Artikel zur Speisekammer hinzufügen",
+    "qtyPlaceholder": "Menge"
   },
   "mission": {
     "welcomeTitle": "Willkommen bei GroceryGenius! 🎉",
@@ -523,6 +533,9 @@
     "addedToShoppingList": "{{name}} zur Einkaufsliste hinzugefügt!",
     "failedAddItemSimple": "Artikel konnte nicht hinzugefügt werden",
     "failedAddSomeItems": "Einige Artikel konnten nicht hinzugefügt werden",
+    "noReceiptItemsDetected": "Keine Artikel auf dem Kassenbon erkannt. Versuchen Sie ein klareres Foto mit besserer Beleuchtung.",
+    "failedAnalyzeReceipt": "Kassenbon konnte nicht analysiert werden. Bitte versuchen Sie es erneut.",
+    "receiptMissingQuantity": "Bitte geben Sie eine Menge für {{count}} Artikel ein, bevor Sie sie zur Speisekammer hinzufügen.",
     "alreadyHaveIngredients": "Du hast bereits alle Zutaten!"
   },
   "survey": {

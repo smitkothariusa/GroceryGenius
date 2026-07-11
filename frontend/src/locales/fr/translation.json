@@ -52,7 +52,8 @@
       "pantryItems": "Articles de Garde-manger",
       "beverages": "Boissons",
       "snacks": "Snacks",
-      "bakery": "Boulangerie"
+      "bakery": "Boulangerie",
+      "condiments": "Condiments"
     },
     "units": {
       "pieces": "pièces",
@@ -451,8 +452,17 @@
     "expiryScannerDesc": "Pointez vers une date de péremption pour la capturer",
     "aiScannerTitle": "Scanner d'articles IA",
     "aiScannerDesc": "Prenez une photo d'un aliment pour une identification par IA",
-    "receiptUploadTitle": "Téléchargement de reçu",
-    "receiptUploadDesc": "Téléchargez un reçu pour ajouter plusieurs articles à la fois"
+    "receiptUploadTitle": "Scanner de reçu",
+    "receiptUploadDesc": "Scannez un reçu avec votre caméra pour ajouter automatiquement plusieurs articles à la fois",
+    "readingReceipt": "Lecture du reçu...",
+    "receiptReviewTitle": "Vérifier les articles",
+    "receiptReviewDesc": "Confirmez les articles trouvés sur votre reçu avant de les ajouter à votre garde-manger",
+    "receiptRejectedLines": "{{count}} lignes non-articles ignorées (taxes, totaux, remises, etc.)",
+    "confidenceHigh": "Confiance élevée",
+    "confidenceMedium": "Confiance moyenne",
+    "confidenceLow": "Confiance faible",
+    "addSelectedItems": "Ajouter {{count}} articles au garde-manger",
+    "qtyPlaceholder": "qté"
   },
   "mission": {
     "welcomeTitle": "Bienvenue sur GroceryGenius! 🎉",
@@ -523,6 +533,9 @@
     "addedToShoppingList": "{{name}} ajouté à la liste de courses !",
     "failedAddItemSimple": "Échec de l'ajout de l'article",
     "failedAddSomeItems": "Échec de l'ajout de certains articles",
+    "noReceiptItemsDetected": "Aucun article détecté sur le reçu. Essayez une photo plus claire avec un meilleur éclairage.",
+    "failedAnalyzeReceipt": "Échec de l'analyse du reçu. Veuillez réessayer.",
+    "receiptMissingQuantity": "Veuillez saisir une quantité pour {{count}} article(s) avant de les ajouter au garde-manger.",
     "alreadyHaveIngredients": "Vous avez déjà tous les ingrédients !"
   },
   "survey": {

@@ -1,4 +1,5 @@
-﻿import { defineConfig } from 'vite';
+﻿/// <reference types="vitest/config" />
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
@@ -54,5 +55,16 @@ export default defineConfig({
     alias: {
       '@': '/src'
     }
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    // Dummy values only -- src/lib/supabase.ts throws at import time if these
+    // are unset, and CI has no real Supabase env vars for the frontend job.
+    // Not secrets: no live project is reachable at this URL/key.
+    env: {
+      VITE_SUPABASE_URL: 'https://test.supabase.co',
+      VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+    },
   }
 });

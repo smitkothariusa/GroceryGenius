@@ -52,7 +52,8 @@
       "pantryItems": "Artículos de Despensa",
       "beverages": "Bebidas",
       "snacks": "Aperitivos",
-      "bakery": "Panadería"
+      "bakery": "Panadería",
+      "condiments": "Condimentos"
     },
     "units": {
       "pieces": "piezas",
@@ -452,7 +453,15 @@
     "aiScannerTitle": "Escáner de artículos IA",
     "aiScannerDesc": "Toma una foto de cualquier alimento para identificación por IA",
     "receiptUploadTitle": "Subir recibo",
-    "receiptUploadDesc": "Sube un recibo de compras para agregar múltiples artículos"
+    "receiptUploadDesc": "Sube un recibo de compras para agregar múltiples artículos",
+    "readingReceipt": "Leyendo el recibo...",
+    "receiptReviewTitle": "Revisar artículos",
+    "receiptReviewDesc": "Confirma los artículos encontrados en tu recibo antes de agregarlos a tu despensa",
+    "receiptRejectedLines": "Se omitieron {{count}} líneas que no son artículos (impuestos, totales, descuentos, etc.)",
+    "confidenceHigh": "Confianza alta",
+    "confidenceMedium": "Confianza media",
+    "confidenceLow": "Confianza baja",
+    "addSelectedItems": "Añadir {{count}} artículos a la despensa"
   },
   "mission": {
     "welcomeTitle": "¡Bienvenido a GroceryGenius! 🎉",
@@ -523,6 +532,8 @@
     "addedToShoppingList": "¡{{name}} agregado a la lista de compras!",
     "failedAddItemSimple": "Error al agregar el artículo",
     "failedAddSomeItems": "Error al agregar algunos artículos",
+    "noReceiptItemsDetected": "No se detectaron artículos en el recibo. Prueba con una foto más clara y mejor iluminación.",
+    "failedAnalyzeReceipt": "Error al analizar el recibo. Inténtalo de nuevo.",
     "alreadyHaveIngredients": "¡Ya tienes todos los ingredientes!"
   },
   "survey": {

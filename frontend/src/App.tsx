@@ -6999,7 +6999,13 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             </div>
             
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('calorieTracker.dailyGoal')}</label>
-            <input type="number" value={dailyCalorieGoal} onChange={(e) => setDailyCalorieGoal(Number(e.target.value))}
+            <input type="number" value={dailyCalorieGoal} onChange={(e) => {
+                const newGoal = Number(e.target.value);
+                setDailyCalorieGoal(newGoal);
+                // Keep the Settings panel's copy in sync — it reads from
+                // userProfile, which this control otherwise never touches.
+                setUserProfile(prev => prev ? { ...prev, daily_calorie_goal: newGoal } : prev);
+              }}
               style={{ width: '100%', padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '8px', marginBottom: '1rem', boxSizing: 'border-box' }} />
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button onClick={async () => {

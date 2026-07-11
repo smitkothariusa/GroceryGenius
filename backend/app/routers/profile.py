@@ -45,6 +45,7 @@ async def generate_dietary_label(request: Request, payload: DietaryLabelRequest,
             user_prompt=text,
             max_tokens=120,
             temperature=0.3,
+            route="profile.generate_dietary_label",
         )
         data = json.loads(raw)
         return DietaryLabelResponse(

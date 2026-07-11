@@ -69,7 +69,7 @@ def _map_off_category(categories_tags: list) -> str:
     return "other"
 
 
-async def _ai_clean_name(barcode: str, raw_name: str = None) -> dict:
+async def _ai_clean_name(barcode: str, raw_name: str = None, route: str = "barcode._ai_clean_name") -> dict:
     """Use GPT-4o to identify or clean a product name from a barcode number."""
     client = _openai_client()
 
@@ -109,12 +109,12 @@ async def _ai_clean_name(barcode: str, raw_name: str = None) -> dict:
         temperature=0.1,
         max_tokens=100,
     )
-    log_openai_usage(response.model, (time.perf_counter() - start) * 1000, response.usage)
+    log_openai_usage(response.model, (time.perf_counter() - start) * 1000, response.usage, route=route)
 
     return json.loads(response.choices[0].message.content)
 
 
-async def _lookup_product_by_number(barcode: str) -> dict:
+async def _lookup_product_by_number(barcode: str, route: str = "barcode._lookup_product_by_number") -> dict:
     """
     Look up a product by its barcode number.
     1. Try Open Food Facts (free, no key, huge food database)
@@ -144,7 +144,7 @@ async def _lookup_product_by_number(barcode: str) -> dict:
                     or product.get("generic_name")
                 )
                 if raw_name and raw_name.strip():
-                    ai = await _ai_clean_name(barcode, raw_name)
+                    ai = await _ai_clean_name(barcode, raw_name, route=route)
                     category = ai.get("category") or _map_off_category(
                         product.get("categories_tags") or []
                     )
@@ -161,7 +161,7 @@ async def _lookup_product_by_number(barcode: str) -> dict:
 
     # --- GPT-4o fallback ---
     try:
-        ai = await _ai_clean_name(barcode)
+        ai = await _ai_clean_name(barcode, route=route)
         logger.debug("GPT-4o identified: '%s' (confidence: %s)", ai.get("name"), ai.get("confidence"))
         return {
             "barcode": barcode,
@@ -254,7 +254,7 @@ async def vision_barcode_lookup(request: Request, payload: BarcodeImageRequest):
                 max_tokens=30,
                 temperature=0,
             )
-            log_openai_usage(vision_resp.model, (time.perf_counter() - start) * 1000, vision_resp.usage)
+            log_openai_usage(vision_resp.model, (time.perf_counter() - start) * 1000, vision_resp.usage, route="barcode.vision_barcode_lookup")
             raw = vision_resp.choices[0].message.content.strip()
             digits_only = "".join(c for c in raw if c.isdigit())
             if len(digits_only) >= 8:
@@ -273,7 +273,7 @@ async def vision_barcode_lookup(request: Request, payload: BarcodeImageRequest):
             }
 
         # --- Stage 2: Look up product by the decoded number ---
-        result = await _lookup_product_by_number(barcode_number)
+        result = await _lookup_product_by_number(barcode_number, route="barcode.vision_barcode_lookup")
         result["source"] = "vision"
         return result
 
@@ -289,7 +289,7 @@ async def vision_barcode_lookup(request: Request, payload: BarcodeImageRequest):
 async def ai_barcode_lookup(request: Request, payload: BarcodeRequest):
     """Look up a product by its barcode number (Open Food Facts → GPT-4o)."""
     try:
-        result = await _lookup_product_by_number(payload.barcode)
+        result = await _lookup_product_by_number(payload.barcode, route="barcode.ai_barcode_lookup")
         result["source"] = "ai"
         return result
     except Exception as e:

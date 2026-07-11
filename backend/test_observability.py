@@ -122,12 +122,71 @@ def test_openai_usage_logged_with_cost(caplog):
 
     with caplog.at_level(logging.INFO, logger="app.services.openai_client"):
         openai_client.log_openai_usage(
-            "gpt-4o-mini", 123.4, {"prompt_tokens": 1000, "completion_tokens": 500}
+            "gpt-4o-mini", 123.4, {"prompt_tokens": 1000, "completion_tokens": 500},
+            route="recipes.generate_recipes",
         )
 
     line = next(r.getMessage() for r in caplog.records if "openai call" in r.getMessage())
+    assert "route=recipes.generate_recipes" in line
     assert "model=gpt-4o-mini" in line
     assert "prompt_tokens=1000" in line
     assert "completion_tokens=500" in line
+    assert "total_tokens=1500" in line
     # 1000 * 0.15/1M + 500 * 0.60/1M = 0.00045
     assert "est_cost_usd=0.000450" in line
+
+
+def test_openai_usage_logged_without_route_defaults_to_dash(caplog):
+    """route is optional — callers that omit it still produce a valid, parseable log line."""
+    from app.services import openai_client
+
+    with caplog.at_level(logging.INFO, logger="app.services.openai_client"):
+        openai_client.log_openai_usage(
+            "gpt-4o", 50.0, {"prompt_tokens": 10, "completion_tokens": 5}
+        )
+
+    line = next(r.getMessage() for r in caplog.records if "openai call" in r.getMessage())
+    assert "route=-" in line
+    assert "model=gpt-4o" in line
+
+
+def test_call_chat_completion_logs_calling_route(caplog):
+    """call_chat_completion propagates its `route` kwarg through to the usage log line."""
+    from app.services import openai_client
+
+    url = openai_client.OPENAI_CHAT_URL
+
+    class FakeClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *exc):
+            return False
+
+        async def post(self, *args, **kwargs):
+            return httpx.Response(
+                200,
+                json={
+                    "model": "gpt-4o-mini",
+                    "usage": {"prompt_tokens": 20, "completion_tokens": 10, "total_tokens": 30},
+                    "choices": [{"message": {"content": "ok"}}],
+                },
+                request=httpx.Request("POST", url),
+            )
+
+    with caplog.at_level(logging.INFO, logger="app.services.openai_client"), \
+         patch.object(openai_client.httpx, "AsyncClient", FakeClient):
+        result = asyncio.run(
+            openai_client.call_chat_completion(
+                "system", "user", route="pantry.match_ingredients"
+            )
+        )
+
+    assert result == "ok"
+    line = next(r.getMessage() for r in caplog.records if "openai call" in r.getMessage())
+    assert "route=pantry.match_ingredients" in line
+    assert "model=gpt-4o-mini" in line
+    assert "total_tokens=30" in line

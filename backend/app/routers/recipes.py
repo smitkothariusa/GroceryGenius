@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, field_validator
 from app.services.auth import limiter, AI_HEAVY_LIMIT, AI_LIGHT_LIMIT
 from app.services.openai_client import call_chat_completion
 from app.services.recipe_parser import parse_recipes_text
+from app.services.ingredient_parsing import clean_ingredient_lines, strip_json_code_fences
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +109,7 @@ CRITICAL: Return ONLY a valid JSON array with this exact structure:
 ]"""
 
     try:
-        raw = await call_chat_completion(system_prompt, user_prompt, max_tokens=4000, temperature=0.7)
+        raw = await call_chat_completion(system_prompt, user_prompt, max_tokens=4000, temperature=0.7, route="recipes.generate_recipes")
         recipes = parse_recipes_text(raw, expected=3)
         
         # Ensure we have exactly 3 recipes
@@ -151,7 +152,7 @@ async def translate_recipe_names(request: Request, payload: TranslateNamesReques
     system = f"You are a translator. Translate recipe names to {lang_name}. Keep them as proper recipe names (not literal translations if that sounds unnatural). Return ONLY a numbered list in the same order, one name per line, with no extra text."
     user = f"Translate these recipe names to {lang_name}:\n{names_list}"
     try:
-        raw = await call_chat_completion(system, user, max_tokens=500, temperature=0.3)
+        raw = await call_chat_completion(system, user, max_tokens=500, temperature=0.3, route="recipes.translate_recipe_names")
         lines = [l.strip() for l in raw.strip().splitlines() if l.strip()]
         # Strip numbering from lines like "1. Nombre"
         translated = []
@@ -210,7 +211,7 @@ async def translate_full_recipes(request: Request, payload: TranslateFullRecipes
         )
         user = f"Translate these recipe fields to {lang_name}:\n{json.dumps(fields_to_translate, ensure_ascii=False)}"
         try:
-            raw = await call_chat_completion(system, user, max_tokens=2000, temperature=0.3)
+            raw = await call_chat_completion(system, user, max_tokens=2000, temperature=0.3, route="recipes.translate_full_recipes")
             raw = raw.strip()
             if raw.startswith("```"):
                 raw = raw.split("```")[1]
@@ -231,7 +232,7 @@ class IngredientParseRequest(BaseModel):
 @limiter.limit(AI_LIGHT_LIMIT)
 async def parse_ingredients(request: Request, payload: IngredientParseRequest):
     """Use AI to parse raw ingredient lines into structured name/quantity/unit objects."""
-    lines = [l.strip() for l in payload.lines if l.strip()]
+    lines = clean_ingredient_lines(payload.lines)
     if not lines:
         return []
 
@@ -252,8 +253,8 @@ async def parse_ingredients(request: Request, payload: IngredientParseRequest):
     user_prompt = "\n".join(lines)
 
     try:
-        raw = await call_chat_completion(system_prompt, user_prompt, max_tokens=2000, temperature=0.1)
-        raw = raw.replace("```json", "").replace("```", "").strip()
+        raw = await call_chat_completion(system_prompt, user_prompt, max_tokens=2000, temperature=0.1, route="recipes.parse_ingredients")
+        raw = strip_json_code_fences(raw)
         items = json.loads(raw)
         return items
     except Exception:

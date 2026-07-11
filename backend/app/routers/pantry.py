@@ -7,6 +7,7 @@ import logging
 import json
 from app.services.auth import limiter, AI_LIGHT_LIMIT
 from app.services.openai_client import call_chat_completion
+from app.services.ingredient_parsing import clean_ingredient_lines, strip_json_code_fences
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ class MatchIngredientsRequest(BaseModel):
 @limiter.limit(AI_LIGHT_LIMIT)
 async def match_ingredients(request: Request, payload: MatchIngredientsRequest):
     """AI-match recipe ingredient lines against pantry items."""
-    lines = [l.strip() for l in payload.ingredient_lines if l.strip()]
+    lines = clean_ingredient_lines(payload.ingredient_lines)
     if not lines or not payload.pantry_items:
         # Still parse ingredients even with no pantry
         return [{"ingredient_name": l, "quantity": None, "unit": None,
@@ -63,8 +64,8 @@ async def match_ingredients(request: Request, payload: MatchIngredientsRequest):
     user_prompt = f"Recipe ingredients:\n{ingredients_text}\n\nPantry items:\n{pantry_text}"
 
     try:
-        raw = await call_chat_completion(system_prompt, user_prompt, max_tokens=2000, temperature=0.1)
-        raw = raw.replace("```json", "").replace("```", "").strip()
+        raw = await call_chat_completion(system_prompt, user_prompt, max_tokens=2000, temperature=0.1, route="pantry.match_ingredients")
+        raw = strip_json_code_fences(raw)
         return json.loads(raw)
     except Exception:
         logger.error("match-ingredients error", exc_info=True)

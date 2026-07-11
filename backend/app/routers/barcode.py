@@ -1,13 +1,16 @@
 # backend/app/routers/barcode.py
 
 from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+import logging
 import os
+import time
 import base64
 import json
 import httpx
 from openai import OpenAI
 from app.services.auth import limiter, AI_LIGHT_LIMIT
+from app.services.openai_client import log_openai_usage
 
 try:
     import zxingcpp
@@ -18,15 +21,22 @@ except Exception:
     # zxingcpp is optional — falls back to GPT-4o vision for digit reading
     ZXING_AVAILABLE = False
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
 
 
+def _openai_client() -> OpenAI:
+    return OpenAI(api_key=os.getenv("OPENAI_API_KEY"), timeout=90.0, max_retries=2)
+
+
 class BarcodeImageRequest(BaseModel):
-    image: str  # base64 encoded image
+    # ~10 MB of base64 characters (≈7.5 MB binary image)
+    image: str = Field(max_length=10_000_000)  # base64 encoded image
 
 
 class BarcodeRequest(BaseModel):
-    barcode: str
+    barcode: str = Field(max_length=32)
 
 
 def _map_off_category(categories_tags: list) -> str:
@@ -58,7 +68,7 @@ def _map_off_category(categories_tags: list) -> str:
 
 async def _ai_clean_name(barcode: str, raw_name: str = None) -> dict:
     """Use GPT-4o to identify or clean a product name from a barcode number."""
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    client = _openai_client()
 
     if raw_name:
         user_msg = (
@@ -69,6 +79,7 @@ async def _ai_clean_name(barcode: str, raw_name: str = None) -> dict:
     else:
         user_msg = f"Barcode: {barcode}\n\nWhat grocery product is this?"
 
+    start = time.perf_counter()
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=[
@@ -95,6 +106,7 @@ async def _ai_clean_name(barcode: str, raw_name: str = None) -> dict:
         temperature=0.1,
         max_tokens=100,
     )
+    log_openai_usage(response.model, (time.perf_counter() - start) * 1000, response.usage)
 
     return json.loads(response.choices[0].message.content)
 
@@ -107,11 +119,19 @@ async def _lookup_product_by_number(barcode: str) -> dict:
     """
     # --- Open Food Facts ---
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            resp = await client.get(
-                f"https://world.openfoodfacts.org/api/v2/product/{barcode}.json"
-            )
-        if resp.status_code == 200:
+        resp = None
+        for attempt in range(2):  # one retry
+            try:
+                async with httpx.AsyncClient(timeout=5.0) as client:
+                    resp = await client.get(
+                        f"https://world.openfoodfacts.org/api/v2/product/{barcode}.json"
+                    )
+                break
+            except (httpx.ConnectError, httpx.TimeoutException) as exc:
+                if attempt == 1:
+                    raise
+                logger.warning("Open Food Facts request failed (%s), retrying", type(exc).__name__)
+        if resp is not None and resp.status_code == 200:
             data = resp.json()
             if data.get("status") == 1 and data.get("product"):
                 product = data["product"]
@@ -126,7 +146,7 @@ async def _lookup_product_by_number(barcode: str) -> dict:
                         product.get("categories_tags") or []
                     )
                     clean = ai.get("name") or raw_name
-                    print(f"✅ OFF: '{raw_name}' → '{clean}'")
+                    logger.debug("OFF match: '%s' -> '%s'", raw_name, clean)
                     return {
                         "barcode": barcode,
                         "name": clean,
@@ -134,20 +154,20 @@ async def _lookup_product_by_number(barcode: str) -> dict:
                         "confidence": "high",
                     }
     except Exception as e:
-        print(f"⚠️ Open Food Facts failed: {e}")
+        logger.warning("Open Food Facts lookup failed: %s", e)
 
     # --- GPT-4o fallback ---
     try:
         ai = await _ai_clean_name(barcode)
-        print(f"✅ GPT-4o identified: '{ai.get('name')}' (confidence: {ai.get('confidence')})")
+        logger.debug("GPT-4o identified: '%s' (confidence: %s)", ai.get("name"), ai.get("confidence"))
         return {
             "barcode": barcode,
             "name": ai.get("name", "Unknown Product"),
             "category": ai.get("category", "other"),
             "confidence": ai.get("confidence", "low"),
         }
-    except Exception as e:
-        print(f"❌ GPT-4o identification failed: {e}")
+    except Exception:
+        logger.error("GPT-4o identification failed", exc_info=True)
         return {
             "barcode": barcode,
             "name": "Unknown Product",
@@ -186,14 +206,15 @@ async def vision_barcode_lookup(request: Request, payload: BarcodeImageRequest):
                     data = r.text
                     if data.isdigit() and len(data) >= 8:
                         barcode_number = data
-                        print(f"✅ zxingcpp decoded: {barcode_number}")
+                        logger.debug("zxingcpp decoded: %s", barcode_number)
                         break
             except Exception as e:
-                print(f"⚠️ zxingcpp failed: {e}")
+                logger.warning("zxingcpp decode failed: %s", e)
 
         # --- Stage 1b: GPT-4o vision — read digits only, not identify product ---
         if not barcode_number:
-            client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            client = _openai_client()
+            start = time.perf_counter()
             vision_resp = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
@@ -222,13 +243,14 @@ async def vision_barcode_lookup(request: Request, payload: BarcodeImageRequest):
                 max_tokens=30,
                 temperature=0,
             )
+            log_openai_usage(vision_resp.model, (time.perf_counter() - start) * 1000, vision_resp.usage)
             raw = vision_resp.choices[0].message.content.strip()
             digits_only = "".join(c for c in raw if c.isdigit())
             if len(digits_only) >= 8:
                 barcode_number = digits_only
-                print(f"✅ GPT-4o vision read digits: {barcode_number}")
+                logger.debug("GPT-4o vision read digits: %s", barcode_number)
             else:
-                print(f"⚠️ GPT-4o could not read digits from image: '{raw}'")
+                logger.warning("GPT-4o could not read digits from image: '%s'", raw)
 
         if not barcode_number:
             return {
@@ -245,7 +267,7 @@ async def vision_barcode_lookup(request: Request, payload: BarcodeImageRequest):
         return result
 
     except Exception as e:
-        print(f"❌ Vision barcode lookup error: {e}")
+        logger.error("Vision barcode lookup error", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Vision lookup failed: {str(e)}")
 
 
@@ -258,5 +280,5 @@ async def ai_barcode_lookup(request: Request, payload: BarcodeRequest):
         result["source"] = "ai"
         return result
     except Exception as e:
-        print(f"❌ AI barcode lookup error: {e}")
+        logger.error("AI barcode lookup error", exc_info=True)
         raise HTTPException(status_code=500, detail=f"AI lookup failed: {str(e)}")

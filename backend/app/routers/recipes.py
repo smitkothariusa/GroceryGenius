@@ -1,16 +1,20 @@
 ﻿# backend/app/routers/recipes.py
 import json
+import logging
 from fastapi import APIRouter, HTTPException, Query, Request
 from typing import List, Optional
-from pydantic import BaseModel
+from typing_extensions import Annotated
+from pydantic import BaseModel, Field
 from app.services.auth import limiter, AI_HEAVY_LIMIT, AI_LIGHT_LIMIT
 from app.services.openai_client import call_chat_completion
 from app.services.recipe_parser import parse_recipes_text
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
 
 class Ingredients(BaseModel):
-    ingredients: List[str]
+    ingredients: List[Annotated[str, Field(max_length=200)]] = Field(max_length=30)
     strict: bool = False
 
 LANGUAGE_NAMES = {
@@ -126,13 +130,13 @@ CRITICAL: Return ONLY a valid JSON array with this exact structure:
         
         return recipes[:3]  # Return exactly 3 recipes
     except Exception as e:
-        print("OpenAI call or parsing error:", e)
+        logger.error("OpenAI call or parsing error", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to generate recipes: {str(e)}")
 
 
 class TranslateNamesRequest(BaseModel):
-    names: List[str]
-    language: str
+    names: List[Annotated[str, Field(max_length=200)]] = Field(max_length=50)
+    language: str = Field(max_length=10)
 
 @router.post("/translate-names", response_model=List[str])
 @limiter.limit(AI_LIGHT_LIMIT)
@@ -159,14 +163,14 @@ async def translate_recipe_names(request: Request, payload: TranslateNamesReques
         while len(translated) < len(payload.names):
             translated.append(payload.names[len(translated)])
         return translated[:len(payload.names)]
-    except Exception as e:
-        print("Translation error:", e)
+    except Exception:
+        logger.error("Translation error", exc_info=True)
         return payload.names
 
 
 class TranslateFullRecipesRequest(BaseModel):
-    recipes: List[dict]
-    language: str
+    recipes: List[dict] = Field(max_length=10)
+    language: str = Field(max_length=10)
 
 @router.post("/translate-full")
 @limiter.limit(AI_HEAVY_LIMIT)
@@ -202,14 +206,14 @@ async def translate_full_recipes(request: Request, payload: TranslateFullRecipes
                     raw = raw[4:]
             translated_fields = json.loads(raw)
             translated_recipes.append({**recipe, **translated_fields})
-        except Exception as e:
-            print("Full recipe translation error:", e)
+        except Exception:
+            logger.error("Full recipe translation error", exc_info=True)
             translated_recipes.append(recipe)
     return translated_recipes
 
 
 class IngredientParseRequest(BaseModel):
-    lines: List[str]
+    lines: List[Annotated[str, Field(max_length=300)]] = Field(max_length=100)
 
 @router.post("/parse-ingredients")
 @limiter.limit(AI_LIGHT_LIMIT)
@@ -240,6 +244,6 @@ async def parse_ingredients(request: Request, payload: IngredientParseRequest):
         raw = raw.replace("```json", "").replace("```", "").strip()
         items = json.loads(raw)
         return items
-    except Exception as e:
-        print(f"Ingredient parse error: {e}")
+    except Exception:
+        logger.error("Ingredient parse error", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to parse ingredients")

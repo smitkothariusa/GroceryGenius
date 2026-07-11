@@ -38,6 +38,7 @@ import { useToast } from './hooks/useToast';
 import { useState, useEffect, useRef } from 'react';
 import { authService, supabase, profileService, CustomDietaryLabel, Profile } from './lib/supabase';
 import { authFetch } from './lib/apiClient';
+import { escapeHtml } from './lib/escapeHtml';
 import { calorieService } from './lib/database';
 import { pantryService, shoppingService, recipesService, mealPlansService, donationService } from './lib/database';
 import Auth from './components/Auth';
@@ -195,7 +196,6 @@ const App: React.FC = () => {
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [customDietaryLabels, setCustomDietaryLabels] = useState<CustomDietaryLabel[]>([]);
   const [savedProfilePrefs, setSavedProfilePrefs] = useState<string[]>([]);
-  const [showDemoConfirm, setShowDemoConfirm] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([]);
   const [favorites, setFavorites] = useState<FavoriteRecipe[]>([]);
@@ -1284,7 +1284,7 @@ const App: React.FC = () => {
       <html>
         <head>
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-          <title>Shopping List - ${new Date().toLocaleDateString()}</title>
+          <title>Shopping List - ${escapeHtml(new Date().toLocaleDateString())}</title>
           <style>
             body { font-family: Arial, sans-serif; padding: 20px; }
             h1 { color: #10b981; }
@@ -1295,12 +1295,12 @@ const App: React.FC = () => {
         </head>
         <body>
           <h1>🛒 Shopping List</h1>
-          <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+          <p><strong>Date:</strong> ${escapeHtml(new Date().toLocaleDateString())}</p>
           <p><strong>Total:</strong> ${shoppingList.length} items (${shoppingList.filter(i => !i.checked).length} remaining)</p>
           <hr>
           ${shoppingList.map(item => `
             <div class="item ${item.checked ? 'checked' : ''}">
-              ${item.checked ? '☑' : '☐'} ${item.quantity} ${item.unit} ${item.name}
+              ${item.checked ? '☑' : '☐'} ${escapeHtml(String(item.quantity))} ${escapeHtml(item.unit)} ${escapeHtml(item.name)}
             </div>
           `).join('')}
         </body>
@@ -1572,137 +1572,6 @@ const App: React.FC = () => {
       console.error('Camera access error:', err);
       error(t('toasts.cameraAccessDenied'));
     }
-  };
-  const loadDemoData = () => {
-    // Demo pantry items
-    const demoPantry: PantryItem[] = [
-      { id: '1', name: 'Rice', quantity: 5, unit: 'lbs', category: 'grains', expiryDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] },
-      { id: '2', name: 'Canned Beans', quantity: 12, unit: 'pc', category: 'canned', expiryDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] },
-      { id: '3', name: 'Pasta', quantity: 3, unit: 'lbs', category: 'grains', expiryDate: new Date(Date.now() + 120 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] },
-      { id: '4', name: 'Canned Tomatoes', quantity: 8, unit: 'pc', category: 'canned', expiryDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] },
-      { id: '5', name: 'Peanut Butter', quantity: 2, unit: 'pc', category: 'pantry', expiryDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] },
-      { id: '6', name: 'Cereal', quantity: 4, unit: 'pc', category: 'breakfast', expiryDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] }
-    ];
-
-    // Demo donation history
-    const demoDonations: DonationRecord[] = [
-      {
-        id: '1',
-        date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        foodBank: 'Foodbank of Southeastern Virginia',
-        totalMeals: 48,
-        items: [
-          { name: 'Rice', quantity: 2, unit: 'lbs', estimatedMeals: 16 },
-          { name: 'Canned Vegetables', quantity: 8, unit: 'pc', estimatedMeals: 16 },
-          { name: 'Pasta', quantity: 2, unit: 'lbs', estimatedMeals: 16 }
-        ]
-      },
-      {
-        id: '2',
-        date: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
-        foodBank: 'Virginia Beach Community Food Pantry',
-        totalMeals: 64,
-        items: [
-          { name: 'Canned Beans', quantity: 12, unit: 'pc', estimatedMeals: 24 },
-          { name: 'Rice', quantity: 3, unit: 'lbs', estimatedMeals: 24 },
-          { name: 'Canned Soup', quantity: 8, unit: 'pc', estimatedMeals: 16 }
-        ]
-      },
-      {
-        id: '3',
-        date: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-        foodBank: 'Hope House Foundation',
-        totalMeals: 72,
-        items: [
-          { name: 'Pasta', quantity: 4, unit: 'lbs', estimatedMeals: 32 },
-          { name: 'Canned Tomatoes', quantity: 10, unit: 'pc', estimatedMeals: 20 },
-          { name: 'Cereal', quantity: 2, unit: 'pc', estimatedMeals: 20 }
-        ]
-      },
-      {
-        id: '4',
-        date: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(),
-        foodBank: 'St. Mary\'s Food Pantry',
-        totalMeals: 56,
-        items: [
-          { name: 'Rice', quantity: 2, unit: 'lbs', estimatedMeals: 16 },
-          { name: 'Peanut Butter', quantity: 3, unit: 'pc', estimatedMeals: 45 },
-          { name: 'Canned Fruit', quantity: 5, unit: 'pc', estimatedMeals: 10 }
-        ]
-      },
-      {
-        id: '5',
-        date: new Date(Date.now() - 50 * 24 * 60 * 60 * 1000).toISOString(),
-        foodBank: 'Chesapeake Care Center',
-        totalMeals: 80,
-        items: [
-          { name: 'Canned Beans', quantity: 15, unit: 'pc', estimatedMeals: 30 },
-          { name: 'Pasta', quantity: 3, unit: 'lbs', estimatedMeals: 24 },
-          { name: 'Canned Vegetables', quantity: 13, unit: 'pc', estimatedMeals: 26 }
-        ]
-      }
-    ];
-
-    // Calculate total impact
-    const totalMeals = demoDonations.reduce((sum, d) => sum + d.totalMeals, 0);
-    const totalPounds = 112; // Estimated
-    const co2Saved = totalPounds * 3.8;
-
-    const demoImpact: DonationImpact = {
-      totalDonations: demoDonations.length,
-      totalMeals: totalMeals,
-      totalPounds: totalPounds,
-      co2Saved: co2Saved,
-      lastDonation: demoDonations[0].date
-    };
-
-    // Demo favorites
-    const demoFavorites: FavoriteRecipe[] = [
-      {
-        id: '1',
-        name: 'Healthy Chicken Stir-Fry',
-        ingredients: '2 chicken breasts\n2 cups broccoli\n1 bell pepper\n2 tbsp soy sauce',
-        instructions: '1. Cut chicken into strips\n2. Stir-fry with vegetables\n3. Add sauce and serve',
-        prep_time: '15 min',
-        cook_time: '20 min',
-        difficulty: 'Easy',
-        servings: 2,
-        nutrition: { calories: 380, protein: 35, carbs: 25, fat: 12, fiber: 6, sodium: 450 },
-        health_benefits: 'High protein, rich in vitamins',
-        budget_tip: 'Buy frozen vegetables in bulk',
-        savedDate: new Date().toISOString()
-      }
-    ];
-
-    setPantry(demoPantry);
-    setDonationHistory(demoDonations);
-    setDonationImpact(demoImpact);
-    setFavorites(demoFavorites);
-    
-    success(t('toasts.demoLoaded'));
-    setShowDemoConfirm(false);
-    setPantry(demoPantry);
-    setDonationHistory(demoDonations);
-    setDonationImpact(demoImpact);
-    setFavorites(demoFavorites);
-    
-    success(t('toasts.demoLoaded'));
-    setShowDemoConfirm(false);
-    
-    // Show mission popup after demo loads
-    setTimeout(() => {
-      setShowMissionPopup(true);
-    }, 500);
-  };
-
-  const clearDemoData = () => {
-    setPantry([]);
-    setDonationHistory([]);
-    setDonationImpact({ totalDonations: 0, totalMeals: 0, totalPounds: 0, co2Saved: 0 });
-    setFavorites([]);
-    setShoppingList([]);
-    setRecipes([]);
-    success(t('toasts.allDataCleared'));
   };
   const lookupBarcodeWithImage = async (imageData: string) => {
     try {
@@ -7347,106 +7216,6 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
         </div>
       )}
       {/* Demo Mode Confirmation */}
-      {showDemoConfirm && (
-        <div 
-          className="modal-backdrop"
-          onClick={() => setShowDemoConfirm(false)}
-          style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', zIndex: 2500
-          }}
-        >
-          <div
-            className="modal-content"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: cardBg,
-              borderRadius: '20px',
-              padding: '2rem',
-              maxWidth: '500px',
-              width: '90%',
-              animation: 'scaleIn 0.3s ease-out'
-            }}
-          >
-            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.75rem' }}>🎬 Demo Mode</h3>
-            <p style={{ color: mutedText, marginBottom: '2rem', lineHeight: '1.6' }}>
-              Load demo data to showcase the app's features with impressive donation statistics. 
-              Perfect for demonstrations!
-            </p>
-
-            <div style={{
-              background: '#f0fdf4',
-              padding: '1rem',
-              borderRadius: '12px',
-              marginBottom: '2rem',
-              border: '1px solid #86efac'
-            }}>
-              <div style={{ fontSize: '0.875rem', color: '#166534', fontWeight: '600', marginBottom: '0.5rem' }}>
-                Demo data includes:
-              </div>
-              <ul style={{ margin: 0, paddingLeft: '1.5rem', color: '#166534', fontSize: '0.875rem' }}>
-                <li>427 meals donated across 23 donations</li>
-                <li>112 lbs of food saved</li>
-                <li>425 lbs of CO₂ prevented</li>
-                <li>Sample pantry items and donation history</li>
-              </ul>
-            </div>
-
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <button
-                onClick={() => setShowDemoConfirm(false)}
-                style={{
-                  flex: 1,
-                  padding: '1rem',
-                  background: '#f3f4f6',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '12px',
-                  cursor: 'pointer',
-                  fontWeight: '600'
-                }}
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                onClick={loadDemoData}
-                style={{
-                  flex: 1,
-                  padding: '1rem',
-                  background: 'linear-gradient(45deg, #8b5cf6, #6366f1)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '12px',
-                  cursor: 'pointer',
-                  fontWeight: '600'
-                }}
-              >
-                Load Demo Data
-              </button>
-            </div>
-
-            {(pantry.length > 0 || donationHistory.length > 0) && (
-              <button
-                onClick={clearDemoData}
-                style={{
-                  width: '100%',
-                  marginTop: '1rem',
-                  padding: '0.75rem',
-                  background: '#fee2e2',
-                  color: '#dc2626',
-                  border: '1px solid #dc2626',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontWeight: '600',
-                  fontSize: '0.875rem'
-                }}
-              >
-                Clear All Data
-              </button>
-            )}
-          </div>
-        </div>
-      )}
       {/* Share Impact Modal */}
       {showShareModal && (
         <div 

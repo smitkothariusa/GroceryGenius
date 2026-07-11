@@ -3,8 +3,10 @@ Validation tests for audit batch 3: request models must reject empty
 strings, out-of-range numbers, and oversized lists with 422 — not pass
 them through to OpenAI calls or in-memory storage.
 """
+import base64
+
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from fastapi import Request
 from fastapi.testclient import TestClient
 
@@ -89,6 +91,48 @@ def test_ai_barcode_lookup_rejects_too_short_barcode(client):
 def test_vision_barcode_lookup_rejects_empty_image(client):
     response = client.post("/barcode/vision-lookup", json={"image": ""})
     assert response.status_code == 422
+
+
+def test_vision_barcode_lookup_rejects_non_base64_image(client):
+    """Not valid base64 at all -- decoding itself fails."""
+    response = client.post("/barcode/vision-lookup", json={"image": "not-valid-base64!!!"})
+    assert response.status_code == 400
+
+
+def test_vision_barcode_lookup_rejects_non_image_bytes(client):
+    """Valid base64, but the decoded bytes have no recognizable image
+    signature (e.g. a text file base64-encoded and passed off as a photo).
+    No OpenAI call should be made."""
+    fake_text = base64.b64encode(b"this is plain text, not an image").decode()
+    with patch("app.routers.barcode._openai_client") as mock_openai_client:
+        response = client.post("/barcode/vision-lookup", json={"image": fake_text})
+    assert response.status_code == 400
+    mock_openai_client.assert_not_called()
+
+
+def test_vision_barcode_lookup_accepts_valid_image_and_reaches_openai(client):
+    """A real JPEG-signed payload passes validation and proceeds to the
+    GPT-4o vision fallback (no zxingcpp match on junk bytes)."""
+    fake_jpeg = base64.b64encode(b"\xff\xd8\xff" + b"fake-jpeg-body").decode()
+
+    mock_message = MagicMock()
+    mock_message.content = "unreadable"
+    mock_choice = MagicMock()
+    mock_choice.message = mock_message
+    mock_vision_response = MagicMock()
+    mock_vision_response.choices = [mock_choice]
+    mock_vision_response.model = "gpt-4o"
+    mock_vision_response.usage = MagicMock(prompt_tokens=50, completion_tokens=5)
+
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.return_value = mock_vision_response
+
+    with patch("app.routers.barcode._openai_client", return_value=mock_client):
+        response = client.post("/barcode/vision-lookup", json={"image": fake_jpeg})
+
+    assert response.status_code == 200
+    mock_client.chat.completions.create.assert_called_once()
+    assert response.json()["barcode"] == "unreadable"
 
 
 # ---------------------------------------------------------------------------

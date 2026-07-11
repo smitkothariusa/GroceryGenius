@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
+import binascii
 import logging
 import os
 import time
@@ -11,6 +12,7 @@ import httpx
 from openai import OpenAI
 from app.services.auth import limiter, AI_LIGHT_LIMIT
 from app.services.openai_client import log_openai_usage
+from app.services.upload_validation import validate_image_bytes
 
 try:
     import zxingcpp
@@ -195,12 +197,20 @@ async def vision_barcode_lookup(request: Request, payload: BarcodeImageRequest):
         if "," in base64_image:
             base64_image = base64_image.split(",")[1]
 
+        # No multipart content_type here (this is a base64 JSON payload), so
+        # validate the decoded bytes directly: size + magic-byte sniff before
+        # anything gets forwarded to zxingcpp/GPT-4o.
+        try:
+            image_bytes = base64.b64decode(base64_image, validate=True)
+        except (binascii.Error, ValueError):
+            raise HTTPException(status_code=400, detail="Unsupported file type")
+        validate_image_bytes(image_bytes)
+
         barcode_number = None
 
         # --- Stage 1a: zxingcpp (decodes barcode lines directly, Windows-friendly) ---
         if ZXING_AVAILABLE:
             try:
-                image_bytes = base64.b64decode(base64_image)
                 img = Image.open(io.BytesIO(image_bytes))
                 results = zxingcpp.read_barcodes(img)
                 for r in results:
@@ -267,6 +277,8 @@ async def vision_barcode_lookup(request: Request, payload: BarcodeImageRequest):
         result["source"] = "vision"
         return result
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error("Vision barcode lookup error", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Vision lookup failed: {str(e)}")

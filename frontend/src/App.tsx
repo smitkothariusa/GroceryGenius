@@ -1,6 +1,7 @@
 ﻿import { FoodBank, DonationRecord, DonationImpact } from './types/donation';
 import { foodBanks, calculateMeals } from './data/foodBanks';
 import { searchFoods, getSmartExpiryDate, getFoodDisplayName, getSuggestedUnits, type FoodEntry } from './data/foodDatabase';
+import { isExpiringSoon } from './lib/pantryExpiry';
 import { useTranslation } from 'react-i18next';
 
 interface DropOffSite {
@@ -835,21 +836,10 @@ const App: React.FC = () => {
     setTourStep(nextIndex);
   };
 
-  const getExpiringItems = () => {
-    const today = new Date();
-    return pantry.filter(item => {
-      if (!item.expiryDate) return false;
-      const expiry = new Date(item.expiryDate);
-      const daysUntil = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-      return daysUntil <= 3 && daysUntil >= 0;
-    });
-  };
-
-  const isExpiringSoon = (item: PantryItem): boolean => {
-    if (!item.expiryDate) return false;
-    const diff = new Date(item.expiryDate).getTime() - Date.now();
-    return diff > 0 && diff < 3 * 24 * 60 * 60 * 1000;
-  };
+  // Both the "expiring soon" list and the per-row styling delegate to the
+  // shared isExpiringSoon predicate (src/lib/pantryExpiry.ts) so they always
+  // agree on the day-0-inclusive boundary. See that module for history.
+  const getExpiringItems = () => pantry.filter(item => isExpiringSoon(item));
 
   // Parse ingredients from recipe text
   const parseIngredients = (recipe: Recipe): ParsedIngredient[] => {

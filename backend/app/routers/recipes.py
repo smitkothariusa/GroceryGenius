@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, field_validator
 from app.services.auth import limiter, AI_HEAVY_LIMIT, AI_LIGHT_LIMIT
 from app.services.openai_client import call_chat_completion
 from app.services.recipe_parser import parse_recipes_text
+from app.services.ingredient_parsing import clean_ingredient_lines, strip_json_code_fences
 
 logger = logging.getLogger(__name__)
 
@@ -231,7 +232,7 @@ class IngredientParseRequest(BaseModel):
 @limiter.limit(AI_LIGHT_LIMIT)
 async def parse_ingredients(request: Request, payload: IngredientParseRequest):
     """Use AI to parse raw ingredient lines into structured name/quantity/unit objects."""
-    lines = [l.strip() for l in payload.lines if l.strip()]
+    lines = clean_ingredient_lines(payload.lines)
     if not lines:
         return []
 
@@ -253,7 +254,7 @@ async def parse_ingredients(request: Request, payload: IngredientParseRequest):
 
     try:
         raw = await call_chat_completion(system_prompt, user_prompt, max_tokens=2000, temperature=0.1)
-        raw = raw.replace("```json", "").replace("```", "").strip()
+        raw = strip_json_code_fences(raw)
         items = json.loads(raw)
         return items
     except Exception:

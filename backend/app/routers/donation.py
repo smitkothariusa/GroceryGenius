@@ -1,7 +1,7 @@
 # backend/app/routers/donation.py
 from fastapi import APIRouter
 from typing import List
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 router = APIRouter()
 
@@ -88,13 +88,13 @@ _CAN_TABLE: list[tuple[list[str], float]] = [
 
 
 class DonationItem(BaseModel):
-    name: str
-    quantity: float
-    unit: str
+    name: str = Field(min_length=1, max_length=200)
+    quantity: float = Field(ge=0, le=100_000)
+    unit: str = Field(min_length=1, max_length=20)
 
 
 class DonationImpactRequest(BaseModel):
-    items: List[DonationItem]
+    items: List[DonationItem] = Field(max_length=500)
 
 
 # ---------------------------------------------------------------------------

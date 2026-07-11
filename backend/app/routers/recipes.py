@@ -4,7 +4,7 @@ import logging
 from fastapi import APIRouter, HTTPException, Query, Request
 from typing import List, Optional
 from typing_extensions import Annotated
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from app.services.auth import limiter, AI_HEAVY_LIMIT, AI_LIGHT_LIMIT
 from app.services.openai_client import call_chat_completion
 from app.services.recipe_parser import parse_recipes_text
@@ -136,7 +136,7 @@ CRITICAL: Return ONLY a valid JSON array with this exact structure:
 
 class TranslateNamesRequest(BaseModel):
     names: List[Annotated[str, Field(max_length=200)]] = Field(max_length=50)
-    language: str = Field(max_length=10)
+    language: str = Field(min_length=1, max_length=10)
 
 @router.post("/translate-names", response_model=List[str])
 @limiter.limit(AI_LIGHT_LIMIT)
@@ -170,7 +170,19 @@ async def translate_recipe_names(request: Request, payload: TranslateNamesReques
 
 class TranslateFullRecipesRequest(BaseModel):
     recipes: List[dict] = Field(max_length=10)
-    language: str = Field(max_length=10)
+    language: str = Field(min_length=1, max_length=10)
+
+    @field_validator("recipes")
+    @classmethod
+    def _cap_recipe_size(cls, recipes: List[dict]) -> List[dict]:
+        # recipes are arbitrary dicts (round-tripped as-is), so per-field Field()
+        # limits don't apply here — guard against oversized/abusive payloads directly.
+        for recipe in recipes:
+            if len(recipe) > 30:
+                raise ValueError("recipe object has too many fields")
+            if len(json.dumps(recipe, ensure_ascii=False)) > 20_000:
+                raise ValueError("recipe object is too large")
+        return recipes
 
 @router.post("/translate-full")
 @limiter.limit(AI_HEAVY_LIMIT)
@@ -213,7 +225,7 @@ async def translate_full_recipes(request: Request, payload: TranslateFullRecipes
 
 
 class IngredientParseRequest(BaseModel):
-    lines: List[Annotated[str, Field(max_length=300)]] = Field(max_length=100)
+    lines: List[Annotated[str, Field(max_length=300)]] = Field(min_length=1, max_length=100)
 
 @router.post("/parse-ingredients")
 @limiter.limit(AI_LIGHT_LIMIT)

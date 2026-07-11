@@ -424,7 +424,8 @@
     "close": "Close",
     "clearAll": "Clear All",
     "help": "Help",
-    "or": "or"
+    "or": "or",
+    "loadMore": "Load more"
   },
   "notifications": {
     "itemAdded": "Item added to {{list}}!",

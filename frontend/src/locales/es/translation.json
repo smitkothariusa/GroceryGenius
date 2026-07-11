@@ -424,7 +424,8 @@
     "close": "Cerrar",
     "clearAll": "Limpiar Todo",
     "help": "Ayuda",
-    "or": "o"
+    "or": "o",
+    "loadMore": "Cargar más"
   },
   "notifications": {
     "itemAdded": "¡Artículo agregado a {{list}}!",

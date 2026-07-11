@@ -9,10 +9,16 @@ Workflow for each task: `.claude/skills/implement-task/SKILL.md`
 
 ## Current Task
 
-🔴 **[03 — Close backend test gaps + frontend test baseline](docs/tasks/03-backend-tests.md)**
-Status: **NOT STARTED**
-
-Was blocked on 02 and 05, both now DONE and live in production — unblocked.
+Running 4 independent tasks in parallel (isolated worktrees, per standing
+instruction to parallelize independent backlog items): **03, 12, 13, 15**.
+03 is the sole 🔴 Critical item and was unblocked by 02/05 landing. 12/13/15
+are independent 🟠 High items with no cross-task dependency on 03 or each
+other, though 13 and 15 both touch `vision.py`/`barcode.py` so they'll be
+merged to `dev` sequentially with a rebase in between to avoid conflicts.
+Skipped for this batch: 6 (stub, needs scope confirmation), 7/8 (Redis
+provisioning — infra/cost decision needing user sign-off), 9/10 (need a
+product/repo-settings decision before implementing), 14 (depends on 03's
+Vitest baseline landing first).
 
 ---
 
@@ -24,7 +30,7 @@ Was blocked on 02 and 05, both now DONE and live in production — unblocked.
 |---|---|---|---|---|
 | 1 | Pantry & Shopping persistence + per-user isolation | L (2-3d) | DONE | [spec](docs/tasks/01-pantry-persistence.md) |
 | 2 | Add error boundaries to frontend | S (0.5d) | DONE | [spec](docs/tasks/02-error-boundaries.md) |
-| 3 | Close backend test gaps (pantry/shopping/donation) + frontend test baseline | M (1-2d) | NOT STARTED | [spec](docs/tasks/03-backend-tests.md) |
+| 3 | Close backend test gaps (pantry/shopping/donation) + frontend test baseline | M (1-2d) | IN PROGRESS | [spec](docs/tasks/03-backend-tests.md) |
 | 4 | Validate image uploads before sending to OpenAI | S (0.5d) | DONE | [spec](docs/tasks/04-image-upload-validation.md) |
 | 5 | Fix price comparison non-determinism (temp 0.8→0.3) | S (few hrs) | DONE | [spec](docs/tasks/05-price-comparison-determinism.md) |
 
@@ -38,10 +44,10 @@ Was blocked on 02 and 05, both now DONE and live in production — unblocked.
 | 9 | Investigate & fix pantry expiry boundary logic | S (0.5d) | NOT STARTED | [spec](docs/tasks/09-pantry-expiry-boundary.md) |
 | 10 | Enforce CI as a required status check on dev/main | S (1-2h) | NOT STARTED | [spec](docs/tasks/10-ci-branch-protection.md) |
 | 11 | Offline support (PWA service worker + sync queue) | L (2-3d) | NOT STARTED | [spec](docs/tasks/11-offline-support.md) |
-| 12 | Request deduplication (prevent double-submit) | S (0.5d) | NOT STARTED | [spec](docs/tasks/12-request-deduplication.md) |
-| 13 | Centralize ingredient parsing logic | M (1d) | NOT STARTED | [spec](docs/tasks/13-ingredient-parsing.md) |
+| 12 | Request deduplication (prevent double-submit) | S (0.5d) | IN PROGRESS | [spec](docs/tasks/12-request-deduplication.md) |
+| 13 | Centralize ingredient parsing logic | M (1d) | IN PROGRESS | [spec](docs/tasks/13-ingredient-parsing.md) |
 | 14 | Expand frontend test coverage (component-level) | M (1-2d) | NOT STARTED | [spec](docs/tasks/14-frontend-test-coverage.md) |
-| 15 | Structured cost/usage logging for OpenAI calls | M (1d) | NOT STARTED | [spec](docs/tasks/15-openai-cost-logging.md) |
+| 15 | Structured cost/usage logging for OpenAI calls | M (1d) | IN PROGRESS | [spec](docs/tasks/15-openai-cost-logging.md) |
 
 ### 🟡 Medium
 

@@ -205,6 +205,8 @@
     "clickForFullRecipe": "Cliquez pour la recette complète avec ingrédients et mesures détaillées",
     "whatIngredientsLabel": "Quels ingrédients avez-vous ?",
     "generatingRecipe": "Génération de la recette {{n}}...",
+    "timeoutError": "⏱️ La demande a expiré. Essayez avec moins d'ingrédients ou réessayez.",
+    "generationError": "Échec de la génération des recettes. Veuillez réessayer dans un instant.",
     "emptyStatePrompt": "Ajoutez des ingrédients ou recherchez une recette spécifique pour commencer !",
     "emptyStateTip": "Essayez : \"tarte aux pommes\", \"pâtes au poulet\", ou ajoutez des ingrédients comme \"tomates\", \"poulet\"",
     "keyIngredients": "Ingrédients Clés",

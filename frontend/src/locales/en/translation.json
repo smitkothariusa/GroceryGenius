@@ -205,6 +205,8 @@
     "clickForFullRecipe": "Click for full recipe with detailed ingredients & measurements",
     "whatIngredientsLabel": "What ingredients do you have?",
     "generatingRecipe": "Generating recipe {{n}}...",
+    "timeoutError": "⏱️ Request timed out. Please try with fewer ingredients or try again.",
+    "generationError": "Failed to generate recipes. Please try again in a moment.",
     "emptyStatePrompt": "Add ingredients or search for a specific recipe to get started!",
     "emptyStateTip": "Try: \"apple pie\", \"chicken pasta\", or add ingredients like \"tomatoes\", \"chicken\"",
     "keyIngredients": "Key Ingredients",

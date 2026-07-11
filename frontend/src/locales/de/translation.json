@@ -205,6 +205,8 @@
     "clickForFullRecipe": "Klicken Sie für das vollständige Rezept mit detaillierten Zutaten und Maßen",
     "whatIngredientsLabel": "Welche Zutaten haben Sie?",
     "generatingRecipe": "Rezept {{n}} wird generiert...",
+    "timeoutError": "⏱️ Zeitüberschreitung. Bitte versuchen Sie es mit weniger Zutaten erneut.",
+    "generationError": "Rezepte konnten nicht erstellt werden. Bitte versuchen Sie es gleich noch einmal.",
     "emptyStatePrompt": "Füge Zutaten hinzu oder suche nach einem bestimmten Rezept um loszulegen!",
     "emptyStateTip": "Versuche: \"Apfelkuchen\", \"Hühnernudeln\", oder füge Zutaten wie \"Tomaten\", \"Hühnchen\" hinzu",
     "keyIngredients": "Hauptzutaten",

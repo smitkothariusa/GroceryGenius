@@ -76,7 +76,7 @@ Return ONLY: {{"amazon": total_price, "walmart": total_price}}"""
             system_prompt=system_prompt,
             user_prompt=user_prompt,
             max_tokens=150,
-            temperature=0.8
+            temperature=0.3
         )
 
         # Parse the response

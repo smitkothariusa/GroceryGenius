@@ -704,5 +704,17 @@
       "dismiss": "Fermer",
       "gotIt": "Compris"
     }
+  },
+  "errorBoundary": {
+    "root": {
+      "title": "Une erreur est survenue",
+      "message": "GroceryGenius a rencontré un problème inattendu. Recharger l'application résout généralement le problème.",
+      "reload": "Recharger l'application"
+    },
+    "section": {
+      "title": "Cette section a rencontré un problème",
+      "message": "Une erreur est survenue ici, mais le reste de l'application fonctionne toujours.",
+      "tryAgain": "Réessayer"
+    }
   }
 }

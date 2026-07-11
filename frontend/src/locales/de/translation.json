@@ -704,5 +704,17 @@
       "dismiss": "Schließen",
       "gotIt": "Verstanden"
     }
+  },
+  "errorBoundary": {
+    "root": {
+      "title": "Etwas ist schiefgelaufen",
+      "message": "Bei GroceryGenius ist ein unerwartetes Problem aufgetreten. Ein Neuladen der App behebt das meist.",
+      "reload": "App neu laden"
+    },
+    "section": {
+      "title": "In diesem Bereich ist ein Fehler aufgetreten",
+      "message": "Hier ist etwas schiefgelaufen, aber der Rest der App funktioniert weiterhin.",
+      "tryAgain": "Erneut versuchen"
+    }
   }
 }

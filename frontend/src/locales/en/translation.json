@@ -704,5 +704,17 @@
       "dismiss": "Dismiss install banner",
       "gotIt": "Got it"
     }
+  },
+  "errorBoundary": {
+    "root": {
+      "title": "Something went wrong",
+      "message": "GroceryGenius ran into an unexpected problem. Reloading the app usually fixes it.",
+      "reload": "Reload App"
+    },
+    "section": {
+      "title": "This section hit a snag",
+      "message": "Something went wrong here, but the rest of the app is still working.",
+      "tryAgain": "Try Again"
+    }
   }
 }

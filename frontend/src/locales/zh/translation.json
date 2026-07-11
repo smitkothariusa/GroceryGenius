@@ -205,6 +205,8 @@
     "clickForFullRecipe": "点击获取带有详细食材和用量的完整食谱",
     "whatIngredientsLabel": "您有哪些食材？",
     "generatingRecipe": "正在生成第{{n}}个食谱...",
+    "timeoutError": "⏱️ 请求超时。请减少食材数量或重试。",
+    "generationError": "生成食谱失败，请稍后再试。",
     "emptyStatePrompt": "添加食材或搜索特定食谱以开始！",
     "emptyStateTip": "试试：\u201c苹果派\u201d、\u201c鸡肉意面\u201d，或添加食材如\u201c西红柿\u201d、\u201c鸡肉\u201d",
     "keyIngredients": "主要食材",

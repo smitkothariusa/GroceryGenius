@@ -82,11 +82,37 @@ def test_analyze_receipt_drops_invalid_items_and_normalizes_fields():
     assert len(data["items"]) == 1
     item = data["items"][0]
     assert item["name"] == "Cereal"
-    assert item["quantity"] == 1.0  # invalid quantity fell back to 1
+    assert item["quantity"] is None  # unparseable quantity becomes null, not a guessed 1
     assert item["unit"] == "ea"  # empty unit fell back to "ea"
     assert item["category"] == "other"  # invalid category fell back to "other"
     assert item["confidence"] == "low"  # invalid confidence fell back to "low"
     assert data["rejected_lines_count"] == 0  # negative clamped to 0
+
+
+def test_analyze_receipt_null_quantity_stays_null():
+    """A line with no stated quantity/weight should stay null, not default to 1."""
+    client = TestClient(make_app())
+
+    payload = {
+        "items": [
+            {"name": "Mystery Snack", "quantity": None, "unit": "ea", "category": "snacks", "confidence": "medium", "raw_text": "MYSTERY SNACK"},
+            {"name": "Organic Banana", "quantity": 0, "unit": "lb", "category": "produce", "confidence": "high"},  # zero treated as unstated
+        ],
+        "rejected_lines_count": 0,
+    }
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.return_value = _mock_openai_response(payload)
+
+    with patch("app.routers.vision.OpenAI", return_value=mock_client):
+        response = client.post(
+            "/vision/analyze-receipt",
+            files={"file": ("receipt.jpg", b"fake-image-bytes", "image/jpeg")},
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["items"][0]["quantity"] is None
+    assert data["items"][1]["quantity"] is None
 
 
 def test_analyze_receipt_no_items_found():

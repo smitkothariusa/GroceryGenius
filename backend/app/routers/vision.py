@@ -141,12 +141,15 @@ def _clean_receipt_item(raw: dict) -> dict | None:
     if not name or len(name) < 2:
         return None
 
-    try:
-        quantity = float(raw.get("quantity", 1))
-    except (TypeError, ValueError):
-        quantity = 1.0
-    if quantity <= 0:
-        quantity = 1.0
+    raw_quantity = raw.get("quantity")
+    quantity = None
+    if raw_quantity is not None:
+        try:
+            quantity = float(raw_quantity)
+        except (TypeError, ValueError):
+            quantity = None
+        if quantity is not None and quantity <= 0:
+            quantity = None
 
     unit = (raw.get("unit") or "ea").strip().lower() or "ea"
 
@@ -204,9 +207,11 @@ async def analyze_receipt(request: Request, file: UploadFile = File(...)):
                         'abbreviation (e.g. "ORG BANANA" -> "Organic Banana", '
                         '"GV 2% MLK GAL" -> "2% Milk"). Remove brand/store-brand prefixes '
                         "when a generic name is clear, but keep it recognizable.\n"
-                        '- "quantity": a number. Receipts rarely spell out quantity/weight — '
-                        "if not stated, default to 1. If the line shows a multiplier "
-                        "(e.g. \"3 @ 1.50\") or a weight (e.g. \"1.24 lb\"), use that value.\n"
+                        '- "quantity": a number, or null. Only put a number here if the '
+                        "receipt line itself states a count, multiplier, or weight "
+                        "(e.g. \"3 @ 1.50\" -> 3, \"1.24 lb\" -> 1.24, \"2 GAL MILK\" -> 2). "
+                        "Do NOT guess or default to 1 — if the line gives no quantity/weight "
+                        "at all, set quantity to null so the shopper fills it in themselves.\n"
                         '- "unit": a short unit string. Default to "ea" (each) when the '
                         'receipt gives no unit. Use "lb", "oz", "gal", "pk", etc. when the '
                         "receipt implies one.\n"
@@ -220,8 +225,10 @@ async def analyze_receipt(request: Request, file: UploadFile = File(...)):
                         f"Return at most {MAX_RECEIPT_ITEMS} items. Return ONLY a JSON object:\n"
                         "{\n"
                         '  "items": [\n'
-                        '    {"name": "...", "quantity": 1, "unit": "ea", "category": "...", '
-                        '"confidence": "high", "raw_text": "..."}\n'
+                        '    {"name": "...", "quantity": 1.24, "unit": "lb", "category": "...", '
+                        '"confidence": "high", "raw_text": "..."},\n'
+                        '    {"name": "...", "quantity": null, "unit": "ea", "category": "...", '
+                        '"confidence": "medium", "raw_text": "..."}\n'
                         "  ],\n"
                         '  "rejected_lines_count": 0\n'
                         "}\n"

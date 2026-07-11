@@ -461,7 +461,8 @@
     "confidenceHigh": "Confiance élevée",
     "confidenceMedium": "Confiance moyenne",
     "confidenceLow": "Confiance faible",
-    "addSelectedItems": "Ajouter {{count}} articles au garde-manger"
+    "addSelectedItems": "Ajouter {{count}} articles au garde-manger",
+    "qtyPlaceholder": "qté"
   },
   "mission": {
     "welcomeTitle": "Bienvenue sur GroceryGenius! 🎉",
@@ -534,6 +535,7 @@
     "failedAddSomeItems": "Échec de l'ajout de certains articles",
     "noReceiptItemsDetected": "Aucun article détecté sur le reçu. Essayez une photo plus claire avec un meilleur éclairage.",
     "failedAnalyzeReceipt": "Échec de l'analyse du reçu. Veuillez réessayer.",
+    "receiptMissingQuantity": "Veuillez saisir une quantité pour {{count}} article(s) avant de les ajouter au garde-manger.",
     "alreadyHaveIngredients": "Vous avez déjà tous les ingrédients !"
   },
   "survey": {

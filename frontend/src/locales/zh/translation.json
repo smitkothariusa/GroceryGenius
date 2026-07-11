@@ -461,7 +461,8 @@
     "confidenceHigh": "高置信度",
     "confidenceMedium": "中等置信度",
     "confidenceLow": "低置信度",
-    "addSelectedItems": "将 {{count}} 件物品添加到储藏室"
+    "addSelectedItems": "将 {{count}} 件物品添加到储藏室",
+    "qtyPlaceholder": "数量"
   },
   "mission": {
     "welcomeTitle": "欢迎使用GroceryGenius！🎉",
@@ -534,6 +535,7 @@
     "failedAddSomeItems": "部分物品添加失败",
     "noReceiptItemsDetected": "未在收据上检测到物品。请尝试使用更清晰、光线更好的照片。",
     "failedAnalyzeReceipt": "收据分析失败，请重试。",
+    "receiptMissingQuantity": "请在添加到储藏室之前为 {{count}} 件物品输入数量。",
     "alreadyHaveIngredients": "您已拥有所有食材！"
   },
   "survey": {

@@ -461,7 +461,8 @@
     "confidenceHigh": "Confianza alta",
     "confidenceMedium": "Confianza media",
     "confidenceLow": "Confianza baja",
-    "addSelectedItems": "Añadir {{count}} artículos a la despensa"
+    "addSelectedItems": "Añadir {{count}} artículos a la despensa",
+    "qtyPlaceholder": "cant."
   },
   "mission": {
     "welcomeTitle": "¡Bienvenido a GroceryGenius! 🎉",
@@ -534,6 +535,7 @@
     "failedAddSomeItems": "Error al agregar algunos artículos",
     "noReceiptItemsDetected": "No se detectaron artículos en el recibo. Prueba con una foto más clara y mejor iluminación.",
     "failedAnalyzeReceipt": "Error al analizar el recibo. Inténtalo de nuevo.",
+    "receiptMissingQuantity": "Por favor ingresa una cantidad para {{count}} artículo(s) antes de añadir a la despensa.",
     "alreadyHaveIngredients": "¡Ya tienes todos los ingredientes!"
   },
   "survey": {

@@ -603,7 +603,7 @@ const AppContent: React.FC = () => {
     } finally {
       console.log('🏁 loadUserData execution finished');
     }
-  }, [user]);
+  }, [user, setFavorites]);
   // Daily reset check - runs every minute to check if we've crossed midnight
   useEffect(() => {
     const checkDailyReset = () => {
@@ -725,7 +725,7 @@ const AppContent: React.FC = () => {
       return () => {
         authListener?.subscription?.unsubscribe();
       };
-    }, []);
+    }, [setFavorites]);
 
   // Load user data after authentication - SEPARATE useEffect
   useEffect(() => {
@@ -740,7 +740,7 @@ const AppContent: React.FC = () => {
         setDonationHistory([]);
       });
     }
-  }, [user, authLoading, loadUserData]);
+  }, [user, authLoading, loadUserData, setFavorites]);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);

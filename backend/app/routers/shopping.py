@@ -6,6 +6,7 @@ import logging
 import json
 from app.services.auth import limiter, AI_HEAVY_LIMIT
 from app.services.openai_client import call_chat_completion
+from app.services.ingredient_parsing import strip_json_code_fences
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +82,7 @@ Return ONLY: {{"amazon": total_price, "walmart": total_price}}"""
 
         # Parse the response
         # Remove any markdown code blocks if present
-        clean_response = response_text.replace('```json', '').replace('```', '').strip()
+        clean_response = strip_json_code_fences(response_text)
         
         try:
             prices = json.loads(clean_response)

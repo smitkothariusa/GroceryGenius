@@ -9,9 +9,10 @@ Workflow for each task: `.claude/skills/implement-task/SKILL.md`
 
 ## Current Task
 
-Three tasks running in parallel via subagents (2026-07-11): **02**, **04**, **05**.
-**03** is queued — its spec depends on 02's `ErrorBoundary` component and
-references 05's fix, so it waits until both land in dev.
+🔴 **[03 — Close backend test gaps + frontend test baseline](docs/tasks/03-backend-tests.md)**
+Status: **NOT STARTED**
+
+Was blocked on 02 and 05, both now DONE and live in production — unblocked.
 
 ---
 
@@ -22,10 +23,10 @@ references 05's fix, so it waits until both land in dev.
 | # | Task | Effort | Status | Spec |
 |---|---|---|---|---|
 | 1 | Pantry & Shopping persistence + per-user isolation | L (2-3d) | DONE | [spec](docs/tasks/01-pantry-persistence.md) |
-| 2 | Add error boundaries to frontend | S (0.5d) | IN PROGRESS | [spec](docs/tasks/02-error-boundaries.md) |
-| 3 | Close backend test gaps (pantry/shopping/donation) + frontend test baseline | M (1-2d) | NOT STARTED (blocked on 2, 5) | [spec](docs/tasks/03-backend-tests.md) |
-| 4 | Validate image uploads before sending to OpenAI | S (0.5d) | IN PROGRESS | [spec](docs/tasks/04-image-upload-validation.md) |
-| 5 | Fix price comparison non-determinism (temp 0.8→0.3) | S (few hrs) | IN PROGRESS | [spec](docs/tasks/05-price-comparison-determinism.md) |
+| 2 | Add error boundaries to frontend | S (0.5d) | DONE | [spec](docs/tasks/02-error-boundaries.md) |
+| 3 | Close backend test gaps (pantry/shopping/donation) + frontend test baseline | M (1-2d) | NOT STARTED | [spec](docs/tasks/03-backend-tests.md) |
+| 4 | Validate image uploads before sending to OpenAI | S (0.5d) | DONE | [spec](docs/tasks/04-image-upload-validation.md) |
+| 5 | Fix price comparison non-determinism (temp 0.8→0.3) | S (few hrs) | DONE | [spec](docs/tasks/05-price-comparison-determinism.md) |
 
 ### 🟠 High
 

@@ -32,11 +32,12 @@ def _openai_client() -> OpenAI:
 
 class BarcodeImageRequest(BaseModel):
     # ~10 MB of base64 characters (≈7.5 MB binary image)
-    image: str = Field(max_length=10_000_000)  # base64 encoded image
+    image: str = Field(min_length=1, max_length=10_000_000)  # base64 encoded image
 
 
 class BarcodeRequest(BaseModel):
-    barcode: str = Field(max_length=32)
+    # Real barcodes (UPC-A/EAN-8/EAN-13/etc.) are numeric-only, 8-14 digits.
+    barcode: str = Field(min_length=6, max_length=32, pattern=r"^[0-9]+$")
 
 
 def _map_off_category(categories_tags: list) -> str:

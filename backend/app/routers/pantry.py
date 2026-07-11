@@ -15,13 +15,13 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 class PantryItem(BaseModel):
-    id: Optional[str] = None
-    name: str
-    quantity: int
-    unit: str
-    category: str = "other"
-    expiry_date: Optional[str] = None
-    added_date: Optional[str] = None
+    id: Optional[str] = Field(default=None, max_length=100)
+    name: str = Field(min_length=1, max_length=200)
+    quantity: int = Field(ge=0, le=100_000)
+    unit: str = Field(min_length=1, max_length=20)
+    category: str = Field(default="other", max_length=50)
+    expiry_date: Optional[str] = Field(default=None, max_length=50)
+    added_date: Optional[str] = Field(default=None, max_length=50)
 
 class PantryResponse(BaseModel):
     items: List[PantryItem]
@@ -70,10 +70,10 @@ def delete_pantry_item(item_id: str):
 
 
 class PantryItemInput(BaseModel):
-    id: str
-    name: str
-    quantity: float
-    unit: str
+    id: str = Field(min_length=1, max_length=100)
+    name: str = Field(min_length=1, max_length=200)
+    quantity: float = Field(ge=0, le=100_000)
+    unit: str = Field(min_length=1, max_length=20)
 
 
 class MatchIngredientsRequest(BaseModel):

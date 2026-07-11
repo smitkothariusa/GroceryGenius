@@ -64,7 +64,7 @@ async def match_ingredients(request: Request, payload: MatchIngredientsRequest):
     user_prompt = f"Recipe ingredients:\n{ingredients_text}\n\nPantry items:\n{pantry_text}"
 
     try:
-        raw = await call_chat_completion(system_prompt, user_prompt, max_tokens=2000, temperature=0.1)
+        raw = await call_chat_completion(system_prompt, user_prompt, max_tokens=2000, temperature=0.1, route="pantry.match_ingredients")
         raw = strip_json_code_fences(raw)
         return json.loads(raw)
     except Exception:

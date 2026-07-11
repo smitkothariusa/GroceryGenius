@@ -80,7 +80,7 @@ async def analyze_ingredients(request: Request, file: UploadFile = File(...)):
             ],
             max_tokens=300
         )
-        log_openai_usage(response.model, (time.perf_counter() - start) * 1000, response.usage)
+        log_openai_usage(response.model, (time.perf_counter() - start) * 1000, response.usage, route="vision.analyze_ingredients")
 
         # Extract ingredients from response
         content = response.choices[0].message.content
@@ -252,7 +252,7 @@ async def analyze_receipt(request: Request, file: UploadFile = File(...)):
             temperature=0.1,
             max_tokens=3000,
         )
-        log_openai_usage(response.model, (time.perf_counter() - start) * 1000, response.usage)
+        log_openai_usage(response.model, (time.perf_counter() - start) * 1000, response.usage, route="vision.analyze_receipt")
 
         content = response.choices[0].message.content
         try:

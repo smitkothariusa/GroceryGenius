@@ -42,23 +42,27 @@ def estimate_cost_usd(model: str, prompt_tokens: int, completion_tokens: int) ->
     return (prompt_tokens * prices[0] + completion_tokens * prices[1]) / 1_000_000
 
 
-def log_openai_usage(model: str, duration_ms: float, usage) -> None:
+def log_openai_usage(model: str, duration_ms: float, usage, route: str = "") -> None:
     """
-    Log one INFO line per OpenAI call: model, latency, tokens, estimated cost.
+    Log one INFO line per OpenAI call: model, latency, tokens, estimated cost, calling route.
     `usage` may be a dict (HTTP API) or an SDK CompletionUsage object.
+    `route` identifies the endpoint/call site that triggered the request (e.g. "recipes.generate_recipes").
     """
     if usage is None:
-        prompt_tokens = completion_tokens = 0
+        prompt_tokens = completion_tokens = total_tokens = 0
     elif isinstance(usage, dict):
         prompt_tokens = usage.get("prompt_tokens") or 0
         completion_tokens = usage.get("completion_tokens") or 0
+        total_tokens = usage.get("total_tokens") or (prompt_tokens + completion_tokens)
     else:
         prompt_tokens = getattr(usage, "prompt_tokens", 0) or 0
         completion_tokens = getattr(usage, "completion_tokens", 0) or 0
+        total_tokens = getattr(usage, "total_tokens", 0) or (prompt_tokens + completion_tokens)
 
     logger.info(
-        "openai call model=%s duration_ms=%.0f prompt_tokens=%d completion_tokens=%d est_cost_usd=%.6f",
-        model, duration_ms, prompt_tokens, completion_tokens,
+        "openai call route=%s model=%s duration_ms=%.0f prompt_tokens=%d completion_tokens=%d "
+        "total_tokens=%d est_cost_usd=%.6f",
+        route or "-", model, duration_ms, prompt_tokens, completion_tokens, total_tokens,
         estimate_cost_usd(model, prompt_tokens, completion_tokens),
     )
 
@@ -93,9 +97,10 @@ async def _post_with_retry(payload: dict) -> dict:
     raise RuntimeError("unreachable")  # loop always returns or raises
 
 
-async def call_chat_completion(system_prompt: str, user_prompt: str, max_tokens: int = 600, temperature: float = 0.7):
+async def call_chat_completion(system_prompt: str, user_prompt: str, max_tokens: int = 600, temperature: float = 0.7, route: str = ""):
     """
     Call the OpenAI Chat Completions HTTP API and return the assistant's content as text.
+    `route` identifies the calling endpoint, for cost/usage logging (e.g. "recipes.generate_recipes").
     """
     payload = {
         "model": MODEL,
@@ -111,7 +116,7 @@ async def call_chat_completion(system_prompt: str, user_prompt: str, max_tokens:
     start = time.perf_counter()
     resp = await _post_with_retry(payload)
     duration_ms = (time.perf_counter() - start) * 1000
-    log_openai_usage(resp.get("model", MODEL), duration_ms, resp.get("usage"))
+    log_openai_usage(resp.get("model", MODEL), duration_ms, resp.get("usage"), route=route)
 
     # safe extraction
     choices = resp.get("choices", [])

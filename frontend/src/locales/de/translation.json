@@ -473,6 +473,7 @@
     "viewAgain": "Mission erneut ansehen"
   },
   "toasts": {
+    "rateLimited": "Du sendest Anfragen zu schnell. Bitte warte einen Moment und versuche es erneut.",
     "addedIngredientsToShopping": "{{count}} Zutaten zur Einkaufsliste hinzugefügt!",
     "shoppingListCopied": "Einkaufsliste in die Zwischenablage kopiert!",
     "pantryItemUpdated": "Vorratskammerartikel aktualisiert!",

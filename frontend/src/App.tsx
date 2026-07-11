@@ -38,6 +38,7 @@ import { useToast } from './hooks/useToast';
 import { useState, useEffect, useRef } from 'react';
 import { authService, supabase, profileService, CustomDietaryLabel, Profile } from './lib/supabase';
 import { authFetch } from './lib/apiClient';
+import { onRateLimited } from './lib/rateLimitBridge';
 import { escapeHtml } from './lib/escapeHtml';
 import { calorieService } from './lib/database';
 import { pantryService, shoppingService, recipesService, mealPlansService, donationService } from './lib/database';
@@ -255,6 +256,9 @@ const App: React.FC = () => {
     loading: boolean;
   }>({ amazon: 0, walmart: 0, loading: false });
   const { toasts, removeToast, success, error, warning, info } = useToast();
+  useEffect(() => {
+    return onRateLimited(() => warning(t('toasts.rateLimited')));
+  }, [warning, t]);
   const [isTabChanging, setIsTabChanging] = useState(false);
   const API_BASE = import.meta.env.VITE_API_URL || '/_/backend';
   const bgColor = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';

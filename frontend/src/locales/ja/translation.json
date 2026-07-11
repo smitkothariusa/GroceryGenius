@@ -473,6 +473,7 @@
     "viewAgain": "ミッションを再度見る"
   },
   "toasts": {
+    "rateLimited": "リクエストの送信が速すぎます。少し待ってからもう一度お試しください。",
     "addedIngredientsToShopping": "{{count}} 個の食材をショッピングリストに追加しました！",
     "shoppingListCopied": "ショッピングリストをクリップボードにコピーしました！",
     "pantryItemUpdated": "パントリーアイテムを更新しました！",

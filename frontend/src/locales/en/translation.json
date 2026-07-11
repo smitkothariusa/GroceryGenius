@@ -473,6 +473,7 @@
     "viewAgain": "View Mission Again"
   },
   "toasts": {
+    "rateLimited": "You're sending requests too quickly. Please wait a moment and try again.",
     "addedIngredientsToShopping": "Added {{count}} ingredients to shopping list!",
     "shoppingListCopied": "Shopping list copied to clipboard!",
     "pantryItemUpdated": "Pantry item updated!",

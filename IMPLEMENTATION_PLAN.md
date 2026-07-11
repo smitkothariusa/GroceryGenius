@@ -9,13 +9,8 @@ Workflow for each task: `.claude/skills/implement-task/SKILL.md`
 
 ## Current Task
 
-🔴 **[01 — Pantry & Shopping Persistence + Per-User Isolation](docs/tasks/01-pantry-persistence.md)**
-Status: **IN PROGRESS**
-
-Not just a persistence gap — verified during planning that `pantry.py` and
-`shopping.py` use a single global in-memory list with no `user_id` at all,
-so any authenticated user can currently read/edit/delete any other user's
-pantry and shopping data. This is the most severe item in the backlog.
+🔴 **[02 — Add error boundaries to frontend](docs/tasks/02-error-boundaries.md)**
+Status: **NOT STARTED**
 
 ---
 
@@ -25,7 +20,7 @@ pantry and shopping data. This is the most severe item in the backlog.
 
 | # | Task | Effort | Status | Spec |
 |---|---|---|---|---|
-| 1 | Pantry & Shopping persistence + per-user isolation | L (2-3d) | IN PROGRESS | [spec](docs/tasks/01-pantry-persistence.md) |
+| 1 | Pantry & Shopping persistence + per-user isolation | L (2-3d) | DONE | [spec](docs/tasks/01-pantry-persistence.md) |
 | 2 | Add error boundaries to frontend | S (0.5d) | NOT STARTED | [spec](docs/tasks/02-error-boundaries.md) |
 | 3 | Close backend test gaps (pantry/shopping/donation) + frontend test baseline | M (1-2d) | NOT STARTED | [spec](docs/tasks/03-backend-tests.md) |
 | 4 | Validate image uploads before sending to OpenAI | S (0.5d) | NOT STARTED | [spec](docs/tasks/04-image-upload-validation.md) |

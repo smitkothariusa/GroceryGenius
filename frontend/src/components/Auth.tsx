@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { authService, supabase } from '../lib/supabase';
 
@@ -8,6 +8,12 @@ interface AuthProps {
 
 const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
   const { t } = useTranslation();
+  // Keep a ref to the latest `t` so the mount-only effect below (URL email
+  // confirmation parsing) can use translated error text without taking a
+  // dependency on `t` itself — that would make the effect re-run on every
+  // language change and re-parse/re-verify the URL token a second time.
+  const tRef = useRef(t);
+  tRef.current = t;
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -49,14 +55,14 @@ useEffect(() => {
         
         if (error) {
           console.error('Verification error:', error);
-          setError(t('auth.emailConfirmFailed'));
+          setError(tRef.current('auth.emailConfirmFailed'));
         } else if (data.session) {
           console.log('Email verified successfully!');
           onAuthSuccess();
         }
       } catch (err) {
         console.error('Verification exception:', err);
-        setError(t('auth.emailConfirmFailed'));
+        setError(tRef.current('auth.emailConfirmFailed'));
       }
     }
   };

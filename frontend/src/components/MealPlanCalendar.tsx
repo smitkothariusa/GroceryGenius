@@ -392,11 +392,16 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
           });
           if (!response.ok) throw new Error('Match failed');
           const matches: MatchResult[] = await response.json();
-          setDeductModal({ mealId, recipeName: meal.recipe.name, matches });
+          // Only apply if the modal is still showing *this* meal — if the
+          // user checked another meal complete while this request was in
+          // flight, deductModal.mealId has since moved on, and applying
+          // these matches would silently swap the visible meal's ingredient
+          // matches out from under the user mid-review.
+          setDeductModal(prev => (prev && prev.mealId === mealId ? { mealId, recipeName: meal.recipe!.name, matches } : prev));
         } catch (err) {
           console.error('Failed to match ingredients:', err);
           // Keep modal open with empty matches so user can skip manually
-          setDeductModal(prev => prev ? { ...prev, matches: [] } : null);
+          setDeductModal(prev => (prev && prev.mealId === mealId ? { ...prev, matches: [] } : prev));
         } finally {
           setDeductLoading(false);
         }

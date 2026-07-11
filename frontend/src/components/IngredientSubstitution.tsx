@@ -18,20 +18,10 @@ interface IngredientSubstitutionProps {
   onClose: () => void;
 }
 
-const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
-  ingredientName,
-  quantity,
-  unit,
-  onSubstitute,
-  onClose
-}) => {
-  const { t } = useTranslation();
-  const [substitutions, setSubstitutions] = useState<Substitution[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedDietaryFilter, setSelectedDietaryFilter] = useState<string>('all');
-
-  // Comprehensive substitution database
-  const substitutionDatabase: Record<string, Substitution[]> = {
+// Comprehensive substitution database. This is static reference data (not
+// derived from props/state), so it's hoisted to module scope rather than
+// recreated inside the component on every render.
+const substitutionDatabase: Record<string, Substitution[]> = {
     // PROTEINS
     'chicken': [
       { id: '1', ingredient_name: 'chicken', substitute_name: 'turkey', conversion_ratio: 1.0, dietary_tags: ['meat'], notes: 'Similar cooking time and texture' },
@@ -150,7 +140,19 @@ const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
       { id: '160', ingredient_name: 'tomato', substitute_name: 'red bell pepper', conversion_ratio: 1.0, dietary_tags: ['vegan', 'vegetarian', 'keto', 'gluten-free'], notes: 'Sweeter, similar color' },
       { id: '161', ingredient_name: 'tomato', substitute_name: 'sun-dried tomatoes', conversion_ratio: 0.5, dietary_tags: ['vegan', 'vegetarian', 'keto', 'gluten-free'], notes: 'More intense flavor, use less' }
     ]
-  };
+};
+
+const IngredientSubstitution: React.FC<IngredientSubstitutionProps> = ({
+  ingredientName,
+  quantity,
+  unit,
+  onSubstitute,
+  onClose
+}) => {
+  const { t } = useTranslation();
+  const [substitutions, setSubstitutions] = useState<Substitution[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDietaryFilter, setSelectedDietaryFilter] = useState<string>('all');
 
   useEffect(() => {
     setLoading(true);

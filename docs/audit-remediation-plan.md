@@ -138,8 +138,10 @@ that the YAML parses), and confirmed green on the real PR runs for #23-#25.
 Batch3 (PRs #22-#25) merged to `dev` and verified deployed there (Vercel
 frontend cloned commit confirmed via `vercel inspect`; Render backend
 confirmed `live` at the deploy containing the validation changes; `/health`
-200, AI routes 401 without a token). `main`/production untouched — pending
-explicit "deploy to production" go-ahead.
+200, AI routes 401 without a token). **Released to production 2026-07-11**
+(main merge commit b530c43) — verified via Render deploy API (commit
+b530c43, status `live`) and `/health` 200 / tokenless-401 on
+`grocerygenius-api.onrender.com`.
 
 ## Standing deferred items (from user-feedback triage, not this audit)
 - Protein/fiber tracking + goals; low-glycemic diet option

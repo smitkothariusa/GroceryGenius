@@ -399,7 +399,7 @@ const App: React.FC = () => {
           .from('profiles')
           .select('daily_calorie_goal')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
         
         if (profileData?.daily_calorie_goal && !isStale()) {
           setDailyCalorieGoal(profileData.daily_calorie_goal);

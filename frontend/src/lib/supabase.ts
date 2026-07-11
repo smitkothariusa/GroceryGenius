@@ -513,12 +513,12 @@ export const profileService = {
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
     if (error) {
       console.error('Error fetching profile:', error);
       return null;
     }
-    return data as Profile;
+    return data as Profile | null;
   },
 
   async upsertProfile(userId: string, updates: Partial<Omit<Profile, 'id' | 'created_at' | 'updated_at'>>): Promise<{ error: any }> {

@@ -10,15 +10,18 @@ Workflow for each task: `.claude/skills/implement-task/SKILL.md`
 ## Current Task
 
 🟠 **[14 — Expand frontend test coverage](docs/tasks/14-frontend-test-coverage.md)**
-Status: **NOT STARTED**
+Status: **IN PROGRESS**
 
 Tasks 03, 12, 13, 15 (PRs #39–#42) shipped and released to production as of
 2026-07-11 (main 90d888d) — verified live on grocerygenius.org +
 grocerygenius-api.onrender.com. 14 is now unblocked by 03's Vitest baseline.
 
-Still skipped pending decisions: 6 (stub, needs scope confirmation), 7/8
-(Redis provisioning — infra/cost decision needing user sign-off), 9/10
-(need a product/repo-settings decision before implementing).
+Running 14, 16, 17, 9 in parallel via worktree subagents (2026-07-11). 10
+(CI required status checks) applied directly via `gh api`, no code change.
+6 gets a research-only pass to flesh out its stub spec; actual extraction
+deferred until after 14 lands. 7/8 (Redis) explicitly skipped this session
+per user decision — not needed at current single-instance scale. Still
+gated: 18/19/20 (product/schema sign-off needed before implementation).
 
 ---
 
@@ -41,20 +44,20 @@ Still skipped pending decisions: 6 (stub, needs scope confirmation), 7/8
 | 6 | Refactor App.tsx into feature modules | XL (multi-day) | NOT STARTED | [spec](docs/tasks/06-app-tsx-refactor.md) |
 | 7 | Redis-backed rate limiting for multi-instance | M (1d) | NOT STARTED | [spec](docs/tasks/07-redis-rate-limiting.md) |
 | 8 | Recipe caching (Redis, 24h TTL) | M (1d) | NOT STARTED | [spec](docs/tasks/08-recipe-caching.md) |
-| 9 | Investigate & fix pantry expiry boundary logic | S (0.5d) | NOT STARTED | [spec](docs/tasks/09-pantry-expiry-boundary.md) |
-| 10 | Enforce CI as a required status check on dev/main | S (1-2h) | NOT STARTED | [spec](docs/tasks/10-ci-branch-protection.md) |
+| 9 | Investigate & fix pantry expiry boundary logic | S (0.5d) | IN PROGRESS | [spec](docs/tasks/09-pantry-expiry-boundary.md) |
+| 10 | Enforce CI as a required status check on dev/main | S (1-2h) | IN PROGRESS | [spec](docs/tasks/10-ci-branch-protection.md) |
 | 11 | Offline support (PWA service worker + sync queue) | L (2-3d) | NOT STARTED | [spec](docs/tasks/11-offline-support.md) |
 | 12 | Request deduplication (prevent double-submit) | S (0.5d) | DONE | [spec](docs/tasks/12-request-deduplication.md) |
 | 13 | Centralize ingredient parsing logic | M (1d) | DONE | [spec](docs/tasks/13-ingredient-parsing.md) |
-| 14 | Expand frontend test coverage (component-level) | M (1-2d) | NOT STARTED | [spec](docs/tasks/14-frontend-test-coverage.md) |
+| 14 | Expand frontend test coverage (component-level) | M (1-2d) | IN PROGRESS | [spec](docs/tasks/14-frontend-test-coverage.md) |
 | 15 | Structured cost/usage logging for OpenAI calls | M (1d) | DONE | [spec](docs/tasks/15-openai-cost-logging.md) |
 
 ### 🟡 Medium
 
 | # | Task | Effort | Status | Spec |
 |---|---|---|---|---|
-| 16 | Health check endpoint dependency checks | S (0.5d) | NOT STARTED | [spec](docs/tasks/16-health-check-deps.md) |
-| 17 | Pagination for pantry/shopping lists | S (0.5d) | NOT STARTED | [spec](docs/tasks/17-pagination.md) |
+| 16 | Health check endpoint dependency checks | S (0.5d) | IN PROGRESS | [spec](docs/tasks/16-health-check-deps.md) |
+| 17 | Pagination for pantry/shopping lists | S (0.5d) | IN PROGRESS | [spec](docs/tasks/17-pagination.md) |
 | 18 | Weekly meal calendar feature | L (2-3d) | NOT STARTED | [spec](docs/tasks/18-meal-calendar.md) |
 
 ### 🟢 Low

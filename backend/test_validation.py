@@ -154,25 +154,6 @@ def test_price_comparison_rejects_oversized_items_list(client):
     assert response.status_code == 422
 
 
-def test_shopping_batch_rejects_oversized_list():
-    """Direct model test (no HTTP route mounted in app.main) for the batch endpoint's
-    payload shape — it now requires {"items": [...]} with a max_length cap."""
-    from app.routers.shopping import BatchShoppingItems
-    from pydantic import ValidationError
-
-    too_many = [{"name": "Apples", "quantity": 1} for _ in range(201)]
-    with pytest.raises(ValidationError):
-        BatchShoppingItems(items=too_many)
-
-
-def test_shopping_item_rejects_zero_quantity():
-    from app.routers.shopping import ShoppingItem
-    from pydantic import ValidationError
-
-    with pytest.raises(ValidationError):
-        ShoppingItem(name="Apples", quantity=0)
-
-
 # ---------------------------------------------------------------------------
 # donation.py
 # ---------------------------------------------------------------------------

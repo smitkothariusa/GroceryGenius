@@ -30,6 +30,14 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
   const [rect, setRect] = useState<SpotlightRect | null>(null);
   const [tooltipAbove, setTooltipAbove] = useState(false);
   const retryRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // App.tsx passes a fresh `onNext` function identity on every render (it's
+  // not wrapped in useCallback there). Putting `onNext` directly in the
+  // measurement effect's deps below would make that effect re-run — and
+  // re-measure/re-scroll — on every unrelated App.tsx re-render while the
+  // tour is open, not just on step changes. A ref sidesteps that: the
+  // effect always calls the latest onNext without needing it as a dep.
+  const onNextRef = useRef(onNext);
+  onNextRef.current = onNext;
 
   const step = steps[currentStep];
   const total = steps.length;
@@ -51,12 +59,20 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
     };
   }, []);
 
-  if (!step) return null;
-
   useEffect(() => {
+    // `step` can be undefined for one render — e.g. the parent increments
+    // currentStep to advance past the last tour step in the same tick it
+    // stops rendering TourOverlay. This must stay a no-op *inside* the
+    // effect (not an early `return null` before the hook — that would call
+    // a different number of hooks depending on `step`, which is exactly
+    // the "Rendered more hooks than during the previous render" violation
+    // the audit flagged and a prior session couldn't reproduce: it only
+    // shows up transiently at the last step of a tour, not on every render).
+    if (!step) return;
+
     // Handle skipOnMobile immediately — no DOM lookup needed
     if (isMobile && step.skipOnMobile) {
-      onNext();
+      onNextRef.current();
       return;
     }
 
@@ -82,7 +98,7 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
         if (attempt < 10) {
           retryRef.current = setTimeout(() => measure(attempt + 1), 150);
         } else {
-          onNext();
+          onNextRef.current();
         }
         return;
       }
@@ -93,7 +109,7 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
         if (attempt < 10) {
           retryRef.current = setTimeout(() => measure(attempt + 1), 150);
         } else {
-          onNext();
+          onNextRef.current();
         }
         return;
       }
@@ -150,7 +166,9 @@ export default function TourOverlay({ steps, currentStep, isMobile, onNext, onSk
       if (resizeTimer) clearTimeout(resizeTimer);
       window.removeEventListener('resize', handleResize);
     };
-  }, [step.selector, step.mobileSelector, step.skipOnMobile, currentStep, isMobile]);
+  }, [step, currentStep, isMobile]);
+
+  if (!step) return null;
 
   const isLast = currentStep === total - 1;
 

@@ -35,7 +35,7 @@ const dropOffSites: DropOffSite[] = [
 ];
 import Toast from './components/Toast';
 import { useToast } from './hooks/useToast';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { authService, supabase, profileService, CustomDietaryLabel, Profile } from './lib/supabase';
 import { authFetch } from './lib/apiClient';
 import { escapeHtml } from './lib/escapeHtml';
@@ -153,6 +153,10 @@ const App: React.FC = () => {
   const filterPanelRef = useRef<HTMLDivElement>(null);
   const recipesRef = useRef<Recipe[]>([]);
   recipesRef.current = recipes;
+  // Bumped whenever a loadUserData() call should be considered stale (a
+  // newer load started, or the user signed out) so in-flight responses from
+  // an older call don't clobber state set by a newer one.
+  const loadUserDataRequestRef = useRef(0);
   const [errorMsg, setErrorMsg] = useState('');
   const [dietaryFilter, setDietaryFilter] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -370,14 +374,19 @@ const App: React.FC = () => {
     };
 
     calculateAllItemsImpact();
-  }, [showDonationModal]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const loadUserData = async () => {
+  }, [showDonationModal, pantry]);
+  const loadUserData = useCallback(async () => {
+    // Tag this call with a request token. If a newer loadUserData() call
+    // starts (e.g. the user re-authenticates) or the user signs out before
+    // this one's awaits resolve, `isStale()` flips true and we stop setting
+    // state instead of overwriting fresher/cleared state with old data.
+    const requestToken = ++loadUserDataRequestRef.current;
+    const isStale = () => requestToken !== loadUserDataRequestRef.current;
     try {
       console.log('📦 Loading user data from Supabase...');
 
       // Load each data source independently so one failure doesn't break everything
-      
+
       // Load calorie data
       console.log('⏳ Starting to load calorie data...');
       try {
@@ -388,13 +397,13 @@ const App: React.FC = () => {
           .eq('id', user.id)
           .single();
         
-        if (profileData?.daily_calorie_goal) {
+        if (profileData?.daily_calorie_goal && !isStale()) {
           setDailyCalorieGoal(profileData.daily_calorie_goal);
         }
         
         // Get today's calorie total
         const calorieData = await calorieService.getTodayCalories();
-        if (calorieData && calorieData.total !== undefined) {
+        if (calorieData && calorieData.total !== undefined && !isStale()) {
           setTodayCalories(calorieData.total);
         }
         
@@ -406,7 +415,7 @@ const App: React.FC = () => {
       // Load full profile for settings + survey
       try {
         const profileResult = await profileService.getProfile(user.id);
-        if (profileResult) {
+        if (profileResult && !isStale()) {
           setUserProfile(profileResult);
           setCustomDietaryLabels(profileResult.custom_dietary_labels ?? []);
           const prefs0 = profileResult.dietary_preferences ?? [];
@@ -427,19 +436,21 @@ const App: React.FC = () => {
     try {
       const pantryData = await pantryService.getAll();
       console.log('📦 Pantry data received, transforming...');
-      setPantry(pantryData.map(item => ({
-        id: item.id,
-        name: item.name,
-        quantity: item.quantity,
-        unit: item.unit,
-        category: item.category,
-        expiryDate: item.expiry_date,
-        emoji: item.emoji || undefined,  // NEW
-      })));
+      if (!isStale()) {
+        setPantry(pantryData.map(item => ({
+          id: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          unit: item.unit,
+          category: item.category,
+          expiryDate: item.expiry_date,
+          emoji: item.emoji || undefined,  // NEW
+        })));
+      }
       console.log('✅ Pantry loaded:', pantryData.length, 'items');
     } catch (error) {
       console.error('❌ Error loading pantry:', error);
-      setPantry([]);
+      if (!isStale()) setPantry([]);
     }
 
     // Load shopping items
@@ -447,19 +458,21 @@ const App: React.FC = () => {
     try {
       const shoppingData = await shoppingService.getAll();
       console.log('📦 Shopping data received, transforming...');
-      setShoppingList(shoppingData.map(item => ({
-        id: item.id,
-        name: item.name,
-        quantity: item.quantity,
-        unit: item.unit,
-        category: item.category,
-        checked: item.checked,
-        priority: item.priority as 'high' | 'medium' | 'low',
-      })));
+      if (!isStale()) {
+        setShoppingList(shoppingData.map(item => ({
+          id: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          unit: item.unit,
+          category: item.category,
+          checked: item.checked,
+          priority: item.priority as 'high' | 'medium' | 'low',
+        })));
+      }
       console.log('✅ Shopping list loaded:', shoppingData.length, 'items');
     } catch (error) {
       console.error('❌ Error loading shopping list:', error);
-      setShoppingList([]);
+      if (!isStale()) setShoppingList([]);
     }
 
     // Load favorite recipes
@@ -467,24 +480,26 @@ const App: React.FC = () => {
     try {
       const recipesData = await recipesService.getAll();
       console.log('📦 Favorites data received, transforming...');
-      setFavorites(recipesData.map(recipe => ({
-        id: recipe.id,
-        name: recipe.name,
-        ingredients: recipe.ingredients,
-        instructions: recipe.instructions,
-        prep_time: recipe.prep_time,
-        cook_time: recipe.cook_time,
-        difficulty: recipe.difficulty,
-        servings: recipe.servings,
-        nutrition: recipe.nutrition,
-        health_benefits: recipe.health_benefits,
-        budget_tip: recipe.budget_tip,
-        savedDate: recipe.created_at,
-      })));
+      if (!isStale()) {
+        setFavorites(recipesData.map(recipe => ({
+          id: recipe.id,
+          name: recipe.name,
+          ingredients: recipe.ingredients,
+          instructions: recipe.instructions,
+          prep_time: recipe.prep_time,
+          cook_time: recipe.cook_time,
+          difficulty: recipe.difficulty,
+          servings: recipe.servings,
+          nutrition: recipe.nutrition,
+          health_benefits: recipe.health_benefits,
+          budget_tip: recipe.budget_tip,
+          savedDate: recipe.created_at,
+        })));
+      }
       console.log('✅ Favorites loaded:', recipesData.length, 'recipes');
     } catch (error) {
       console.error('❌ Error loading favorites:', error);
-      setFavorites([]);
+      if (!isStale()) setFavorites([]);
     }
 
     // Load donation history
@@ -492,17 +507,19 @@ const App: React.FC = () => {
     try {
       const historyData = await donationService.getHistory();
       console.log('📦 History data received, transforming...');
-      setDonationHistory(historyData.map(donation => ({
-        id: donation.id,
-        date: donation.date,
-        foodBank: donation.food_bank,
-        items: donation.items,
-        totalMeals: donation.total_meals,
-      })));
+      if (!isStale()) {
+        setDonationHistory(historyData.map(donation => ({
+          id: donation.id,
+          date: donation.date,
+          foodBank: donation.food_bank,
+          items: donation.items,
+          totalMeals: donation.total_meals,
+        })));
+      }
       console.log('✅ Donation history loaded:', historyData.length, 'donations');
     } catch (error) {
       console.error('❌ Error loading donation history:', error);
-      setDonationHistory([]);
+      if (!isStale()) setDonationHistory([]);
     }
 
     // Load donation impact
@@ -510,22 +527,26 @@ const App: React.FC = () => {
     try {
       const impactData = await donationService.getImpact();
       console.log('📦 Impact data received, transforming...');
-      setDonationImpact({
-        totalDonations: impactData.total_donations || 0,
-        totalMeals: impactData.total_meals || 0,
-        totalPounds: impactData.total_pounds || 0,
-        co2Saved: impactData.co2_saved || 0,
-        lastDonation: impactData.last_donation,
-      });
+      if (!isStale()) {
+        setDonationImpact({
+          totalDonations: impactData.total_donations || 0,
+          totalMeals: impactData.total_meals || 0,
+          totalPounds: impactData.total_pounds || 0,
+          co2Saved: impactData.co2_saved || 0,
+          lastDonation: impactData.last_donation,
+        });
+      }
       console.log('✅ Donation impact loaded');
     } catch (error) {
       console.error('❌ Error loading donation impact:', error);
-      setDonationImpact({
-        totalDonations: 0,
-        totalMeals: 0,
-        totalPounds: 0,
-        co2Saved: 0
-      });
+      if (!isStale()) {
+        setDonationImpact({
+          totalDonations: 0,
+          totalMeals: 0,
+          totalPounds: 0,
+          co2Saved: 0
+        });
+      }
     }
 
     console.log('✅ All user data loading attempts complete');
@@ -538,7 +559,7 @@ const App: React.FC = () => {
     } finally {
       console.log('🏁 loadUserData execution finished');
     }
-  };
+  }, [user]);
   // Daily reset check - runs every minute to check if we've crossed midnight
   useEffect(() => {
     const checkDailyReset = () => {
@@ -611,21 +632,26 @@ const App: React.FC = () => {
         setUser(session?.user || null);
         setAuthLoading(false);
         
-        if (event === 'SIGNED_IN' && session?.user) {
-          // Only reload if this is a fresh sign-in, not a page refresh
-          if (event === 'SIGNED_IN' && !user) {
-            console.log('🔄 Fresh sign in detected, reloading data...');
-            setTimeout(async () => {
-              try {
-                await loadUserData();
-              } catch (loadError) {
-                console.error('Error loading user data:', loadError);
-              }
-            }, 100);
-          }
-        }
-        
+        // Note: we deliberately do NOT call loadUserData() here for
+        // SIGNED_IN. setUser(session.user) above already updates the `user`
+        // state, and the separate "Load user data after authentication"
+        // effect below reacts to that change and calls loadUserData() with
+        // a fresh, non-stale closure. (This used to also fire loadUserData()
+        // from here, guarded by `!user` — but `user` inside this listener
+        // is captured once at mount, when it's always null, so that guard
+        // never actually filtered anything, and the stale loadUserData()
+        // it invoked read `user.id` from that same stale null closure,
+        // throwing and silently swallowing the profile/calorie-goal load
+        // on every real sign-in. It also raced with the effect below:
+        // both fired loadUserData() concurrently, and if the user signed
+        // out again before the stale call's pantry/shopping/favorites
+        // fetches resolved, those late responses could overwrite the
+        // SIGNED_OUT reset below with the previous session's data.)
+
         if (event === 'SIGNED_OUT') {
+          // Invalidate any loadUserData() call still in flight so its
+          // late-arriving responses can't overwrite the empty state below.
+          loadUserDataRequestRef.current++;
           setPantry([]);
           setShoppingList([]);
           setFavorites([]);
@@ -665,7 +691,7 @@ const App: React.FC = () => {
         setDonationHistory([]);
       });
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, loadUserData]);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
@@ -719,7 +745,7 @@ const App: React.FC = () => {
         setTranslatedFavoriteNames(map);
       })
       .catch(() => setTranslatedFavoriteNames({}));
-  }, [i18n.language, favorites]);
+  }, [i18n.language, favorites, API_BASE]);
 
   const handleTabChange = (tab: typeof currentTab) => {
     localStorage.setItem('activeTab', tab);
@@ -2415,7 +2441,7 @@ const App: React.FC = () => {
   // Add a ref to track the latest API call
   const priceComparisonAbortController = useRef<AbortController | null>(null);
 
-  const fetchPriceComparison = async () => {
+  const fetchPriceComparison = useCallback(async () => {
     // Cancel any in-flight request
     if (priceComparisonAbortController.current) {
       priceComparisonAbortController.current.abort();
@@ -2482,7 +2508,7 @@ const App: React.FC = () => {
         info(t('toasts.estimatedPrices'));
       }
     }
-  };
+  }, [shoppingList, API_BASE, t, info]);
 
   useEffect(() => {
     if (currentTab === 'shopping' && shoppingList.length > 0) {
@@ -2490,12 +2516,12 @@ const App: React.FC = () => {
       const timer = setTimeout(() => {
         fetchPriceComparison();
       }, 500);
-      
+
       return () => clearTimeout(timer);
     } else if (shoppingList.length === 0) {
       setPriceComparison({ amazon: 0, walmart: 0, loading: false });
     }
-  }, [shoppingList.length, currentTab]);
+  }, [shoppingList.length, currentTab, fetchPriceComparison]);
   const generateShareText = () => {
     const treesEquivalent = Math.round(donationImpact.co2Saved / 48);
     const gasSaved = Math.round(donationImpact.co2Saved / 19.6);

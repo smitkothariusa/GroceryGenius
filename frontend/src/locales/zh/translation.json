@@ -52,7 +52,8 @@
       "pantryItems": "储藏室物品",
       "beverages": "饮料",
       "snacks": "零食",
-      "bakery": "烘焙食品"
+      "bakery": "烘焙食品",
+      "condiments": "调味品"
     },
     "units": {
       "pieces": "个",
@@ -452,7 +453,15 @@
     "aiScannerTitle": "AI物品扫描器",
     "aiScannerDesc": "拍摄任何食物的照片，进行AI识别和营养信息获取",
     "receiptUploadTitle": "收据上传",
-    "receiptUploadDesc": "上传超市收据以一次自动添加多个物品"
+    "receiptUploadDesc": "上传超市收据以一次自动添加多个物品",
+    "readingReceipt": "正在读取收据...",
+    "receiptReviewTitle": "确认物品",
+    "receiptReviewDesc": "在添加到您的储藏室之前，请确认收据上找到的物品",
+    "receiptRejectedLines": "已跳过 {{count}} 行非物品内容（税费、总计、折扣等）",
+    "confidenceHigh": "高置信度",
+    "confidenceMedium": "中等置信度",
+    "confidenceLow": "低置信度",
+    "addSelectedItems": "将 {{count}} 件物品添加到储藏室"
   },
   "mission": {
     "welcomeTitle": "欢迎使用GroceryGenius！🎉",
@@ -523,6 +532,8 @@
     "addedToShoppingList": "{{name}} 已添加到购物清单！",
     "failedAddItemSimple": "添加物品失败",
     "failedAddSomeItems": "部分物品添加失败",
+    "noReceiptItemsDetected": "未在收据上检测到物品。请尝试使用更清晰、光线更好的照片。",
+    "failedAnalyzeReceipt": "收据分析失败，请重试。",
     "alreadyHaveIngredients": "您已拥有所有食材！"
   },
   "survey": {

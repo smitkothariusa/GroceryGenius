@@ -88,6 +88,7 @@ def test_ai_routes_reject_tokenless_requests():
         ("post", "/recipes/translate-full", {"json": {"recipes": [], "language": "es"}}),
         ("post", "/recipes/parse-ingredients", {"json": {"lines": ["1 cup rice"]}}),
         ("post", "/vision/analyze-ingredients", {"files": {"file": ("a.jpg", b"xx", "image/jpeg")}}),
+        ("post", "/vision/analyze-receipt", {"files": {"file": ("r.jpg", b"xx", "image/jpeg")}}),
         ("post", "/barcode/vision-lookup", {"json": {"image": "aGk="}}),
         ("post", "/barcode/ai-lookup", {"json": {"barcode": "012345678905"}}),
         ("post", "/pantry/match-ingredients", {"json": {"ingredient_lines": [], "pantry_items": []}}),

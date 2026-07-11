@@ -52,7 +52,8 @@
       "pantryItems": "Pantry Items",
       "beverages": "Beverages",
       "snacks": "Snacks",
-      "bakery": "Bakery"
+      "bakery": "Bakery",
+      "condiments": "Condiments"
     },
     "units": {
       "pieces": "pieces",
@@ -452,7 +453,15 @@
     "aiScannerTitle": "AI Item Scanner",
     "aiScannerDesc": "Take a photo of any food item for AI identification and nutritional info",
     "receiptUploadTitle": "Receipt Upload",
-    "receiptUploadDesc": "Upload a grocery receipt to automatically add multiple items at once"
+    "receiptUploadDesc": "Upload a grocery receipt to automatically add multiple items at once",
+    "readingReceipt": "Reading receipt...",
+    "receiptReviewTitle": "Review Items",
+    "receiptReviewDesc": "Confirm the items found on your receipt before adding them to your pantry",
+    "receiptRejectedLines": "Skipped {{count}} non-item lines (tax, totals, discounts, etc.)",
+    "confidenceHigh": "High confidence",
+    "confidenceMedium": "Medium confidence",
+    "confidenceLow": "Low confidence",
+    "addSelectedItems": "Add {{count}} Items to Pantry"
   },
   "mission": {
     "welcomeTitle": "Welcome to GroceryGenius! 🎉",
@@ -523,6 +532,8 @@
     "addedToShoppingList": "Added {{name}} to shopping list!",
     "failedAddItemSimple": "Failed to add item",
     "failedAddSomeItems": "Failed to add some items",
+    "noReceiptItemsDetected": "No items detected on the receipt. Try a clearer photo with better lighting.",
+    "failedAnalyzeReceipt": "Failed to analyze receipt. Please try again.",
     "alreadyHaveIngredients": "You already have all ingredients!"
   },
   "survey": {

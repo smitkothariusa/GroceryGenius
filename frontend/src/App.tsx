@@ -1045,9 +1045,9 @@ const App: React.FC = () => {
       clearTimeout(timeoutId);
       console.error('Recipe generation error:', err);
       if (err.name === 'AbortError') {
-        setErrorMsg('⏱️ Request timed out. OpenAI is taking too long. Please try with fewer ingredients or try again.');
+        setErrorMsg(t('recipes.timeoutError'));
       } else {
-        setErrorMsg('Failed to generate recipes. Please check your backend is running on http://localhost:8000');
+        setErrorMsg(t('recipes.generationError'));
       }
     } finally {
       setRecipeLoading(false);
@@ -3785,8 +3785,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         <input
                           type="number"
                           min="1"
-                          value={newPantryItem.quantity}
-                          onChange={(e) => setNewPantryItem({...newPantryItem, quantity: Math.max(1, parseInt(e.target.value) || 1)})}
+                          value={newPantryItem.quantity === '' ? '' : newPantryItem.quantity}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setNewPantryItem(prev => ({ ...prev, quantity: val === '' ? '' as any : parseInt(val) || '' as any }));
+                          }}
                           style={{
                             width: '100%',
                             padding: '0.75rem',

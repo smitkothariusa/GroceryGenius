@@ -205,6 +205,8 @@
     "clickForFullRecipe": "詳細な材料と分量を含む完全なレシピはクリックしてください",
     "whatIngredientsLabel": "どんな食材をお持ちですか？",
     "generatingRecipe": "レシピ{{n}}を生成中...",
+    "timeoutError": "⏱️ リクエストがタイムアウトしました。材料を減らすか、もう一度お試しください。",
+    "generationError": "レシピの生成に失敗しました。しばらくしてからもう一度お試しください。",
     "emptyStatePrompt": "食材を追加するか特定のレシピを検索して始めましょう！",
     "emptyStateTip": "試してみてください：「アップルパイ」、「チキンパスタ」、または「トマト」「鶏肉」などの食材を追加",
     "keyIngredients": "主な食材",

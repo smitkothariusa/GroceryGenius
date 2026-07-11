@@ -9,16 +9,16 @@ Workflow for each task: `.claude/skills/implement-task/SKILL.md`
 
 ## Current Task
 
-Tasks **03, 12, 13, 15** were implemented in parallel (isolated worktrees)
-and are merged to `dev` (PRs #39–#42) — all deployed and smoke-tested on
-dev.grocerygenius.org / grocerygenius-dev.onrender.com. Not yet released to
-production; awaiting user feedback and the explicit release phrase per
-CLAUDE.md. Next up once released: **14** (frontend test coverage, now
-unblocked by 03's Vitest baseline landing).
+🟠 **[14 — Expand frontend test coverage](docs/tasks/14-frontend-test-coverage.md)**
+Status: **NOT STARTED**
 
-Skipped for this batch: 6 (stub, needs scope confirmation), 7/8 (Redis
-provisioning — infra/cost decision needing user sign-off), 9/10 (need a
-product/repo-settings decision before implementing).
+Tasks 03, 12, 13, 15 (PRs #39–#42) shipped and released to production as of
+2026-07-11 (main 90d888d) — verified live on grocerygenius.org +
+grocerygenius-api.onrender.com. 14 is now unblocked by 03's Vitest baseline.
+
+Still skipped pending decisions: 6 (stub, needs scope confirmation), 7/8
+(Redis provisioning — infra/cost decision needing user sign-off), 9/10
+(need a product/repo-settings decision before implementing).
 
 ---
 
@@ -30,7 +30,7 @@ product/repo-settings decision before implementing).
 |---|---|---|---|---|
 | 1 | Pantry & Shopping persistence + per-user isolation | L (2-3d) | DONE | [spec](docs/tasks/01-pantry-persistence.md) |
 | 2 | Add error boundaries to frontend | S (0.5d) | DONE | [spec](docs/tasks/02-error-boundaries.md) |
-| 3 | Close backend test gaps (pantry/shopping/donation) + frontend test baseline | M (1-2d) | MERGED TO DEV | [spec](docs/tasks/03-backend-tests.md) |
+| 3 | Close backend test gaps (pantry/shopping/donation) + frontend test baseline | M (1-2d) | DONE | [spec](docs/tasks/03-backend-tests.md) |
 | 4 | Validate image uploads before sending to OpenAI | S (0.5d) | DONE | [spec](docs/tasks/04-image-upload-validation.md) |
 | 5 | Fix price comparison non-determinism (temp 0.8→0.3) | S (few hrs) | DONE | [spec](docs/tasks/05-price-comparison-determinism.md) |
 
@@ -44,10 +44,10 @@ product/repo-settings decision before implementing).
 | 9 | Investigate & fix pantry expiry boundary logic | S (0.5d) | NOT STARTED | [spec](docs/tasks/09-pantry-expiry-boundary.md) |
 | 10 | Enforce CI as a required status check on dev/main | S (1-2h) | NOT STARTED | [spec](docs/tasks/10-ci-branch-protection.md) |
 | 11 | Offline support (PWA service worker + sync queue) | L (2-3d) | NOT STARTED | [spec](docs/tasks/11-offline-support.md) |
-| 12 | Request deduplication (prevent double-submit) | S (0.5d) | MERGED TO DEV | [spec](docs/tasks/12-request-deduplication.md) |
-| 13 | Centralize ingredient parsing logic | M (1d) | MERGED TO DEV | [spec](docs/tasks/13-ingredient-parsing.md) |
+| 12 | Request deduplication (prevent double-submit) | S (0.5d) | DONE | [spec](docs/tasks/12-request-deduplication.md) |
+| 13 | Centralize ingredient parsing logic | M (1d) | DONE | [spec](docs/tasks/13-ingredient-parsing.md) |
 | 14 | Expand frontend test coverage (component-level) | M (1-2d) | NOT STARTED | [spec](docs/tasks/14-frontend-test-coverage.md) |
-| 15 | Structured cost/usage logging for OpenAI calls | M (1d) | MERGED TO DEV | [spec](docs/tasks/15-openai-cost-logging.md) |
+| 15 | Structured cost/usage logging for OpenAI calls | M (1d) | DONE | [spec](docs/tasks/15-openai-cost-logging.md) |
 
 ### 🟡 Medium
 

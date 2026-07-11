@@ -461,7 +461,8 @@
     "confidenceHigh": "High confidence",
     "confidenceMedium": "Medium confidence",
     "confidenceLow": "Low confidence",
-    "addSelectedItems": "Add {{count}} Items to Pantry"
+    "addSelectedItems": "Add {{count}} Items to Pantry",
+    "qtyPlaceholder": "qty"
   },
   "mission": {
     "welcomeTitle": "Welcome to GroceryGenius! 🎉",
@@ -534,6 +535,7 @@
     "failedAddSomeItems": "Failed to add some items",
     "noReceiptItemsDetected": "No items detected on the receipt. Try a clearer photo with better lighting.",
     "failedAnalyzeReceipt": "Failed to analyze receipt. Please try again.",
+    "receiptMissingQuantity": "Please enter a quantity for {{count}} item(s) before adding to pantry.",
     "alreadyHaveIngredients": "You already have all ingredients!"
   },
   "survey": {

@@ -461,7 +461,8 @@
     "confidenceHigh": "高い信頼度",
     "confidenceMedium": "中程度の信頼度",
     "confidenceLow": "低い信頼度",
-    "addSelectedItems": "{{count}} 件のアイテムをパントリーに追加"
+    "addSelectedItems": "{{count}} 件のアイテムをパントリーに追加",
+    "qtyPlaceholder": "数量"
   },
   "mission": {
     "welcomeTitle": "GroceryGeniusへようこそ！🎉",
@@ -534,6 +535,7 @@
     "failedAddSomeItems": "一部のアイテムの追加に失敗しました",
     "noReceiptItemsDetected": "レシートにアイテムが見つかりませんでした。より鮮明で明るい写真をお試しください。",
     "failedAnalyzeReceipt": "レシートの解析に失敗しました。もう一度お試しください。",
+    "receiptMissingQuantity": "パントリーに追加する前に、{{count}} 件のアイテムの数量を入力してください。",
     "alreadyHaveIngredients": "すべての食材がすでにあります！"
   },
   "survey": {

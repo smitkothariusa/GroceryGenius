@@ -461,7 +461,8 @@
     "confidenceHigh": "Hohe Zuverlässigkeit",
     "confidenceMedium": "Mittlere Zuverlässigkeit",
     "confidenceLow": "Niedrige Zuverlässigkeit",
-    "addSelectedItems": "{{count}} Artikel zur Speisekammer hinzufügen"
+    "addSelectedItems": "{{count}} Artikel zur Speisekammer hinzufügen",
+    "qtyPlaceholder": "Menge"
   },
   "mission": {
     "welcomeTitle": "Willkommen bei GroceryGenius! 🎉",
@@ -534,6 +535,7 @@
     "failedAddSomeItems": "Einige Artikel konnten nicht hinzugefügt werden",
     "noReceiptItemsDetected": "Keine Artikel auf dem Kassenbon erkannt. Versuchen Sie ein klareres Foto mit besserer Beleuchtung.",
     "failedAnalyzeReceipt": "Kassenbon konnte nicht analysiert werden. Bitte versuchen Sie es erneut.",
+    "receiptMissingQuantity": "Bitte geben Sie eine Menge für {{count}} Artikel ein, bevor Sie sie zur Speisekammer hinzufügen.",
     "alreadyHaveIngredients": "Du hast bereits alle Zutaten!"
   },
   "survey": {

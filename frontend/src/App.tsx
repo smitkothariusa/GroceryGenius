@@ -77,12 +77,13 @@ interface ShoppingItem {
 interface ReceiptItem {
   id: string;
   name: string;
-  quantity: number;
+  quantity: number | null;
   unit: string;
   category: string;
   confidence: 'high' | 'medium' | 'low';
   rawText: string;
   selected: boolean;
+  emoji?: string;
 }
 
 interface Recipe {
@@ -2418,16 +2419,20 @@ const App: React.FC = () => {
       const data = await response.json();
 
       if (data.success && data.items?.length > 0) {
-        setReceiptItems(data.items.map((item: any) => ({
-          id: `${Date.now()}-${Math.random()}`,
-          name: item.name,
-          quantity: item.quantity,
-          unit: item.unit,
-          category: item.category,
-          confidence: item.confidence,
-          rawText: item.raw_text || '',
-          selected: item.confidence !== 'low',
-        })));
+        setReceiptItems(data.items.map((item: any) => {
+          const matchedFood = searchFoods(item.name, i18n.language || 'en', 1)[0];
+          return {
+            id: `${Date.now()}-${Math.random()}`,
+            name: item.name,
+            quantity: item.quantity ?? null,
+            unit: item.unit,
+            category: item.category,
+            confidence: item.confidence,
+            rawText: item.raw_text || '',
+            selected: item.confidence !== 'low',
+            emoji: matchedFood?.emoji,
+          };
+        }));
         setReceiptRejectedCount(data.rejected_lines_count || 0);
         setShowReceiptReview(true);
       } else {
@@ -2517,13 +2522,20 @@ const App: React.FC = () => {
       return;
     }
 
+    const missingQuantity = selected.filter(item => !item.quantity || item.quantity <= 0);
+    if (missingQuantity.length > 0) {
+      warning(t('toasts.receiptMissingQuantity', { count: missingQuantity.length }));
+      return;
+    }
+
     try {
       const savedItems = await Promise.all(selected.map(item =>
         pantryService.add({
           name: item.name,
-          quantity: item.quantity,
+          quantity: item.quantity as number,
           unit: item.unit,
           category: item.category,
+          emoji: item.emoji,
         })
       ));
       setPantry(prev => [...prev, ...savedItems.map(item => ({
@@ -6716,6 +6728,13 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               )}
               {receiptItems.map(item => {
                 const confidenceColor = item.confidence === 'high' ? '#10b981' : item.confidence === 'medium' ? '#f59e0b' : '#ef4444';
+                const categoryEmoji: Record<string, string> = {
+                  produce: '🥬', dairy: '🥛', meat: '🍖', canned: '🥫', grains: '🌾',
+                  breakfast: '🥞', beverages: '🥤', snacks: '🍿', frozen: '🧊',
+                  bakery: '🍞', condiments: '🧂', other: '📦'
+                };
+                const displayEmoji = item.emoji || categoryEmoji[item.category] || '📦';
+                const needsQuantity = item.selected && (item.quantity === null || item.quantity <= 0);
                 return (
                   <div key={item.id} style={{
                     border: `1px solid ${item.selected ? confidenceColor : '#e5e7eb'}`,
@@ -6733,6 +6752,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         ))}
                         style={{ marginTop: '0.6rem', width: '18px', height: '18px', cursor: 'pointer', flexShrink: 0 }}
                       />
+                      <span style={{ fontSize: '1.4rem', marginTop: '0.3rem', flexShrink: 0 }}>{displayEmoji}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
                           <input
@@ -6759,11 +6779,17 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                             type="number"
                             min="0"
                             step="0.01"
-                            value={item.quantity}
+                            value={item.quantity ?? ''}
+                            placeholder={t('scan.qtyPlaceholder')}
                             onChange={(e) => setReceiptItems(prev => prev.map(it =>
-                              it.id === item.id ? { ...it, quantity: parseFloat(e.target.value) || 0 } : it
+                              it.id === item.id ? { ...it, quantity: e.target.value === '' ? null : parseFloat(e.target.value) } : it
                             ))}
-                            style={{ width: '70px', padding: '0.4rem', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '0.85rem' }}
+                            style={{
+                              width: '70px', padding: '0.4rem',
+                              border: needsQuantity ? '1px solid #ef4444' : '1px solid #e5e7eb',
+                              background: needsQuantity ? '#fef2f2' : 'white',
+                              borderRadius: '6px', fontSize: '0.85rem'
+                            }}
                           />
                           <input
                             type="text"

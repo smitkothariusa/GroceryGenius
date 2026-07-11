@@ -34,6 +34,7 @@ const dropOffSites: DropOffSite[] = [
   { id: 'do15', name: 'PenFed Credit Union', address: '4920 Haygood Rd.', city: 'Virginia Beach', hours: 'Monday through Friday from 9 am to 5 pm', lat: 36.8350, lng: -76.1150 }
 ];
 import Toast from './components/Toast';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { useToast } from './hooks/useToast';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { authService, supabase, profileService, CustomDietaryLabel, Profile } from './lib/supabase';
@@ -3080,6 +3081,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
         animation: isTabChanging ? 'fadeOut 0.15s ease-out' : 'fadeIn 0.3s ease-out'
       }}>
         {currentTab === 'recipes' && (
+          <ErrorBoundary context="section:recipes" variant="section">
           <>
             <div style={{ background: cardBg, padding: isMobile ? '1rem' : '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
               {isMobile ? (
@@ -3733,8 +3735,10 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               </div>
             )}
           </>
+          </ErrorBoundary>
         )}
         {currentTab === 'mealplan' && (
+          <ErrorBoundary context="section:mealplan" variant="section">
         <div>
         <MealPlanCalendar
           savedRecipes={favorites}
@@ -3785,10 +3789,12 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
           }}
         />
         </div>
+          </ErrorBoundary>
         )}
         {currentTab === 'pantry' && (
-          <div style={{ 
-            background: cardBg, 
+          <ErrorBoundary context="section:pantry" variant="section">
+          <div style={{
+            background: cardBg,
             padding: isMobile ? '1rem' : '2rem', 
             borderRadius: '16px' 
           }}>
@@ -4697,10 +4703,12 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               )}
             </div>
           </div>
+          </ErrorBoundary>
         )}
 
         {currentTab === 'shopping' && (
-          <div style={{ 
+          <ErrorBoundary context="section:shopping" variant="section">
+          <div style={{
             background: cardBg, 
             padding: isMobile ? '1rem' : '2rem', 
             borderRadius: '16px' 
@@ -5042,10 +5050,12 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               )}
             </div>
           </div>
+          </ErrorBoundary>
         )}
 
         {currentTab === 'favorites' && (
-          <div style={{ 
+          <ErrorBoundary context="section:favorites" variant="section">
+          <div style={{
             background: cardBg, 
             padding: isMobile ? '1rem' : '2rem', 
             borderRadius: '16px' 
@@ -5106,9 +5116,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               )}
             </div>
           </div>
+          </ErrorBoundary>
         )}
 
         {currentTab === 'donate' && (
+          <ErrorBoundary context="section:donate" variant="section">
           <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
             {/* Impact Dashboard */}
             <div style={{ 
@@ -5851,6 +5863,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
               </div>
             )}
           </div>
+          </ErrorBoundary>
         )}
       {/* Mobile FAB — only shown on mobile via CSS */}
       {isMobile && (currentTab === 'pantry' || currentTab === 'shopping') && (

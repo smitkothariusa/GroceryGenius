@@ -5,6 +5,7 @@ import './mobile.css'
 import './mobile-responsive.css'
 import './i18n'
 import { initGlobalErrorHandlers } from './lib/errorService'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { registerSW } from 'virtual:pwa-register'
 
 // Capture beforeinstallprompt before React mounts — the event fires early
@@ -25,6 +26,8 @@ registerSW({
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <ErrorBoundary context="root" variant="root">
+      <App />
+    </ErrorBoundary>
   </React.StrictMode>
 )

@@ -10,12 +10,13 @@ import time
 from openai import OpenAI
 from app.services.auth import limiter, AI_HEAVY_LIMIT
 from app.services.openai_client import log_openai_usage
+from app.services.upload_validation import validate_image_upload, MAX_UPLOAD_BYTES
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-MAX_IMAGE_BYTES = 8 * 1024 * 1024  # 8 MB
+MAX_IMAGE_BYTES = MAX_UPLOAD_BYTES  # 8 MB — kept as an alias, see upload_validation.py
 MAX_RECEIPT_ITEMS = 40
 
 VALID_CATEGORIES = {
@@ -31,10 +32,8 @@ async def analyze_ingredients(request: Request, file: UploadFile = File(...)):
     Analyze an image and extract visible ingredients using GPT-4 Vision
     """
     try:
-        # Read the uploaded file
-        contents = await file.read()
-        if len(contents) > MAX_IMAGE_BYTES:
-            raise HTTPException(status_code=413, detail="Image too large (max 8 MB)")
+        # Validate content-type/size/magic-bytes, then read the uploaded file
+        contents = await validate_image_upload(file)
 
         # Convert to base64
         base64_image = base64.b64encode(contents).decode('utf-8')
@@ -180,9 +179,7 @@ async def analyze_receipt(request: Request, file: UploadFile = File(...)):
     Tax, subtotal/total, discount/coupon, and non-grocery lines are filtered out.
     """
     try:
-        contents = await file.read()
-        if len(contents) > MAX_IMAGE_BYTES:
-            raise HTTPException(status_code=413, detail="Image too large (max 8 MB)")
+        contents = await validate_image_upload(file)
 
         base64_image = base64.b64encode(contents).decode('utf-8')
 

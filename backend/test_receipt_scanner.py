@@ -7,6 +7,13 @@ from fastapi.testclient import TestClient
 from app.services.auth import get_current_user
 from app.routers.vision import router
 
+# A real JPEG magic-byte prefix (\xff\xd8\xff) followed by junk. The new
+# upload-validation gate in app/services/upload_validation.py sniffs magic
+# bytes, so plain b"fake-image-bytes" (no valid signature) would now be
+# rejected with 400 before ever reaching the mocked OpenAI call -- use this
+# wherever a test wants the upload to pass validation and mock OpenAI instead.
+FAKE_JPEG_BYTES = b"\xff\xd8\xff" + b"fake-image-bytes"
+
 
 def make_app(user_id="test-user-uuid-1234"):
     """App with the vision router, auth dependency overridden to a fixed user."""
@@ -46,7 +53,7 @@ def test_analyze_receipt_returns_parsed_items():
     with patch("app.routers.vision.OpenAI", return_value=mock_client):
         response = client.post(
             "/vision/analyze-receipt",
-            files={"file": ("receipt.jpg", b"fake-image-bytes", "image/jpeg")},
+            files={"file": ("receipt.jpg", FAKE_JPEG_BYTES, "image/jpeg")},
         )
 
     assert response.status_code == 200
@@ -74,7 +81,7 @@ def test_analyze_receipt_drops_invalid_items_and_normalizes_fields():
     with patch("app.routers.vision.OpenAI", return_value=mock_client):
         response = client.post(
             "/vision/analyze-receipt",
-            files={"file": ("receipt.jpg", b"fake-image-bytes", "image/jpeg")},
+            files={"file": ("receipt.jpg", FAKE_JPEG_BYTES, "image/jpeg")},
         )
 
     assert response.status_code == 200
@@ -106,7 +113,7 @@ def test_analyze_receipt_null_quantity_stays_null():
     with patch("app.routers.vision.OpenAI", return_value=mock_client):
         response = client.post(
             "/vision/analyze-receipt",
-            files={"file": ("receipt.jpg", b"fake-image-bytes", "image/jpeg")},
+            files={"file": ("receipt.jpg", FAKE_JPEG_BYTES, "image/jpeg")},
         )
 
     assert response.status_code == 200
@@ -126,7 +133,7 @@ def test_analyze_receipt_no_items_found():
     with patch("app.routers.vision.OpenAI", return_value=mock_client):
         response = client.post(
             "/vision/analyze-receipt",
-            files={"file": ("receipt.jpg", b"fake-image-bytes", "image/jpeg")},
+            files={"file": ("receipt.jpg", FAKE_JPEG_BYTES, "image/jpeg")},
         )
 
     assert response.status_code == 200
@@ -155,7 +162,7 @@ def test_analyze_receipt_openai_failure_returns_500():
     with patch("app.routers.vision.OpenAI", return_value=mock_client):
         response = client.post(
             "/vision/analyze-receipt",
-            files={"file": ("receipt.jpg", b"fake-image-bytes", "image/jpeg")},
+            files={"file": ("receipt.jpg", FAKE_JPEG_BYTES, "image/jpeg")},
         )
 
     assert response.status_code == 500
@@ -171,3 +178,80 @@ def test_analyze_receipt_requires_auth():
         files={"file": ("receipt.jpg", b"fake-image-bytes", "image/jpeg")},
     )
     assert response.status_code == 401
+
+
+# ---------------------------------------------------------------------------
+# Upload validation (task 04: content-type + magic-byte checks before OpenAI)
+# ---------------------------------------------------------------------------
+
+def test_analyze_receipt_rejects_bad_content_type():
+    """A non-image content_type is rejected outright, no OpenAI call made."""
+    client = TestClient(make_app())
+
+    mock_client = MagicMock()
+    with patch("app.routers.vision.OpenAI", return_value=mock_client):
+        response = client.post(
+            "/vision/analyze-receipt",
+            files={"file": ("notes.txt", b"just some text", "text/plain")},
+        )
+
+    assert response.status_code == 400
+    mock_client.chat.completions.create.assert_not_called()
+
+
+def test_analyze_receipt_rejects_txt_renamed_to_jpg():
+    """A .txt file's bytes, even relabeled as image/jpeg (renamed extension +
+    browser-guessed content_type), fails the magic-byte sniff and is
+    rejected -- no OpenAI call made."""
+    client = TestClient(make_app())
+
+    mock_client = MagicMock()
+    with patch("app.routers.vision.OpenAI", return_value=mock_client):
+        response = client.post(
+            "/vision/analyze-receipt",
+            files={"file": ("receipt.jpg", b"this is plain text, not a real image", "image/jpeg")},
+        )
+
+    assert response.status_code == 400
+    mock_client.chat.completions.create.assert_not_called()
+
+
+def test_analyze_ingredients_rejects_txt_renamed_to_jpg():
+    client = TestClient(make_app())
+
+    mock_client = MagicMock()
+    with patch("app.routers.vision.OpenAI", return_value=mock_client):
+        response = client.post(
+            "/vision/analyze-ingredients",
+            files={"file": ("photo.jpg", b"this is plain text, not a real image", "image/jpeg")},
+        )
+
+    assert response.status_code == 400
+    mock_client.chat.completions.create.assert_not_called()
+
+
+def test_analyze_ingredients_accepts_valid_image_and_reaches_openai():
+    client = TestClient(make_app())
+
+    mock_message = MagicMock()
+    mock_message.content = '["banana", "apple"]'
+    mock_choice = MagicMock()
+    mock_choice.message = mock_message
+    mock_response = MagicMock()
+    mock_response.choices = [mock_choice]
+    mock_response.model = "gpt-4o"
+    mock_response.usage = MagicMock(prompt_tokens=100, completion_tokens=20)
+
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.return_value = mock_response
+
+    with patch("app.routers.vision.OpenAI", return_value=mock_client):
+        response = client.post(
+            "/vision/analyze-ingredients",
+            files={"file": ("photo.jpg", FAKE_JPEG_BYTES, "image/jpeg")},
+        )
+
+    assert response.status_code == 200
+    mock_client.chat.completions.create.assert_called_once()
+    data = response.json()
+    assert "banana" in data["ingredients"]

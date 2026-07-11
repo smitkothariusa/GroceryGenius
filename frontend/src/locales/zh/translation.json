@@ -704,5 +704,17 @@
       "dismiss": "关闭",
       "gotIt": "好的"
     }
+  },
+  "errorBoundary": {
+    "root": {
+      "title": "出错了",
+      "message": "GroceryGenius 遇到了意外问题。重新加载应用通常可以解决此问题。",
+      "reload": "重新加载应用"
+    },
+    "section": {
+      "title": "此部分出现了问题",
+      "message": "这里出了点问题，但应用的其余部分仍可正常使用。",
+      "tryAgain": "重试"
+    }
   }
 }

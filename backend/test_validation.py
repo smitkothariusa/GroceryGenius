@@ -3,8 +3,10 @@ Validation tests for audit batch 3: request models must reject empty
 strings, out-of-range numbers, and oversized lists with 422 — not pass
 them through to OpenAI calls or in-memory storage.
 """
+import base64
+
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from fastapi import Request
 from fastapi.testclient import TestClient
 
@@ -91,6 +93,48 @@ def test_vision_barcode_lookup_rejects_empty_image(client):
     assert response.status_code == 422
 
 
+def test_vision_barcode_lookup_rejects_non_base64_image(client):
+    """Not valid base64 at all -- decoding itself fails."""
+    response = client.post("/barcode/vision-lookup", json={"image": "not-valid-base64!!!"})
+    assert response.status_code == 400
+
+
+def test_vision_barcode_lookup_rejects_non_image_bytes(client):
+    """Valid base64, but the decoded bytes have no recognizable image
+    signature (e.g. a text file base64-encoded and passed off as a photo).
+    No OpenAI call should be made."""
+    fake_text = base64.b64encode(b"this is plain text, not an image").decode()
+    with patch("app.routers.barcode._openai_client") as mock_openai_client:
+        response = client.post("/barcode/vision-lookup", json={"image": fake_text})
+    assert response.status_code == 400
+    mock_openai_client.assert_not_called()
+
+
+def test_vision_barcode_lookup_accepts_valid_image_and_reaches_openai(client):
+    """A real JPEG-signed payload passes validation and proceeds to the
+    GPT-4o vision fallback (no zxingcpp match on junk bytes)."""
+    fake_jpeg = base64.b64encode(b"\xff\xd8\xff" + b"fake-jpeg-body").decode()
+
+    mock_message = MagicMock()
+    mock_message.content = "unreadable"
+    mock_choice = MagicMock()
+    mock_choice.message = mock_message
+    mock_vision_response = MagicMock()
+    mock_vision_response.choices = [mock_choice]
+    mock_vision_response.model = "gpt-4o"
+    mock_vision_response.usage = MagicMock(prompt_tokens=50, completion_tokens=5)
+
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.return_value = mock_vision_response
+
+    with patch("app.routers.barcode._openai_client", return_value=mock_client):
+        response = client.post("/barcode/vision-lookup", json={"image": fake_jpeg})
+
+    assert response.status_code == 200
+    mock_client.chat.completions.create.assert_called_once()
+    assert response.json()["barcode"] == "unreadable"
+
+
 # ---------------------------------------------------------------------------
 # pantry.py
 # ---------------------------------------------------------------------------
@@ -152,6 +196,34 @@ def test_price_comparison_rejects_oversized_items_list(client):
     items = [{"name": "Apples", "quantity": 1, "unit": "pc"} for _ in range(101)]
     response = client.post("/shopping/ai-price-comparison", json={"items": items})
     assert response.status_code == 422
+
+
+def test_price_comparison_uses_low_temperature_for_deterministic_estimates(client, monkeypatch):
+    """
+    Price estimates should be stable across repeated calls for the same
+    basket, not the high-variance sampling appropriate for creative text.
+    Guards against a regression back to temperature=0.8.
+    """
+    import app.routers.shopping as shopping_module
+
+    captured = {}
+
+    async def fake_call_chat_completion(**kwargs):
+        captured.update(kwargs)
+        return '{"amazon": 12.5, "walmart": 10.0}'
+
+    monkeypatch.setattr(shopping_module, "call_chat_completion", fake_call_chat_completion)
+
+    response = client.post(
+        "/shopping/ai-price-comparison",
+        json={"items": [{"name": "Apples", "quantity": 2, "unit": "pc"}]},
+    )
+
+    assert response.status_code == 200
+    assert captured["temperature"] <= 0.3
+    body = response.json()
+    assert body["amazon_total"] == 12.5
+    assert body["walmart_total"] == 10.0
 
 
 # ---------------------------------------------------------------------------

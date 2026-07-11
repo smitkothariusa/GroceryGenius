@@ -35,21 +35,37 @@
 <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- The service worker (public/service-worker.js) is a hand-rolled
-         cache-first-forever implementation with no cache-busting: it serves
-         index.html from cache indefinitely, so anyone who had it installed
-         before registration was disabled below keeps seeing stale deploys
-         until they hard-refresh. Actively unregister it (and its caches)
-         for every visitor instead of just no longer registering new ones. -->
+    <!-- public/service-worker.js used to be a hand-rolled cache-first-forever
+         implementation with no cache-busting. It has since been replaced by
+         a self-unregistering "kill switch" (see that file) that cleans up
+         any lingering legacy install on its own via the browser's normal SW
+         update check — no help needed from here.
+
+         This script used to unregister *every* registration and clear *all*
+         caches on *every* page load, unconditionally. That was fine while
+         the app registered no service worker of its own, but main.tsx now
+         registers a legitimate one (virtual:pwa-register, scoped to
+         /sw.js) for PWA installability. Nuking every registration on every
+         load was fighting that: unregister -> re-register -> unregister on
+         the next load, in an unbounded loop that manifested as the page
+         reloading itself continuously and — because that generation of
+         re-renders steals input focus — the on-screen keyboard dismissing
+         mid-type on the sign-in form.
+
+         Scope this to the legacy script by URL so it only ever touches the
+         old /service-worker.js registration and leaves /sw.js alone. -->
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then((registrations) => {
-                registrations.forEach((registration) => registration.unregister());
-            });
-        }
-        if (window.caches) {
-            caches.keys().then((names) => {
-                names.forEach((name) => caches.delete(name));
+                registrations
+                    .filter((registration) => {
+                        const url = registration.active?.scriptURL
+                            || registration.installing?.scriptURL
+                            || registration.waiting?.scriptURL
+                            || '';
+                        return url.includes('/service-worker.js');
+                    })
+                    .forEach((registration) => registration.unregister());
             });
         }
     </script>

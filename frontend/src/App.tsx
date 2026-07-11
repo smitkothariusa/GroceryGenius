@@ -171,6 +171,13 @@ const App: React.FC = () => {
   // newer load started, or the user signed out) so in-flight responses from
   // an older call don't clobber state set by a newer one.
   const loadUserDataRequestRef = useRef(0);
+  // Guards the "save calorie goal" effect below from firing before
+  // loadUserData() has fetched the real saved goal. Without this, logging in
+  // sets `user`, which the save effect also depends on, and it fires
+  // immediately with whatever dailyCalorieGoal still holds (the component's
+  // default of 2000) — overwriting the real stored goal before the fetch
+  // that would have loaded it resolves.
+  const calorieGoalLoadedRef = useRef(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [dietaryFilter, setDietaryFilter] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -421,16 +428,24 @@ const App: React.FC = () => {
         if (profileData?.daily_calorie_goal && !isStale()) {
           setDailyCalorieGoal(profileData.daily_calorie_goal);
         }
-        
+
         // Get today's calorie total
         const calorieData = await calorieService.getTodayCalories();
         if (calorieData && calorieData.total !== undefined && !isStale()) {
           setTodayCalories(calorieData.total);
         }
-        
+
         console.log('✅ Calorie data loaded');
       } catch (error) {
         console.error('❌ Error loading calorie data:', error);
+      } finally {
+        // Unblock the save effect now that we've attempted the real fetch —
+        // whether it succeeded, found no stored goal, or errored. Otherwise
+        // a failed fetch would permanently block the user from ever saving
+        // an edited goal for the rest of the session.
+        if (!isStale()) {
+          calorieGoalLoadedRef.current = true;
+        }
       }
 
       // Load full profile for settings + survey
@@ -626,8 +641,12 @@ const App: React.FC = () => {
       }
     };
     
-    // Only save if we have a user and a valid goal
-    if (user && dailyCalorieGoal > 0) {
+    // Only save if we have a user, a valid goal, and have already loaded the
+    // real stored goal — otherwise this fires the instant `user` is set on
+    // login, before the fetch below has a chance to load the actual value,
+    // and clobbers it with whatever dailyCalorieGoal still holds (the 2000
+    // default).
+    if (user && dailyCalorieGoal > 0 && calorieGoalLoadedRef.current) {
       saveCalorieGoal();
     }
   }, [dailyCalorieGoal, user]);
@@ -673,6 +692,7 @@ const App: React.FC = () => {
           // Invalidate any loadUserData() call still in flight so its
           // late-arriving responses can't overwrite the empty state below.
           loadUserDataRequestRef.current++;
+          calorieGoalLoadedRef.current = false;
           setPantry([]);
           setShoppingList([]);
           setFavorites([]);
@@ -6979,7 +6999,13 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
             </div>
             
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('calorieTracker.dailyGoal')}</label>
-            <input type="number" value={dailyCalorieGoal} onChange={(e) => setDailyCalorieGoal(Number(e.target.value))}
+            <input type="number" value={dailyCalorieGoal} onChange={(e) => {
+                const newGoal = Number(e.target.value);
+                setDailyCalorieGoal(newGoal);
+                // Keep the Settings panel's copy in sync — it reads from
+                // userProfile, which this control otherwise never touches.
+                setUserProfile(prev => prev ? { ...prev, daily_calorie_goal: newGoal } : prev);
+              }}
               style={{ width: '100%', padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '8px', marginBottom: '1rem', boxSizing: 'border-box' }} />
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button onClick={async () => {

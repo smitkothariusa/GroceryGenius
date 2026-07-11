@@ -390,9 +390,9 @@ export const donationService = {
       .from('donation_impact')
       .select('*')
       .eq('user_id', userData.user.id)
-      .single();
-    
-    if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows
+      .maybeSingle();
+
+    if (error) throw error;
     return data || {
       total_donations: 0,
       total_meals: 0,
@@ -502,8 +502,8 @@ export const calorieService = {
       .from('profiles')
       .select('daily_calorie_goal')
       .eq('id', userData.user.id)
-      .single();
-    
+      .maybeSingle();
+
     if (error) throw error;
     return data?.daily_calorie_goal || 2000;
   },

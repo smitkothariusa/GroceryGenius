@@ -1,7 +1,10 @@
 # backend/app/main.py
 import logging
+import os
 import time
 import uuid
+
+import httpx
 
 from app.services.logging_config import request_id_var, setup_logging
 
@@ -105,6 +108,87 @@ app.include_router(shopping.router, prefix="/shopping", tags=["shopping"], depen
 app.include_router(vision.router, prefix="/vision", tags=["vision"], dependencies=auth_required)
 app.include_router(donation.router, prefix="/donation", tags=["donation"], dependencies=auth_required)
 app.include_router(profile.router, prefix="/profile", tags=["profile"])
+
+
+# Short timeout so one flaky dependency can't hang the health endpoint. Uptime
+# monitors poll this frequently, so every check here must be cheap and side-effect-free.
+HEALTH_CHECK_TIMEOUT = httpx.Timeout(3.0)
+
+
+def _check_supabase() -> str:
+    """
+    Lightweight Supabase reachability probe: hit the PostgREST base with the anon
+    apikey. Not a full auth round-trip (no token validation) and read-only.
+
+    Per the CLAUDE.md gotcha, no client is created at import time — the HTTP client
+    is created here, per call. Returns "ok" or "error"; never raises.
+    """
+    supabase_url = os.getenv("SUPABASE_URL", "")
+    supabase_anon_key = os.getenv("SUPABASE_ANON_KEY", "")
+    if not supabase_url or not supabase_anon_key:
+        return "error"
+    try:
+        with httpx.Client(timeout=HEALTH_CHECK_TIMEOUT) as client:
+            resp = client.get(
+                f"{supabase_url.rstrip('/')}/rest/v1/",
+                headers={"apikey": supabase_anon_key},
+            )
+        # PostgREST answers the base path with 2xx/3xx/4xx once it's reachable;
+        # a 5xx means the backing service is unhealthy.
+        return "ok" if resp.status_code < 500 else "error"
+    except Exception:
+        logger.warning("health check: supabase unreachable", exc_info=False)
+        return "error"
+
+
+def _check_openai() -> str:
+    """
+    Lightweight OpenAI reachability probe: list models (cheap GET), never a real
+    completion — this is polled frequently and must not spend quota. Returns
+    "ok" or "error"; never raises.
+    """
+    api_key = os.getenv("OPENAI_API_KEY", "")
+    if not api_key:
+        return "error"
+    try:
+        with httpx.Client(timeout=HEALTH_CHECK_TIMEOUT) as client:
+            resp = client.get(
+                "https://api.openai.com/v1/models",
+                headers={"Authorization": f"Bearer {api_key}"},
+            )
+        return "ok" if resp.status_code < 500 else "error"
+    except Exception:
+        logger.warning("health check: openai unreachable", exc_info=False)
+        return "error"
+
+
 @app.get("/health")
 def health():
-    return {"status": "ok", "version": "1.0.0"}
+    """
+    Public, unauthenticated health check polled by uptime monitors.
+
+    Reports app liveness plus downstream dependency reachability. A failing
+    dependency is reported as "error" in the body but never 500s the endpoint,
+    so uptime monitors keep getting a parseable response.
+    """
+    # Each sub-check is defensively wrapped: even an unexpected error in a helper
+    # is reported as "error" rather than failing the whole endpoint.
+    try:
+        supabase_status = _check_supabase()
+    except Exception:
+        supabase_status = "error"
+    try:
+        openai_status = _check_openai()
+    except Exception:
+        openai_status = "error"
+
+    return {
+        "status": "ok",
+        "version": "1.0.0",
+        "checks": {
+            "supabase": supabase_status,
+            "openai": openai_status,
+            # TODO: Redis check once tasks 7/8 land
+            "redis": "not_configured",
+        },
+    }

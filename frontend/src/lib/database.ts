@@ -6,13 +6,22 @@ import { logError } from './errorService';
 // ============================================
 
 export const pantryService = {
-  // Get all pantry items for current user
-  async getAll() {
-    const { data, error } = await supabase
+  // Get pantry items for current user.
+  // Pass { limit, offset } to paginate; omit for the full (legacy) fetch.
+  async getAll(opts?: { limit?: number; offset?: number }) {
+    let query = supabase
       .from('pantry_items')
       .select('*')
       .order('added_date', { ascending: false });
-    
+
+    if (opts && typeof opts.limit === 'number') {
+      const from = opts.offset ?? 0;
+      const to = from + opts.limit - 1;
+      query = query.range(from, to);
+    }
+
+    const { data, error } = await query;
+
     if (error) throw error;
     return data || [];
   },
@@ -96,13 +105,22 @@ export const pantryService = {
 // ============================================
 
 export const shoppingService = {
-  // Get all shopping items
-  async getAll() {
-    const { data, error } = await supabase
+  // Get shopping items for current user.
+  // Pass { limit, offset } to paginate; omit for the full (legacy) fetch.
+  async getAll(opts?: { limit?: number; offset?: number }) {
+    let query = supabase
       .from('shopping_items')
       .select('*')
       .order('created_at', { ascending: false });
-    
+
+    if (opts && typeof opts.limit === 'number') {
+      const from = opts.offset ?? 0;
+      const to = from + opts.limit - 1;
+      query = query.range(from, to);
+    }
+
+    const { data, error } = await query;
+
     if (error) throw error;
     return data || [];
   },

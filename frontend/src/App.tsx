@@ -129,6 +129,10 @@ const PRESET_LABEL_MAP: Record<string, string> = {
 
 const COMBINED_PROFILE_KEY = '__combined__';
 
+// Page size for paginated pantry/shopping reads (Supabase .range()).
+// Kept generous since per-user item counts are low at current scale.
+const LIST_PAGE_SIZE = 50;
+
 function buildCombinedDietaryString(prefs: string[], customLabels: CustomDietaryLabel[]): string {
   const parts = prefs
     .map(p => PRESET_LABEL_MAP[p] ?? customLabels.find(l => l.id === p)?.label ?? null)
@@ -184,6 +188,8 @@ const App: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [pantry, setPantry] = useState<PantryItem[]>([]);
+  const [pantryHasMore, setPantryHasMore] = useState(false);
+  const [pantryLoadingMore, setPantryLoadingMore] = useState(false);
   const [showAddPantry, setShowAddPantry] = useState(false);
   const [newPantryItem, setNewPantryItem] = useState<{
     name: string;
@@ -228,6 +234,8 @@ const App: React.FC = () => {
   const [savedProfilePrefs, setSavedProfilePrefs] = useState<string[]>([]);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([]);
+  const [shoppingHasMore, setShoppingHasMore] = useState(false);
+  const [shoppingLoadingMore, setShoppingLoadingMore] = useState(false);
   const [favorites, setFavorites] = useState<FavoriteRecipe[]>([]);
   const [translatedFavoriteNames, setTranslatedFavoriteNames] = useState<Record<string, string>>({});
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -471,7 +479,7 @@ const App: React.FC = () => {
       // Load pantry items
     console.log('⏳ Starting to load pantry...');
     try {
-      const pantryData = await pantryService.getAll();
+      const pantryData = await pantryService.getAll({ limit: LIST_PAGE_SIZE, offset: 0 });
       console.log('📦 Pantry data received, transforming...');
       if (!isStale()) {
         setPantry(pantryData.map(item => ({
@@ -483,6 +491,7 @@ const App: React.FC = () => {
           expiryDate: item.expiry_date,
           emoji: item.emoji || undefined,  // NEW
         })));
+        setPantryHasMore(pantryData.length === LIST_PAGE_SIZE);
       }
       console.log('✅ Pantry loaded:', pantryData.length, 'items');
     } catch (error) {
@@ -493,7 +502,7 @@ const App: React.FC = () => {
     // Load shopping items
     console.log('⏳ Starting to load shopping items...');
     try {
-      const shoppingData = await shoppingService.getAll();
+      const shoppingData = await shoppingService.getAll({ limit: LIST_PAGE_SIZE, offset: 0 });
       console.log('📦 Shopping data received, transforming...');
       if (!isStale()) {
         setShoppingList(shoppingData.map(item => ({
@@ -505,6 +514,7 @@ const App: React.FC = () => {
           checked: item.checked,
           priority: item.priority as 'high' | 'medium' | 'low',
         })));
+        setShoppingHasMore(shoppingData.length === LIST_PAGE_SIZE);
       }
       console.log('✅ Shopping list loaded:', shoppingData.length, 'items');
     } catch (error) {
@@ -840,6 +850,61 @@ const App: React.FC = () => {
   // shared isExpiringSoon predicate (src/lib/pantryExpiry.ts) so they always
   // agree on the day-0-inclusive boundary. See that module for history.
   const getExpiringItems = () => pantry.filter(item => isExpiringSoon(item));
+
+  // Fetch the next page of pantry items and append (de-duping on id so a
+  // boundary overlap or an optimistic insert can't produce duplicate rows).
+  const loadMorePantry = async () => {
+    if (pantryLoadingMore) return;
+    setPantryLoadingMore(true);
+    try {
+      const next = await pantryService.getAll({ limit: LIST_PAGE_SIZE, offset: pantry.length });
+      const mapped = next.map(item => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        category: item.category,
+        expiryDate: item.expiry_date,
+        emoji: item.emoji || undefined,
+      }));
+      setPantry(prev => {
+        const seen = new Set(prev.map(i => i.id));
+        return [...prev, ...mapped.filter(i => !seen.has(i.id))];
+      });
+      setPantryHasMore(next.length === LIST_PAGE_SIZE);
+    } catch (error) {
+      console.error('❌ Error loading more pantry items:', error);
+    } finally {
+      setPantryLoadingMore(false);
+    }
+  };
+
+  // Fetch the next page of shopping items and append (de-duping on id).
+  const loadMoreShopping = async () => {
+    if (shoppingLoadingMore) return;
+    setShoppingLoadingMore(true);
+    try {
+      const next = await shoppingService.getAll({ limit: LIST_PAGE_SIZE, offset: shoppingList.length });
+      const mapped = next.map(item => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        category: item.category,
+        checked: item.checked,
+        priority: item.priority as 'high' | 'medium' | 'low',
+      }));
+      setShoppingList(prev => {
+        const seen = new Set(prev.map(i => i.id));
+        return [...prev, ...mapped.filter(i => !seen.has(i.id))];
+      });
+      setShoppingHasMore(next.length === LIST_PAGE_SIZE);
+    } catch (error) {
+      console.error('❌ Error loading more shopping items:', error);
+    } finally {
+      setShoppingLoadingMore(false);
+    }
+  };
 
   // Parse ingredients from recipe text
   const parseIngredients = (recipe: Recipe): ParsedIngredient[] => {
@@ -4711,6 +4776,25 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   <p>{t('pantry.emptyPantry')}</p>
                 </div>
               )}
+              {pantryHasMore && (
+                <button
+                  onClick={loadMorePantry}
+                  disabled={pantryLoadingMore}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: pantryLoadingMore ? 'default' : 'pointer',
+                    fontWeight: '600',
+                    opacity: pantryLoadingMore ? 0.7 : 1
+                  }}
+                >
+                  {pantryLoadingMore ? t('common.loading') : t('common.loadMore')}
+                </button>
+              )}
             </div>
           </div>
           </ErrorBoundary>
@@ -5057,6 +5141,25 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                   <div style={{ fontSize: '3rem' }}>🛒</div>
                   <p>{t('shopping.emptyList')}</p>
                 </div>
+              )}
+              {shoppingHasMore && (
+                <button
+                  onClick={loadMoreShopping}
+                  disabled={shoppingLoadingMore}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: shoppingLoadingMore ? 'default' : 'pointer',
+                    fontWeight: '600',
+                    opacity: shoppingLoadingMore ? 0.7 : 1
+                  }}
+                >
+                  {shoppingLoadingMore ? t('common.loading') : t('common.loadMore')}
+                </button>
               )}
             </div>
           </div>

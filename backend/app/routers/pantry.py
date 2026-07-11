@@ -1,12 +1,16 @@
 # backend/app/routers/pantry.py
 from fastapi import APIRouter, HTTPException, Request
 from typing import List, Optional
-from pydantic import BaseModel
+from typing_extensions import Annotated
+from pydantic import BaseModel, Field
 from datetime import datetime
+import logging
 import uuid
 import json
 from app.services.auth import limiter, AI_LIGHT_LIMIT
 from app.services.openai_client import call_chat_completion
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -73,8 +77,8 @@ class PantryItemInput(BaseModel):
 
 
 class MatchIngredientsRequest(BaseModel):
-    ingredient_lines: List[str]
-    pantry_items: List[PantryItemInput]
+    ingredient_lines: List[Annotated[str, Field(max_length=300)]] = Field(max_length=100)
+    pantry_items: List[PantryItemInput] = Field(max_length=200)
 
 @router.post("/match-ingredients")
 @limiter.limit(AI_LIGHT_LIMIT)
@@ -118,6 +122,6 @@ async def match_ingredients(request: Request, payload: MatchIngredientsRequest):
         raw = await call_chat_completion(system_prompt, user_prompt, max_tokens=2000, temperature=0.1)
         raw = raw.replace("```json", "").replace("```", "").strip()
         return json.loads(raw)
-    except Exception as e:
-        print(f"match-ingredients error: {e}")
+    except Exception:
+        logger.error("match-ingredients error", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to match ingredients")

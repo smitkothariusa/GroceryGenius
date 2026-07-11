@@ -1,10 +1,13 @@
 import json
+import logging
 import os
 from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from app.services.auth import get_current_user, limiter, AI_LIGHT_LIMIT
 from app.services.openai_client import call_chat_completion
 from supabase import create_client
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -21,7 +24,7 @@ DIETARY_LABEL_SYSTEM_PROMPT = (
 
 
 class DietaryLabelRequest(BaseModel):
-    text: str
+    text: str = Field(max_length=500)
 
 
 class DietaryLabelResponse(BaseModel):
@@ -71,24 +74,25 @@ async def delete_account(user=Depends(get_current_user)):
     for table in tables:
         try:
             sb_service.table(table).delete().eq("user_id", user_id).execute()
-            print(f"[delete_account] deleted from {table} ✓")
+            logger.debug("delete_account: deleted from %s user=%s", table, user_id)
         except Exception as exc:
-            print(f"[delete_account] FAILED on {table}: {exc}")
+            logger.error("delete_account: failed on %s user=%s", table, user_id, exc_info=True)
             raise HTTPException(status_code=500, detail=f"Failed to delete rows from {table}: {exc}")
 
     # profiles uses 'id' as the user identifier, not 'user_id'
     try:
         sb_service.table("profiles").delete().eq("id", user_id).execute()
-        print(f"[delete_account] deleted from profiles ✓")
+        logger.debug("delete_account: deleted from profiles user=%s", user_id)
     except Exception as exc:
-        print(f"[delete_account] FAILED on profiles: {exc}")
+        logger.error("delete_account: failed on profiles user=%s", user_id, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to delete rows from profiles: {exc}")
 
     try:
         sb_service.auth.admin.delete_user(user_id)
-        print(f"[delete_account] auth user deleted ✓")
     except Exception as exc:
-        print(f"[delete_account] FAILED deleting auth user: {exc}")
+        logger.error("delete_account: failed deleting auth user user=%s", user_id, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to delete auth user: {exc}")
 
+    # Audit trail: one INFO line per completed account deletion.
+    logger.info("account deleted user=%s", user_id)
     return {"deleted": True}

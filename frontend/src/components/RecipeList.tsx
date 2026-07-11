@@ -1,7 +1,7 @@
 // frontend/src/components/RecipeList.tsx
 import React from "react";
 import { useTranslation } from "react-i18next";
-import type { Recipe } from "../services/recipeService";
+import type { Recipe } from "../types/recipe";
 
 interface Props {
   recipes: Recipe[];

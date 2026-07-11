@@ -202,6 +202,7 @@ const App: React.FC = () => {
   const [scanMode, setScanMode] = useState<'menu' | 'camera' | 'barcode' | 'expiry' | 'upload' | 'receipt'>('menu');
   const [barcodeScanning, setBarcodeScanning] = useState(false);
   const [expiryScanning, setExpiryScanning] = useState(false);
+  const [receiptScanning, setReceiptScanning] = useState(false);
   const [detectedBarcode, setDetectedBarcode] = useState<string>('');
   const [detectedExpiry, setDetectedExpiry] = useState<string>('');
   const [receiptItems, setReceiptItems] = useState<ReceiptItem[]>([]);
@@ -2394,27 +2395,16 @@ const App: React.FC = () => {
       e.target.value = '';
     }
   };
-  const handleReceiptScanner = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      error(t('toasts.pleaseUploadImage'));
-      e.target.value = '';
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      error(t('toasts.imageTooLarge'));
-      e.target.value = '';
-      return;
-    }
-
+  const analyzeReceiptImage = async (canvas: HTMLCanvasElement) => {
     setRecipeLoading(true);
-
     try {
+      const blob: Blob | null = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.92));
+      if (!blob) {
+        throw new Error('Failed to capture image from camera');
+      }
+
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', blob, 'receipt.jpg');
 
       const response = await authFetch(`${API_BASE}/vision/analyze-receipt`, {
         method: 'POST',
@@ -2439,7 +2429,6 @@ const App: React.FC = () => {
           selected: item.confidence !== 'low',
         })));
         setReceiptRejectedCount(data.rejected_lines_count || 0);
-        setShowImageUpload(false);
         setShowReceiptReview(true);
       } else {
         warning(t('toasts.noReceiptItemsDetected'));
@@ -2449,7 +2438,74 @@ const App: React.FC = () => {
       error(t('toasts.failedAnalyzeReceipt'));
     } finally {
       setRecipeLoading(false);
-      e.target.value = '';
+      setShowImageUpload(false);
+    }
+  };
+  const handleReceiptScanner = async () => {
+    try {
+      setReceiptScanning(true);
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+      });
+
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.autoplay = true;
+      video.playsInline = true;
+
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;';
+
+      video.style.cssText = 'max-width:90%;max-height:60vh;border-radius:12px;';
+
+      const instructions = document.createElement('div');
+      instructions.style.cssText = 'color:white;text-align:center;margin-bottom:1rem;font-size:1.1rem;font-weight:600;';
+      instructions.innerHTML = '🧾 Position the receipt in frame';
+
+      const buttonContainer = document.createElement('div');
+      buttonContainer.style.cssText = 'display:flex;gap:1rem;margin-top:1rem;';
+
+      const captureBtn = document.createElement('button');
+      captureBtn.textContent = '📸 Scan Receipt';
+      captureBtn.style.cssText = 'padding:1rem 2rem;background:#ec4899;color:white;border:none;border-radius:12px;font-weight:600;cursor:pointer;font-size:1rem;';
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.style.cssText = 'padding:1rem 2rem;background:#ef4444;color:white;border:none;border-radius:12px;font-weight:600;cursor:pointer;font-size:1rem;';
+
+      const cleanup = () => {
+        stream.getTracks().forEach(track => track.stop());
+        document.body.removeChild(modal);
+        setReceiptScanning(false);
+        setShowImageUpload(false);
+        setScanMode('menu');
+      };
+
+      captureBtn.onclick = async () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(video, 0, 0);
+
+        cleanup();
+        await analyzeReceiptImage(canvas);
+      };
+
+      cancelBtn.onclick = cleanup;
+
+      modal.appendChild(instructions);
+      modal.appendChild(video);
+      buttonContainer.appendChild(captureBtn);
+      buttonContainer.appendChild(cancelBtn);
+      modal.appendChild(buttonContainer);
+      document.body.appendChild(modal);
+
+    } catch (err) {
+      console.error('Camera access error:', err);
+      error(t('toasts.cameraAccessDenied'));
+      setReceiptScanning(false);
     }
   };
   const confirmReceiptItems = async () => {
@@ -6562,20 +6618,28 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
                 {/* Receipt Scanner Button (pantry only — receipts always add to pantry) */}
                 {cameraSource === 'pantry' && (
-                  <label style={{
-                    display: 'block',
-                    width: '100%',
-                    padding: '1rem',
-                    background: '#ec4899',
-                    color: 'white',
-                    borderRadius: '8px',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    fontWeight: '600',
-                    opacity: recipeLoading ? 0.5 : 1,
-                    pointerEvents: recipeLoading ? 'none' : 'auto',
-                    fontSize: isMobile ? '0.9rem' : '1rem'
-                  }}>
+                  <button
+                    onClick={() => {
+                      setScanMode('receipt');
+                      handleReceiptScanner();
+                    }}
+                    disabled={recipeLoading}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '1rem',
+                      background: '#ec4899',
+                      color: 'white',
+                      borderRadius: '8px',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      border: 'none',
+                      opacity: recipeLoading ? 0.5 : 1,
+                      pointerEvents: recipeLoading ? 'none' : 'auto',
+                      fontSize: isMobile ? '0.9rem' : '1rem'
+                    }}
+                  >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                       <span style={{ fontSize: '1.5rem' }}>🧾</span>
                       <div>
@@ -6585,18 +6649,7 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
                         </div>
                       </div>
                     </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      onChange={(e) => {
-                        setScanMode('receipt');
-                        handleReceiptScanner(e);
-                      }}
-                      disabled={recipeLoading}
-                      style={{ display: 'none' }}
-                    />
-                  </label>
+                  </button>
                 )}
 
                 <button

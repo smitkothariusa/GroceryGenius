@@ -1,7 +1,10 @@
 ﻿# backend/app/services/recipe_parser.py
 import json
+import logging
 import re
 from typing import List, Dict, Any
+
+logger = logging.getLogger(__name__)
 
 def parse_recipes_text(text: str, expected: int = 3) -> List[Dict[str, Any]]:
     """
@@ -48,8 +51,8 @@ def parse_recipes_text(text: str, expected: int = 3) -> List[Dict[str, Any]]:
             if results:
                 return results[:expected]
     except Exception as e:
-        print(f"JSON parsing error: {e}")
-        pass
+        # Expected when the model returns non-JSON text; fallbacks below handle it.
+        logger.debug("recipe JSON parse failed, using fallback: %s", e)
 
     # Try to extract JSON from text if it's embedded
     json_match = re.search(r'\[[\s\S]*\]', text)

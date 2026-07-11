@@ -2,11 +2,18 @@
 from fastapi import APIRouter, File, Request, UploadFile, HTTPException
 from typing import List
 import base64
+import logging
 import os
+import time
 from openai import OpenAI
 from app.services.auth import limiter, AI_HEAVY_LIMIT
+from app.services.openai_client import log_openai_usage
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+MAX_IMAGE_BYTES = 8 * 1024 * 1024  # 8 MB
 
 @router.post("/analyze-ingredients")
 @limiter.limit(AI_HEAVY_LIMIT)
@@ -17,12 +24,15 @@ async def analyze_ingredients(request: Request, file: UploadFile = File(...)):
     try:
         # Read the uploaded file
         contents = await file.read()
-        
+        if len(contents) > MAX_IMAGE_BYTES:
+            raise HTTPException(status_code=413, detail="Image too large (max 8 MB)")
+
         # Convert to base64
         base64_image = base64.b64encode(contents).decode('utf-8')
 
         # Call GPT-4 Vision API
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), timeout=90.0, max_retries=2)
+        start = time.perf_counter()
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
@@ -62,7 +72,8 @@ async def analyze_ingredients(request: Request, file: UploadFile = File(...)):
             ],
             max_tokens=300
         )
-        
+        log_openai_usage(response.model, (time.perf_counter() - start) * 1000, response.usage)
+
         # Extract ingredients from response
         content = response.choices[0].message.content
         
@@ -108,11 +119,8 @@ async def analyze_ingredients(request: Request, file: UploadFile = File(...)):
             "raw_response": content
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Vision API error: {e}")
+        logger.error("Vision API error", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to analyze image: {str(e)}")
-
-@router.get("/test")
-def test_vision():
-    """Test endpoint to verify vision router is working"""
-    return {"status": "Vision API ready", "model": "gpt-4o"}

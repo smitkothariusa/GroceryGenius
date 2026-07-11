@@ -1,11 +1,14 @@
 # backend/app/routers/shopping.py
 from fastapi import APIRouter, HTTPException, Request
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+import logging
 import uuid
 import json
 from app.services.auth import limiter, AI_HEAVY_LIMIT
 from app.services.openai_client import call_chat_completion
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -83,7 +86,7 @@ def add_batch_items(items: List[ShoppingItem]):
 # ============================================
 
 class PriceComparisonRequest(BaseModel):
-    items: List[dict]  # [{name: str, quantity: int, unit: str}, ...]
+    items: List[dict] = Field(max_length=100)  # [{name: str, quantity: int, unit: str}, ...]
 
 @router.post("/ai-price-comparison")
 @limiter.limit(AI_HEAVY_LIMIT)
@@ -149,8 +152,9 @@ Return ONLY: {{"amazon": total_price, "walmart": total_price}}"""
             amazon_total = float(prices.get("amazon", 0))
             walmart_total = float(prices.get("walmart", 0))
         except (json.JSONDecodeError, ValueError) as e:
-            print(f"⚠️ Failed to parse AI response: {clean_response}")
-            print(f"Error: {e}")
+            # Response body only at DEBUG, truncated — it can echo user item names.
+            logger.debug("unparseable AI price response: %.200s", clean_response)
+            logger.error("Failed to parse AI price estimation: %s", e)
             raise HTTPException(status_code=500, detail="Failed to parse price estimation")
         
         return {
@@ -160,8 +164,8 @@ Return ONLY: {{"amazon": total_price, "walmart": total_price}}"""
         
     except HTTPException:
         raise
-    except Exception as e:
-        print(f"❌ Error in AI price comparison: {e}")
+    except Exception:
+        logger.error("Error in AI price comparison, using fallback estimate", exc_info=True)
         # Fallback to simple estimation
         item_count = sum(item.get('quantity', 1) for item in items)
         return {

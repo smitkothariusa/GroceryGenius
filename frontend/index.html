@@ -35,16 +35,23 @@
 <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- SERVICE WORKER TEMPORARILY DISABLED TO FIX CACHE ERRORS
+    <!-- The service worker (public/service-worker.js) is a hand-rolled
+         cache-first-forever implementation with no cache-busting: it serves
+         index.html from cache indefinitely, so anyone who had it installed
+         before registration was disabled below keeps seeing stale deploys
+         until they hard-refresh. Actively unregister it (and its caches)
+         for every visitor instead of just no longer registering new ones. -->
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(reg => console.log('Service Worker registered'))
-                .catch(err => console.log('Service Worker registration failed:', err));
+            navigator.serviceWorker.getRegistrations().then((registrations) => {
+                registrations.forEach((registration) => registration.unregister());
+            });
+        }
+        if (window.caches) {
+            caches.keys().then((names) => {
+                names.forEach((name) => caches.delete(name));
             });
         }
     </script>
-    -->
 </body>
 </html>

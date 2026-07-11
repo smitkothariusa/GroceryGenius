@@ -77,7 +77,8 @@ Return ONLY: {{"amazon": total_price, "walmart": total_price}}"""
             system_prompt=system_prompt,
             user_prompt=user_prompt,
             max_tokens=150,
-            temperature=0.3
+            temperature=0.3,
+            route="shopping.ai_price_comparison",
         )
 
         # Parse the response

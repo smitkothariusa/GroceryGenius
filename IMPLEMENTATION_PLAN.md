@@ -14,11 +14,10 @@ feature modules](docs/tasks/06-app-tsx-refactor.md)**, now that 14's test
 coverage has landed as a regression safety net — but it's XL/multi-day and
 needs an explicit kickoff, not auto-started.
 
-Tasks 03, 12, 13, 15 (PRs #39–#42) and **9, 14, 16, 17 (PRs #44–#47)**
-shipped and merged to `dev` as of 2026-07-11 — verified on
-dev.grocerygenius.org / grocerygenius-dev.onrender.com. **03, 12, 13, 15
-are also released to production** (main 90d888d); 9/14/16/17 are on `dev`
-only, awaiting feedback before release.
+Tasks 03, 12, 13, 15 (PRs #39–#42) and **9, 14, 16, 17 (PRs #44–#47)** are
+**all released to production** as of 2026-07-11 (main 728ecc2) — verified
+live on grocerygenius.org / grocerygenius-api.onrender.com (health check,
+99 backend tests, 26 frontend tests, auth-required smoke test).
 
 **Also shipped straight to production this session (unplanned, urgent):** a
 service-worker reload loop (`frontend/index.html` fighting `main.tsx`'s SW
@@ -26,6 +25,12 @@ registration on every page load) was breaking sign-in on mobile Safari —
 diagnosed, fixed, and released same-day (main 645646d) per explicit
 user go-ahead. See git history for `fix: stop index.html from
 unregistering the live service worker every load`.
+
+**Release-policy note (2026-07-11, see CLAUDE.md Git Workflow #1):** for
+non-feature `dev` changes (bug fixes, backend logic, refactors, tests,
+config) the user has given standing approval to release to `main` at ≥95%
+confidence without waiting for the explicit phrase each time. New
+user-facing features still wait for the user to try them on dev first.
 
 10 (CI required status checks) applied directly via `gh api` to both `dev`
 and `main` — no code change, no PR. 6's stub spec was fleshed out with a
@@ -56,20 +61,20 @@ changes the calculus).
 | 6 | Refactor App.tsx into feature modules | XL (multi-day) | NOT STARTED | [spec](docs/tasks/06-app-tsx-refactor.md) |
 | 7 | Redis-backed rate limiting for multi-instance | M (1d) | NOT STARTED | [spec](docs/tasks/07-redis-rate-limiting.md) |
 | 8 | Recipe caching (Redis, 24h TTL) | M (1d) | NOT STARTED | [spec](docs/tasks/08-recipe-caching.md) |
-| 9 | Investigate & fix pantry expiry boundary logic | S (0.5d) | MERGED TO DEV | [spec](docs/tasks/09-pantry-expiry-boundary.md) |
+| 9 | Investigate & fix pantry expiry boundary logic | S (0.5d) | DONE | [spec](docs/tasks/09-pantry-expiry-boundary.md) |
 | 10 | Enforce CI as a required status check on dev/main | S (1-2h) | DONE | [spec](docs/tasks/10-ci-branch-protection.md) |
 | 11 | Offline support (PWA service worker + sync queue) | L (2-3d) | NOT STARTED | [spec](docs/tasks/11-offline-support.md) |
 | 12 | Request deduplication (prevent double-submit) | S (0.5d) | DONE | [spec](docs/tasks/12-request-deduplication.md) |
 | 13 | Centralize ingredient parsing logic | M (1d) | DONE | [spec](docs/tasks/13-ingredient-parsing.md) |
-| 14 | Expand frontend test coverage (component-level) | M (1-2d) | MERGED TO DEV | [spec](docs/tasks/14-frontend-test-coverage.md) |
+| 14 | Expand frontend test coverage (component-level) | M (1-2d) | DONE | [spec](docs/tasks/14-frontend-test-coverage.md) |
 | 15 | Structured cost/usage logging for OpenAI calls | M (1d) | DONE | [spec](docs/tasks/15-openai-cost-logging.md) |
 
 ### 🟡 Medium
 
 | # | Task | Effort | Status | Spec |
 |---|---|---|---|---|
-| 16 | Health check endpoint dependency checks | S (0.5d) | MERGED TO DEV | [spec](docs/tasks/16-health-check-deps.md) |
-| 17 | Pagination for pantry/shopping lists | S (0.5d) | MERGED TO DEV | [spec](docs/tasks/17-pagination.md) |
+| 16 | Health check endpoint dependency checks | S (0.5d) | DONE | [spec](docs/tasks/16-health-check-deps.md) |
+| 17 | Pagination for pantry/shopping lists | S (0.5d) | DONE | [spec](docs/tasks/17-pagination.md) |
 | 18 | Weekly meal calendar feature | L (2-3d) | NOT STARTED | [spec](docs/tasks/18-meal-calendar.md) |
 
 ### 🟢 Low

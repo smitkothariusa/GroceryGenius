@@ -211,6 +211,7 @@
     "timeoutError": "⏱️ Zeitüberschreitung. Bitte versuchen Sie es mit weniger Zutaten erneut.",
     "generationError": "Rezepte konnten nicht erstellt werden. Bitte versuchen Sie es gleich noch einmal.",
     "sessionExpiredError": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich ab und wieder an, und versuchen Sie es erneut.",
+    "tooManyIngredientsError": "Zu viele Zutaten ausgewählt. Bitte entfernen Sie einige und versuchen Sie es erneut.",
     "emptyStatePrompt": "Füge Zutaten hinzu oder suche nach einem bestimmten Rezept um loszulegen!",
     "emptyStateTip": "Versuche: \"Apfelkuchen\", \"Hühnernudeln\", oder füge Zutaten wie \"Tomaten\", \"Hühnchen\" hinzu",
     "keyIngredients": "Hauptzutaten",

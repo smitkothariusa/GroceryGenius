@@ -9,20 +9,32 @@ Workflow for each task: `.claude/skills/implement-task/SKILL.md`
 
 ## Current Task
 
-**[6 — Refactor App.tsx into feature modules](docs/tasks/06-app-tsx-refactor.md)**
-— IN PROGRESS as of 2026-07-11, kicked off per explicit user go-ahead.
-Per the spec's recommended extraction order, doing this as a sequence of
-small PRs rather than one giant change: Favorites (done, PR #48) →
-MealPlanCalendar wiring (done — already fully wired, no work needed) →
-Donation (done, PR #49) → Recipes (done, PR #50) → Scanning+Pantry (last,
-most entangled — not started). All merged to `dev` (85ed0a1) and confirmed
-live on dev.grocerygenius.org. `App.tsx` is down from 7966 to ~5124 lines.
-Next: Scanning+Pantry extraction (final step of task 6).
+None actively in progress. Task 6 (App.tsx refactor) completed 2026-07-12 —
+see below. Next candidates needing product/scope sign-off before
+implementation: 18 (meal calendar), 19 (allergen checking), 20 (soft
+delete). 7/8 (Redis) remain deprioritized per user decision.
 
 Tasks 03, 12, 13, 15 (PRs #39–#42) and **9, 14, 16, 17 (PRs #44–#47)** are
 **all released to production** as of 2026-07-11 (main 728ecc2) — verified
 live on grocerygenius.org / grocerygenius-api.onrender.com (health check,
 99 backend tests, 26 frontend tests, auth-required smoke test).
+
+**Task 6 (App.tsx refactor) completed 2026-07-12**, merged to `dev` in five
+sequential PRs per the spec's recommended order: Favorites (#48) →
+MealPlanCalendar wiring (no-op, already fully wired) → Donation (#49) →
+Recipes (#50) → Scanning+Pantry (#51, most entangled, done last).
+`App.tsx`: 7966 → 2624 lines (67% reduction), split into
+`frontend/src/features/{favorites,donation,recipes,pantry}/`. Each step
+verified independently (tsc, lint, vitest) after cherry-picking off worktree
+agents — every one of the five hit the worktree-isolation gotcha (agent's
+branch silently based off a stale commit instead of the assigned task
+branch); caught and fixed each time via manual `git log` verification +
+cherry-pick before pushing. All five deploys confirmed live on
+dev.grocerygenius.org via `vercel inspect`. Not yet released to `main` —
+this is dev-only so far pending user sign-off, though it qualifies as a
+non-feature (pure refactor, no behavior change) so it's eligible under the
+main-release policy below once confidence is established via more use on
+dev.
 
 **Also shipped straight to production this session (unplanned, urgent):** a
 service-worker reload loop (`frontend/index.html` fighting `main.tsx`'s SW
@@ -63,7 +75,7 @@ changes the calculus).
 
 | # | Task | Effort | Status | Spec |
 |---|---|---|---|---|
-| 6 | Refactor App.tsx into feature modules | XL (multi-day) | IN PROGRESS | [spec](docs/tasks/06-app-tsx-refactor.md) |
+| 6 | Refactor App.tsx into feature modules | XL (multi-day) | DONE | [spec](docs/tasks/06-app-tsx-refactor.md) |
 | 7 | Redis-backed rate limiting for multi-instance | M (1d) | NOT STARTED | [spec](docs/tasks/07-redis-rate-limiting.md) |
 | 8 | Recipe caching (Redis, 24h TTL) | M (1d) | NOT STARTED | [spec](docs/tasks/08-recipe-caching.md) |
 | 9 | Investigate & fix pantry expiry boundary logic | S (0.5d) | DONE | [spec](docs/tasks/09-pantry-expiry-boundary.md) |

@@ -35,19 +35,19 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'supabase-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 // 24 hours
-              }
-            }
-          }
-        ]
+        // IMPORTANT: do NOT add a runtimeCaching rule for *.supabase.co.
+        // A NetworkFirst cache of Supabase requests (previously here) served
+        // STALE cached auth/session responses on flaky mobile networks, so the
+        // client sent an expired token and the backend 401'd — recipe (and any
+        // authenticated) requests failed. It reproduced exactly as reported:
+        // normal browsers (which had the poisoned cache) failed while incognito
+        // (no service worker, no cache) worked, and it survived both app-bundle
+        // updates and sign-out/in because the workbox cache is separate from
+        // both the app shell and the localStorage session. Caching
+        // authenticated API/auth responses in a service worker is an
+        // anti-pattern; Supabase must always hit the network. See
+        // main.tsx for the one-time cleanup that deletes the leftover
+        // 'supabase-cache' on already-affected clients.
       }
     })
   ],

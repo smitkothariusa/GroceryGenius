@@ -17,6 +17,16 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 initGlobalErrorHandlers()
 
+// One-time cleanup: older builds registered a service worker that cached all
+// *.supabase.co responses in a 'supabase-cache' (NetworkFirst, 24h). That
+// cache served stale auth/session responses on flaky networks, causing the
+// client to send an expired token and get 401s on authenticated requests
+// (recipe generation, etc.) — reproduced as "fails in a normal browser, works
+// in incognito," surviving both app updates and sign-out/in. The runtimeCaching
+// rule is gone (see vite.config.ts), but the already-populated cache lingers on
+// affected devices; delete it explicitly so those users recover on next load.
+caches?.delete('supabase-cache').catch(() => { /* no-op: best effort */ })
+
 // Detecting a new service worker (below) isn't enough on its own — with
 // skipWaiting+clientsClaim (registerType: 'autoUpdate'), the new worker takes
 // control in the background, but the ALREADY-OPEN tab keeps running the old

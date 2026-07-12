@@ -54,6 +54,8 @@ import InstallBanner from './components/InstallBanner';
 import SettingsPanel from './components/SettingsPanel';
 import TourOverlay from './components/TourOverlay';
 import { TOUR_STEPS } from './tourSteps';
+import { FavoritesProvider, useFavorites, type FavoriteRecipe } from './features/favorites/FavoritesContext';
+import { FavoritesSection } from './features/favorites/FavoritesSection';
 
 
 interface PantryItem {
@@ -115,10 +117,6 @@ interface ParsedIngredient {
   unit: string;
 }
 
-interface FavoriteRecipe extends Recipe {
-  id: string;
-  savedDate: string;
-}
 
 const PRESET_LABEL_MAP: Record<string, string> = {
   'vegetarian': 'Vegetarian', 'vegan': 'Vegan', 'gluten-free': 'Gluten-Free',
@@ -143,7 +141,7 @@ function buildCombinedDietaryString(prefs: string[], customLabels: CustomDietary
   return `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`;
 }
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const { t, i18n } = useTranslation();
   
   const [user, setUser] = useState<any>(null);
@@ -236,8 +234,7 @@ const App: React.FC = () => {
   const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([]);
   const [shoppingHasMore, setShoppingHasMore] = useState(false);
   const [shoppingLoadingMore, setShoppingLoadingMore] = useState(false);
-  const [favorites, setFavorites] = useState<FavoriteRecipe[]>([]);
-  const [translatedFavoriteNames, setTranslatedFavoriteNames] = useState<Record<string, string>>({});
+  const { favorites, setFavorites, translatedFavoriteNames } = useFavorites();
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [sortShoppingBy, setSortShoppingBy] = useState<'category' | 'alphabetical'>('category');
   const [loadingImpact, setLoadingImpact] = useState(false);
@@ -606,7 +603,7 @@ const App: React.FC = () => {
     } finally {
       console.log('🏁 loadUserData execution finished');
     }
-  }, [user]);
+  }, [user, setFavorites]);
   // Daily reset check - runs every minute to check if we've crossed midnight
   useEffect(() => {
     const checkDailyReset = () => {
@@ -728,7 +725,7 @@ const App: React.FC = () => {
       return () => {
         authListener?.subscription?.unsubscribe();
       };
-    }, []);
+    }, [setFavorites]);
 
   // Load user data after authentication - SEPARATE useEffect
   useEffect(() => {
@@ -743,7 +740,7 @@ const App: React.FC = () => {
         setDonationHistory([]);
       });
     }
-  }, [user, authLoading, loadUserData]);
+  }, [user, authLoading, loadUserData, setFavorites]);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
@@ -779,25 +776,6 @@ const App: React.FC = () => {
       .catch(() => { /* keep existing recipes on error */ })
       .finally(() => setRecipeLoading(false));
   }, [i18n.language]);
-
-  // Translate saved recipe names whenever language OR favorites change
-  useEffect(() => {
-    if (favorites.length === 0) { setTranslatedFavoriteNames({}); return; }
-    const lang = i18n.language.split('-')[0];
-    const names = favorites.map(f => f.name);
-    authFetch(`${API_BASE}/recipes/translate-names`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ names, language: lang }),
-    })
-      .then(r => r.json())
-      .then((translated: string[]) => {
-        const map: Record<string, string> = {};
-        favorites.forEach((f, i) => { map[f.id] = translated[i] ?? f.name; });
-        setTranslatedFavoriteNames(map);
-      })
-      .catch(() => setTranslatedFavoriteNames({}));
-  }, [i18n.language, favorites, API_BASE]);
 
   const handleTabChange = (tab: typeof currentTab) => {
     localStorage.setItem('activeTab', tab);
@@ -5168,67 +5146,14 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
 
         {currentTab === 'favorites' && (
           <ErrorBoundary context="section:favorites" variant="section">
-          <div style={{
-            background: cardBg, 
-            padding: isMobile ? '1rem' : '2rem', 
-            borderRadius: '16px' 
-          }}>
-            <h2 style={{ 
-              margin: '0 0 2rem 0',
-              fontSize: isMobile ? '1.5rem' : '2rem'
-            }}>⭐ {t('favorites.title')} ({favorites.length})</h2>
-            <div data-tour="favorites-grid" style={{ display: 'grid', gap: '1rem' }}>
-              {favorites.map((recipe, index) => (
-                <div 
-                  key={recipe.id} 
-                  onClick={() => { setSelectedRecipe(recipe); setShowDetailedView(true); }}
-                  className="card-hover"
-                  style={{ 
-                    padding: '1.5rem', 
-                    background: '#f9fafb', 
-                    borderRadius: '12px', 
-                    border: '1px solid #e5e7eb', 
-                    cursor: 'pointer' 
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <div style={{ flex: 1 }}>
-                      <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem' }}>{translatedFavoriteNames[recipe.id] || recipe.name}</h3>
-                      <div style={{ fontSize: '0.875rem', color: mutedText }}>
-                        {recipe.prep_time && `⏱ ${recipe.prep_time}`}
-                        {recipe.nutrition && ` • ${recipe.nutrition.calories} cal`}
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: mutedText, marginTop: '0.5rem' }}>
-                        {t('favorites.savedOn')}: {new Date(recipe.savedDate).toLocaleDateString()}
-                      </div>
-                    </div>
-                    <button
-                      {...(index === 0 ? { 'data-tour': 'favorites-heart-btn' } : {})}
-                      onClick={async (e) => {
-                      e.stopPropagation();
-                      try {
-                        await recipesService.delete(recipe.id);
-                        setFavorites(prev => prev.filter(f => f.id !== recipe.id));
-                        success(t('notifications.recipeRemoved'));
-                      } catch (error) {
-                        console.error('Error deleting recipe:', error);
-                        warning(t('notifications.error'));
-                      }
-                    }} style={{
-                      background: '#fee2e2', color: '#dc2626', border: 'none',
-                      padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', height: 'fit-content'
-                    }}>{t('favorites.remove')}</button>
-                  </div>
-                </div>
-              ))}
-              {favorites.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '3rem', color: mutedText }}>
-                  <div style={{ fontSize: '3rem' }}>⭐</div>
-                  <p>{t('favorites.noFavoritesMessage')}</p>
-                </div>
-              )}
-            </div>
-          </div>
+            <FavoritesSection
+              isMobile={isMobile}
+              cardBg={cardBg}
+              mutedText={mutedText}
+              onSelectRecipe={(recipe) => { setSelectedRecipe(recipe); setShowDetailedView(true); }}
+              onSuccess={success}
+              onError={warning}
+            />
           </ErrorBoundary>
         )}
 
@@ -8056,5 +7981,11 @@ Together we can fight hunger and reduce food waste. Join me in making an impact!
     </div>
   );
 };
+
+const App: React.FC = () => (
+  <FavoritesProvider>
+    <AppContent />
+  </FavoritesProvider>
+);
 
 export default App;

@@ -396,6 +396,20 @@
     "goodToDonate": "Apto para donar",
     "keepAtHome": "Conservar en casa"
   },
+  "achievements": {
+    "title": "Tus logros",
+    "streakActive": "Racha de {{count}} días sin desperdicio",
+    "streakStart": "Comienza una racha sin desperdicio",
+    "badgesTitle": "Hitos de donación",
+    "badge10Name": "Buen comienzo",
+    "badge50Name": "Apoyo constante",
+    "badge100Name": "Gran impacto",
+    "badge500Name": "Una diferencia enorme",
+    "badgeUnlockedDesc": "Donaste {{count}}+ comidas",
+    "badgeLockedDesc": "Faltan {{count}} comidas",
+    "hide": "Ocultar logros",
+    "show": "Mostrar logros"
+  },
   "favorites": {
     "title": "Recetas Favoritas",
     "savedOn": "Guardado",

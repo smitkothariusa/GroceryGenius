@@ -396,6 +396,20 @@
     "goodToDonate": "Gut zum Spenden",
     "keepAtHome": "Zu Hause behalten"
   },
+  "achievements": {
+    "title": "Deine Erfolge",
+    "streakActive": "{{count}}-Tage-Serie ohne Verschwendung",
+    "streakStart": "Starte eine verschwendungsfreie Serie",
+    "badgesTitle": "Spenden-Meilensteine",
+    "badge10Name": "Guter Anfang",
+    "badge50Name": "Beständige Unterstützung",
+    "badge100Name": "Starke Wirkung",
+    "badge500Name": "Ein großer Unterschied",
+    "badgeUnlockedDesc": "{{count}}+ Mahlzeiten gespendet",
+    "badgeLockedDesc": "Noch {{count}} Mahlzeiten",
+    "hide": "Erfolge ausblenden",
+    "show": "Erfolge anzeigen"
+  },
   "favorites": {
     "title": "Lieblingsrezepte",
     "savedOn": "Gespeichert",

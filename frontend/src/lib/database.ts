@@ -635,6 +635,98 @@ export const donationService = {
     return data;
   },
 };
+
+// ============================================
+// ZERO-WASTE STREAKS
+// ============================================
+//
+// Lightweight daily check-in counter — NOT a rigorous historical audit (see
+// docs/tasks/24-streaks-badges.md). Reflects "did the user have any
+// stale-expired item sitting in their pantry the last time this was
+// checked," checked at most once/day client-side — not a server-verified
+// guarantee.
+
+export interface UserStreak {
+  user_id: string;
+  zero_waste_streak_days: number;
+  last_checked_date: string | null;
+  updated_at: string;
+}
+
+export const streakService = {
+  // Get the current streak row, upsert-on-read style: falls back to an
+  // (unpersisted) default row if the user has never checked in yet —
+  // mirrors donationService.getImpact()'s default-row fallback.
+  async get(): Promise<UserStreak> {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('user_streaks')
+      .select('*')
+      .eq('user_id', userData.user.id)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data || {
+      user_id: userData.user.id,
+      zero_waste_streak_days: 0,
+      last_checked_date: null,
+      updated_at: new Date().toISOString(),
+    };
+  },
+
+  // Daily check-in. Call at most once per session/day — the caller decides
+  // when to call this; the state machine here is:
+  //   - last_checked_date is today             -> no-op (already checked in)
+  //   - last_checked_date is yesterday
+  //       AND !hasStaleExpiredItems             -> streak + 1
+  //   - hasStaleExpiredItems                    -> streak reset to 0
+  //   - otherwise (gap of >1 day, or first-ever
+  //     check-in with no stale items)           -> streak set to 1
+  async checkIn(hasStaleExpiredItems: boolean): Promise<UserStreak> {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error('Not authenticated');
+
+    const current = await streakService.get();
+
+    const today = new Date().toISOString().split('T')[0];
+    if (current.last_checked_date === today) {
+      // Already checked in today — no-op.
+      return current;
+    }
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    let nextStreakDays: number;
+    if (current.last_checked_date === yesterdayStr && !hasStaleExpiredItems) {
+      nextStreakDays = current.zero_waste_streak_days + 1;
+    } else if (hasStaleExpiredItems) {
+      nextStreakDays = 0;
+    } else {
+      nextStreakDays = 1;
+    }
+
+    const { data, error } = await supabase
+      .from('user_streaks')
+      .upsert({
+        user_id: userData.user.id,
+        zero_waste_streak_days: nextStreakDays,
+        last_checked_date: today,
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'user_id'
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+};
+
 // ============================================
 // CALORIE TRACKING
 // ============================================

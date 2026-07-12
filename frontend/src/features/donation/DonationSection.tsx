@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { calculateMeals } from '../../data/foodBanks';
 import { useDonation } from './DonationContext';
+import { AchievementsPanel } from '../achievements/AchievementsPanel';
 
 // Mirrors the `PantryItem` shape in App.tsx (not centrally typed yet; this
 // duplication matches the existing pattern in features/favorites for `Recipe`).
@@ -156,6 +157,9 @@ export function DonationSection({
                 📱 {t('donate.shareImpact')}
               </button>
             )}
+
+            {/* Streaks & Badges */}
+            <AchievementsPanel isMobile={isMobile} cardBg={cardBg} mutedText={mutedText} />
 
             {/* Expiring Items Alert */}
             {getExpiringItems().length > 0 && (

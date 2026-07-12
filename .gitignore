@@ -19,6 +19,9 @@ dist/
 .vscode/
 .idea/.worktrees/
 
+# Claude Code agent worktrees
+.claude/worktrees/
+
 # Supabase CLI
 supabase/.temp/
 .vercel

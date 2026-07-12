@@ -1,6 +1,7 @@
 // frontend/src/lib/apiClient.ts
 import { supabase } from './supabase';
 import { notifyRateLimited } from './rateLimitBridge';
+import { logError } from './errorService';
 
 // In-flight request de-duplication: if the exact same request (method + URL +
 // body) is already pending, join it instead of firing a second one. Guards
@@ -72,13 +73,32 @@ export async function authFetch(input: RequestInfo | URL, init: RequestInit = {}
     const nowSec = Math.floor(Date.now() / 1000);
     const tokenMissingOrStale =
       !session || (session.expires_at != null && session.expires_at - nowSec < 60);
+    let refreshOutcome: string | null = null;
     if (tokenMissingOrStale) {
-      const { data: refreshed } = await supabase.auth.refreshSession();
-      if (refreshed.session) session = refreshed.session;
+      const { data: refreshed, error: refreshErr } = await supabase.auth.refreshSession();
+      if (refreshed.session) {
+        session = refreshed.session;
+        refreshOutcome = 'refreshed-ok';
+      } else {
+        refreshOutcome = `refresh-null:${refreshErr?.message ?? 'no-error'}`;
+      }
     }
     const token = session?.access_token;
     const headers = new Headers(init.headers);
-    if (token) headers.set('Authorization', `Bearer ${token}`);
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    } else {
+      // We're about to send an authenticated request with NO token, which the
+      // backend rejects as "missing authorization header" — the exact 401 that
+      // broke recipe generation on mobile. This should no longer happen after
+      // the processLock fix (lib/supabase.ts) + the refresh-on-null above; log
+      // WHY if it still does (no token itself is logged) so the post-fix
+      // verification is conclusive rather than another guess.
+      logError(
+        `authFetch sending request with no token — finalSessionPresent=${session ? 'y' : 'n'} refreshOutcome=${refreshOutcome ?? 'not-attempted'}`,
+        'api:authFetch.no-token',
+      );
+    }
     const response = await fetch(input, { ...init, headers });
     // Backend slowapi rate limits (10/min heavy, 30/min light) return 429.
     // Surface a shared "slow down" toast without disturbing each call site's

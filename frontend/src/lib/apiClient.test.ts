@@ -10,8 +10,10 @@ vi.mock('./supabase', () => ({
   supabase: { auth: { getSession, refreshSession } },
 }));
 vi.mock('./rateLimitBridge', () => ({ notifyRateLimited: vi.fn() }));
+vi.mock('./errorService', () => ({ logError: vi.fn() }));
 
 import { authFetch } from './apiClient';
+import { logError } from './errorService';
 
 const NOW_SEC = 1_000_000;
 
@@ -73,5 +75,17 @@ describe('authFetch — proactive token refresh', () => {
     const headers = (globalThis.fetch as any).mock.calls[0][1].headers as Headers;
     // Still sends the stale token; the backend 401s and the caller prompts re-login.
     expect(headers.get('Authorization')).toBe('Bearer stale-token');
+  });
+
+  it('logs a diagnostic (and sends no auth header) when no token can be obtained at all', async () => {
+    getSession.mockResolvedValue({ data: { session: null } });
+    refreshSession.mockResolvedValue({ data: { session: null }, error: { message: 'refresh_token_not_found' } });
+
+    await authFetch('https://api.example.com/notoken', { method: 'POST', body: 'unique-body-notoken' });
+
+    const headers = (globalThis.fetch as any).mock.calls[0][1].headers as Headers;
+    expect(headers.get('Authorization')).toBeNull();
+    expect(logError).toHaveBeenCalledTimes(1);
+    expect((logError as any).mock.calls[0][1]).toBe('api:authFetch.no-token');
   });
 });

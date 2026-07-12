@@ -210,6 +210,7 @@
     "generatingRecipe": "Génération de la recette {{n}}...",
     "timeoutError": "⏱️ La demande a expiré. Essayez avec moins d'ingrédients ou réessayez.",
     "generationError": "Échec de la génération des recettes. Veuillez réessayer dans un instant.",
+    "sessionExpiredError": "Votre session a expiré. Déconnectez-vous puis reconnectez-vous, et réessayez.",
     "emptyStatePrompt": "Ajoutez des ingrédients ou recherchez une recette spécifique pour commencer !",
     "emptyStateTip": "Essayez : \"tarte aux pommes\", \"pâtes au poulet\", ou ajoutez des ingrédients comme \"tomates\", \"poulet\"",
     "keyIngredients": "Ingrédients Clés",

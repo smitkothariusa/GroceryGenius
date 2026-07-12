@@ -210,6 +210,7 @@
     "generatingRecipe": "Generando receta {{n}}...",
     "timeoutError": "⏱️ Se agotó el tiempo de espera. Prueba con menos ingredientes o inténtalo de nuevo.",
     "generationError": "No se pudieron generar las recetas. Inténtalo de nuevo en un momento.",
+    "sessionExpiredError": "Tu sesión ha caducado. Cierra sesión y vuelve a iniciarla, luego inténtalo de nuevo.",
     "emptyStatePrompt": "¡Agrega ingredientes o busca una receta específica para comenzar!",
     "emptyStateTip": "Prueba: \"tarta de manzana\", \"pasta con pollo\", o agrega ingredientes como \"tomates\", \"pollo\"",
     "keyIngredients": "Ingredientes Clave",

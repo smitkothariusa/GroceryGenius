@@ -15,10 +15,10 @@ be resolved with the user before coding), `IN PROGRESS`, `DONE`, `SKIPPED`.
 
 ## Current status
 
-Nothing started yet as of 2026-07-12. Quick-win cluster to consider first:
-#2, #5, #12, #13 (lean on infra that already exists). #1 and #4 are the
-biggest value unlocks but also the biggest data-model commitments — treat as
-XL/needs-its-own-spec before coding.
+As of 2026-07-12: #2 (donatable-items highlighter) is DONE, merged to `dev`.
+Next quick-win candidates: #5, #12, #13 (lean on infra that already exists).
+#1 and #4 are the biggest value unlocks but also the biggest data-model
+commitments — treat as XL/needs-its-own-spec before coding.
 
 ---
 
@@ -27,7 +27,7 @@ XL/needs-its-own-spec before coding.
 | # | Idea | Complexity | Status |
 |---|---|---|---|
 | 1 | [Nationwide food-bank finder (dynamic, geocoded)](#1-nationwide-food-bank-finder-dynamic-geocoded) | L | NEEDS PRODUCT DECISION |
-| 2 | [Donatable-items highlighter (perishable vs. non-perishable)](#2-donatable-items-highlighter-perishable-vs-non-perishable) | M | IN PROGRESS — spec: [docs/tasks/21-donatable-items-highlighter.md](tasks/21-donatable-items-highlighter.md) |
+| 2 | [Donatable-items highlighter (perishable vs. non-perishable)](#2-donatable-items-highlighter-perishable-vs-non-perishable) | M | DONE — spec: [docs/tasks/21-donatable-items-highlighter.md](tasks/21-donatable-items-highlighter.md) |
 | 3 | [Multi-nutrient tracker (protein, fiber — user-selected)](#3-multi-nutrient-tracker-protein-fiber--user-selected) | M | NEEDS PRODUCT DECISION |
 | 4 | [Household / shared pantry (family accounts)](#4-household--shared-pantry-family-accounts) | XL | NEEDS PRODUCT DECISION |
 | 5 | [Cook what you have (pantry-first, expiry-aware recipes)](#5-cook-what-you-have-recipe-mode-pantry-first-expiry-aware) | M | NEEDS PRODUCT DECISION |
@@ -102,6 +102,20 @@ if done heuristically. Mobile: badge + filter toggle.
 (cost/accuracy tradeoff)? Do we hard-hide perishables or just de-emphasize
 them? Should a food bank's own `acceptedItems` narrow the list further
 per-destination?
+
+**Shipped 2026-07-12** (PR [#53](https://github.com/smitkothariusa/GroceryGenius/pull/53),
+merged to `dev` @ `521cbb6`). Heuristic classification via a new
+`classifyPerishability()` helper (category + shelfLife lookups against
+`foodDatabase.ts`, keyword fallback for unrecognized items) — no AI route,
+per the resolved product decision. `DonationModal` badges each item
+(good-to-donate / keep-at-home) and adds a "Donatable only" toggle that
+collapses (not hides) perishables; selection state is unaffected by the
+toggle. i18n added across all 6 locales. Per-food-bank `acceptedItems`
+narrowing was explicitly skipped for v1 (free-text field, not a structured
+taxonomy — see spec). Deploy note: Vercel hit an account-level build-rate
+limit at merge time, so `dev.grocerygenius.org` had not yet picked up this
+commit as of merge — expected to auto-deploy once the limit resets; no
+code issue.
 
 ## 3. Multi-nutrient tracker (protein, fiber — user-selected)
 

@@ -210,6 +210,7 @@
     "generatingRecipe": "Generating recipe {{n}}...",
     "timeoutError": "⏱️ Request timed out. Please try with fewer ingredients or try again.",
     "generationError": "Failed to generate recipes. Please try again in a moment.",
+    "sessionExpiredError": "Your session expired. Please sign out and sign back in, then try again.",
     "emptyStatePrompt": "Add ingredients or search for a specific recipe to get started!",
     "emptyStateTip": "Try: \"apple pie\", \"chicken pasta\", or add ingredients like \"tomatoes\", \"chicken\"",
     "keyIngredients": "Key Ingredients",

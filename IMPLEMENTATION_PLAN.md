@@ -12,9 +12,12 @@ Workflow for each task: `.claude/skills/implement-task/SKILL.md`
 **[6 — Refactor App.tsx into feature modules](docs/tasks/06-app-tsx-refactor.md)**
 — IN PROGRESS as of 2026-07-11, kicked off per explicit user go-ahead.
 Per the spec's recommended extraction order, doing this as a sequence of
-small PRs rather than one giant change: Favorites → MealPlanCalendar wiring
-→ Donation → Recipes → Scanning+Pantry (last, most entangled). First step:
-Favorites extraction.
+small PRs rather than one giant change: Favorites (done, PR #48) →
+MealPlanCalendar wiring (done — already fully wired, no work needed) →
+Donation (done, PR #49) → Recipes → Scanning+Pantry (last, most entangled).
+Both merged to `dev` (79d049c) and confirmed live on
+dev.grocerygenius.org. `App.tsx` is down from 7966 to ~6593 lines. Next:
+Recipes extraction.
 
 Tasks 03, 12, 13, 15 (PRs #39–#42) and **9, 14, 16, 17 (PRs #44–#47)** are
 **all released to production** as of 2026-07-11 (main 728ecc2) — verified

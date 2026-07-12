@@ -389,7 +389,10 @@
       "spices": "スパイス",
       "hygiene_products": "衛生用品"
     },
-    "hoursLabel": "営業時間"
+    "hoursLabel": "営業時間",
+    "donatableOnlyFilter": "寄付可能のみ表示",
+    "goodToDonate": "寄付に適しています",
+    "keepAtHome": "自宅で保管"
   },
   "favorites": {
     "title": "お気に入りレシピ",

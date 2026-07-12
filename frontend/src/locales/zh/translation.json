@@ -389,7 +389,10 @@
       "spices": "香料",
       "hygiene_products": "卫生用品"
     },
-    "hoursLabel": "营业时间"
+    "hoursLabel": "营业时间",
+    "donatableOnlyFilter": "仅显示可捐赠",
+    "goodToDonate": "适合捐赠",
+    "keepAtHome": "建议留用"
   },
   "favorites": {
     "title": "收藏的食谱",

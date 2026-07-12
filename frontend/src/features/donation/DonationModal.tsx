@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FoodBank } from '../../types/donation';
 import { foodBanks } from '../../data/foodBanks';
 import { useDonation, type DropOffSite } from './DonationContext';
+import { classifyPerishability } from './perishability';
 
 // Mirrors the `PantryItem` shape in App.tsx (not centrally typed yet; this
 // duplication matches the existing pattern in features/favorites for `Recipe`).
@@ -40,6 +42,7 @@ export function DonationModal({ cardBg, pantry, getExpiringItems, onSubmit, onWa
     allItemsImpact,
     loadingImpact,
   } = useDonation();
+  const [donatableOnly, setDonatableOnly] = useState(false);
 
   if (!showDonationModal) return null;
 
@@ -173,10 +176,40 @@ export function DonationModal({ cardBg, pantry, getExpiringItems, onSubmit, onWa
                   <p>{t('donate.pantryEmptyDonate')}</p>
                 </div>
               ) : (
-                <div style={{ display: 'grid', gap: '0.75rem', maxHeight: '300px', overflow: 'auto' }}>
-                  {pantry.map(item => {
+                <>
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      marginBottom: '0.75rem',
+                      padding: '0.5rem 0.75rem',
+                      background: '#f9fafb',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '0.9rem',
+                      fontWeight: 600,
+                      color: '#374151',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={donatableOnly}
+                      onChange={(e) => setDonatableOnly(e.target.checked)}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer', flexShrink: 0 }}
+                    />
+                    {t('donate.donatableOnlyFilter')}
+                  </label>
+                  <div style={{ display: 'grid', gap: '0.75rem', maxHeight: '300px', overflow: 'auto' }}>
+                  {pantry.filter(item => {
+                    if (!donatableOnly) return true;
+                    return classifyPerishability(item) !== 'perishable';
+                  }).map(item => {
                     const isSelected = itemsToDonate.includes(item.id);
                     const isExpiring = getExpiringItems().some(e => e.id === item.id);
+                    const perishability = classifyPerishability(item);
 
                     return (
                       <div
@@ -226,6 +259,24 @@ export function DonationModal({ cardBg, pantry, getExpiringItems, onSubmit, onWa
                                   ⚠️ {t('donate.expiringSoon')}
                                 </span>
                               )}
+                              {perishability === 'non-perishable' && (
+                                <span style={{
+                                  marginLeft: '0.5rem',
+                                  color: '#059669',
+                                  fontWeight: '600'
+                                }}>
+                                  ✅ {t('donate.goodToDonate')}
+                                </span>
+                              )}
+                              {perishability === 'perishable' && (
+                                <span style={{
+                                  marginLeft: '0.5rem',
+                                  color: '#92400e',
+                                  fontWeight: '600'
+                                }}>
+                                  🏠 {t('donate.keepAtHome')}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -243,7 +294,8 @@ export function DonationModal({ cardBg, pantry, getExpiringItems, onSubmit, onWa
                       </div>
                     );
                   })}
-                </div>
+                  </div>
+                </>
               )}
             </div>
 

@@ -135,6 +135,8 @@
     "recipeMode": "食谱模式：",
     "addPantryItems": "添加储藏室物品",
     "scanIngredients": "扫描食材",
+    "cookWhatsExpiring": "烹饪即将过期的食材",
+    "noExpiringItems": "没有即将过期的储藏室物品",
     "dietary": {
       "all": "任何饮食偏好",
       "vegetarian": "素食",
@@ -266,6 +268,26 @@
       "friday": "周五",
       "saturday": "周六",
       "sunday": "周日"
+    },
+    "templates": {
+      "saveButton": "将本周保存为模板",
+      "applyButton": "应用模板",
+      "saving": "保存中...",
+      "applying": "应用中...",
+      "namePrompt": "为此模板命名：",
+      "nameRequiredError": "请输入模板名称。",
+      "emptyWeekError": "请先为本周添加一些餐食，然后再保存为模板。",
+      "capReachedError": "您已达到10个模板的上限。请先删除一个模板，再保存新模板。",
+      "saveSuccess": "模板已保存！",
+      "saveError": "保存模板失败，请重试。",
+      "applyModalTitle": "应用模板",
+      "noTemplates": "暂无已保存的模板。将某一周保存为模板即可稍后重复使用！",
+      "mealsCount": "{{count}} 餐",
+      "applyOverwriteConfirm": "本周已有计划的餐食。应用此模板将删除它们，并替换为模板中的餐食。是否继续？",
+      "applySuccess": "模板已应用！",
+      "applyError": "应用模板失败，请重试。",
+      "deleteConfirm": "删除此模板？此操作无法撤销。",
+      "deleteError": "删除模板失败，请重试。"
     }
   },
   "shopping": {
@@ -389,7 +411,24 @@
       "spices": "香料",
       "hygiene_products": "卫生用品"
     },
-    "hoursLabel": "营业时间"
+    "hoursLabel": "营业时间",
+    "donatableOnlyFilter": "仅显示可捐赠",
+    "goodToDonate": "适合捐赠",
+    "keepAtHome": "建议留用"
+  },
+  "achievements": {
+    "title": "你的成就",
+    "streakActive": "连续 {{count}} 天零浪费",
+    "streakStart": "开始零浪费记录",
+    "badgesTitle": "捐赠里程碑",
+    "badge10Name": "良好开端",
+    "badge50Name": "持续支持",
+    "badge100Name": "重要贡献",
+    "badge500Name": "巨大改变",
+    "badgeUnlockedDesc": "已捐赠 {{count}}+ 份餐食",
+    "badgeLockedDesc": "还差 {{count}} 份餐食",
+    "hide": "隐藏成就",
+    "show": "显示成就"
   },
   "favorites": {
     "title": "收藏的食谱",
@@ -704,6 +743,15 @@
       "copied": "已复制！",
       "dismiss": "关闭",
       "gotIt": "好的"
+    }
+  },
+  "offline": {
+    "banner": {
+      "offline": "您已离线 — 更改将稍后同步",
+      "syncing": "正在同步 {{count}} 项更改…"
+    },
+    "toasts": {
+      "synced": "已同步 {{count}} 项更改"
     }
   },
   "errorBoundary": {

@@ -135,6 +135,8 @@
     "recipeMode": "レシピモード：",
     "addPantryItems": "パントリーから追加",
     "scanIngredients": "材料をスキャン",
+    "cookWhatsExpiring": "期限切れ間近の食材で調理",
+    "noExpiringItems": "期限切れ間近のパントリー食材はありません",
     "dietary": {
       "all": "すべての食事の好み",
       "vegetarian": "ベジタリアン",
@@ -266,6 +268,26 @@
       "friday": "金曜日",
       "saturday": "土曜日",
       "sunday": "日曜日"
+    },
+    "templates": {
+      "saveButton": "今週をテンプレートとして保存",
+      "applyButton": "テンプレートを適用",
+      "saving": "保存中...",
+      "applying": "適用中...",
+      "namePrompt": "このテンプレートの名前を入力してください：",
+      "nameRequiredError": "テンプレートの名前を入力してください。",
+      "emptyWeekError": "テンプレートとして保存する前に、この週に食事を追加してください。",
+      "capReachedError": "テンプレートの上限（10件）に達しました。新しいテンプレートを保存する前に、既存のものを削除してください。",
+      "saveSuccess": "テンプレートを保存しました！",
+      "saveError": "テンプレートの保存に失敗しました。もう一度お試しください。",
+      "applyModalTitle": "テンプレートを適用",
+      "noTemplates": "保存されたテンプレートはまだありません。1週間分をテンプレートとして保存すると、後で再利用できます！",
+      "mealsCount": "{{count}} 食",
+      "applyOverwriteConfirm": "この週にはすでに食事が計画されています。このテンプレートを適用すると、それらは削除され、テンプレートの食事に置き換えられます。続行しますか？",
+      "applySuccess": "テンプレートを適用しました！",
+      "applyError": "テンプレートの適用に失敗しました。もう一度お試しください。",
+      "deleteConfirm": "このテンプレートを削除しますか？この操作は元に戻せません。",
+      "deleteError": "テンプレートの削除に失敗しました。もう一度お試しください。"
     }
   },
   "shopping": {
@@ -389,7 +411,24 @@
       "spices": "スパイス",
       "hygiene_products": "衛生用品"
     },
-    "hoursLabel": "営業時間"
+    "hoursLabel": "営業時間",
+    "donatableOnlyFilter": "寄付可能のみ表示",
+    "goodToDonate": "寄付に適しています",
+    "keepAtHome": "自宅で保管"
+  },
+  "achievements": {
+    "title": "あなたの実績",
+    "streakActive": "{{count}}日間 食品ロスゼロ継続中",
+    "streakStart": "食品ロスゼロの記録を始めよう",
+    "badgesTitle": "寄付マイルストーン",
+    "badge10Name": "はじめの一歩",
+    "badge50Name": "継続的なサポート",
+    "badge100Name": "大きな貢献",
+    "badge500Name": "大きな変化",
+    "badgeUnlockedDesc": "{{count}}食以上を寄付しました",
+    "badgeLockedDesc": "あと{{count}}食",
+    "hide": "実績を非表示",
+    "show": "実績を表示"
   },
   "favorites": {
     "title": "お気に入りレシピ",
@@ -704,6 +743,15 @@
       "copied": "コピーしました！",
       "dismiss": "閉じる",
       "gotIt": "了解"
+    }
+  },
+  "offline": {
+    "banner": {
+      "offline": "オフラインです — 変更は後で同期されます",
+      "syncing": "{{count}} 件の変更を同期中…"
+    },
+    "toasts": {
+      "synced": "{{count}} 件の変更を同期しました"
     }
   },
   "errorBoundary": {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isExpiringSoon, daysUntilExpiry } from './pantryExpiry';
+import { isExpiringSoon, daysUntilExpiry, parseLocalDate } from './pantryExpiry';
 
 const DAY = 1000 * 60 * 60 * 24;
 // Fixed reference "now" so the tests are deterministic regardless of the
@@ -23,6 +23,21 @@ const oldIsExpiringSoon = (item: { expiryDate?: string }, now: Date) => {
   const diff = new Date(item.expiryDate).getTime() - now.getTime();
   return diff > 0 && diff < 3 * DAY;
 };
+
+describe('parseLocalDate — off-by-one regression guard', () => {
+  it('parses a YYYY-MM-DD string to the SAME calendar day, regardless of machine timezone', () => {
+    // The bug: `new Date("2026-07-15")` parses as UTC midnight. Calling
+    // `.toLocaleDateString()` on that then renders in the machine's local
+    // timezone — for any timezone west of UTC (all of the Americas), that
+    // shifts the displayed/computed date back to July 14th. parseLocalDate
+    // must return a Date whose calendar-day fields exactly match the input
+    // string, independent of the runner's timezone offset.
+    const d = parseLocalDate('2026-07-15');
+    expect(d.getFullYear()).toBe(2026);
+    expect(d.getMonth()).toBe(6); // 0-indexed: July
+    expect(d.getDate()).toBe(15);
+  });
+});
 
 describe('pantryExpiry — historical disagreement (regression guard)', () => {
   it('the two old implementations disagreed for an item expiring today', () => {
@@ -80,12 +95,21 @@ describe('pantryExpiry.isExpiringSoon — fixed, day-0-inclusive', () => {
 });
 
 describe('pantryExpiry — list inclusion and row styling now agree', () => {
-  it('the shared predicate matches getExpiringItems semantics across the clock and offsets', () => {
+  it('day-0-inclusive semantics hold across the clock and offsets, independent of machine timezone', () => {
+    // NOTE: this used to assert isExpiringSoon matched
+    // oldGetExpiringItemsPredicate exactly, but that predicate parses
+    // expiryDate via the UTC-midnight `new Date(str)` — the very bug fixed by
+    // daysUntilExpiry/isExpiringSoon switching to parseLocalDate (see
+    // pantryExpiry.ts). Asserting equality against the old UTC-based
+    // predicate would now correctly FAIL on any machine not running in UTC.
+    // Instead, verify the day-0-inclusive/ceil model is self-consistent
+    // regardless of the runner's timezone.
     for (let h = 0; h < 48; h++) {
       const now = new Date(NOW.getTime() + h * 3600 * 1000);
       for (let off = -2; off <= 6; off++) {
         const item = { expiryDate: dateOnly(new Date(now.getTime() + off * DAY)) };
-        expect(isExpiringSoon(item, now)).toBe(oldGetExpiringItemsPredicate(item, now));
+        const days = daysUntilExpiry(item, now)!;
+        expect(isExpiringSoon(item, now)).toBe(days >= 0 && days <= 3);
       }
     }
   });

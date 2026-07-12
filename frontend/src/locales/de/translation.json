@@ -135,6 +135,8 @@
     "recipeMode": "Rezeptmodus:",
     "addPantryItems": "Vorratskammer Hinzufügen",
     "scanIngredients": "Zutaten Scannen",
+    "cookWhatsExpiring": "Ablaufende Zutaten Kochen",
+    "noExpiringItems": "Keine Vorratsartikel laufen bald ab",
     "dietary": {
       "all": "Beliebige Ernährungspräferenz",
       "vegetarian": "Vegetarisch",
@@ -266,6 +268,26 @@
       "friday": "Freitag",
       "saturday": "Samstag",
       "sunday": "Sonntag"
+    },
+    "templates": {
+      "saveButton": "Woche als Vorlage speichern",
+      "applyButton": "Vorlage anwenden",
+      "saving": "Wird gespeichert...",
+      "applying": "Wird angewendet...",
+      "namePrompt": "Name für diese Vorlage:",
+      "nameRequiredError": "Bitte gib einen Namen für die Vorlage ein.",
+      "emptyWeekError": "Füge dieser Woche Mahlzeiten hinzu, bevor du sie als Vorlage speicherst.",
+      "capReachedError": "Du hast das Limit von 10 Vorlagen erreicht. Lösche eine Vorlage, bevor du eine neue speicherst.",
+      "saveSuccess": "Vorlage gespeichert!",
+      "saveError": "Vorlage konnte nicht gespeichert werden. Bitte versuche es erneut.",
+      "applyModalTitle": "Vorlage anwenden",
+      "noTemplates": "Noch keine gespeicherten Vorlagen. Speichere eine Woche als Vorlage, um sie später wiederzuverwenden!",
+      "mealsCount": "{{count}} Mahlzeit(en)",
+      "applyOverwriteConfirm": "Diese Woche hat bereits geplante Mahlzeiten. Beim Anwenden dieser Vorlage werden sie gelöscht und durch die Mahlzeiten der Vorlage ersetzt. Fortfahren?",
+      "applySuccess": "Vorlage angewendet!",
+      "applyError": "Vorlage konnte nicht angewendet werden. Bitte versuche es erneut.",
+      "deleteConfirm": "Diese Vorlage löschen? Dies kann nicht rückgängig gemacht werden.",
+      "deleteError": "Vorlage konnte nicht gelöscht werden. Bitte versuche es erneut."
     }
   },
   "shopping": {
@@ -389,7 +411,24 @@
       "spices": "Gewürze",
       "hygiene_products": "Hygieneartikel"
     },
-    "hoursLabel": "Öffnungszeiten"
+    "hoursLabel": "Öffnungszeiten",
+    "donatableOnlyFilter": "Nur spendenfähig",
+    "goodToDonate": "Gut zum Spenden",
+    "keepAtHome": "Zu Hause behalten"
+  },
+  "achievements": {
+    "title": "Deine Erfolge",
+    "streakActive": "{{count}}-Tage-Serie ohne Verschwendung",
+    "streakStart": "Starte eine verschwendungsfreie Serie",
+    "badgesTitle": "Spenden-Meilensteine",
+    "badge10Name": "Guter Anfang",
+    "badge50Name": "Beständige Unterstützung",
+    "badge100Name": "Starke Wirkung",
+    "badge500Name": "Ein großer Unterschied",
+    "badgeUnlockedDesc": "{{count}}+ Mahlzeiten gespendet",
+    "badgeLockedDesc": "Noch {{count}} Mahlzeiten",
+    "hide": "Erfolge ausblenden",
+    "show": "Erfolge anzeigen"
   },
   "favorites": {
     "title": "Lieblingsrezepte",
@@ -704,6 +743,15 @@
       "copied": "Kopiert!",
       "dismiss": "Schließen",
       "gotIt": "Verstanden"
+    }
+  },
+  "offline": {
+    "banner": {
+      "offline": "Du bist offline — Änderungen werden später synchronisiert",
+      "syncing": "{{count}} Änderung(en) werden synchronisiert…"
+    },
+    "toasts": {
+      "synced": "{{count}} Änderung(en) synchronisiert"
     }
   },
   "errorBoundary": {

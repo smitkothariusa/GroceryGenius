@@ -1,6 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { calculateMeals } from '../../data/foodBanks';
 import { useDonation } from './DonationContext';
+import { AchievementsPanel } from '../achievements/AchievementsPanel';
+import { classifyPerishability } from './perishability';
+import { daysUntilExpiry } from '../../lib/pantryExpiry';
 
 // Mirrors the `PantryItem` shape in App.tsx (not centrally typed yet; this
 // duplication matches the existing pattern in features/favorites for `Recipe`).
@@ -92,6 +95,15 @@ export function DonationSection({
     return R * c;
   };
 
+  // Only nudge users to donate expiring items that are actually donatable —
+  // a perishable item (e.g. bananas) expiring soon should be used/discarded
+  // at home, not suggested for a food-bank drop-off. 'unknown' items (not
+  // classifiable either way) are still included, matching how the Pantry
+  // tab's "Donatable only" filter treats them.
+  const expiringDonatableItems = getExpiringItems().filter(
+    item => classifyPerishability(item) !== 'perishable'
+  );
+
   return (
           <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
             {/* Impact Dashboard */}
@@ -157,8 +169,11 @@ export function DonationSection({
               </button>
             )}
 
+            {/* Streaks & Badges */}
+            <AchievementsPanel isMobile={isMobile} cardBg={cardBg} mutedText={mutedText} />
+
             {/* Expiring Items Alert */}
-            {getExpiringItems().length > 0 && (
+            {expiringDonatableItems.length > 0 && (
               <div data-tour="donate-expiring-list" style={{
                 background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
                 border: '2px solid #f59e0b',
@@ -214,7 +229,7 @@ export function DonationSection({
                         fontSize: '1.75rem',
                         fontWeight: '700'
                       }}>
-                        {t('donate.itemsExpiring', { count: getExpiringItems().length })}
+                        {t('donate.itemsExpiring', { count: expiringDonatableItems.length })}
                       </h3>
                       <p style={{
                         margin: '0.25rem 0 0 0',
@@ -234,10 +249,8 @@ export function DonationSection({
                     gap: '0.75rem',
                     marginBottom: '1.5rem'
                   }}>
-                    {getExpiringItems().map(item => {
-                      const daysUntil = Math.ceil(
-                        (new Date(item.expiryDate!).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-                      );
+                    {expiringDonatableItems.map(item => {
+                      const daysUntil = daysUntilExpiry(item) ?? 0;
 
                       return (
                         <div key={item.id} style={{
@@ -331,12 +344,12 @@ export function DonationSection({
                         {t('donate.potentialImpact')}
                       </div>
                       <div style={{ fontSize: '1.25rem', fontWeight: '700', color: '#10b981' }}>
-                        ~{getExpiringItems().reduce((total, item) => {
+                        ~{expiringDonatableItems.reduce((total, item) => {
                           return total + calculateMeals(item.quantity, item.unit, item.name);
                         }, 0)} {t('donate.meals')}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: '#b45309', marginTop: '0.25rem' }}>
-                        Prevention: ~{Math.round(getExpiringItems().reduce((total, item) => {
+                        Prevention: ~{Math.round(expiringDonatableItems.reduce((total, item) => {
                           const pounds = item.unit === 'lbs' ? item.quantity : item.quantity * 0.5;
                           return total + (pounds * 3.8);
                         }, 0))} lbs CO₂
@@ -347,7 +360,7 @@ export function DonationSection({
                   {/* CTA Button */}
                   <button
                     onClick={() => {
-                      setItemsToDonate(getExpiringItems().map(i => i.id));
+                      setItemsToDonate(expiringDonatableItems.map(i => i.id));
                       setShowDonationModal(true);
                     }}
                     style={{

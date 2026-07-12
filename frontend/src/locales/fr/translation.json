@@ -135,6 +135,8 @@
     "recipeMode": "Mode de recette :",
     "addPantryItems": "Ajouter du Garde-Manger",
     "scanIngredients": "Scanner Ingrédients",
+    "cookWhatsExpiring": "Cuisiner ce qui Expire",
+    "noExpiringItems": "Aucun article du garde-manger n'expire bientôt",
     "dietary": {
       "all": "Toute préférence alimentaire",
       "vegetarian": "Végétarien",
@@ -266,6 +268,26 @@
       "friday": "Vendredi",
       "saturday": "Samedi",
       "sunday": "Dimanche"
+    },
+    "templates": {
+      "saveButton": "Enregistrer la Semaine comme Modèle",
+      "applyButton": "Appliquer un Modèle",
+      "saving": "Enregistrement...",
+      "applying": "Application...",
+      "namePrompt": "Nommez ce modèle :",
+      "nameRequiredError": "Veuillez saisir un nom pour le modèle.",
+      "emptyWeekError": "Ajoutez des repas à cette semaine avant de l'enregistrer comme modèle.",
+      "capReachedError": "Vous avez atteint la limite de 10 modèles. Supprimez un modèle avant d'en enregistrer un nouveau.",
+      "saveSuccess": "Modèle enregistré !",
+      "saveError": "Échec de l'enregistrement du modèle. Veuillez réessayer.",
+      "applyModalTitle": "Appliquer un Modèle",
+      "noTemplates": "Aucun modèle enregistré pour le moment. Enregistrez une semaine comme modèle pour la réutiliser plus tard !",
+      "mealsCount": "{{count}} repas",
+      "applyOverwriteConfirm": "Cette semaine contient déjà des repas planifiés. Appliquer ce modèle les supprimera et les remplacera par les repas du modèle. Continuer ?",
+      "applySuccess": "Modèle appliqué !",
+      "applyError": "Échec de l'application du modèle. Veuillez réessayer.",
+      "deleteConfirm": "Supprimer ce modèle ? Cette action est irréversible.",
+      "deleteError": "Échec de la suppression du modèle. Veuillez réessayer."
     }
   },
   "shopping": {
@@ -389,7 +411,24 @@
       "spices": "épices",
       "hygiene_products": "produits d'hygiène"
     },
-    "hoursLabel": "Horaires"
+    "hoursLabel": "Horaires",
+    "donatableOnlyFilter": "Donnables uniquement",
+    "goodToDonate": "Bon à donner",
+    "keepAtHome": "Garder à la maison"
+  },
+  "achievements": {
+    "title": "Vos réussites",
+    "streakActive": "Série de {{count}} jours sans gaspillage",
+    "streakStart": "Commencez une série sans gaspillage",
+    "badgesTitle": "Étapes de don",
+    "badge10Name": "Bon départ",
+    "badge50Name": "Soutien constant",
+    "badge100Name": "Fort impact",
+    "badge500Name": "Une grande différence",
+    "badgeUnlockedDesc": "{{count}}+ repas donnés",
+    "badgeLockedDesc": "Encore {{count}} repas",
+    "hide": "Masquer les réussites",
+    "show": "Afficher les réussites"
   },
   "favorites": {
     "title": "Recettes Favorites",
@@ -704,6 +743,15 @@
       "copied": "Copié !",
       "dismiss": "Fermer",
       "gotIt": "Compris"
+    }
+  },
+  "offline": {
+    "banner": {
+      "offline": "Vous êtes hors ligne — les modifications seront synchronisées plus tard",
+      "syncing": "Synchronisation de {{count}} modification(s)…"
+    },
+    "toasts": {
+      "synced": "{{count}} modification(s) synchronisée(s)"
     }
   },
   "errorBoundary": {

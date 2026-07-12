@@ -1,9 +1,97 @@
 import { supabase } from './supabase';
 import { logError } from './errorService';
+import {
+  enqueue,
+  isNetworkError,
+  generateOfflineId,
+  getQueue,
+  removeEntry,
+  ITEM_SYNCED_EVENT,
+  type QueueEntry,
+  type AddPayload,
+  type UpdatePayload,
+  type DeletePayload,
+} from './offlineQueue';
 
 // ============================================
 // PANTRY ITEMS
 // ============================================
+
+interface PantryAddInput {
+  name: string;
+  quantity: number;
+  unit: string;
+  category: string;
+  expiryDate?: string;
+  emoji?: string;
+}
+
+interface PantryUpdateInput {
+  name?: string;
+  quantity?: number;
+  unit?: string;
+  category?: string;
+  expiryDate?: string;
+  emoji?: string;
+}
+
+// Raw Supabase calls, unwrapped by offline handling. Used both by the public
+// pantryService below and by drainOfflineQueue() to replay queued entries.
+async function pantryAddRemote(item: PantryAddInput) {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) throw new Error('Not authenticated');
+
+  const { data, error } = await supabase
+    .from('pantry_items')
+    .insert({
+      user_id: userData.user.id,
+      name: item.name,
+      quantity: item.quantity,
+      unit: item.unit,
+      category: item.category,
+      expiry_date: item.expiryDate || null,
+      emoji: item.emoji || null,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    logError(error, 'api:pantry.add');
+    throw error;
+  }
+  return data;
+}
+
+async function pantryUpdateRemote(id: string, item: PantryUpdateInput) {
+  const { data, error } = await supabase
+    .from('pantry_items')
+    .update({
+      name: item.name,
+      quantity: item.quantity,
+      unit: item.unit,
+      category: item.category,
+      expiry_date: item.expiryDate,
+      emoji: item.emoji,
+    })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    logError(error, 'api:pantry.update');
+    throw error;
+  }
+  return data;
+}
+
+async function pantryDeleteRemote(id: string) {
+  const { error } = await supabase
+    .from('pantry_items')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+}
 
 export const pantryService = {
   // Get pantry items for current user.
@@ -26,83 +114,122 @@ export const pantryService = {
     return data || [];
   },
 
-  // Add a new pantry item
-  async add(item: {
-    name: string;
-    quantity: number;
-    unit: string;
-    category: string;
-    expiryDate?: string;
-    emoji?: string;  // NEW
-  }) {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) throw new Error('Not authenticated');
-
-    const { data, error } = await supabase
-      .from('pantry_items')
-      .insert({
-        user_id: userData.user.id,
+  // Add a new pantry item. Offline (or genuine network failure): queues the
+  // write and returns a synthetic row under a client-generated id so
+  // call sites (which build local UI state off the returned row) keep
+  // working unmodified — see docs/tasks/11-offline-support.md.
+  async add(item: PantryAddInput) {
+    try {
+      return await pantryAddRemote(item);
+    } catch (error) {
+      if (!isNetworkError(error)) throw error;
+      const tempId = generateOfflineId();
+      enqueue('pantry', 'add', { tempId, item } satisfies AddPayload<PantryAddInput>);
+      return {
+        id: tempId,
+        user_id: null,
         name: item.name,
         quantity: item.quantity,
         unit: item.unit,
         category: item.category,
         expiry_date: item.expiryDate || null,
-        emoji: item.emoji || null,  // NEW
-      })
-      .select()
-      .single();
-
-    if (error) {
-      logError(error, 'api:pantry.add');
-      throw error;
+        emoji: item.emoji || null,
+        added_date: new Date().toISOString(),
+      };
     }
-    return data;
   },
 
-  // Update a pantry item
-  async update(id: string, item: {
-    name?: string;
-    quantity?: number;
-    unit?: string;
-    category?: string;
-    expiryDate?: string;
-    emoji?: string;  // NEW
-  }) {
-    const { data, error } = await supabase
-      .from('pantry_items')
-      .update({
-        name: item.name,
-        quantity: item.quantity,
-        unit: item.unit,
-        category: item.category,
-        expiry_date: item.expiryDate,
-        emoji: item.emoji,  // NEW
-      })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      logError(error, 'api:pantry.update');
-      throw error;
+  // Update a pantry item. Offline: queues the write; the call succeeds
+  // (doesn't throw) so callers that only apply local state after a
+  // successful await still apply it optimistically.
+  async update(id: string, item: PantryUpdateInput) {
+    try {
+      return await pantryUpdateRemote(id, item);
+    } catch (error) {
+      if (!isNetworkError(error)) throw error;
+      enqueue('pantry', 'update', { targetId: id, updates: item } satisfies UpdatePayload<PantryUpdateInput>);
+      return { id, ...item };
     }
-    return data;
   },
 
-  // Delete a pantry item
+  // Delete a pantry item. Offline: queues the delete instead of throwing.
   async delete(id: string) {
-    const { error } = await supabase
-      .from('pantry_items')
-      .delete()
-      .eq('id', id);
-    
-    if (error) throw error;
+    try {
+      await pantryDeleteRemote(id);
+    } catch (error) {
+      if (!isNetworkError(error)) throw error;
+      enqueue('pantry', 'delete', { targetId: id } satisfies DeletePayload);
+    }
   },
 };
 
 // ============================================
 // SHOPPING ITEMS
 // ============================================
+
+interface ShoppingAddInput {
+  name: string;
+  quantity: number;
+  unit: string;
+  category: string;
+  checked?: boolean;
+  priority?: string;
+}
+
+type ShoppingUpdateInput = Partial<{
+  name: string;
+  quantity: number;
+  unit: string;
+  category: string;
+  checked: boolean;
+  priority: string;
+}>;
+
+async function shoppingAddRemote(item: ShoppingAddInput) {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) throw new Error('Not authenticated');
+
+  const { data, error } = await supabase
+    .from('shopping_items')
+    .insert({
+      user_id: userData.user.id,
+      name: item.name,
+      quantity: item.quantity,
+      unit: item.unit,
+      category: item.category,
+      checked: item.checked || false,
+      priority: item.priority || 'medium',
+    })
+    .select()
+    .single();
+
+  if (error) {
+    logError(error, 'api:shopping.add');
+    throw error;
+  }
+  return data;
+}
+
+async function shoppingUpdateRemote(id: string, updates: ShoppingUpdateInput) {
+  const { data, error } = await supabase
+    .from('shopping_items')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+async function shoppingDeleteRemote(id: string) {
+  const { error } = await supabase
+    .from('shopping_items')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+}
 
 export const shoppingService = {
   // Get shopping items for current user.
@@ -125,67 +252,47 @@ export const shoppingService = {
     return data || [];
   },
 
-  // Add shopping item
-  async add(item: {
-    name: string;
-    quantity: number;
-    unit: string;
-    category: string;
-    checked?: boolean;
-    priority?: string;
-  }) {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) throw new Error('Not authenticated');
-
-    const { data, error } = await supabase
-      .from('shopping_items')
-      .insert({
-        user_id: userData.user.id,
+  // Add shopping item. Offline: queues the write and returns a synthetic
+  // row under a client-generated id (same reasoning as pantryService.add).
+  async add(item: ShoppingAddInput) {
+    try {
+      return await shoppingAddRemote(item);
+    } catch (error) {
+      if (!isNetworkError(error)) throw error;
+      const tempId = generateOfflineId();
+      enqueue('shopping', 'add', { tempId, item } satisfies AddPayload<ShoppingAddInput>);
+      return {
+        id: tempId,
+        user_id: null,
         name: item.name,
         quantity: item.quantity,
         unit: item.unit,
         category: item.category,
         checked: item.checked || false,
         priority: item.priority || 'medium',
-      })
-      .select()
-      .single();
-
-    if (error) {
-      logError(error, 'api:shopping.add');
-      throw error;
+      };
     }
-    return data;
   },
 
-  // Update shopping item
-  async update(id: string, updates: Partial<{
-    name: string;
-    quantity: number;
-    unit: string;
-    category: string;
-    checked: boolean;
-    priority: string;
-  }>) {
-    const { data, error } = await supabase
-      .from('shopping_items')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
+  // Update shopping item. Offline: queues the write instead of throwing.
+  async update(id: string, updates: ShoppingUpdateInput) {
+    try {
+      return await shoppingUpdateRemote(id, updates);
+    } catch (error) {
+      if (!isNetworkError(error)) throw error;
+      enqueue('shopping', 'update', { targetId: id, updates } satisfies UpdatePayload<ShoppingUpdateInput>);
+      return { id, ...updates };
+    }
   },
 
-  // Delete shopping item
+  // Delete shopping item. Offline: queues the delete instead of throwing.
   async delete(id: string) {
-    const { error } = await supabase
-      .from('shopping_items')
-      .delete()
-      .eq('id', id);
-    
-    if (error) throw error;
+    try {
+      await shoppingDeleteRemote(id);
+    } catch (error) {
+      if (!isNetworkError(error)) throw error;
+      enqueue('shopping', 'delete', { targetId: id } satisfies DeletePayload);
+    }
   },
 
   // Delete all checked items
@@ -211,6 +318,88 @@ export const shoppingService = {
     if (error) throw error;
   },
 };
+
+// ============================================
+// OFFLINE QUEUE DRAIN
+// ============================================
+// Replays queued pantry/shopping writes against Supabase in order, once the
+// browser is back online. Scope: pantry + shopping item add/update/delete
+// only (see docs/tasks/11-offline-support.md) — deleteChecked/updateAll and
+// recipes/favorites/donation writes are not queued and are unaffected.
+
+export interface DrainOfflineQueueResult {
+  /** Number of entries successfully replayed. */
+  syncedCount: number;
+  /** Number of entries still left in the queue after this run. */
+  remaining: number;
+  /** True if the drain stopped early because an entry failed (still offline, or a real error). */
+  stoppedOnError: boolean;
+}
+
+export async function drainOfflineQueue(): Promise<DrainOfflineQueueResult> {
+  const queue = getQueue();
+  if (queue.length === 0) {
+    return { syncedCount: 0, remaining: 0, stoppedOnError: false };
+  }
+
+  // A queued update/delete may target an item that was itself added while
+  // offline (and hasn't synced yet within this same drain). Track
+  // tempId → real-id as 'add' entries resolve so later entries in this pass
+  // hit the row Supabase actually created, not the placeholder id.
+  const idMap = new Map<string, string>();
+  let syncedCount = 0;
+
+  for (const entry of queue) {
+    try {
+      await replayEntry(entry, idMap);
+      removeEntry(entry.id);
+      syncedCount++;
+    } catch (error) {
+      // Genuine failure (still offline, or a real server-side error this
+      // time) — stop here and preserve this entry plus everything after it,
+      // in order, per the spec ("don't lose data, don't reorder").
+      console.error('Offline queue: failed to sync entry, stopping drain', entry, error);
+      return { syncedCount, remaining: getQueue().length, stoppedOnError: true };
+    }
+  }
+
+  return { syncedCount, remaining: 0, stoppedOnError: false };
+}
+
+async function replayEntry(entry: QueueEntry, idMap: Map<string, string>): Promise<void> {
+  if (entry.entity === 'pantry') {
+    if (entry.operation === 'add') {
+      const { tempId, item } = entry.payload as AddPayload<PantryAddInput>;
+      const row = await pantryAddRemote(item);
+      idMap.set(tempId, row.id);
+      dispatchItemSynced('pantry', tempId, row.id);
+    } else if (entry.operation === 'update') {
+      const { targetId, updates } = entry.payload as UpdatePayload<PantryUpdateInput>;
+      await pantryUpdateRemote(idMap.get(targetId) ?? targetId, updates);
+    } else {
+      const { targetId } = entry.payload as DeletePayload;
+      await pantryDeleteRemote(idMap.get(targetId) ?? targetId);
+    }
+  } else {
+    if (entry.operation === 'add') {
+      const { tempId, item } = entry.payload as AddPayload<ShoppingAddInput>;
+      const row = await shoppingAddRemote(item);
+      idMap.set(tempId, row.id);
+      dispatchItemSynced('shopping', tempId, row.id);
+    } else if (entry.operation === 'update') {
+      const { targetId, updates } = entry.payload as UpdatePayload<ShoppingUpdateInput>;
+      await shoppingUpdateRemote(idMap.get(targetId) ?? targetId, updates);
+    } else {
+      const { targetId } = entry.payload as DeletePayload;
+      await shoppingDeleteRemote(idMap.get(targetId) ?? targetId);
+    }
+  }
+}
+
+function dispatchItemSynced(entity: 'pantry' | 'shopping', tempId: string, realId: string): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(ITEM_SYNCED_EVENT, { detail: { entity, tempId, realId } }));
+}
 
 // ============================================
 // SAVED RECIPES (FAVORITES)
@@ -355,7 +544,82 @@ export const mealPlansService = {
       .from('meal_plans')
       .delete()
       .eq('id', id);
-    
+
+    if (error) throw error;
+  },
+};
+
+// ============================================
+// MEAL PLAN TEMPLATES
+// ============================================
+
+// Week-relative entry: dayOfWeek is 0 (Sunday) - 6 (Saturday), matching
+// MealPlanCalendar's weekDates ordering, so a template can be replayed
+// onto any week regardless of absolute dates.
+export interface MealPlanTemplateEntry {
+  dayOfWeek: number;
+  meal_type: string;
+  recipe: any;
+  servings: number;
+  notes?: string;
+}
+
+export interface MealPlanTemplate {
+  id: string;
+  user_id: string;
+  name: string;
+  template_data: MealPlanTemplateEntry[];
+  created_at: string;
+}
+
+// Client-side cap only (see docs/tasks/23-meal-plan-templates.md) — no
+// server-side enforcement for v1, a client bypass here is just a UX cap.
+export const MEAL_PLAN_TEMPLATE_CAP = 10;
+
+export const mealPlanTemplatesService = {
+  // Get all saved templates for the current user, newest first
+  async getAll(): Promise<MealPlanTemplate[]> {
+    const { data, error } = await supabase
+      .from('meal_plan_templates')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  // Add a new template
+  async add(template: {
+    name: string;
+    template_data: MealPlanTemplateEntry[];
+  }): Promise<MealPlanTemplate> {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('meal_plan_templates')
+      .insert({
+        user_id: userData.user.id,
+        name: template.name,
+        template_data: template.template_data,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      logError(error, 'api:mealplantemplates.add');
+      throw error;
+    }
+    return data;
+  },
+
+  // Delete a template
+  async delete(id: string) {
+    const { error } = await supabase
+      .from('meal_plan_templates')
+      .delete()
+      .eq('id', id);
+
     if (error) throw error;
   },
 };
@@ -446,6 +710,98 @@ export const donationService = {
     return data;
   },
 };
+
+// ============================================
+// ZERO-WASTE STREAKS
+// ============================================
+//
+// Lightweight daily check-in counter — NOT a rigorous historical audit (see
+// docs/tasks/24-streaks-badges.md). Reflects "did the user have any
+// stale-expired item sitting in their pantry the last time this was
+// checked," checked at most once/day client-side — not a server-verified
+// guarantee.
+
+export interface UserStreak {
+  user_id: string;
+  zero_waste_streak_days: number;
+  last_checked_date: string | null;
+  updated_at: string;
+}
+
+export const streakService = {
+  // Get the current streak row, upsert-on-read style: falls back to an
+  // (unpersisted) default row if the user has never checked in yet —
+  // mirrors donationService.getImpact()'s default-row fallback.
+  async get(): Promise<UserStreak> {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('user_streaks')
+      .select('*')
+      .eq('user_id', userData.user.id)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data || {
+      user_id: userData.user.id,
+      zero_waste_streak_days: 0,
+      last_checked_date: null,
+      updated_at: new Date().toISOString(),
+    };
+  },
+
+  // Daily check-in. Call at most once per session/day — the caller decides
+  // when to call this; the state machine here is:
+  //   - last_checked_date is today             -> no-op (already checked in)
+  //   - last_checked_date is yesterday
+  //       AND !hasStaleExpiredItems             -> streak + 1
+  //   - hasStaleExpiredItems                    -> streak reset to 0
+  //   - otherwise (gap of >1 day, or first-ever
+  //     check-in with no stale items)           -> streak set to 1
+  async checkIn(hasStaleExpiredItems: boolean): Promise<UserStreak> {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error('Not authenticated');
+
+    const current = await streakService.get();
+
+    const today = new Date().toISOString().split('T')[0];
+    if (current.last_checked_date === today) {
+      // Already checked in today — no-op.
+      return current;
+    }
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    let nextStreakDays: number;
+    if (current.last_checked_date === yesterdayStr && !hasStaleExpiredItems) {
+      nextStreakDays = current.zero_waste_streak_days + 1;
+    } else if (hasStaleExpiredItems) {
+      nextStreakDays = 0;
+    } else {
+      nextStreakDays = 1;
+    }
+
+    const { data, error } = await supabase
+      .from('user_streaks')
+      .upsert({
+        user_id: userData.user.id,
+        zero_waste_streak_days: nextStreakDays,
+        last_checked_date: today,
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'user_id'
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+};
+
 // ============================================
 // CALORIE TRACKING
 // ============================================

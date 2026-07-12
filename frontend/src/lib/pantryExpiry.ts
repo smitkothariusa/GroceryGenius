@@ -12,6 +12,17 @@
 
 const DAY_MS = 1000 * 60 * 60 * 24;
 
+/** Parses a date-only `YYYY-MM-DD` string as a LOCAL calendar date (midnight
+ * in the browser's timezone). `new Date("YYYY-MM-DD")` parses as UTC
+ * midnight instead, which made expiry dates display and compute as one day
+ * earlier than what the user entered in any timezone west of UTC (e.g. all
+ * of the US) — `.toLocaleDateString()` on a UTC-midnight Date renders the
+ * previous day once shifted into a negative-offset local timezone. */
+export function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
 /** How many whole calendar-days until the item expires (day-0-inclusive,
  * matching the ceil model the pantry UI committed to). `null` if no expiry. */
 export function daysUntilExpiry(
@@ -19,7 +30,7 @@ export function daysUntilExpiry(
   now: Date = new Date(),
 ): number | null {
   if (!item.expiryDate) return null;
-  return Math.ceil((new Date(item.expiryDate).getTime() - now.getTime()) / DAY_MS);
+  return Math.ceil((parseLocalDate(item.expiryDate).getTime() - now.getTime()) / DAY_MS);
 }
 
 /** True when the item expires within the next 3 days, INCLUDING today (day 0). */

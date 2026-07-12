@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { mealPlansService, pantryService } from '../lib/database';
+import {
+  mealPlansService,
+  pantryService,
+  mealPlanTemplatesService,
+  MEAL_PLAN_TEMPLATE_CAP,
+  type MealPlanTemplate,
+  type MealPlanTemplateEntry,
+} from '../lib/database';
 import { authFetch } from '../lib/apiClient';
 import DeductIngredientsModal, { MatchResult } from './DeductIngredientsModal';
 interface Recipe {
@@ -66,6 +73,11 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
     matches: MatchResult[];
   } | null>(null);
   const [deductLoading, setDeductLoading] = useState(false);
+  const [templates, setTemplates] = useState<MealPlanTemplate[]>([]);
+  const [showApplyTemplateModal, setShowApplyTemplateModal] = useState(false);
+  const [savingTemplate, setSavingTemplate] = useState(false);
+  const [applyingTemplateId, setApplyingTemplateId] = useState<string | null>(null);
+  const [deletingTemplateId, setDeletingTemplateId] = useState<string | null>(null);
   const dragGhostRef = useRef<HTMLDivElement | null>(null);
 
   const daysOfWeek = [
@@ -147,6 +159,20 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
 
     loadData();
   }, [currentWeekStart]);
+
+  // Templates aren't week-specific, so load once (not tied to currentWeekStart).
+  useEffect(() => {
+    const loadTemplates = async () => {
+      try {
+        const data = await mealPlanTemplatesService.getAll();
+        setTemplates(data);
+      } catch (error) {
+        console.error('❌ Error loading meal plan templates:', error);
+      }
+    };
+
+    loadTemplates();
+  }, []);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -551,6 +577,140 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
     }
   };
 
+  // ============================================
+  // MEAL PLAN TEMPLATES
+  // ============================================
+
+  const handleSaveAsTemplate = async () => {
+    if (templates.length >= MEAL_PLAN_TEMPLATE_CAP) {
+      alert(t('mealPlan.templates.capReachedError'));
+      return;
+    }
+
+    const weekDateStrings = weekDates.map(formatDate);
+    const thisWeekMeals = mealPlans.filter(m => weekDateStrings.includes(m.date));
+    if (thisWeekMeals.length === 0) {
+      alert(t('mealPlan.templates.emptyWeekError'));
+      return;
+    }
+
+    const name = window.prompt(t('mealPlan.templates.namePrompt'));
+    if (name === null) return; // user cancelled
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      alert(t('mealPlan.templates.nameRequiredError'));
+      return;
+    }
+
+    setSavingTemplate(true);
+    try {
+      // dayOfWeek is the index within weekDates (0 = Sunday .. 6 = Saturday) —
+      // weekDates always starts on Sunday (see getWeekStart), so this index
+      // IS the day-of-week, letting the template be replayed onto any week.
+      const templateData: MealPlanTemplateEntry[] = thisWeekMeals.map(meal => ({
+        dayOfWeek: weekDateStrings.indexOf(meal.date),
+        meal_type: meal.meal_type,
+        recipe: meal.recipe ? {
+          id: meal.recipe.id,
+          name: meal.recipe.name,
+          ingredients: meal.recipe.ingredients,
+          instructions: meal.recipe.instructions,
+          prep_time: meal.recipe.prep_time,
+          servings: meal.recipe.servings,
+          nutrition: meal.recipe.nutrition,
+        } : null,
+        servings: meal.servings,
+        notes: meal.notes,
+      }));
+
+      const saved = await mealPlanTemplatesService.add({ name: trimmedName, template_data: templateData });
+      setTemplates(prev => [saved, ...prev]);
+      alert(t('mealPlan.templates.saveSuccess'));
+    } catch (error) {
+      console.error('❌ Error saving meal plan template:', error);
+      alert(t('mealPlan.templates.saveError'));
+    } finally {
+      setSavingTemplate(false);
+    }
+  };
+
+  const applyTemplateToWeek = async (template: MealPlanTemplate) => {
+    setApplyingTemplateId(template.id);
+    try {
+      const weekDateStrings = weekDates.map(formatDate);
+      const existingThisWeek = mealPlans.filter(m => weekDateStrings.includes(m.date));
+
+      // Overwrite: delete this week's existing rows first, then insert the
+      // template's entries mapped onto this week's actual dates.
+      await Promise.all(existingThisWeek.map(m => mealPlansService.delete(m.id)));
+
+      const validEntries = template.template_data.filter(
+        entry => entry.dayOfWeek >= 0 && entry.dayOfWeek <= 6
+      );
+      const savedMeals = await Promise.all(
+        validEntries.map(entry =>
+          mealPlansService.add({
+            date: weekDateStrings[entry.dayOfWeek],
+            meal_type: entry.meal_type,
+            recipe: entry.recipe,
+            servings: entry.servings,
+            notes: entry.notes,
+            completed: false,
+          })
+        )
+      );
+
+      const newMeals: MealPlan[] = savedMeals.map(saved => ({
+        id: saved.id,
+        date: saved.date,
+        meal_type: saved.meal_type as any,
+        recipe: saved.recipe,
+        servings: saved.servings,
+        notes: saved.notes,
+        completed: saved.completed,
+      }));
+
+      setMealPlans(prev => [
+        ...prev.filter(m => !weekDateStrings.includes(m.date)),
+        ...newMeals,
+      ]);
+      setShowApplyTemplateModal(false);
+      alert(t('mealPlan.templates.applySuccess'));
+    } catch (error) {
+      console.error('❌ Error applying meal plan template:', error);
+      alert(t('mealPlan.templates.applyError'));
+    } finally {
+      setApplyingTemplateId(null);
+    }
+  };
+
+  const handleSelectTemplateToApply = (template: MealPlanTemplate) => {
+    const weekDateStrings = weekDates.map(formatDate);
+    const hasExisting = mealPlans.some(m => weekDateStrings.includes(m.date));
+    if (hasExisting) {
+      const confirmed = window.confirm(t('mealPlan.templates.applyOverwriteConfirm'));
+      if (!confirmed) return;
+    }
+    applyTemplateToWeek(template);
+  };
+
+  const handleDeleteTemplate = async (template: MealPlanTemplate, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const confirmed = window.confirm(t('mealPlan.templates.deleteConfirm'));
+    if (!confirmed) return;
+
+    setDeletingTemplateId(template.id);
+    try {
+      await mealPlanTemplatesService.delete(template.id);
+      setTemplates(prev => prev.filter(tpl => tpl.id !== template.id));
+    } catch (error) {
+      console.error('❌ Error deleting meal plan template:', error);
+      alert(t('mealPlan.templates.deleteError'));
+    } finally {
+      setDeletingTemplateId(null);
+    }
+  };
+
   return (
     <div style={{ padding: isMobile ? '1rem' : '2rem', maxWidth: '1400px', margin: '0 auto' }}>
       {/* Header */}
@@ -620,6 +780,34 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
         }}>
           {generatingList ? `⏳ ${t('mealPlan.generatingShoppingList')}` : `🛒 ${t('mealPlan.generateShoppingList')}`}
         </button>
+
+        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem', flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
+          <button
+            data-tour="mealplan-save-template-btn"
+            onClick={handleSaveAsTemplate}
+            disabled={savingTemplate}
+            style={{
+              flex: 1, minWidth: isMobile ? '100%' : 'auto',
+              padding: '0.75rem 1rem', background: savingTemplate ? '#6b7280' : 'linear-gradient(45deg, #8b5cf6, #6366f1)',
+              color: 'white', border: 'none', borderRadius: '12px', cursor: savingTemplate ? 'not-allowed' : 'pointer',
+              fontWeight: '600', fontSize: isMobile ? '0.875rem' : '1rem'
+            }}
+          >
+            {savingTemplate ? `⏳ ${t('mealPlan.templates.saving')}` : `💾 ${t('mealPlan.templates.saveButton')}`}
+          </button>
+          <button
+            data-tour="mealplan-apply-template-btn"
+            onClick={() => setShowApplyTemplateModal(true)}
+            style={{
+              flex: 1, minWidth: isMobile ? '100%' : 'auto',
+              padding: '0.75rem 1rem', background: '#f3f4f6', color: '#111827',
+              border: 'none', borderRadius: '12px', cursor: 'pointer',
+              fontWeight: '600', fontSize: isMobile ? '0.875rem' : '1rem'
+            }}
+          >
+            📋 {t('mealPlan.templates.applyButton')}
+          </button>
+        </div>
 
         {isMobile && (
           <div style={{ marginTop: '0.75rem' }}>
@@ -897,6 +1085,89 @@ const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ savedRecipes, trans
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Apply Template Modal — simple list/sheet, mirrors the Recipe Picker Modal */}
+      {showApplyTemplateModal && (
+        <div onClick={() => setShowApplyTemplateModal(false)} style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', zIndex: 1000
+        }}>
+          <div onClick={(e) => e.stopPropagation()} style={{
+            background: 'white', borderRadius: '16px', padding: '2rem',
+            maxWidth: '600px', maxHeight: '80vh', overflow: 'auto', width: isMobile ? '90vw' : 'auto'
+          }}>
+            <h3 style={{ margin: '0 0 1.5rem 0' }}>{t('mealPlan.templates.applyModalTitle')}</h3>
+            {templates.length === 0 ? (
+              <div style={{
+                textAlign: 'center', padding: '2rem', color: '#6b7280',
+                background: '#f9fafb', borderRadius: '12px', border: '2px dashed #e5e7eb'
+              }}>
+                {t('mealPlan.templates.noTemplates')}
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {templates.map(template => {
+                  const isBusy = applyingTemplateId === template.id || deletingTemplateId === template.id;
+                  return (
+                    <div
+                      key={template.id}
+                      onClick={() => !isBusy && handleSelectTemplateToApply(template)}
+                      style={{
+                        padding: '1rem',
+                        border: '2px solid #e5e7eb',
+                        borderRadius: '8px',
+                        cursor: isBusy ? 'default' : 'pointer',
+                        opacity: isBusy ? 0.6 : 1,
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: '0.75rem'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (isBusy) return;
+                        e.currentTarget.style.borderColor = '#8b5cf6';
+                        e.currentTarget.style.background = '#f5f3ff';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#e5e7eb';
+                        e.currentTarget.style.background = 'white';
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>{template.name}</div>
+                        <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                          {t('mealPlan.templates.mealsCount', { count: template.template_data.length })}
+                          {' • '}
+                          {new Date(template.created_at).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </div>
+                        {applyingTemplateId === template.id && (
+                          <div style={{ fontSize: '0.75rem', color: '#8b5cf6', marginTop: '0.25rem' }}>
+                            {t('mealPlan.templates.applying')}
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={(e) => handleDeleteTemplate(template, e)}
+                        disabled={isBusy}
+                        style={{
+                          background: '#fee2e2', border: 'none', borderRadius: '6px',
+                          padding: '0.4rem 0.6rem', cursor: isBusy ? 'not-allowed' : 'pointer',
+                          fontSize: '0.9rem', flexShrink: 0
+                        }}
+                        aria-label={t('mealPlan.templates.deleteConfirm')}
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -135,6 +135,8 @@
     "recipeMode": "Modo de receta:",
     "addPantryItems": "Agregar de Despensa",
     "scanIngredients": "Escanear Ingredientes",
+    "cookWhatsExpiring": "Cocinar lo que Caduca",
+    "noExpiringItems": "No hay artículos de la despensa por caducar pronto",
     "dietary": {
       "all": "Cualquier preferencia dietética",
       "vegetarian": "Vegetariano",
@@ -266,6 +268,26 @@
       "friday": "Viernes",
       "saturday": "Sábado",
       "sunday": "Domingo"
+    },
+    "templates": {
+      "saveButton": "Guardar Semana como Plantilla",
+      "applyButton": "Aplicar Plantilla",
+      "saving": "Guardando...",
+      "applying": "Aplicando...",
+      "namePrompt": "Nombra esta plantilla:",
+      "nameRequiredError": "Por favor ingresa un nombre para la plantilla.",
+      "emptyWeekError": "Agrega algunas comidas a esta semana antes de guardarla como plantilla.",
+      "capReachedError": "Has alcanzado el límite de 10 plantillas. Elimina una plantilla antes de guardar una nueva.",
+      "saveSuccess": "¡Plantilla guardada!",
+      "saveError": "No se pudo guardar la plantilla. Inténtalo de nuevo.",
+      "applyModalTitle": "Aplicar una Plantilla",
+      "noTemplates": "Aún no tienes plantillas guardadas. ¡Guarda una semana como plantilla para reutilizarla después!",
+      "mealsCount": "{{count}} comida(s)",
+      "applyOverwriteConfirm": "Esta semana ya tiene comidas planificadas. Aplicar esta plantilla las eliminará y las reemplazará con las comidas de la plantilla. ¿Continuar?",
+      "applySuccess": "¡Plantilla aplicada!",
+      "applyError": "No se pudo aplicar la plantilla. Inténtalo de nuevo.",
+      "deleteConfirm": "¿Eliminar esta plantilla? Esta acción no se puede deshacer.",
+      "deleteError": "No se pudo eliminar la plantilla. Inténtalo de nuevo."
     }
   },
   "shopping": {
@@ -389,7 +411,24 @@
       "spices": "especias",
       "hygiene_products": "productos de higiene"
     },
-    "hoursLabel": "Horario"
+    "hoursLabel": "Horario",
+    "donatableOnlyFilter": "Solo donables",
+    "goodToDonate": "Apto para donar",
+    "keepAtHome": "Conservar en casa"
+  },
+  "achievements": {
+    "title": "Tus logros",
+    "streakActive": "Racha de {{count}} días sin desperdicio",
+    "streakStart": "Comienza una racha sin desperdicio",
+    "badgesTitle": "Hitos de donación",
+    "badge10Name": "Buen comienzo",
+    "badge50Name": "Apoyo constante",
+    "badge100Name": "Gran impacto",
+    "badge500Name": "Una diferencia enorme",
+    "badgeUnlockedDesc": "Donaste {{count}}+ comidas",
+    "badgeLockedDesc": "Faltan {{count}} comidas",
+    "hide": "Ocultar logros",
+    "show": "Mostrar logros"
   },
   "favorites": {
     "title": "Recetas Favoritas",
@@ -704,6 +743,15 @@
       "copied": "¡Copiado!",
       "dismiss": "Cerrar",
       "gotIt": "Entendido"
+    }
+  },
+  "offline": {
+    "banner": {
+      "offline": "Estás sin conexión: los cambios se sincronizarán más tarde",
+      "syncing": "Sincronizando {{count}} cambio(s)…"
+    },
+    "toasts": {
+      "synced": "{{count}} cambio(s) sincronizado(s)"
     }
   },
   "errorBoundary": {

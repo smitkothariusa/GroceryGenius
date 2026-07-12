@@ -56,18 +56,23 @@ export async function authFetch(input: RequestInfo | URL, init: RequestInit = {}
 
   const doFetch = async (): Promise<Response> => {
     let { data: { session } } = await supabase.auth.getSession();
-    // Proactively refresh an expired/near-expiry access token before sending.
-    // getSession() returns the stored session as-is; supabase-js's background
-    // auto-refresh timer is PAUSED while a mobile PWA is backgrounded/frozen by
-    // the OS, so after the app is foregrounded the stored access token can
-    // already be expired. Sending it gets a 401 from the backend — the most
-    // likely cause of "authenticated requests (recipe generation etc.) fail on
-    // mobile but work in a fresh incognito login." Refresh here so we never
-    // send a known-expired token. If the refresh itself fails (refresh token
-    // also dead), we fall through and send whatever we have; the backend 401s
-    // and the caller surfaces the sign-in-again prompt.
+    // Ensure we have a usable, non-expired token before sending. Two mobile
+    // failure modes make getSession() insufficient on its own, both of which
+    // caused authenticated requests to go out tokenless and 401 with "missing
+    // authorization header" (confirmed in backend logs):
+    //   1. getSession() returns a NULL session when the supabase-js auth lock
+    //      is contended by a frozen backgrounded PWA/tab (root cause — see the
+    //      processLock change in lib/supabase.ts, which prevents this).
+    //   2. The stored access token is expired because supabase-js's background
+    //      auto-refresh timer was paused while the PWA was frozen.
+    // In either case, force a refresh from the stored refresh token so we don't
+    // fire an unauthenticated request. If the refresh itself fails (refresh
+    // token also dead), we fall through and the backend 401s -> the caller
+    // surfaces the sign-in-again prompt (unchanged).
     const nowSec = Math.floor(Date.now() / 1000);
-    if (session?.expires_at && session.expires_at - nowSec < 60) {
+    const tokenMissingOrStale =
+      !session || (session.expires_at != null && session.expires_at - nowSec < 60);
+    if (tokenMissingOrStale) {
       const { data: refreshed } = await supabase.auth.refreshSession();
       if (refreshed.session) session = refreshed.session;
     }

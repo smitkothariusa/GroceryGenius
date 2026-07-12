@@ -1,5 +1,5 @@
 // frontend/src/lib/supabase.ts
-import { createClient } from '@supabase/supabase-js';
+import { createClient, processLock } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -8,7 +8,23 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    // Root cause of the mobile "recipe generation fails / works in incognito"
+    // 401s: they were "missing authorization header" (confirmed in the backend
+    // Render logs), i.e. authFetch's supabase.auth.getSession() was returning a
+    // NULL session, so no token was attached. supabase-js v2 defaults to
+    // navigatorLock (the Web Locks API) to serialize auth-token access across
+    // tabs. On mobile, when the OS freezes a backgrounded PWA/tab that is
+    // holding that lock, getSession() can't acquire it and resolves with no
+    // session — even though a valid session is stored — so the app still looks
+    // logged in but every authenticated request goes out tokenless and 401s.
+    // Incognito has no prior frozen lock-holder, so it works. processLock is an
+    // in-memory, per-tab lock (no Web Locks API), which cannot be held hostage
+    // by a frozen background context. Fine for a predominantly single-tab PWA.
+    lock: processLock,
+  },
+});
 
 // ============================================
 // DATABASE TYPES

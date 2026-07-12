@@ -39,6 +39,20 @@ describe('authFetch — proactive token refresh', () => {
     expect(headers.get('Authorization')).toBe('Bearer fresh-token');
   });
 
+  it('refreshes and uses the new token when getSession returns a NULL session (the mobile lock bug)', async () => {
+    // The actual production failure: getSession() returned null (auth lock
+    // contended on a frozen mobile PWA), so authFetch sent no Authorization
+    // header and the backend 401'd with "missing authorization header".
+    getSession.mockResolvedValue({ data: { session: null } });
+    refreshSession.mockResolvedValue(sessionExpiringIn(3600, 'recovered-token'));
+
+    await authFetch('https://api.example.com/nullsession', { method: 'POST', body: 'unique-body-null' });
+
+    expect(refreshSession).toHaveBeenCalledTimes(1);
+    const headers = (globalThis.fetch as any).mock.calls[0][1].headers as Headers;
+    expect(headers.get('Authorization')).toBe('Bearer recovered-token');
+  });
+
   it('does NOT refresh when the stored token is comfortably valid', async () => {
     getSession.mockResolvedValue(sessionExpiringIn(3600, 'good-token')); // 1h left
 

@@ -135,6 +135,8 @@
     "recipeMode": "食谱模式：",
     "addPantryItems": "添加储藏室物品",
     "scanIngredients": "扫描食材",
+    "cookWhatsExpiring": "烹饪即将过期的食材",
+    "noExpiringItems": "没有即将过期的储藏室物品",
     "dietary": {
       "all": "任何饮食偏好",
       "vegetarian": "素食",

@@ -135,6 +135,8 @@
     "recipeMode": "Rezeptmodus:",
     "addPantryItems": "Vorratskammer Hinzufügen",
     "scanIngredients": "Zutaten Scannen",
+    "cookWhatsExpiring": "Ablaufende Zutaten Kochen",
+    "noExpiringItems": "Keine Vorratsartikel laufen bald ab",
     "dietary": {
       "all": "Beliebige Ernährungspräferenz",
       "vegetarian": "Vegetarisch",

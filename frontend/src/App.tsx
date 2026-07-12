@@ -15,7 +15,6 @@ import { calorieService } from './lib/database';
 import { pantryService, shoppingService, recipesService, mealPlansService, donationService } from './lib/database';
 import Auth from './components/Auth';
 import MealPlanCalendar from './components/MealPlanCalendar';
-import IngredientSubstitution from './components/IngredientSubstitution';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import OnboardingSurvey from './components/OnboardingSurvey';
 import FeedbackButton from './components/FeedbackButton';
@@ -29,6 +28,10 @@ import { DonationProvider, useDonation, type DropOffSite } from './features/dona
 import { DonationSection } from './features/donation/DonationSection';
 import { DonationModal } from './features/donation/DonationModal';
 import { ShareImpactModal } from './features/donation/ShareImpactModal';
+import { RecipesProvider, useRecipes, parseIngredients, COMBINED_PROFILE_KEY, type Recipe } from './features/recipes/RecipesContext';
+import { RecipeSection } from './features/recipes/RecipeSection';
+import { RecipeDetailModal } from './features/recipes/RecipeDetailModal';
+import { RecipeSubstitutionModal } from './features/recipes/RecipeSubstitutionModal';
 
 
 interface PantryItem {
@@ -63,86 +66,18 @@ interface ReceiptItem {
   emoji?: string;
 }
 
-interface Recipe {
-  name: string;
-  ingredients: string;
-  instructions: string;
-  prep_time?: string;
-  cook_time?: string;
-  difficulty?: string;
-  servings?: number;
-  originalServings?: number;
-  nutrition?: {
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-    fiber: number;
-    sodium: number;
-  };
-  health_benefits?: string;
-  budget_tip?: string;
-}
-
-interface ParsedIngredient {
-  name: string;
-  quantity: number;
-  unit: string;
-}
-
-
-const PRESET_LABEL_MAP: Record<string, string> = {
-  'vegetarian': 'Vegetarian', 'vegan': 'Vegan', 'gluten-free': 'Gluten-Free',
-  'dairy-free': 'Dairy-Free', 'halal': 'Halal', 'kosher': 'Kosher',
-  'keto': 'Keto', 'low-carb': 'Low-Carb', 'nut-free': 'Nut-Free', 'paleo': 'Paleo',
-  'diabetic-friendly': 'Diabetic-Friendly', 'heart-healthy': 'Heart-Healthy',
-};
-
-const COMBINED_PROFILE_KEY = '__combined__';
-
 // Page size for paginated pantry/shopping reads (Supabase .range()).
 // Kept generous since per-user item counts are low at current scale.
 const LIST_PAGE_SIZE = 50;
-
-function buildCombinedDietaryString(prefs: string[], customLabels: CustomDietaryLabel[]): string {
-  const parts = prefs
-    .map(p => PRESET_LABEL_MAP[p] ?? customLabels.find(l => l.id === p)?.label ?? null)
-    .filter(Boolean) as string[];
-  if (parts.length === 0) return '';
-  if (parts.length === 1) return parts[0];
-  if (parts.length === 2) return `${parts[0]} and ${parts[1]}`;
-  return `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`;
-}
 
 const AppContent: React.FC = () => {
   const { t, i18n } = useTranslation();
   
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [recipeLoading, setRecipeLoading] = useState(false);
-  const [recipeMode, setRecipeMode] = useState<'loose' | 'strict'>(
-    () => localStorage.getItem('gg_recipe_mode') === 'strict' ? 'strict' : 'loose'
-  );
-  const [showSubstitution, setShowSubstitution] = useState(false);
-  const [selectedIngredient, setSelectedIngredient] = useState<{
-    name: string;
-    quantity: number;
-    unit: string;
-  } | null>(null);
   const [currentTab, setCurrentTab] = useState<'pantry' | 'recipes' | 'mealplan' | 'shopping' | 'donate' | 'favorites'>(
     () => (localStorage.getItem('activeTab') as 'pantry' | 'recipes' | 'mealplan' | 'shopping' | 'donate' | 'favorites') || 'pantry'
-  );  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
-  const [showDetailedView, setShowDetailedView] = useState(false);
-  const [recipeSearchQuery, setRecipeSearchQuery] = useState('');
-  const [recipeServings, setRecipeServings] = useState<number | ''>(2);
-  const [recipeDifficulty, setRecipeDifficulty] = useState<'flexible' | 'easy' | 'medium' | 'hard'>('flexible');
-  const [recipeSubTab, setRecipeSubTab] = useState<'ingredient' | 'name'>('ingredient');
-  const [showFilters, setShowFilters] = useState(false);
-  const [ingredientTags, setIngredientTags] = useState<string[]>([]);
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const filterPanelRef = useRef<HTMLDivElement>(null);
-  const recipesRef = useRef<Recipe[]>([]);
-  recipesRef.current = recipes;
+  );
   // Bumped whenever a loadUserData() call should be considered stale (a
   // newer load started, or the user signed out) so in-flight responses from
   // an older call don't clobber state set by a newer one.
@@ -154,8 +89,6 @@ const AppContent: React.FC = () => {
   // default of 2000) — overwriting the real stored goal before the fetch
   // that would have loaded it resolves.
   const calorieGoalLoadedRef = useRef(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [dietaryFilter, setDietaryFilter] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [pantry, setPantry] = useState<PantryItem[]>([]);
@@ -222,6 +155,14 @@ const AppContent: React.FC = () => {
     allItemsImpact, setAllItemsImpact,
     loadingImpact, setLoadingImpact,
   } = useDonation();
+  const {
+    recipeLoading, setRecipeLoading,
+    setRecipeMode,
+    ingredientTags, setIngredientTags,
+    setDietaryFilter,
+    setSelectedRecipe,
+    setShowDetailedView,
+  } = useRecipes();
   const [cameraSource, setCameraSource] = useState<'recipes' | 'pantry'>('recipes');
   const [showImageUpload, setShowImageUpload] = useState(false);
   const [showCalorieTracker, setShowCalorieTracker] = useState(false);
@@ -548,7 +489,7 @@ const AppContent: React.FC = () => {
     } finally {
       console.log('🏁 loadUserData execution finished');
     }
-  }, [user, setFavorites, setDonationHistory, setDonationImpact]);
+  }, [user, setFavorites, setDonationHistory, setDonationImpact, setDietaryFilter]);
   // Daily reset check - runs every minute to check if we've crossed midnight
   useEffect(() => {
     const checkDailyReset = () => {
@@ -670,7 +611,7 @@ const AppContent: React.FC = () => {
       return () => {
         authListener?.subscription?.unsubscribe();
       };
-    }, [setFavorites, setDonationHistory, setDonationImpact, setUserLocation, setLocationPermission]);
+    }, [setFavorites, setDonationHistory, setDonationImpact, setUserLocation, setLocationPermission, setRecipeMode]);
 
   // Load user data after authentication - SEPARATE useEffect
   useEffect(() => {
@@ -691,36 +632,6 @@ const AppContent: React.FC = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  useEffect(() => {
-    if (!showFilters || isMobile) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (filterPanelRef.current && !filterPanelRef.current.contains(e.target as Node)) {
-        setShowFilters(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showFilters, isMobile]);
-
-  // When language changes: translate existing recipe cards in-place
-  useEffect(() => {
-    setSelectedRecipe(null);
-    setShowDetailedView(false);
-    const currentRecipes = recipesRef.current;
-    if (currentRecipes.length === 0) return;
-    setRecipeLoading(true);
-    const API_BASE_URL = import.meta.env.VITE_API_URL || '/_/backend';
-    authFetch(`${API_BASE_URL}/recipes/translate-full`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ recipes: currentRecipes, language: i18n.language }),
-    })
-      .then(r => r.json())
-      .then((translated: Recipe[]) => { setRecipes(translated); })
-      .catch(() => { /* keep existing recipes on error */ })
-      .finally(() => setRecipeLoading(false));
-  }, [i18n.language]);
 
   const handleTabChange = (tab: typeof currentTab) => {
     localStorage.setItem('activeTab', tab);
@@ -829,363 +740,6 @@ const AppContent: React.FC = () => {
     }
   };
 
-  // Parse ingredients from recipe text
-  const parseIngredients = (recipe: Recipe): ParsedIngredient[] => {
-    const ingredients: ParsedIngredient[] = [];
-    const text = `${recipe.ingredients}\n${recipe.instructions}`.toLowerCase();
-    const servingScale = (recipe.originalServings && recipe.servings)
-      ? recipe.servings / recipe.originalServings
-      : 1;
-    
-    // Split by newlines to process each ingredient line
-    const lines = recipe.ingredients.split('\n').filter(line => line.trim());
-    
-    const seen = new Set<string>();
-    
-    lines.forEach(line => {
-      const cleanLine = line.trim().toLowerCase();
-      if (!cleanLine || cleanLine.length < 3) return;
-      
-      // Pattern 1: Quantity + Unit + Ingredient (e.g., "2 cups flour", "1 tbsp oil")
-      const pattern1 = /^(\d+(?:\/\d+)?|\d+\.\d+)\s*(cups?|cup|tablespoons?|tbsp|teaspoons?|tsp|ounces?|oz|pounds?|lbs?|lb|grams?|g|kilograms?|kg|milliliters?|ml|liters?|l|cloves?|pieces?|pcs?|slices?)\s+(?:of\s+)?(.+)$/i;
-      const match1 = cleanLine.match(pattern1);
-      
-      if (match1) {
-        let quantity = match1[1];
-        const unit = match1[2];
-        let name = match1[3].trim();
-        
-        // Handle fractions
-        if (quantity.includes('/')) {
-          const [num, denom] = quantity.split('/').map(Number);
-          quantity = (num / denom).toFixed(2);
-        }
-        
-        // Clean up the name
-        name = name
-          .replace(/\b(fresh|dried|raw|cooked|minced|chopped|diced|sliced|grated|large|medium|small|ripe|frozen|canned)\b/gi, '')
-          .replace(/[,;()]/g, '')
-          .trim();
-        
-        if (name.length > 2 && name.length < 40 && !seen.has(name)) {
-          seen.add(name);
-          ingredients.push({
-            name,
-            quantity: parseFloat(quantity) * servingScale,
-            unit: unit.toLowerCase()
-          });
-        }
-        return;
-      }
-
-      // Pattern 2: Just Quantity + Ingredient (e.g., "2 avocados", "3 eggs", "4 tomatoes")
-      const pattern2 = /^(\d+(?:\/\d+)?|\d+\.\d+)\s+(?:whole|medium|large|small)?\s*(.+)$/i;
-      const match2 = cleanLine.match(pattern2);
-      
-      if (match2) {
-        let quantity = match2[1];
-        let name = match2[2].trim();
-        
-        // Handle fractions
-        if (quantity.includes('/')) {
-          const [num, denom] = quantity.split('/').map(Number);
-          quantity = (num / denom).toFixed(2);
-        }
-        
-        // Clean up the name
-        name = name
-          .replace(/\b(fresh|dried|raw|cooked|minced|chopped|diced|sliced|grated|large|medium|small|ripe|frozen|canned)\b/gi, '')
-          .replace(/[,;()]/g, '')
-          .trim();
-        
-        if (name.length > 2 && name.length < 40 && !seen.has(name)) {
-          seen.add(name);
-          ingredients.push({
-            name,
-            quantity: parseFloat(quantity) * servingScale,
-            unit: 'pc'
-          });
-        }
-        return;
-      }
-
-      // Pattern 3: Ingredient with descriptive words (e.g., "large avocado", "ripe banana")
-      const pattern3 = /^(?:a|an|one|some)?\s*(?:large|medium|small|ripe|fresh)?\s*(.+)$/i;
-      const match3 = cleanLine.match(pattern3);
-      
-      if (match3 && !cleanLine.match(/^\d/)) {
-        let name = match3[1].trim();
-        
-        // Clean up the name
-        name = name
-          .replace(/\b(fresh|dried|raw|cooked|minced|chopped|diced|sliced|grated|large|medium|small|ripe|frozen|canned)\b/gi, '')
-          .replace(/[,;()]/g, '')
-          .trim();
-        
-        // Only add if it looks like a real ingredient (not instructions)
-        if (name.length > 2 && name.length < 40 && !seen.has(name) && 
-            !name.includes('mix') && !name.includes('stir') && !name.includes('cook') &&
-            !name.includes('heat') && !name.includes('add') && !name.includes('serve')) {
-          seen.add(name);
-          ingredients.push({
-            name,
-            quantity: 1 * servingScale,
-            unit: 'pc'
-          });
-        }
-      }
-    });
-
-    return ingredients.slice(0, 20); // Increased from 12 to 20
-  };
-
-  const calculateHealthGrade = (recipe: Recipe) => {
-    if (!recipe.nutrition) return 'B';
-    const { calories, protein, fiber, sodium, fat } = recipe.nutrition;
-    let score = 70;
-    
-    if (protein >= 25) score += 12; else if (protein >= 20) score += 10; else if (protein >= 15) score += 6;
-    if (fiber >= 8) score += 12; else if (fiber >= 6) score += 8; else if (fiber >= 4) score += 4;
-    if (calories > 700) score -= 15; else if (calories > 600) score -= 10; else if (calories >= 350 && calories <= 500) score += 5;
-    if (sodium > 1000) score -= 15; else if (sodium > 800) score -= 10; else if (sodium < 400) score += 8;
-    if (fat > 25) score -= 8; else if (fat > 20) score -= 5; else if (fat >= 10 && fat <= 15) score += 5;
-    
-    if (score >= 95) return 'A+';
-    if (score >= 90) return 'A';
-    if (score >= 85) return 'A-';
-    if (score >= 80) return 'B+';
-    if (score >= 75) return 'B';
-    if (score >= 70) return 'B-';
-    if (score >= 65) return 'C+';
-    if (score >= 60) return 'C';
-    return 'D';
-  };
-
-  const getGradeColor = (grade: string) => {
-    if (grade.startsWith('A')) return '#10b981';
-    if (grade.startsWith('B')) return '#3b82f6';
-    if (grade.startsWith('C')) return '#f59e0b';
-    return '#ef4444';
-  };
-
-  const handleGetRecipes = async () => {
-    if (isMobile) {
-      if (recipeSubTab === 'ingredient' && ingredientTags.length === 0) {
-        setErrorMsg(t('recipes.emptyStatePrompt'));
-        return;
-      }
-      if (recipeSubTab === 'name' && !recipeSearchQuery.trim()) {
-        setErrorMsg(t('recipes.emptyStatePrompt'));
-        return;
-      }
-    } else {
-      if (ingredientTags.length === 0 && !recipeSearchQuery.trim()) {
-        setErrorMsg(t('recipes.emptyStatePrompt'));
-        return;
-      }
-    }
-
-    setRecipeLoading(true);
-    setErrorMsg('');
-    setRecipes([]);
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
-
-    try {
-      const params = new URLSearchParams();
-      if (dietaryFilter) {
-        if (dietaryFilter === COMBINED_PROFILE_KEY) {
-          const parts = savedProfilePrefs.map(p => {
-            const cl = customDietaryLabels.find(l => l.id === p);
-            return cl ? (cl.description || cl.label) : p;
-          }).filter(Boolean);
-          params.append('dietary', parts.join(', '));
-        } else {
-          const customLabel = customDietaryLabels.find(l => l.id === dietaryFilter);
-          params.append('dietary', customLabel ? customLabel.description : dietaryFilter);
-        }
-      }
-      params.append('language', i18n.language || 'en');
-      if (recipeDifficulty !== 'flexible') params.append('difficulty', recipeDifficulty);
-
-      const allIngredients = isMobile
-        ? (recipeSubTab === 'name' ? [recipeSearchQuery.trim()] : ingredientTags)
-        : (recipeSearchQuery.trim() ? [recipeSearchQuery.trim(), ...ingredientTags] : ingredientTags);
-
-      const response = await authFetch(`${API_BASE}/recipes?${params.toString()}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ingredients: allIngredients, strict: recipeMode === 'strict' }),
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      // Scale recipes to requested servings
-      const scaledRecipes = data.map((recipe: Recipe) => {
-        const originalServings = recipe.servings || 2;
-        const servings = typeof recipeServings === 'number' ? recipeServings : 2;
-        const scale = servings / originalServings;
-        
-        return {
-          ...recipe,
-          servings: servings,
-          originalServings: originalServings,
-          nutrition: recipe.nutrition ? {
-            calories: Math.round(recipe.nutrition.calories * scale),
-            protein: Math.round(recipe.nutrition.protein * scale),
-            carbs: Math.round(recipe.nutrition.carbs * scale),
-            fat: Math.round(recipe.nutrition.fat * scale),
-            fiber: Math.round(recipe.nutrition.fiber * scale),
-            sodium: Math.round(recipe.nutrition.sodium * scale)
-          } : undefined
-        };
-      });
-      
-      setRecipes(scaledRecipes);
-
-      // Results render below the ingredient list; scroll them into view so
-      // users get clear feedback that generation completed.
-      setTimeout(() => {
-        document.querySelector('.recipe-card-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
-    } catch (err: any) {
-      clearTimeout(timeoutId);
-      console.error('Recipe generation error:', err);
-      if (err.name === 'AbortError') {
-        setErrorMsg(t('recipes.timeoutError'));
-      } else {
-        setErrorMsg(t('recipes.generationError'));
-      }
-    } finally {
-      setRecipeLoading(false);
-    }
-  };
-
-  const handleRecipeModeChange = (mode: 'loose' | 'strict') => {
-    setRecipeMode(mode);
-    localStorage.setItem('gg_recipe_mode', mode);
-  };
-
-  const activeFilterCount = [
-    dietaryFilter !== '',
-    recipeDifficulty !== 'flexible',
-    typeof recipeServings === 'number' && recipeServings !== 2,
-    recipeMode !== 'loose',
-  ].filter(Boolean).length;
-
-  const handleResetFilters = () => {
-    setDietaryFilter('');
-    setRecipeDifficulty('flexible');
-    setRecipeServings(2);
-    handleRecipeModeChange('loose');
-    setShowFilters(false);
-  };
-
-  const renderFilterControls = () => (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.9rem' }}>
-      {/* Dietary Preference */}
-      <div>
-        <div style={{ fontSize: '0.63rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
-          {t('recipes.dietaryPreferences')}
-        </div>
-        <select
-          data-tour="recipes-dietary-filter"
-          value={dietaryFilter}
-          onChange={e => setDietaryFilter(e.target.value)}
-          style={{ width: '100%', padding: '0.42rem 0.5rem', border: '1.5px solid #e5e7eb', borderRadius: '7px', fontSize: '0.8rem', background: 'white', boxSizing: 'border-box' as const }}
-        >
-          <option value="">{t('recipes.dietary.all')}</option>
-          {savedProfilePrefs.length > 1 && (
-            <option value={COMBINED_PROFILE_KEY}>📋 {buildCombinedDietaryString(savedProfilePrefs, customDietaryLabels)}</option>
-          )}
-          <option value="vegetarian">{t('recipes.dietary.vegetarian')}</option>
-          <option value="vegan">{t('recipes.dietary.vegan')}</option>
-          <option value="gluten-free">{t('recipes.dietary.glutenFree')}</option>
-          <option value="keto">{t('recipes.dietary.keto')}</option>
-          <option value="diabetic-friendly">{t('recipes.dietary.diabeticFriendly')}</option>
-          <option value="heart-healthy">{t('recipes.dietary.heartHealthy')}</option>
-          {customDietaryLabels.map(custom => (
-            <option key={custom.id} value={custom.id}>✨ {custom.label}</option>
-          ))}
-        </select>
-      </div>
-      {/* Servings */}
-      <div>
-        <div style={{ fontSize: '0.63rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
-          {t('recipes.servings')}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', background: '#f3f4f6', borderRadius: '7px', padding: '0.3rem 0.55rem', width: 'fit-content' }}>
-          <button
-            onClick={() => setRecipeServings(Math.max(1, (typeof recipeServings === 'number' ? recipeServings : 2) - 1))}
-            style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: '5px', width: '24px', height: '24px', cursor: 'pointer', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >−</button>
-          <span style={{ fontWeight: 700, fontSize: '0.9rem', minWidth: '20px', textAlign: 'center' as const }}>{typeof recipeServings === 'number' ? recipeServings : 2}</span>
-          <button
-            onClick={() => setRecipeServings(Math.min(12, (typeof recipeServings === 'number' ? recipeServings : 2) + 1))}
-            style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: '5px', width: '24px', height: '24px', cursor: 'pointer', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >+</button>
-        </div>
-      </div>
-      {/* Difficulty */}
-      <div>
-        <div style={{ fontSize: '0.63rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
-          {t('recipes.difficulty')}
-        </div>
-        <div style={{ display: 'flex', gap: '0.18rem', background: '#f3f4f6', borderRadius: '7px', padding: '0.16rem' }}>
-          {(['flexible', 'easy', 'medium', 'hard'] as const).map(level => (
-            <button key={level} aria-pressed={recipeDifficulty === level} onClick={() => setRecipeDifficulty(level)}
-              style={{
-                flex: 1, padding: '0.3rem 0',
-                background: recipeDifficulty === level ? 'linear-gradient(45deg, #10b981, #059669)' : 'transparent',
-                color: recipeDifficulty === level ? 'white' : '#6b7280',
-                border: 'none', borderRadius: '5px', cursor: 'pointer',
-                fontWeight: recipeDifficulty === level ? 700 : 500, fontSize: '0.68rem',
-                transition: 'background 0.2s, color 0.2s',
-              }}
-            >
-              {t(`recipes.difficultyLevelShort.${level}`)}
-            </button>
-          ))}
-        </div>
-      </div>
-      {/* Extra Ingredients (Strict/Loose) */}
-      <div>
-        <div style={{ fontSize: '0.63rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
-          {t('recipes.extraIngredients')}
-        </div>
-        <div style={{ display: 'flex', gap: '0.18rem', background: '#f3f4f6', borderRadius: '7px', padding: '0.16rem' }}>
-          {(['loose', 'strict'] as const).map(mode => (
-            <button key={mode} aria-pressed={recipeMode === mode} onClick={() => handleRecipeModeChange(mode)}
-              style={{
-                flex: 1, padding: '0.3rem 0',
-                background: recipeMode === mode ? 'linear-gradient(45deg, #10b981, #059669)' : 'transparent',
-                color: recipeMode === mode ? 'white' : '#6b7280',
-                border: 'none', borderRadius: '5px', cursor: 'pointer',
-                fontWeight: recipeMode === mode ? 700 : 500, fontSize: '0.68rem',
-                transition: 'background 0.2s, color 0.2s',
-              }}
-            >
-              {mode === 'loose' ? t('recipes.modeLoose') : t('recipes.modeStrict')}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  const addPantryToIngredients = () => {
-    const names = pantry.map(item => item.name.toLowerCase());
-    setIngredientTags(Array.from(new Set([...ingredientTags, ...names])));
-  };
-
   const addMissingToShopping = async (recipe: Recipe) => {
     const ingredients = parseIngredients(recipe);
     const pantryNames = pantry.map(i => i.name.toLowerCase());
@@ -1253,6 +807,19 @@ const AppContent: React.FC = () => {
       }
     } else {
       info(t('toasts.alreadyHaveIngredients'));
+    }
+  };
+
+  // Logs a recipe's calories to today's total (cross-feature: needs setTodayCalories, owned here).
+  const handleLogRecipeCalories = async (recipe: Recipe) => {
+    const calories = recipe.nutrition!.calories;
+    try {
+      await calorieService.logCalories(calories, 'meal', recipe.name);
+      setTodayCalories(prev => prev + calories);
+      success(t('toasts.addedCalories', { calories, name: recipe.name }));
+    } catch (err) {
+      console.error('Error logging calories:', err);
+      error(t('toasts.failedAddCalories'));
     }
   };
 
@@ -2984,659 +2551,21 @@ const AppContent: React.FC = () => {
       }}>
         {currentTab === 'recipes' && (
           <ErrorBoundary context="section:recipes" variant="section">
-          <>
-            <div style={{ background: cardBg, padding: isMobile ? '1rem' : '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
-              {isMobile ? (
-                <>
-                  {/* ── Tab switcher (iOS segmented control) ── */}
-                  <div role="tablist" style={{ display: 'flex', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '10px', padding: '3px', marginBottom: '0.85rem' }}>
-                    {(['ingredient', 'name'] as const).map(tab => (
-                      <button
-                        key={tab}
-                        role="tab"
-                        aria-selected={recipeSubTab === tab}
-                        onClick={() => setRecipeSubTab(tab)}
-                        style={{
-                          flex: 1, minHeight: '44px', padding: '0.38rem 0',
-                          background: recipeSubTab === tab ? 'white' : 'transparent',
-                          color: recipeSubTab === tab ? '#111827' : '#6b7280',
-                          border: 'none', borderRadius: '7px', cursor: 'pointer',
-                          fontSize: '0.85rem', fontWeight: recipeSubTab === tab ? 700 : 500,
-                          boxShadow: recipeSubTab === tab ? '0 1px 4px rgba(0,0,0,0.15)' : 'none',
-                          transition: 'all 0.2s ease',
-                        }}
-                      >
-                        {tab === 'ingredient' ? `🥘 ${t('recipes.subTabIngredient')}` : `🔍 ${t('recipes.subTabName')}`}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* ── Stacked toolbar — By Ingredient ── */}
-                  {recipeSubTab === 'ingredient' && (
-                    <>
-                      {/* Row 1: Add Pantry + Scan */}
-                      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        {pantry.length > 0 && (
-                          <button data-tour="recipes-use-pantry-btn" onClick={addPantryToIngredients} style={{
-                            flex: 1, minHeight: '44px', padding: '0.5rem 0.65rem',
-                            background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '10px',
-                            cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem',
-                          }}>📦 {t('recipes.addPantryItems')}</button>
-                        )}
-                        <button onClick={() => { setCameraSource('recipes'); setShowImageUpload(true); }} style={{
-                          flex: 1, minHeight: '44px', padding: '0.5rem 0.65rem',
-                          background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '10px',
-                          cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem',
-                        }}>📷 {t('recipes.scanIngredients')}</button>
-                      </div>
-                      {/* Row 2: Filters + Get Recipes */}
-                      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        <button
-                          aria-expanded={showFilters}
-                          aria-controls="recipe-filter-panel"
-                          onClick={() => setShowFilters(v => !v)}
-                          style={{
-                            flex: 1, minHeight: '44px', position: 'relative',
-                            background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '10px',
-                            cursor: 'pointer', fontWeight: 700, fontSize: '0.82rem',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem',
-                          }}
-                        >
-                          ⚙️ {t('recipes.filtersButton')}
-                          {activeFilterCount > 0 && (
-                            <span style={{
-                              position: 'absolute', top: '-6px', right: '-6px',
-                              minWidth: '18px', height: '18px', background: '#ef4444', color: 'white',
-                              borderRadius: '9px', fontSize: '0.65rem', fontWeight: 700,
-                              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px',
-                            }}>{activeFilterCount}</span>
-                          )}
-                        </button>
-                        <button onClick={handleGetRecipes} disabled={recipeLoading} style={{
-                          flex: 1, minHeight: '44px', padding: '0.5rem',
-                          background: recipeLoading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)',
-                          color: 'white', border: 'none', borderRadius: '10px',
-                          fontWeight: 700, cursor: recipeLoading ? 'not-allowed' : 'pointer', fontSize: '0.85rem',
-                        }}>
-                          {recipeLoading ? `⏳ ${t('recipes.generating')}` : `🍳 ${t('recipes.getRecipes')}`}
-                        </button>
-                      </div>
-                      {/* Row 3: Clear All ghost */}
-                      <button onClick={() => { setRecipes([]); setIngredientTags([]); setRecipeSearchQuery(''); setErrorMsg(''); }} style={{
-                        width: '100%', minHeight: '44px', padding: '0.5rem',
-                        background: 'transparent', border: '1px solid #d1d5db', borderRadius: '10px',
-                        cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, color: '#6b7280',
-                        marginBottom: '0.5rem',
-                      }}>
-                        {t('common.clearAll')}
-                      </button>
-                    </>
-                  )}
-
-                  {/* ── Stacked toolbar — By Name ── */}
-                  {recipeSubTab === 'name' && (
-                    <>
-                      {/* Row 1: Filters + Search Recipes */}
-                      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        <button
-                          aria-expanded={showFilters}
-                          aria-controls="recipe-filter-panel"
-                          onClick={() => setShowFilters(v => !v)}
-                          style={{
-                            flex: 1, minHeight: '44px', position: 'relative',
-                            background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '10px',
-                            cursor: 'pointer', fontWeight: 700, fontSize: '0.82rem',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem',
-                          }}
-                        >
-                          ⚙️ {t('recipes.filtersButton')}
-                          {activeFilterCount > 0 && (
-                            <span style={{
-                              position: 'absolute', top: '-6px', right: '-6px',
-                              minWidth: '18px', height: '18px', background: '#ef4444', color: 'white',
-                              borderRadius: '9px', fontSize: '0.65rem', fontWeight: 700,
-                              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px',
-                            }}>{activeFilterCount}</span>
-                          )}
-                        </button>
-                        <button onClick={handleGetRecipes} disabled={recipeLoading} style={{
-                          flex: 1, minHeight: '44px', padding: '0.5rem',
-                          background: recipeLoading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)',
-                          color: 'white', border: 'none', borderRadius: '10px',
-                          fontWeight: 700, cursor: recipeLoading ? 'not-allowed' : 'pointer', fontSize: '0.85rem',
-                        }}>
-                          {recipeLoading ? `⏳ ${t('recipes.generating')}` : `🔍 ${t('recipes.searchRecipes')}`}
-                        </button>
-                      </div>
-                      {/* Row 2: Clear All ghost */}
-                      <button onClick={() => { setRecipes([]); setIngredientTags([]); setRecipeSearchQuery(''); setErrorMsg(''); }} style={{
-                        width: '100%', minHeight: '44px', padding: '0.5rem',
-                        background: 'transparent', border: '1px solid #d1d5db', borderRadius: '10px',
-                        cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, color: '#6b7280',
-                        marginBottom: '0.5rem',
-                      }}>
-                        {t('common.clearAll')}
-                      </button>
-                    </>
-                  )}
-
-                  {/* ── Active filter chips ── */}
-                  {activeFilterCount > 0 && (
-                    <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                      {dietaryFilter && (
-                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.25rem 0.65rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', border: '1px solid #c4b5fd' }}>
-                          {dietaryFilter === COMBINED_PROFILE_KEY
-                            ? buildCombinedDietaryString(savedProfilePrefs, customDietaryLabels)
-                            : (customDietaryLabels.find(l => l.id === dietaryFilter)?.label || PRESET_LABEL_MAP[dietaryFilter] || dietaryFilter)}
-                          <button onClick={() => setDietaryFilter('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '1rem', padding: 0, lineHeight: 1 }}>×</button>
-                        </span>
-                      )}
-                      {recipeDifficulty !== 'flexible' && (
-                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.25rem 0.65rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', border: '1px solid #c4b5fd' }}>
-                          {t(`recipes.difficultyLevel.${recipeDifficulty}`)}
-                          <button onClick={() => setRecipeDifficulty('flexible')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '1rem', padding: 0, lineHeight: 1 }}>×</button>
-                        </span>
-                      )}
-                      {typeof recipeServings === 'number' && recipeServings !== 2 && (
-                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.25rem 0.65rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', border: '1px solid #c4b5fd' }}>
-                          {recipeServings} {t('recipes.servings')}
-                          <button onClick={() => setRecipeServings(2)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '1rem', padding: 0, lineHeight: 1 }}>×</button>
-                        </span>
-                      )}
-                      {recipeMode !== 'loose' && (
-                        <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '0.25rem 0.65rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', border: '1px solid #c4b5fd' }}>
-                          {t('recipes.modeStrict')}
-                          <button onClick={() => handleRecipeModeChange('loose')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6d28d9', fontSize: '1rem', padding: 0, lineHeight: 1 }}>×</button>
-                        </span>
-                      )}
-                      <button onClick={handleResetFilters} style={{ background: '#f3f4f6', color: '#6b7280', padding: '0.25rem 0.65rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 500, border: 'none', cursor: 'pointer' }}>
-                        {t('recipes.clearFilters')}
-                      </button>
-                    </div>
-                  )}
-
-                  {/* ── By Ingredient: tags + input ── */}
-                  {recipeSubTab === 'ingredient' && (
-                    <>
-                      {ingredientTags.length > 0 && (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.6rem' }}>
-                          {ingredientTags.map(tag => (
-                            <span key={tag} style={{
-                              background: 'linear-gradient(45deg, #10b981, #059669)', color: 'white',
-                              padding: '0.4rem 0.75rem', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem',
-                            }}>
-                              {tag}
-                              <button onClick={() => setIngredientTags(ingredientTags.filter(t => t !== tag))}
-                                style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.1rem', lineHeight: 1 }}>×</button>
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      {activeFilterCount > 0 && <div style={{ borderTop: '1px solid #f3f4f6', margin: '0.35rem 0 0.6rem' }} />}
-                      <input
-                        data-tour="recipes-ingredient-input"
-                        type="text"
-                        placeholder={t('recipes.ingredientsPlaceholder')}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
-                            const tag = (e.target as HTMLInputElement).value.trim().toLowerCase();
-                            if (!ingredientTags.includes(tag)) setIngredientTags([...ingredientTags, tag]);
-                            (e.target as HTMLInputElement).value = '';
-                          }
-                        }}
-                        style={{ width: '100%', padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '10px', fontSize: '0.875rem', boxSizing: 'border-box' as const }}
-                      />
-                    </>
-                  )}
-
-                  {/* ── By Name: label + input ── */}
-                  {recipeSubTab === 'name' && (
-                    <>
-                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
-                        {t('recipes.searchByNameLabel')}
-                      </div>
-                      {activeFilterCount > 0 && <div style={{ borderTop: '1px solid #f3f4f6', margin: '0.35rem 0 0.6rem' }} />}
-                      <input
-                        type="text"
-                        placeholder={t('recipes.searchByNamePlaceholder')}
-                        value={recipeSearchQuery}
-                        onChange={e => setRecipeSearchQuery(e.target.value)}
-                        onKeyPress={e => e.key === 'Enter' && !recipeLoading && handleGetRecipes()}
-                        style={{ width: '100%', padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '10px', fontSize: '0.875rem', boxSizing: 'border-box' as const }}
-                      />
-                    </>
-                  )}
-
-                  {errorMsg && <div style={{ background: '#fee2e2', color: '#dc2626', padding: '0.75rem', borderRadius: '8px', borderLeft: '4px solid #dc2626', marginTop: '0.75rem' }}>{errorMsg}</div>}
-
-                  {/* ── Mobile bottom sheet for filters ── */}
-                  {showFilters && (
-                    <>
-                      <div onClick={() => setShowFilters(false)} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.4)' }} />
-                      <div
-                        id="recipe-filter-panel"
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label={t('recipes.filtersButton')}
-                        style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 201, background: 'white', borderRadius: '16px 16px 0 0', padding: '1rem 1rem 2.5rem' }}
-                      >
-                        <div style={{ width: '36px', height: '4px', background: '#d1d5db', borderRadius: '2px', margin: '0 auto 1rem' }} />
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                          <span style={{ fontWeight: 700, fontSize: '1rem' }}>{t('recipes.filtersButton')}</span>
-                          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                            <button onClick={handleResetFilters} style={{ background: 'none', border: 'none', color: '#7c3aed', fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem' }}>
-                              {t('recipes.resetAll')}
-                            </button>
-                            <button autoFocus onClick={() => setShowFilters(false)} style={{ background: '#f3f4f6', border: 'none', borderRadius: '6px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#374151' }}>✕</button>
-                          </div>
-                        </div>
-                        {renderFilterControls()}
-                      </div>
-                    </>
-                  )}
-                </>
-              ) : (
-                <>
-                  {/* DESKTOP */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-                    <label style={{ fontWeight: '600' }}>🥘 {t('recipes.whatIngredientsLabel')}</label>
-                    {pantry.length > 0 && (
-                      <button data-tour="recipes-use-pantry-btn" onClick={addPantryToIngredients} style={{
-                        padding: '0.35rem 0.75rem', background: '#8b5cf6', color: 'white',
-                        border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem'
-                      }}>📦 {t('recipes.addPantryItems')}</button>
-                    )}
-                    <div style={{ display: 'flex', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '3px' }}>
-                      {(['strict', 'loose'] as const).map((mode) => (
-                        <button
-                          key={mode}
-                          type="button"
-                          aria-pressed={recipeMode === mode}
-                          onClick={() => handleRecipeModeChange(mode)}
-                          style={{
-                            padding: '0.25rem 0.65rem',
-                            background: recipeMode === mode ? '#1f2937' : 'transparent',
-                            color: recipeMode === mode ? 'white' : '#6b7280',
-                            border: 'none', borderRadius: '6px', cursor: 'pointer',
-                            fontSize: '0.8rem', fontWeight: '600',
-                            transition: 'background 0.15s, color 0.15s',
-                            whiteSpace: 'nowrap'
-                          }}
-                        >
-                          {mode === 'strict' ? t('recipes.modeStrict') : t('recipes.modeLoose')}
-                        </button>
-                      ))}
-                    </div>
-                    <button onClick={() => { setRecipes([]); setIngredientTags([]); setRecipeSearchQuery(''); setErrorMsg(''); }}
-                      style={{ marginLeft: 'auto', padding: '0.25rem 0.65rem', background: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600', color: '#6b7280', whiteSpace: 'nowrap' }}>
-                      {t('common.clearAll')}
-                    </button>
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
-                    {ingredientTags.map(tag => (
-                      <span key={tag} style={{
-                        background: 'linear-gradient(45deg, #10b981, #059669)', color: 'white',
-                        padding: '0.5rem 1rem', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '0.5rem'
-                      }}>
-                        {tag}
-                        <button onClick={() => setIngredientTags(ingredientTags.filter(t => t !== tag))}
-                          style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.25rem' }}>×</button>
-                      </span>
-                    ))}
-                  </div>
-                  <input data-tour="recipes-ingredient-input" type="text" placeholder={t('recipes.ingredientsPlaceholder')} onKeyPress={(e) => {
-                    if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
-                      const tag = (e.target as HTMLInputElement).value.trim().toLowerCase();
-                      if (!ingredientTags.includes(tag)) setIngredientTags([...ingredientTags, tag]);
-                      (e.target as HTMLInputElement).value = '';
-                    }
-                  }} style={{ width: '100%', padding: '1rem', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: '1rem', marginBottom: '1rem', boxSizing: 'border-box' }} />
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>🔍 {t('recipes.searchLabel')}</label>
-                  <input type="text" placeholder={t('recipes.searchPlaceholder')} value={recipeSearchQuery}
-                    onChange={(e) => setRecipeSearchQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && !recipeLoading && handleGetRecipes()}
-                    style={{ width: '100%', padding: '1rem', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: '1rem', marginBottom: '1rem', boxSizing: 'border-box' }} />
-                  <div className="recipe-controls-row" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-                    <select data-tour="recipes-dietary-filter" value={dietaryFilter} onChange={(e) => setDietaryFilter(e.target.value)}
-                      style={{ padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '8px', minWidth: '200px' }}>
-                      <option value="">{t('recipes.dietary.all')}</option>
-                      {savedProfilePrefs.length > 1 && (
-                        <option value={COMBINED_PROFILE_KEY}>📋 {buildCombinedDietaryString(savedProfilePrefs, customDietaryLabels)}</option>
-                      )}
-                      <option value="vegetarian">{t('recipes.dietary.vegetarian')}</option>
-                      <option value="vegan">{t('recipes.dietary.vegan')}</option>
-                      <option value="gluten-free">{t('recipes.dietary.glutenFree')}</option>
-                      <option value="keto">{t('recipes.dietary.keto')}</option>
-                      <option value="diabetic-friendly">{t('recipes.dietary.diabeticFriendly')}</option>
-                      <option value="heart-healthy">{t('recipes.dietary.heartHealthy')}</option>
-                      {customDietaryLabels.map(custom => (
-                        <option key={custom.id} value={custom.id}>✨ {custom.label}</option>
-                      ))}
-                    </select>
-                    <div className="recipe-servings-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span>⚖️</span>
-                      <label style={{ fontWeight: '600' }}>{t('recipes.servings')}:</label>
-                      <input type="number" min="1" max="12" value={recipeServings}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === '') { setRecipeServings('' as any); }
-                          else { setRecipeServings(Math.max(1, Math.min(12, parseInt(val) || 2))); }
-                        }}
-                        onBlur={(e) => {
-                          if (e.target.value === '' || parseInt(e.target.value) < 1) { setRecipeServings(2); }
-                        }}
-                        style={{ width: '60px', padding: '0.5rem', border: '2px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', fontWeight: '600' }} />
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: '#f3f4f6', borderRadius: '10px', padding: '0.25rem' }}>
-                      {(['flexible', 'easy', 'medium', 'hard'] as const).map((level) => {
-                        const active = recipeDifficulty === level;
-                        const colors: Record<string, { bg: string; text: string }> = {
-                          flexible: { bg: '#6366f1', text: 'white' },
-                          easy:     { bg: '#10b981', text: 'white' },
-                          medium:   { bg: '#f59e0b', text: 'white' },
-                          hard:     { bg: '#ef4444', text: 'white' },
-                        };
-                        return (
-                          <button key={level} onClick={() => setRecipeDifficulty(level)} style={{
-                            padding: '0.4rem 0.75rem',
-                            background: active ? colors[level].bg : 'transparent',
-                            color: active ? colors[level].text : '#6b7280',
-                            border: 'none', borderRadius: '8px', cursor: 'pointer',
-                            fontWeight: active ? '700' : '500', fontSize: '0.8rem',
-                            transition: 'background 0.2s, color 0.2s, transform 0.15s',
-                            transform: active ? 'scale(1.05)' : 'scale(1)',
-                            whiteSpace: 'nowrap'
-                          }}>
-                            {t(`recipes.difficultyLevel.${level}`)}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <button onClick={() => { setCameraSource('recipes'); setShowImageUpload(true); }}
-                      style={{ padding: '0.75rem 1rem', background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      📷 {t('recipes.scanIngredients')}
-                    </button>
-                    <button onClick={handleGetRecipes} disabled={recipeLoading}
-                      style={{ padding: '0.75rem 2rem', background: recipeLoading ? '#9ca3af' : 'linear-gradient(45deg, #10b981, #059669)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '600', cursor: recipeLoading ? 'not-allowed' : 'pointer' }}>
-                      {recipeLoading ? `⏳ ${t('recipes.generating')}` : `🍳 ${t('recipes.getRecipes')}`}
-                    </button>
-                  </div>
-                  {errorMsg && <div style={{ background: '#fee2e2', color: '#dc2626', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #dc2626' }}>{errorMsg}</div>}
-                </>
-              )}
-            </div>
-
-            {recipeLoading && recipes.length === 0 && (
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
-                {[1, 2, 3].map(i => (
-                  <div key={i} style={{
-                    background: cardBg,
-                    borderRadius: '16px',
-                    padding: '1.5rem',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-                  }}>
-                    {/* Header skeleton */}
-                    <div style={{
-                      height: '24px',
-                      background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-                      backgroundSize: '200% 100%',
-                      animation: 'shimmer 1.5s infinite',
-                      borderRadius: '4px',
-                      marginBottom: '1rem'
-                    }} />
-                    
-                    {/* Content skeleton */}
-                    <div style={{
-                      height: '16px',
-                      background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-                      backgroundSize: '200% 100%',
-                      animation: 'shimmer 1.5s infinite',
-                      borderRadius: '4px',
-                      marginBottom: '0.5rem',
-                      width: '80%'
-                    }} />
-                    
-                    <div style={{
-                      height: '16px',
-                      background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-                      backgroundSize: '200% 100%',
-                      animation: 'shimmer 1.5s infinite',
-                      borderRadius: '4px',
-                      marginBottom: '0.5rem',
-                      width: '60%'
-                    }} />
-                    
-                    {/* Nutrition skeleton */}
-                    <div style={{
-                      height: '80px',
-                      background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-                      backgroundSize: '200% 100%',
-                      animation: 'shimmer 1.5s infinite',
-                      borderRadius: '12px',
-                      marginTop: '1rem'
-                    }} />
-                    
-                    {/* Text at bottom */}
-                    <div style={{
-                      textAlign: 'center',
-                      marginTop: '1rem',
-                      color: '#10b981',
-                      fontWeight: '600'
-                    }}>
-                      🤖 {t('recipes.generatingRecipe', { n: i })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="recipe-card-grid" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>              {recipes.map((recipe, idx) => {
-                const grade = calculateHealthGrade(recipe);
-                const ingredients = parseIngredients(recipe);
-                return (
-                  <div 
-                    key={idx}
-                    className="recipe-card"
-                    style={{ animationDelay: `${idx * 0.1}s` }}
-                  >
-                    <div onClick={() => { setSelectedRecipe(recipe); setShowDetailedView(true); }} style={{ cursor: 'pointer', marginBottom: '0.5rem' }}>
-                      <div style={{ 
-                        background: cardBg, 
-                        borderRadius: isMobile ? '12px' : '16px', 
-                        padding: isMobile ? '1rem' : '1.5rem', 
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)' 
-                      }}>
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          marginBottom: isMobile ? '0.75rem' : '1rem',
-                          gap: isMobile ? '0.75rem' : '1rem'
-                        }}>
-                          <h3 style={{
-                            margin: 0,
-                            fontSize: isMobile ? '0.95rem' : '1.25rem',
-                            fontWeight: '700',
-                            flex: 1,
-                            paddingRight: isMobile ? '0.5rem' : '1rem',
-                            lineHeight: '1.3'
-                          }}>
-                            {idx + 1}. {recipe.name}
-                          </h3>
-                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', flexShrink: 0 }}>
-                            <button onClick={(e) => {
-                              e.stopPropagation();
-                              const exists = favorites.some(f => f.name === recipe.name);
-                              if (!exists) {
-                                recipesService.add({
-                                  name: recipe.name,
-                                  ingredients: recipe.ingredients,
-                                  instructions: recipe.instructions,
-                                  prep_time: recipe.prep_time,
-                                  cook_time: recipe.cook_time,
-                                  difficulty: recipe.difficulty,
-                                  servings: recipe.servings,
-                                  nutrition: recipe.nutrition,
-                                  health_benefits: recipe.health_benefits,
-                                  budget_tip: recipe.budget_tip,
-                                }).then(savedRecipe => {
-                                  setFavorites(prev => [...prev, { ...recipe, id: savedRecipe.id, savedDate: savedRecipe.created_at }]);
-                                  success(t('toasts.addedToFavorites'));
-                                }).catch(() => warning(t('toasts.failedSaveRecipe')));
-                              } else {
-                                info(t('toasts.alreadyInFavorites'));
-                              }
-                            }} style={{
-                              background: favorites.some(f => f.name === recipe.name) ? 'linear-gradient(45deg, #f59e0b, #d97706)' : 'rgba(245,158,11,0.15)',
-                              color: favorites.some(f => f.name === recipe.name) ? 'white' : '#d97706',
-                              border: '1px solid rgba(245,158,11,0.4)',
-                              borderRadius: '10px',
-                              padding: isMobile ? '0.4rem 0.5rem' : '0.5rem 0.6rem',
-                              cursor: 'pointer',
-                              fontSize: isMobile ? '1rem' : '1.1rem',
-                              lineHeight: 1,
-                            }}>💖</button>
-                            <div style={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              gap: '0.25rem',
-                            }}>
-                              <div style={{
-                                background: getGradeColor(grade),
-                                color: 'white',
-                                padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 0.75rem',
-                                borderRadius: '12px',
-                                fontSize: isMobile ? '0.9rem' : '1.1rem',
-                                fontWeight: '700',
-                                minWidth: isMobile ? '45px' : '55px',
-                                textAlign: 'center'
-                              }}>{grade}</div>
-                              <span style={{
-                                fontSize: isMobile ? '0.65rem' : '0.7rem',
-                                color: mutedText,
-                                fontWeight: '600'
-                              }}>{t('recipes.healthGrade')}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-                          {recipe.prep_time && <span style={{ color: mutedText, fontSize: '0.875rem' }}>⏱ {recipe.prep_time}</span>}
-                          {recipe.difficulty && (
-                            <span style={{
-                              padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.875rem',
-                              background: recipe.difficulty.toLowerCase().includes('easy') ? '#dcfce7' : '#fef3c7',
-                              color: recipe.difficulty.toLowerCase().includes('easy') ? '#166534' : '#92400e'
-                            }}>{recipe.difficulty}</span>
-                          )}
-                          <span style={{ color: mutedText, fontSize: '0.875rem' }}>👥 {recipe.servings} {t('recipes.servings')}</span>
-                        </div>
-
-                        {ingredients.length > 0 && (
-                          <div style={{ 
-                            background: '#f0fdf4', 
-                            padding: isMobile ? '0.75rem' : '1rem', 
-                            borderRadius: isMobile ? '8px' : '12px', 
-                            marginBottom: isMobile ? '0.75rem' : '1rem', 
-                            border: '1px solid #bbf7d0' 
-                          }}>
-                            <div style={{ 
-                              fontWeight: '600', 
-                              color: '#166534', 
-                              marginBottom: '0.5rem', 
-                              fontSize: isMobile ? '0.75rem' : '0.875rem' 
-                            }}>📝 {t('recipes.keyIngredients')}:</div>
-                            <div style={{
-                              display: 'grid',
-                              gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
-                              gap: isMobile ? '0.25rem' : '0.5rem',
-                              fontSize: isMobile ? '0.7rem' : '0.8rem',
-                              color: '#047857'
-                            }}>
-                              {ingredients.slice(0, isMobile ? 4 : 8).map((ing, i) => (
-                                <div key={i}>• {Math.round(ing.quantity * 10) / 10} {ing.unit} {ing.name}</div>
-                              ))}
-                              {ingredients.length > (isMobile ? 4 : 8) && (
-                                <div style={{ fontStyle: 'italic' }}>+ {ingredients.length - (isMobile ? 4 : 8)} {t('recipes.moreIngredients')}</div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {recipe.nutrition && (
-                          <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '12px', marginBottom: '1rem', border: '1px solid #e2e8f0' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', fontSize: '0.85rem' }}>
-                              <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontWeight: '600', color: '#059669' }}>{recipe.nutrition.calories}</div>
-                                <div style={{ color: mutedText }}>{t('recipes.calories')}</div>
-                              </div>
-                              <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontWeight: '600', color: '#7c3aed' }}>{recipe.nutrition.protein}g</div>
-                                <div style={{ color: mutedText }}>{t('recipes.protein')}</div>
-                              </div>
-                              <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontWeight: '600', color: '#10b981' }}>{recipe.nutrition.fiber}g</div>
-                                <div style={{ color: mutedText }}>{t('recipes.fiber')}</div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        <div style={{
-                          color: '#10b981', fontWeight: '600', fontSize: '0.9rem', padding: '0.75rem',
-                          background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0', textAlign: 'center'
-                        }}>{t('recipes.clickForFullRecipe')}</div>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                      <button onClick={() => addMissingToShopping(recipe)} style={{
-                        flex: isMobile ? '1 1 100%' : '1',
-                        padding: isMobile ? '0.75rem' : '0.75rem',
-                        background: 'linear-gradient(45deg, #ec4899, #8b5cf6)',
-                        fontSize: isMobile ? '0.875rem' : '1rem',
-                        color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600',
-                        minWidth: isMobile ? 'auto' : '120px'
-                      }}>🛒 {t('recipes.addToShopping')}</button>
-                      
-                      {recipe.nutrition && (
-                        <button onClick={async () => {
-                          const calories = recipe.nutrition!.calories;
-                          try {
-                            // Log to Supabase
-                            await calorieService.logCalories(calories, 'meal', recipe.name);
-                            
-                            // Update local state
-                            setTodayCalories(prev => prev + calories);
-                            
-                            success(t('toasts.addedCalories', { calories, name: recipe.name }));
-                          } catch (err) {
-                            console.error('Error logging calories:', err);
-                            error(t('toasts.failedAddCalories'));
-                          }
-                        }} style={{
-                          flex: isMobile ? '1' : 'initial',
-                          padding: '0.75rem',
-                          background: '#10b981', color: 'white',
-                          border: 'none', borderRadius: '12px', cursor: 'pointer',
-                          fontSize: isMobile ? '0.875rem' : '0.875rem',
-                          minWidth: isMobile ? 'auto' : '80px'
-                        }}>📊 {t('recipes.addCalories')} ({recipe.nutrition.calories} kcal)</button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {recipes.length === 0 && !recipeLoading && (
-              <div style={{ textAlign: 'center', padding: '3rem', color: 'white' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🍳</div>
-                <p>{t('recipes.emptyStatePrompt')}</p>
-                <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>{t('recipes.emptyStateTip')}</p>
-              </div>
-            )}
-          </>
+            <RecipeSection
+              isMobile={isMobile}
+              cardBg={cardBg}
+              mutedText={mutedText}
+              pantry={pantry}
+              savedProfilePrefs={savedProfilePrefs}
+              customDietaryLabels={customDietaryLabels}
+              onAddMissingToShopping={addMissingToShopping}
+              onLogCalories={handleLogRecipeCalories}
+              onScanIngredients={() => { setCameraSource('recipes'); setShowImageUpload(true); }}
+              onSuccess={success}
+              onWarning={warning}
+              onInfo={info}
+              onError={error}
+            />
           </ErrorBoundary>
         )}
         {currentTab === 'mealplan' && (
@@ -5332,275 +4261,10 @@ const AppContent: React.FC = () => {
           </div>
         </div>
       )}
-      {showDetailedView && selectedRecipe && (
-        <div 
-          className="modal-backdrop"
-          onClick={() => setShowDetailedView(false)} 
-          style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center',
-            alignItems: 'center', zIndex: 1000, padding: '2rem', overflow: 'auto'
-          }}
-        >
-          <div
-            className="modal-content"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: cardBg,
-              borderRadius: '20px',
-              padding: isMobile ? '1.5rem' : '2rem',
-              maxWidth: isMobile ? '95vw' : '800px',
-              width: isMobile ? '95vw' : 'auto',
-              maxHeight: '90vh',
-              overflow: 'auto',
-              position: 'relative',
-              animation: 'scaleIn 0.3s ease-out'
-            }}
-          >
-            <button onClick={() => setShowDetailedView(false)} style={{
-              position: 'absolute', top: '1rem', right: '1rem', background: '#f3f4f6',
-              border: 'none', borderRadius: '50%', width: '40px', height: '40px',
-              cursor: 'pointer', fontSize: '1.5rem'
-            }}>×</button>
 
-            <h2 style={{ marginBottom: '1.5rem', fontSize: '2rem', fontWeight: '700', paddingRight: '3rem' }}>
-              {(selectedRecipe as FavoriteRecipe).id && translatedFavoriteNames[(selectedRecipe as FavoriteRecipe).id]
-                ? translatedFavoriteNames[(selectedRecipe as FavoriteRecipe).id]
-                : selectedRecipe.name}
-            </h2>
-
-            <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-              {selectedRecipe.difficulty && <span style={{ fontSize: '1.1rem' }}>⚡ {selectedRecipe.difficulty}</span>}
-              {selectedRecipe.servings && <span style={{ fontSize: '1.1rem' }}>👥 {selectedRecipe.servings} {t('recipes.servings')}</span>}
-              {selectedRecipe.prep_time && <span style={{ fontSize: '1.1rem' }}>⏱️ {t('recipes.prepTime')}: {selectedRecipe.prep_time}</span>}
-              {selectedRecipe.cook_time && <span style={{ fontSize: '1.1rem' }}>🔥 {t('recipes.cookTime')}: {selectedRecipe.cook_time}</span>}
-            </div>
-
-            {selectedRecipe.nutrition && (
-              <div style={{ marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: '600', borderBottom: '2px solid #10b981', paddingBottom: '0.5rem' }}>
-                  📊 {t('recipes.nutritionFacts')}
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
-                  {(Object.entries(selectedRecipe.nutrition) as [string, number][]).map(([key, val]) => {
-                    const unit = key === 'sodium' ? 'mg' : key === 'calories' ? '' : 'g';
-                    const labelKey = `recipes.${key}` as const;
-                    return (
-                      <div key={key} style={{ textAlign: 'center', padding: '1rem', background: '#f0fdf4', borderRadius: '12px' }}>
-                        <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#10b981' }}>{val}{unit}</div>
-                        <div style={{ fontSize: '0.875rem', color: mutedText }}>{t(labelKey)}</div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            <div style={{ marginBottom: '2rem' }}>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: '600', borderBottom: '2px solid #10b981', paddingBottom: '0.5rem' }}>
-                📝 {t('recipes.ingredientsHeading')}
-              </h3>
-              <div style={{ 
-                background: '#f0fdf4', 
-                padding: '1.5rem', 
-                borderRadius: '12px', 
-                marginTop: '1rem',
-                fontSize: '0.95rem'
-              }}>
-                {(() => {
-                  const detailScale = (selectedRecipe.originalServings && selectedRecipe.servings)
-                    ? selectedRecipe.servings / selectedRecipe.originalServings
-                    : 1;
-                  const fmtQty = (q: number) => {
-                    const scaled = q * detailScale;
-                    return parseFloat(scaled.toFixed(2)).toString();
-                  };
-                  return (typeof selectedRecipe.ingredients === 'string'
-                    ? selectedRecipe.ingredients.split('\n')
-                    : selectedRecipe.ingredients
-                  ).map((line, idx) => {
-                    // Parse ingredient from line
-                  const match = line.match(/^(\d+(?:\.\d+)?(?:\/\d+)?)\s*([a-zA-Z]+)\s+(.+)$/);
-
-                  if (match) {
-                    const [, quantity, unit, name] = match;
-                    const displayQty = fmtQty(quantity.includes('/') ? (() => { const [n,d] = quantity.split('/').map(Number); return n/d; })() : parseFloat(quantity));
-                    const cleanName = name.trim().toLowerCase()
-                      .replace(/\b(fresh|dried|raw|cooked|minced|chopped|diced|sliced|grated)\b/g, '')
-                      .trim();
-                    
-                    // Check if substitutions exist for this ingredient (must match actual substitution database keys)
-                    const commonIngredients = [
-                      'chicken', 'beef', 'pork', 'fish', 'salmon', 'shrimp',
-                      'milk', 'butter', 'cheese', 'cream', 'yogurt', 'egg',
-                      'rice', 'pasta', 'flour', 'bread',
-                      'sugar', 'oil', 'potato', 'tomato'
-                    ];
-                    
-                    const hasSubstitutions = commonIngredients.some(ing => 
-                      cleanName.includes(ing) || ing.includes(cleanName)
-                    );
-                    
-                    if (hasSubstitutions) {
-                      // Clickable ingredient with substitutions
-                      return (
-                        <div
-                          key={idx}
-                          onClick={() => {
-                            setSelectedIngredient({
-                              name: name.trim(),
-                              quantity: parseFloat(quantity),
-                              unit: unit.toLowerCase()
-                            });
-                            setShowSubstitution(true);
-                          }}
-                          style={{
-                            padding: '0.75rem',
-                            marginBottom: '0.5rem',
-                            background: 'white',
-                            border: '2px solid #86efac',
-                            borderRadius: '8px',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            lineHeight: '1.6'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = '#dcfce7';
-                            e.currentTarget.style.borderColor = '#10b981';
-                            e.currentTarget.style.transform = 'translateX(4px)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'white';
-                            e.currentTarget.style.borderColor = '#86efac';
-                            e.currentTarget.style.transform = 'translateX(0)';
-                          }}
-                        >
-                          <span style={{ fontWeight: '600', color: '#059669' }}>
-                            {displayQty} {unit}
-                          </span>
-                          {' '}
-                          <span style={{ color: '#166534' }}>{name}</span>
-                          <span style={{ 
-                            float: 'right', 
-                            color: '#10b981',
-                            fontSize: '0.875rem',
-                            opacity: 0.8
-                          }}>
-                            🔄 {t('recipes.clickToSubstitute')}
-                          </span>
-                        </div>
-                      );
-                    } else {
-                      // Non-clickable ingredient (no substitutions available)
-                      return (
-                        <div
-                          key={idx}
-                          style={{
-                            padding: '0.75rem',
-                            marginBottom: '0.5rem',
-                            background: '#f9fafb',
-                            border: '1px solid #e5e7eb',
-                            borderRadius: '8px',
-                            lineHeight: '1.6',
-                            color: '#6b7280'
-                          }}
-                        >
-                          <span style={{ fontWeight: '600', color: '#374151' }}>
-                            {displayQty} {unit}
-                          </span>
-                          {' '}
-                          <span style={{ color: '#4b5563' }}>{name}</span>
-                        </div>
-                      );
-                    }
-                  }
-                  
-                  // Non-parsed lines (just display normally)
-                  if (line.trim()) {
-                    return (
-                      <div
-                        key={idx}
-                        style={{
-                          padding: '0.5rem',
-                          marginBottom: '0.25rem',
-                          color: '#6b7280',
-                          lineHeight: '1.8'
-                        }}
-                      >
-                        {line}
-                      </div>
-                    );
-                  }
-                  
-                  return null;
-                });})()}
-              </div>
-            </div>
-
-            <div style={{ marginBottom: '2rem' }}>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: '600', borderBottom: '2px solid #10b981', paddingBottom: '0.5rem' }}>
-                <img src="/icons/logo-icon.svg" alt="" style={{ height: '1.2em', verticalAlign: 'middle', marginRight: '0.35em' }} />{t('recipes.instructionsHeading')}
-              </h3>
-              <div style={{ 
-                lineHeight: '2', 
-                fontSize: isMobile ? '0.95rem' : '1.05rem', 
-                marginTop: '1rem',
-                whiteSpace: 'pre-wrap'
-              }}>
-                {(() => {
-                  const instructions = selectedRecipe.instructions as any;
-                  
-                  // If it's a string, display normally
-                  if (typeof instructions === 'string') {
-                    return instructions;
-                  }
-                  
-                  // If it's an array, display with step numbers
-                  if (Array.isArray(instructions)) {
-                    return instructions.map((step: any, idx: number) => (
-                      <div key={idx} style={{ marginBottom: '1rem', whiteSpace: 'normal' }}>
-                        <strong>{t('recipes.step', { n: idx + 1 })}:</strong> {step}
-                      </div>
-                    ));
-                  }
-                  
-                  // Fallback - convert to string
-                  return String(instructions);
-                })()}
-              </div>
-            </div>
-
-            {selectedRecipe.health_benefits && (
-              <div style={{ marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: '600', borderBottom: '2px solid #10b981', paddingBottom: '0.5rem' }}>
-                  💚 {t('recipes.healthBenefitsHeading')}
-                </h3>
-                <div style={{ background: '#f0fdf4', padding: '1rem', borderRadius: '12px', marginTop: '1rem', color: '#166534' }}>
-                  {selectedRecipe.health_benefits}
-                </div>
-              </div>
-            )}
-
-            {selectedRecipe.budget_tip && (
-              <div style={{ marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: '600', borderBottom: '2px solid #10b981', paddingBottom: '0.5rem' }}>
-                  💰 {t('recipes.moneySavingHeading')}
-                </h3>
-                <div style={{ background: '#fef3c7', padding: '1rem', borderRadius: '12px', marginTop: '1rem', color: '#92400e' }}>
-                  {selectedRecipe.budget_tip}
-                </div>
-              </div>
-            )}
-
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button onClick={() => setShowDetailedView(false)} style={{
-                padding: '1rem 2rem', background: '#f3f4f6', border: '1px solid #d1d5db',
-                borderRadius: '12px', cursor: 'pointer', fontWeight: '600', fontSize: '1.1rem'
-              }}>{t('common.close')}</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ErrorBoundary context="section:recipes" variant="section">
+        <RecipeDetailModal isMobile={isMobile} cardBg={cardBg} mutedText={mutedText} />
+      </ErrorBoundary>
 
       {showImageUpload && (
         <div style={{
@@ -6465,40 +5129,9 @@ const AppContent: React.FC = () => {
           onSuccess={success}
         />
       </ErrorBoundary>
-      {showSubstitution && selectedIngredient && (
-        <IngredientSubstitution
-          ingredientName={selectedIngredient.name}
-          quantity={selectedIngredient.quantity}
-          unit={selectedIngredient.unit}
-          onSubstitute={(newName, newQty, newUnit) => {
-            if (selectedRecipe) {
-              // Update the recipe with the substitution
-              const updatedIngredients = selectedRecipe.ingredients
-                .split('\n')
-                .map(line => {
-                  if (line.toLowerCase().includes(selectedIngredient.name.toLowerCase())) {
-                    return `${newQty} ${newUnit} ${newName}`;
-                  }
-                  return line;
-                })
-                .join('\n');
-              
-              setSelectedRecipe({
-                ...selectedRecipe,
-                ingredients: updatedIngredients
-              });
-              
-              success(`Substituted ${selectedIngredient.name} with ${newName}!`);
-            }
-            setShowSubstitution(false);
-            setSelectedIngredient(null);
-          }}
-          onClose={() => {
-            setShowSubstitution(false);
-            setSelectedIngredient(null);
-          }}
-        />
-      )}
+      <ErrorBoundary context="section:recipes" variant="section">
+        <RecipeSubstitutionModal onSuccess={success} />
+      </ErrorBoundary>
       {showSurvey && userProfile && (
         <OnboardingSurvey
           userId={user.id}
@@ -6586,7 +5219,9 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => (
   <FavoritesProvider>
     <DonationProvider>
-      <AppContent />
+      <RecipesProvider>
+        <AppContent />
+      </RecipesProvider>
     </DonationProvider>
   </FavoritesProvider>
 );

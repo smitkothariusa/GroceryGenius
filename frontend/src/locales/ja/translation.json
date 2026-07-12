@@ -270,7 +270,7 @@
       "sunday": "日曜日"
     },
     "templates": {
-      "saveButton": "テンプレートとして保存",
+      "saveButton": "今週をテンプレートとして保存",
       "applyButton": "テンプレートを適用",
       "saving": "保存中...",
       "applying": "適用中...",

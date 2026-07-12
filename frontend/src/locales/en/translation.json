@@ -270,7 +270,7 @@
       "sunday": "Sunday"
     },
     "templates": {
-      "saveButton": "Save as Template",
+      "saveButton": "Save Week as Template",
       "applyButton": "Apply Template",
       "saving": "Saving...",
       "applying": "Applying...",

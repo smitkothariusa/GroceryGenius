@@ -706,6 +706,15 @@
       "gotIt": "Compris"
     }
   },
+  "offline": {
+    "banner": {
+      "offline": "Vous êtes hors ligne — les modifications seront synchronisées plus tard",
+      "syncing": "Synchronisation de {{count}} modification(s)…"
+    },
+    "toasts": {
+      "synced": "{{count}} modification(s) synchronisée(s)"
+    }
+  },
   "errorBoundary": {
     "root": {
       "title": "Une erreur est survenue",

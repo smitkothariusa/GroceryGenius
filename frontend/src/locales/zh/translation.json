@@ -706,6 +706,15 @@
       "gotIt": "好的"
     }
   },
+  "offline": {
+    "banner": {
+      "offline": "您已离线 — 更改将稍后同步",
+      "syncing": "正在同步 {{count}} 项更改…"
+    },
+    "toasts": {
+      "synced": "已同步 {{count}} 项更改"
+    }
+  },
   "errorBoundary": {
     "root": {
       "title": "出错了",

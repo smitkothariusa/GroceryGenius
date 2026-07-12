@@ -706,6 +706,15 @@
       "gotIt": "Verstanden"
     }
   },
+  "offline": {
+    "banner": {
+      "offline": "Du bist offline — Änderungen werden später synchronisiert",
+      "syncing": "{{count}} Änderung(en) werden synchronisiert…"
+    },
+    "toasts": {
+      "synced": "{{count}} Änderung(en) synchronisiert"
+    }
+  },
   "errorBoundary": {
     "root": {
       "title": "Etwas ist schiefgelaufen",

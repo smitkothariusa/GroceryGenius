@@ -17,6 +17,8 @@ import LanguageSwitcher from './components/LanguageSwitcher';
 import OnboardingSurvey from './components/OnboardingSurvey';
 import FeedbackButton from './components/FeedbackButton';
 import InstallBanner from './components/InstallBanner';
+import OfflineBanner from './components/OfflineBanner';
+import { useOfflineStatus } from './hooks/useOfflineStatus';
 import SettingsPanel from './components/SettingsPanel';
 import TourOverlay from './components/TourOverlay';
 import { TOUR_STEPS } from './tourSteps';
@@ -127,6 +129,23 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     return onRateLimited(() => warning(t('toasts.rateLimited')));
   }, [warning, t]);
+  // Offline mutation queue (task 11): drains queued pantry/shopping writes
+  // on reconnect, reconciles client-side temp ids to the real Supabase ids
+  // once each queued 'add' syncs, and surfaces a success toast.
+  const handleOfflineSynced = useCallback((count: number) => {
+    success(t('offline.toasts.synced', { count }));
+  }, [success, t]);
+  const handleOfflineItemSynced = useCallback((entity: 'pantry' | 'shopping', tempId: string, realId: string) => {
+    if (entity === 'pantry') {
+      setPantry(prev => prev.map(item => (item.id === tempId ? { ...item, id: realId } : item)));
+    } else {
+      setShoppingList(prev => prev.map(item => (item.id === tempId ? { ...item, id: realId } : item)));
+    }
+  }, [setPantry, setShoppingList]);
+  const { isOnline, pendingCount } = useOfflineStatus({
+    onSynced: handleOfflineSynced,
+    onItemSynced: handleOfflineItemSynced,
+  });
   const [isTabChanging, setIsTabChanging] = useState(false);
   const API_BASE = import.meta.env.VITE_API_URL || '/_/backend';
   const bgColor = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
@@ -1076,6 +1095,8 @@ const AppContent: React.FC = () => {
   }
   return (
     <div style={{ minHeight: '100vh', background: bgColor }}>
+      <OfflineBanner isOnline={isOnline} pendingCount={pendingCount} />
+
       {/* Mobile drawer backdrop */}
       <div
         className={`mobile-drawer-backdrop ${drawerOpen ? 'open' : ''}`}

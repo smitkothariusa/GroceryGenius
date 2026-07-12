@@ -706,6 +706,15 @@
       "gotIt": "Got it"
     }
   },
+  "offline": {
+    "banner": {
+      "offline": "You're offline — changes will sync later",
+      "syncing": "Syncing {{count}} change(s)…"
+    },
+    "toasts": {
+      "synced": "{{count}} change(s) synced"
+    }
+  },
   "errorBoundary": {
     "root": {
       "title": "Something went wrong",

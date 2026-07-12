@@ -706,6 +706,15 @@
       "gotIt": "Entendido"
     }
   },
+  "offline": {
+    "banner": {
+      "offline": "Estás sin conexión: los cambios se sincronizarán más tarde",
+      "syncing": "Sincronizando {{count}} cambio(s)…"
+    },
+    "toasts": {
+      "synced": "{{count}} cambio(s) sincronizado(s)"
+    }
+  },
   "errorBoundary": {
     "root": {
       "title": "Algo salió mal",

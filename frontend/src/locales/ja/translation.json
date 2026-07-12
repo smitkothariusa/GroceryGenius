@@ -706,6 +706,15 @@
       "gotIt": "了解"
     }
   },
+  "offline": {
+    "banner": {
+      "offline": "オフラインです — 変更は後で同期されます",
+      "syncing": "{{count}} 件の変更を同期中…"
+    },
+    "toasts": {
+      "synced": "{{count}} 件の変更を同期しました"
+    }
+  },
   "errorBoundary": {
     "root": {
       "title": "問題が発生しました",

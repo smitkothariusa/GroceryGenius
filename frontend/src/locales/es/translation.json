@@ -270,7 +270,7 @@
       "sunday": "Domingo"
     },
     "templates": {
-      "saveButton": "Guardar como Plantilla",
+      "saveButton": "Guardar Semana como Plantilla",
       "applyButton": "Aplicar Plantilla",
       "saving": "Guardando...",
       "applying": "Aplicando...",

@@ -3,7 +3,8 @@ import { FOOD_DATABASE } from '../../data/foodDatabase';
 /**
  * Heuristic donatability classification for a pantry item.
  *
- * - 'perishable': food banks generally reject these (dairy, produce, meat, frozen...).
+ * - 'perishable': food banks generally reject these (dairy, meat, frozen,
+ *   soft produce like bananas/berries/leafy greens...).
  * - 'non-perishable': shelf-stable, generally accepted by food banks (canned, grains...).
  * - 'unknown': not enough signal to classify confidently — never badged, never
  *   excluded by the "Donatable only" filter.
@@ -23,16 +24,29 @@ export interface PerishabilityInput {
 // Categories present in foodDatabase.ts / vision.py's VALID_CATEGORIES that are
 // unambiguous on their own (every item in the category is reliably perishable
 // or reliably shelf-stable).
-const PERISHABLE_CATEGORIES = new Set(['dairy', 'produce', 'meat', 'frozen', 'vegetables', 'fruits']);
+//
+// NOTE: 'produce' is deliberately NOT in this set. It's a mixed bag — root
+// vegetables like potatoes/onions/garlic/winter squash keep for weeks and are
+// routinely accepted by food banks, while soft produce like bananas/berries/
+// leafy greens spoils in days. Bucketing all of 'produce' as unambiguously
+// perishable meant potatoes (shelfLife 30) were never given the chance to
+// fall through to the shelfLife check below and got misclassified as
+// perishable right alongside bananas (shelfLife 7). Let shelfLife arbitrate
+// instead.
+const PERISHABLE_CATEGORIES = new Set(['dairy', 'meat', 'frozen']);
 const NON_PERISHABLE_CATEGORIES = new Set([
   'canned', 'grains', 'pantryItems', 'snacks', 'beverages', 'condiments', 'spices',
 ]);
-// 'breakfast', 'bakery', 'other', and any unrecognized category are ambiguous —
-// items within them range from shelf-stable (cereal, pancake mix) to highly
-// perishable (croissants, danishes) — fall through to shelfLife/keyword checks.
+// 'produce', 'breakfast', 'bakery', 'other', and any unrecognized category
+// are ambiguous — items within them range from shelf-stable (potatoes,
+// cereal, pancake mix) to highly perishable (bananas, croissants, danishes)
+// — fall through to shelfLife/keyword checks.
 
-/** shelfLife (days) at/above which an ambiguous-category item leans non-perishable. */
-const SHELF_STABLE_DAYS = 60;
+/** shelfLife (days) at/above which an ambiguous-category item leans non-perishable.
+ * 21 days covers hardy produce (potatoes/onions/garlic/winter squash, all
+ * shelfLife >= 21 in foodDatabase.ts) while excluding soft produce
+ * (bananas/tomatoes/leafy greens/berries, all shelfLife <= 14). */
+const SHELF_STABLE_DAYS = 21;
 /** shelfLife (days) below which an ambiguous-category item leans perishable. */
 const SHORT_SHELF_LIFE_DAYS = 14;
 

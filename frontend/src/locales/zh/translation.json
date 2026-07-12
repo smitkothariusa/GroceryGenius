@@ -270,7 +270,7 @@
       "sunday": "周日"
     },
     "templates": {
-      "saveButton": "保存为模板",
+      "saveButton": "将本周保存为模板",
       "applyButton": "应用模板",
       "saving": "保存中...",
       "applying": "应用中...",

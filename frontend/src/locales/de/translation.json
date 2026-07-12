@@ -270,7 +270,7 @@
       "sunday": "Sonntag"
     },
     "templates": {
-      "saveButton": "Als Vorlage speichern",
+      "saveButton": "Woche als Vorlage speichern",
       "applyButton": "Vorlage anwenden",
       "saving": "Wird gespeichert...",
       "applying": "Wird angewendet...",

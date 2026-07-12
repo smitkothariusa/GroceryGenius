@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { pantryService } from '../../lib/database';
-import { isExpiringSoon } from '../../lib/pantryExpiry';
+import { isExpiringSoon, parseLocalDate } from '../../lib/pantryExpiry';
 import { searchFoods, getSmartExpiryDate, getFoodDisplayName, getSuggestedUnits, type FoodEntry } from '../../data/foodDatabase';
 import { useDonation } from '../donation/DonationContext';
 import { usePantry, type PantryItem } from './PantryContext';
@@ -973,7 +973,7 @@ export function PantrySection({
                                 fontWeight: expiring ? '600' : '400'
                               }}>
                                 {expiring && '⚠️ '}
-                                Expires: {new Date(item.expiryDate).toLocaleDateString()}
+                                Expires: {parseLocalDate(item.expiryDate).toLocaleDateString()}
                               </span>
                             )}
                           </div>

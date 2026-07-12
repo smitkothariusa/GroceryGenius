@@ -270,7 +270,7 @@
       "sunday": "Dimanche"
     },
     "templates": {
-      "saveButton": "Enregistrer comme Modèle",
+      "saveButton": "Enregistrer la Semaine comme Modèle",
       "applyButton": "Appliquer un Modèle",
       "saving": "Enregistrement...",
       "applying": "Application...",

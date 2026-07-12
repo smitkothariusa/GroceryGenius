@@ -544,7 +544,82 @@ export const mealPlansService = {
       .from('meal_plans')
       .delete()
       .eq('id', id);
-    
+
+    if (error) throw error;
+  },
+};
+
+// ============================================
+// MEAL PLAN TEMPLATES
+// ============================================
+
+// Week-relative entry: dayOfWeek is 0 (Sunday) - 6 (Saturday), matching
+// MealPlanCalendar's weekDates ordering, so a template can be replayed
+// onto any week regardless of absolute dates.
+export interface MealPlanTemplateEntry {
+  dayOfWeek: number;
+  meal_type: string;
+  recipe: any;
+  servings: number;
+  notes?: string;
+}
+
+export interface MealPlanTemplate {
+  id: string;
+  user_id: string;
+  name: string;
+  template_data: MealPlanTemplateEntry[];
+  created_at: string;
+}
+
+// Client-side cap only (see docs/tasks/23-meal-plan-templates.md) — no
+// server-side enforcement for v1, a client bypass here is just a UX cap.
+export const MEAL_PLAN_TEMPLATE_CAP = 10;
+
+export const mealPlanTemplatesService = {
+  // Get all saved templates for the current user, newest first
+  async getAll(): Promise<MealPlanTemplate[]> {
+    const { data, error } = await supabase
+      .from('meal_plan_templates')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  // Add a new template
+  async add(template: {
+    name: string;
+    template_data: MealPlanTemplateEntry[];
+  }): Promise<MealPlanTemplate> {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('meal_plan_templates')
+      .insert({
+        user_id: userData.user.id,
+        name: template.name,
+        template_data: template.template_data,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      logError(error, 'api:mealplantemplates.add');
+      throw error;
+    }
+    return data;
+  },
+
+  // Delete a template
+  async delete(id: string) {
+    const { error } = await supabase
+      .from('meal_plan_templates')
+      .delete()
+      .eq('id', id);
+
     if (error) throw error;
   },
 };

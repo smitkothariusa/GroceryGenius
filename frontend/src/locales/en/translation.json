@@ -268,6 +268,26 @@
       "friday": "Friday",
       "saturday": "Saturday",
       "sunday": "Sunday"
+    },
+    "templates": {
+      "saveButton": "Save as Template",
+      "applyButton": "Apply Template",
+      "saving": "Saving...",
+      "applying": "Applying...",
+      "namePrompt": "Name this template:",
+      "nameRequiredError": "Please enter a name for the template.",
+      "emptyWeekError": "Add some meals to this week before saving it as a template.",
+      "capReachedError": "You've reached the 10-template limit. Delete a template before saving a new one.",
+      "saveSuccess": "Template saved!",
+      "saveError": "Failed to save template. Please try again.",
+      "applyModalTitle": "Apply a Template",
+      "noTemplates": "No saved templates yet. Save a week as a template to reuse it later!",
+      "mealsCount": "{{count}} meal(s)",
+      "applyOverwriteConfirm": "This week already has meals planned. Applying this template will delete them and replace them with the template's meals. Continue?",
+      "applySuccess": "Template applied!",
+      "applyError": "Failed to apply template. Please try again.",
+      "deleteConfirm": "Delete this template? This can't be undone.",
+      "deleteError": "Failed to delete template. Please try again."
     }
   },
   "shopping": {

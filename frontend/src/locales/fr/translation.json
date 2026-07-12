@@ -268,6 +268,26 @@
       "friday": "Vendredi",
       "saturday": "Samedi",
       "sunday": "Dimanche"
+    },
+    "templates": {
+      "saveButton": "Enregistrer comme Modèle",
+      "applyButton": "Appliquer un Modèle",
+      "saving": "Enregistrement...",
+      "applying": "Application...",
+      "namePrompt": "Nommez ce modèle :",
+      "nameRequiredError": "Veuillez saisir un nom pour le modèle.",
+      "emptyWeekError": "Ajoutez des repas à cette semaine avant de l'enregistrer comme modèle.",
+      "capReachedError": "Vous avez atteint la limite de 10 modèles. Supprimez un modèle avant d'en enregistrer un nouveau.",
+      "saveSuccess": "Modèle enregistré !",
+      "saveError": "Échec de l'enregistrement du modèle. Veuillez réessayer.",
+      "applyModalTitle": "Appliquer un Modèle",
+      "noTemplates": "Aucun modèle enregistré pour le moment. Enregistrez une semaine comme modèle pour la réutiliser plus tard !",
+      "mealsCount": "{{count}} repas",
+      "applyOverwriteConfirm": "Cette semaine contient déjà des repas planifiés. Appliquer ce modèle les supprimera et les remplacera par les repas du modèle. Continuer ?",
+      "applySuccess": "Modèle appliqué !",
+      "applyError": "Échec de l'application du modèle. Veuillez réessayer.",
+      "deleteConfirm": "Supprimer ce modèle ? Cette action est irréversible.",
+      "deleteError": "Échec de la suppression du modèle. Veuillez réessayer."
     }
   },
   "shopping": {

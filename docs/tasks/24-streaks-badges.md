@@ -2,7 +2,7 @@
 
 **Priority:** 🟢 Feature (backlog: [feature-ideas.md #13](../feature-ideas.md#13-gamified-streaks--impact-badges))
 **Effort:** S–M
-**Status:** IN PROGRESS
+**Status:** DONE — merged to `dev` 2026-07-12 (PR [#56](https://github.com/smitkothariusa/GroceryGenius/pull/56))
 
 ## Problem
 

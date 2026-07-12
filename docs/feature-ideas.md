@@ -15,11 +15,13 @@ be resolved with the user before coding), `IN PROGRESS`, `DONE`, `SKIPPED`.
 
 ## Current status
 
-As of 2026-07-12: #2 (donatable-items highlighter) and #5 (cook what you
-have) are DONE, both merged to `dev`. Next quick-win candidates: #12, #13
-(lean on infra that already exists). #1 and #4 are the biggest value
-unlocks but also the biggest data-model commitments — treat as
-XL/needs-its-own-spec before coding.
+As of 2026-07-12: #2 (donatable-items highlighter), #5 (cook what you
+have), #12 (meal-plan templates), and #13 (streaks/badges) are all DONE,
+merged to `dev`. The quick-win cluster is now exhausted — every remaining
+idea (#1, #3, #4, #6–#11, #14, #15) is `NEEDS PRODUCT DECISION` with open
+questions that need the user's input before coding. #1 and #4 are the
+biggest value unlocks but also the biggest data-model commitments — treat
+as XL/needs-its-own-spec before coding.
 
 ---
 
@@ -38,8 +40,8 @@ XL/needs-its-own-spec before coding.
 | 9 | [Grocery budget tracker](#9-grocery-budget-tracker) | M | NEEDS PRODUCT DECISION |
 | 10 | [Voice / conversational quick-add](#10-voice--conversational-quick-add) | M | NEEDS PRODUCT DECISION |
 | 11 | [Barcode-driven price & deal history](#11-barcode-driven-price--deal-history) | L | NEEDS PRODUCT DECISION |
-| 12 | [Meal-plan templates & one-tap week fill](#12-meal-plan-templates--one-tap-week-fill) | M | IN PROGRESS — spec: [docs/tasks/23-meal-plan-templates.md](tasks/23-meal-plan-templates.md) |
-| 13 | [Gamified streaks & impact badges](#13-gamified-streaks--impact-badges) | S–M | IN PROGRESS — spec: [docs/tasks/24-streaks-badges.md](tasks/24-streaks-badges.md) |
+| 12 | [Meal-plan templates & one-tap week fill](#12-meal-plan-templates--one-tap-week-fill) | M | DONE — spec: [docs/tasks/23-meal-plan-templates.md](tasks/23-meal-plan-templates.md) |
+| 13 | [Gamified streaks & impact badges](#13-gamified-streaks--impact-badges) | S–M | DONE — spec: [docs/tasks/24-streaks-badges.md](tasks/24-streaks-badges.md) |
 | 14 | [Dietary-preference-aware recipe generation](#14-dietary-preference-aware-recipe-generation) | M | NEEDS PRODUCT DECISION |
 | 15 | [Accessibility & scan-assist pass](#15-accessibility--scan-assist-pass-high-contrast-larger-text-tts-for-recipes) | M | NEEDS PRODUCT DECISION |
 
@@ -359,6 +361,16 @@ sheet.
 template overwrite or merge into an existing week? Share templates within
 a household (idea #4) or publicly?
 
+**Shipped 2026-07-12** (PR [#55](https://github.com/smitkothariusa/GroceryGenius/pull/55),
+merged to `dev`). Resolved decisions per the spec: applying a template
+overwrites the target week (confirm dialog if it already has entries), a
+10-template cap enforced client-side, and no household sharing (idea #4
+doesn't exist yet). New `mealPlanTemplatesService` in `lib/database.ts`
+against the `meal_plan_templates` table; "Save as Template" / "Apply
+Template" actions added to `MealPlanCalendar.tsx`, reusing the existing
+`mealPlansService` calls so shopping-list generation and pantry deduction
+are unaffected. i18n added across all 6 locales.
+
 ## 13. Gamified streaks & impact badges
 
 Reward engagement with streaks (days logged, weeks with zero waste) and
@@ -378,6 +390,20 @@ shelf.
 **Open product questions:** Which behaviors to reward (careful not to
 incentivize over-buying/over-eating)? Persist streaks or compute live? How
 prominent — opt-in so it doesn't feel gimmicky?
+
+**Shipped 2026-07-12** (PR [#56](https://github.com/smitkothariusa/GroceryGenius/pull/56),
+merged to `dev`). Scoped narrowly per the spec's resolved decisions:
+rewards are waste-reduction (zero-waste streak) and donations (milestone
+badges at 10/50/100/500 meals) only — never purchase volume or app-open
+frequency, to avoid incentivizing over-buying/over-eating. On by default,
+dismissible via a `gg_hide_achievements` localStorage flag. New
+`streakService` in `lib/database.ts` against the `user_streaks` table (a
+lightweight daily check-in counter, not a server-verified audit — an
+intentional v1 limitation); donation badges are fully derived from
+existing `donation_impact.total_meals`, no persistence. New
+`frontend/src/features/achievements/AchievementsPanel.tsx`, mounted in the
+Donation tab. i18n added across all 6 locales, tone-checked to read as
+encouraging rather than judgmental about food waste.
 
 ## 14. Dietary-preference-aware recipe generation
 

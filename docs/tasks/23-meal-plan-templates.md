@@ -2,7 +2,7 @@
 
 **Priority:** 🟢 Feature (backlog: [feature-ideas.md #12](../feature-ideas.md#12-meal-plan-templates--one-tap-week-fill))
 **Effort:** M
-**Status:** IN PROGRESS
+**Status:** DONE — merged to `dev` 2026-07-12 (PR [#55](https://github.com/smitkothariusa/GroceryGenius/pull/55))
 
 ## Problem
 

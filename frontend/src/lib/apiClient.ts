@@ -55,7 +55,22 @@ export async function authFetch(input: RequestInfo | URL, init: RequestInit = {}
   }
 
   const doFetch = async (): Promise<Response> => {
-    const { data: { session } } = await supabase.auth.getSession();
+    let { data: { session } } = await supabase.auth.getSession();
+    // Proactively refresh an expired/near-expiry access token before sending.
+    // getSession() returns the stored session as-is; supabase-js's background
+    // auto-refresh timer is PAUSED while a mobile PWA is backgrounded/frozen by
+    // the OS, so after the app is foregrounded the stored access token can
+    // already be expired. Sending it gets a 401 from the backend — the most
+    // likely cause of "authenticated requests (recipe generation etc.) fail on
+    // mobile but work in a fresh incognito login." Refresh here so we never
+    // send a known-expired token. If the refresh itself fails (refresh token
+    // also dead), we fall through and send whatever we have; the backend 401s
+    // and the caller surfaces the sign-in-again prompt.
+    const nowSec = Math.floor(Date.now() / 1000);
+    if (session?.expires_at && session.expires_at - nowSec < 60) {
+      const { data: refreshed } = await supabase.auth.refreshSession();
+      if (refreshed.session) session = refreshed.session;
+    }
     const token = session?.access_token;
     const headers = new Headers(init.headers);
     if (token) headers.set('Authorization', `Bearer ${token}`);

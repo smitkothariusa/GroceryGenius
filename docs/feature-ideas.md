@@ -30,7 +30,7 @@ commitments — treat as XL/needs-its-own-spec before coding.
 | 2 | [Donatable-items highlighter (perishable vs. non-perishable)](#2-donatable-items-highlighter-perishable-vs-non-perishable) | M | DONE — spec: [docs/tasks/21-donatable-items-highlighter.md](tasks/21-donatable-items-highlighter.md) |
 | 3 | [Multi-nutrient tracker (protein, fiber — user-selected)](#3-multi-nutrient-tracker-protein-fiber--user-selected) | M | NEEDS PRODUCT DECISION |
 | 4 | [Household / shared pantry (family accounts)](#4-household--shared-pantry-family-accounts) | XL | NEEDS PRODUCT DECISION |
-| 5 | [Cook what you have (pantry-first, expiry-aware recipes)](#5-cook-what-you-have-recipe-mode-pantry-first-expiry-aware) | M | NEEDS PRODUCT DECISION |
+| 5 | [Cook what you have (pantry-first, expiry-aware recipes)](#5-cook-what-you-have-recipe-mode-pantry-first-expiry-aware) | M | IN PROGRESS — spec: [docs/tasks/22-cook-what-you-have.md](tasks/22-cook-what-you-have.md) |
 | 6 | [Smart auto-restock suggestions](#6-smart-auto-restock-suggestions) | L | NEEDS PRODUCT DECISION |
 | 7 | [Recipe photo & "make it again" cook log](#7-recipe-photo--make-it-again-cook-log) | M | NEEDS PRODUCT DECISION |
 | 8 | [Weekly waste & savings dashboard](#8-weekly-waste--savings-dashboard) | M | NEEDS PRODUCT DECISION |

@@ -14,10 +14,10 @@ Workflow for each task: `.claude/skills/implement-task/SKILL.md`
 Per the spec's recommended extraction order, doing this as a sequence of
 small PRs rather than one giant change: Favorites (done, PR #48) →
 MealPlanCalendar wiring (done — already fully wired, no work needed) →
-Donation (done, PR #49) → Recipes → Scanning+Pantry (last, most entangled).
-Both merged to `dev` (79d049c) and confirmed live on
-dev.grocerygenius.org. `App.tsx` is down from 7966 to ~6593 lines. Next:
-Recipes extraction.
+Donation (done, PR #49) → Recipes (done, PR #50) → Scanning+Pantry (last,
+most entangled — not started). All merged to `dev` (85ed0a1) and confirmed
+live on dev.grocerygenius.org. `App.tsx` is down from 7966 to ~5124 lines.
+Next: Scanning+Pantry extraction (final step of task 6).
 
 Tasks 03, 12, 13, 15 (PRs #39–#42) and **9, 14, 16, 17 (PRs #44–#47)** are
 **all released to production** as of 2026-07-11 (main 728ecc2) — verified

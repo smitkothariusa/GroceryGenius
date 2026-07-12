@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { recipesService } from '../../lib/database';
 import { authFetch } from '../../lib/apiClient';
+import { isExpiringSoon } from '../../lib/pantryExpiry';
 import { CustomDietaryLabel } from '../../lib/supabase';
 import { useFavorites } from '../favorites/FavoritesContext';
 import {
@@ -102,6 +103,14 @@ export function RecipeSection({
   const handleRecipeModeChange = (mode: 'loose' | 'strict') => {
     setRecipeMode(mode);
     localStorage.setItem('gg_recipe_mode', mode);
+  };
+
+  const expiringPantryItems = pantry.filter(item => isExpiringSoon(item));
+
+  const addExpiringPantryToIngredients = () => {
+    const names = expiringPantryItems.map(item => item.name.toLowerCase());
+    setIngredientTags(Array.from(new Set([...ingredientTags, ...names])));
+    handleRecipeModeChange('strict');
   };
 
   const activeFilterCount = [
@@ -362,6 +371,22 @@ export function RecipeSection({
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem',
                   }}>📷 {t('recipes.scanIngredients')}</button>
                 </div>
+                {/* Row 1b: Cook what's expiring */}
+                {pantry.length > 0 && (
+                  <div style={{ marginBottom: '0.5rem' }}>
+                    <button
+                      onClick={addExpiringPantryToIngredients}
+                      disabled={expiringPantryItems.length === 0}
+                      title={expiringPantryItems.length === 0 ? t('recipes.noExpiringItems') : undefined}
+                      style={{
+                        width: '100%', minHeight: '44px', padding: '0.5rem 0.65rem',
+                        background: expiringPantryItems.length === 0 ? '#d1d5db' : 'linear-gradient(45deg, #f59e0b, #d97706)',
+                        color: 'white', border: 'none', borderRadius: '10px',
+                        cursor: expiringPantryItems.length === 0 ? 'not-allowed' : 'pointer', fontWeight: 600, fontSize: '0.82rem',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem',
+                      }}>🍳 {t('recipes.cookWhatsExpiring')}</button>
+                  </div>
+                )}
                 {/* Row 2: Filters + Get Recipes */}
                 <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
                   <button
@@ -571,13 +596,26 @@ export function RecipeSection({
         ) : (
           <>
             {/* DESKTOP */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
               <label style={{ fontWeight: '600' }}>🥘 {t('recipes.whatIngredientsLabel')}</label>
               {pantry.length > 0 && (
                 <button data-tour="recipes-use-pantry-btn" onClick={addPantryToIngredients} style={{
                   padding: '0.35rem 0.75rem', background: '#8b5cf6', color: 'white',
                   border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem'
                 }}>📦 {t('recipes.addPantryItems')}</button>
+              )}
+              {pantry.length > 0 && (
+                <button
+                  onClick={addExpiringPantryToIngredients}
+                  disabled={expiringPantryItems.length === 0}
+                  title={expiringPantryItems.length === 0 ? t('recipes.noExpiringItems') : undefined}
+                  style={{
+                    padding: '0.35rem 0.75rem',
+                    background: expiringPantryItems.length === 0 ? '#d1d5db' : 'linear-gradient(45deg, #f59e0b, #d97706)',
+                    color: 'white', border: 'none', borderRadius: '8px',
+                    cursor: expiringPantryItems.length === 0 ? 'not-allowed' : 'pointer',
+                    fontWeight: '600', fontSize: '0.85rem', whiteSpace: 'nowrap'
+                  }}>🍳 {t('recipes.cookWhatsExpiring')}</button>
               )}
               <div style={{ display: 'flex', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '3px' }}>
                 {(['strict', 'loose'] as const).map((mode) => (

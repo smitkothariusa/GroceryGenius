@@ -135,6 +135,8 @@
     "recipeMode": "レシピモード：",
     "addPantryItems": "パントリーから追加",
     "scanIngredients": "材料をスキャン",
+    "cookWhatsExpiring": "期限切れ間近の食材で調理",
+    "noExpiringItems": "期限切れ間近のパントリー食材はありません",
     "dietary": {
       "all": "すべての食事の好み",
       "vegetarian": "ベジタリアン",

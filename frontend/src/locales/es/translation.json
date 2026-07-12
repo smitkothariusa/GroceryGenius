@@ -135,6 +135,8 @@
     "recipeMode": "Modo de receta:",
     "addPantryItems": "Agregar de Despensa",
     "scanIngredients": "Escanear Ingredientes",
+    "cookWhatsExpiring": "Cocinar lo que Caduca",
+    "noExpiringItems": "No hay artículos de la despensa por caducar pronto",
     "dietary": {
       "all": "Cualquier preferencia dietética",
       "vegetarian": "Vegetariano",

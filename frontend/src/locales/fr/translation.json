@@ -135,6 +135,8 @@
     "recipeMode": "Mode de recette :",
     "addPantryItems": "Ajouter du Garde-Manger",
     "scanIngredients": "Scanner Ingrédients",
+    "cookWhatsExpiring": "Cuisiner ce qui Expire",
+    "noExpiringItems": "Aucun article du garde-manger n'expire bientôt",
     "dietary": {
       "all": "Toute préférence alimentaire",
       "vegetarian": "Végétarien",

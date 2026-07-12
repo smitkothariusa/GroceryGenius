@@ -135,6 +135,8 @@
     "recipeMode": "Recipe mode:",
     "addPantryItems": "Add Pantry Items",
     "scanIngredients": "Scan Ingredients",
+    "cookWhatsExpiring": "Cook What's Expiring",
+    "noExpiringItems": "No pantry items are expiring soon",
     "dietary": {
       "all": "Any dietary preference",
       "vegetarian": "Vegetarian",

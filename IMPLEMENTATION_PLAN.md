@@ -9,14 +9,36 @@ Workflow for each task: `.claude/skills/implement-task/SKILL.md`
 
 ## Current Task
 
-**[11 — Offline support (PWA)](docs/tasks/11-offline-support.md)** — IN
-PROGRESS as of 2026-07-12. Task 6 (App.tsx refactor) completed and
-released to production 2026-07-12 — see below. Task 18 (meal calendar)
-turned out to already be fully implemented (see deviations section) —
-marked DONE, no work needed. Tasks 19 (allergen checking) and 20 (soft
-delete) reviewed and explicitly skipped per user decision 2026-07-12 — not
-needed. Remaining backlog after 11: 7/8 (Redis), deprioritized, revisit
-only if scaling or cost pressure changes the calculus.
+None actively in progress as of 2026-07-12 (later session). **Task 11
+(offline support) closed out and marked DONE** — code was already merged
+to `dev` via PR #52 from an earlier session; this session verified it
+end-to-end (`npx tsc --noEmit` clean, `npx vitest run` 26/26 passing, all
+6 locale files carry matching `offline.banner.*` keys, full re-read of
+`offlineQueue.ts`/`useOfflineStatus.ts`/`OfflineBanner.tsx`/`database.ts`
+against every implementation step in the spec) before flipping the
+status. **Not independently verified:** the spec's own manual checklist
+(toggling devtools "offline" mode against a signed-in session) — this
+remote sandbox has no Supabase credentials and blocks arbitrary outbound
+network access, so authenticated browser E2E isn't possible here; per
+CLAUDE.md's own Local Environment notes, that kind of authenticated E2E
+run happens from the local machine. Recommend a real offline-toggle pass
+there before treating this as fully proven, though the code review found
+no issues.
+
+The **only remaining `NOT STARTED` items are 7/8 (Redis)**, explicitly
+deprioritized per user decision — not needed at current single-instance
+scale, revisit only if scaling or cost pressure changes the calculus.
+Everything else in this file is DONE or SKIPPED. Further product-facing
+work now lives in `docs/feature-ideas.md`, where the quick-win cluster
+(#2, #5, #12, #13) is fully shipped and every remaining idea needs a
+product decision from the user before it can be scoped — see that file's
+"Current status" note.
+
+Task 6 (App.tsx refactor) completed and released to production
+2026-07-12 — see below. Task 18 (meal calendar) turned out to already be
+fully implemented (see deviations section) — marked DONE, no work needed.
+Tasks 19 (allergen checking) and 20 (soft delete) reviewed and explicitly
+skipped per user decision 2026-07-12 — not needed.
 
 Tasks 03, 12, 13, 15 (PRs #39–#42) and **9, 14, 16, 17 (PRs #44–#47)** are
 **all released to production** as of 2026-07-11 (main 728ecc2) — verified
@@ -84,7 +106,7 @@ changes the calculus).
 | 8 | Recipe caching (Redis, 24h TTL) | M (1d) | NOT STARTED | [spec](docs/tasks/08-recipe-caching.md) |
 | 9 | Investigate & fix pantry expiry boundary logic | S (0.5d) | DONE | [spec](docs/tasks/09-pantry-expiry-boundary.md) |
 | 10 | Enforce CI as a required status check on dev/main | S (1-2h) | DONE | [spec](docs/tasks/10-ci-branch-protection.md) |
-| 11 | Offline support (PWA service worker + sync queue) | L (2-3d) | IN PROGRESS | [spec](docs/tasks/11-offline-support.md) |
+| 11 | Offline support (PWA service worker + sync queue) | L (2-3d) | DONE | [spec](docs/tasks/11-offline-support.md) |
 | 12 | Request deduplication (prevent double-submit) | S (0.5d) | DONE | [spec](docs/tasks/12-request-deduplication.md) |
 | 13 | Centralize ingredient parsing logic | M (1d) | DONE | [spec](docs/tasks/13-ingredient-parsing.md) |
 | 14 | Expand frontend test coverage (component-level) | M (1-2d) | DONE | [spec](docs/tasks/14-frontend-test-coverage.md) |

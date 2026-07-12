@@ -2,7 +2,7 @@
 
 **Priority:** 🟠 High
 **Effort:** L (2-3 days)
-**Status:** NOT STARTED — scoped 2026-07-12, ready to implement
+**Status:** DONE — merged to `dev` 2026-07-12 (PR [#52](https://github.com/smitkothariusa/GroceryGenius/pull/52)). Manual offline-toggle browser verification against a signed-in session still recommended from a local environment before treating this as fully proven (see `IMPLEMENTATION_PLAN.md`'s Current Task note) — the automated checks (`tsc`, `vitest`, i18n key parity, full spec-compliance code review) all passed.
 
 ## What already exists (verified 2026-07-12, don't rebuild)
 

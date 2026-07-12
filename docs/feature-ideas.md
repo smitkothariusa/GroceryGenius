@@ -38,8 +38,8 @@ XL/needs-its-own-spec before coding.
 | 9 | [Grocery budget tracker](#9-grocery-budget-tracker) | M | NEEDS PRODUCT DECISION |
 | 10 | [Voice / conversational quick-add](#10-voice--conversational-quick-add) | M | NEEDS PRODUCT DECISION |
 | 11 | [Barcode-driven price & deal history](#11-barcode-driven-price--deal-history) | L | NEEDS PRODUCT DECISION |
-| 12 | [Meal-plan templates & one-tap week fill](#12-meal-plan-templates--one-tap-week-fill) | M | NEEDS PRODUCT DECISION |
-| 13 | [Gamified streaks & impact badges](#13-gamified-streaks--impact-badges) | S–M | NEEDS PRODUCT DECISION |
+| 12 | [Meal-plan templates & one-tap week fill](#12-meal-plan-templates--one-tap-week-fill) | M | IN PROGRESS — spec: [docs/tasks/23-meal-plan-templates.md](tasks/23-meal-plan-templates.md) |
+| 13 | [Gamified streaks & impact badges](#13-gamified-streaks--impact-badges) | S–M | IN PROGRESS — spec: [docs/tasks/24-streaks-badges.md](tasks/24-streaks-badges.md) |
 | 14 | [Dietary-preference-aware recipe generation](#14-dietary-preference-aware-recipe-generation) | M | NEEDS PRODUCT DECISION |
 | 15 | [Accessibility & scan-assist pass](#15-accessibility--scan-assist-pass-high-contrast-larger-text-tts-for-recipes) | M | NEEDS PRODUCT DECISION |
 

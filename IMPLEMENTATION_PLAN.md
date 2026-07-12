@@ -9,10 +9,14 @@ Workflow for each task: `.claude/skills/implement-task/SKILL.md`
 
 ## Current Task
 
-None actively in progress. Task 6 (App.tsx refactor) completed 2026-07-12 —
-see below. Next candidates needing product/scope sign-off before
-implementation: 18 (meal calendar), 19 (allergen checking), 20 (soft
-delete). 7/8 (Redis) remain deprioritized per user decision.
+None actively in progress. Task 6 (App.tsx refactor) completed and
+released to production 2026-07-12 — see below. Task 18 (meal calendar)
+turned out to already be fully implemented (see deviations section) —
+marked DONE, no work needed. Tasks 19 (allergen checking) and 20 (soft
+delete) reviewed and explicitly skipped per user decision 2026-07-12 — not
+needed. Remaining backlog: 7/8 (Redis), deprioritized, revisit only if
+scaling or cost pressure changes the calculus. 11 (offline support) is
+unblocked but L-sized and not yet kicked off.
 
 Tasks 03, 12, 13, 15 (PRs #39–#42) and **9, 14, 16, 17 (PRs #44–#47)** are
 **all released to production** as of 2026-07-11 (main 728ecc2) — verified
@@ -92,14 +96,14 @@ changes the calculus).
 |---|---|---|---|---|
 | 16 | Health check endpoint dependency checks | S (0.5d) | DONE | [spec](docs/tasks/16-health-check-deps.md) |
 | 17 | Pagination for pantry/shopping lists | S (0.5d) | DONE | [spec](docs/tasks/17-pagination.md) |
-| 18 | Weekly meal calendar feature | L (2-3d) | NOT STARTED | [spec](docs/tasks/18-meal-calendar.md) |
+| 18 | Weekly meal calendar feature | L (2-3d) | DONE (pre-existing, verified 2026-07-12) | [spec](docs/tasks/18-meal-calendar.md) |
 
 ### 🟢 Low
 
 | # | Task | Effort | Status | Spec |
 |---|---|---|---|---|
-| 19 | Allergen cross-checking | M (1-2d) | NOT STARTED | [spec](docs/tasks/19-allergen-checking.md) |
-| 20 | Soft delete for accounts (30-day grace period) | M (1d) | NOT STARTED | [spec](docs/tasks/20-soft-delete-accounts.md) |
+| 19 | Allergen cross-checking | M (1-2d) | SKIPPED (2026-07-12, user decision — not needed) | [spec](docs/tasks/19-allergen-checking.md) |
+| 20 | Soft delete for accounts (30-day grace period) | M (1d) | SKIPPED (2026-07-12, user decision — not needed) | [spec](docs/tasks/20-soft-delete-accounts.md) |
 
 ---
 
@@ -107,6 +111,15 @@ changes the calculus).
 
 Several items in the source list didn't hold up against the current code and were corrected:
 
+- **"18 — Weekly meal calendar feature, NOT STARTED"** — false, discovered
+  2026-07-12 while scoping it for implementation. `frontend/src/components/
+  MealPlanCalendar.tsx` already has full drag-and-drop day planning,
+  shopping-list generation, and pantry-deduction. `mealPlansService` in
+  `lib/database.ts` already loads/saves/updates/deletes against a real
+  `meal_plans` Supabase table — confirmed via `supabase db query` that the
+  table exists in production with RLS enabled and correct
+  `auth.uid() = user_id` policies for all four operations, identical
+  pattern to pantry. Nothing to build; marked DONE.
 - **"Donation router crashes on import"** — false. `donation.py` exists
   (221 lines), is registered in `main.py`, and is confirmed live (see
   CLAUDE.md gotchas). Dropped; replaced with image upload validation, which

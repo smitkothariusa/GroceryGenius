@@ -389,7 +389,10 @@
       "spices": "Gewürze",
       "hygiene_products": "Hygieneartikel"
     },
-    "hoursLabel": "Öffnungszeiten"
+    "hoursLabel": "Öffnungszeiten",
+    "donatableOnlyFilter": "Nur spendenfähig",
+    "goodToDonate": "Gut zum Spenden",
+    "keepAtHome": "Zu Hause behalten"
   },
   "favorites": {
     "title": "Lieblingsrezepte",

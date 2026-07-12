@@ -389,7 +389,10 @@
       "spices": "spices",
       "hygiene_products": "hygiene products"
     },
-    "hoursLabel": "Hours"
+    "hoursLabel": "Hours",
+    "donatableOnlyFilter": "Donatable only",
+    "goodToDonate": "Good to donate",
+    "keepAtHome": "Keep at home"
   },
   "favorites": {
     "title": "Favorite Recipes",

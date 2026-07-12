@@ -15,10 +15,11 @@ be resolved with the user before coding), `IN PROGRESS`, `DONE`, `SKIPPED`.
 
 ## Current status
 
-As of 2026-07-12: #2 (donatable-items highlighter) is DONE, merged to `dev`.
-Next quick-win candidates: #5, #12, #13 (lean on infra that already exists).
-#1 and #4 are the biggest value unlocks but also the biggest data-model
-commitments — treat as XL/needs-its-own-spec before coding.
+As of 2026-07-12: #2 (donatable-items highlighter) and #5 (cook what you
+have) are DONE, both merged to `dev`. Next quick-win candidates: #12, #13
+(lean on infra that already exists). #1 and #4 are the biggest value
+unlocks but also the biggest data-model commitments — treat as
+XL/needs-its-own-spec before coding.
 
 ---
 
@@ -30,7 +31,7 @@ commitments — treat as XL/needs-its-own-spec before coding.
 | 2 | [Donatable-items highlighter (perishable vs. non-perishable)](#2-donatable-items-highlighter-perishable-vs-non-perishable) | M | DONE — spec: [docs/tasks/21-donatable-items-highlighter.md](tasks/21-donatable-items-highlighter.md) |
 | 3 | [Multi-nutrient tracker (protein, fiber — user-selected)](#3-multi-nutrient-tracker-protein-fiber--user-selected) | M | NEEDS PRODUCT DECISION |
 | 4 | [Household / shared pantry (family accounts)](#4-household--shared-pantry-family-accounts) | XL | NEEDS PRODUCT DECISION |
-| 5 | [Cook what you have (pantry-first, expiry-aware recipes)](#5-cook-what-you-have-recipe-mode-pantry-first-expiry-aware) | M | IN PROGRESS — spec: [docs/tasks/22-cook-what-you-have.md](tasks/22-cook-what-you-have.md) |
+| 5 | [Cook what you have (pantry-first, expiry-aware recipes)](#5-cook-what-you-have-recipe-mode-pantry-first-expiry-aware) | M | DONE — spec: [docs/tasks/22-cook-what-you-have.md](tasks/22-cook-what-you-have.md) |
 | 6 | [Smart auto-restock suggestions](#6-smart-auto-restock-suggestions) | L | NEEDS PRODUCT DECISION |
 | 7 | [Recipe photo & "make it again" cook log](#7-recipe-photo--make-it-again-cook-log) | M | NEEDS PRODUCT DECISION |
 | 8 | [Weekly waste & savings dashboard](#8-weekly-waste--savings-dashboard) | M | NEEDS PRODUCT DECISION |
@@ -194,6 +195,19 @@ button on the pantry tab.
 common staples"? How many expiring items to include, and what expiry
 window counts as "use soon"? Surface as its own tab or a toggle on existing
 recipe generation?
+
+**Shipped 2026-07-12** (PR [#54](https://github.com/smitkothariusa/GroceryGenius/pull/54),
+merged to `dev` @ `ad7dc31`). Non-heavy idea — open questions resolved by
+judgment call rather than a user round-trip (recorded in the spec): reused
+the existing `strict` flag in `recipes.py` (no backend change), reused the
+app's existing 3-day "expiring soon" window (`lib/pantryExpiry.ts`) instead
+of inventing a new threshold, and shipped as a CTA button on the existing
+Recipes tab rather than a new tab. New "🍳 Cook What's Expiring" button
+populates ingredient tags from expiring-soon pantry items and switches
+recipe mode to strict; disabled with a tooltip when nothing is expiring.
+i18n added across all 6 locales. Deploy note: same Vercel account-level
+build-rate limit noted on PR #53 applies here too — dev will pick up this
+commit once the limit resets.
 
 ## 6. Smart auto-restock suggestions
 

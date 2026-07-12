@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { recipesService } from '../../lib/database';
 import { authFetch } from '../../lib/apiClient';
 import { isExpiringSoon } from '../../lib/pantryExpiry';
-import { CustomDietaryLabel } from '../../lib/supabase';
+import { logError } from '../../lib/errorService';
+import { supabase, CustomDietaryLabel } from '../../lib/supabase';
 import { useFavorites } from '../favorites/FavoritesContext';
 import {
   useRecipes,
@@ -221,8 +222,25 @@ export function RecipeSection({
     } catch (err: any) {
       clearTimeout(timeoutId);
       console.error('Recipe generation error:', err);
+      // Prior to this, failures here were never reported anywhere but the
+      // browser console — impossible to diagnose from bug reports alone
+      // (this is how the Safari-specific 401s below went unnoticed).
+      logError(err, 'api:recipes.generate');
+
       if (err.name === 'AbortError') {
         setErrorMsg(t('recipes.timeoutError'));
+      } else if (err instanceof Error && /API error: 401/.test(err.message)) {
+        // Safari's storage rules (ITP / stricter PWA storage eviction) can
+        // silently invalidate the Supabase session — supabase.auth.getSession()
+        // then returns no access_token, authFetch sends the request with no
+        // Authorization header, and the backend correctly 401s. Chrome mobile
+        // doesn't share Safari's storage eviction behavior, which is why this
+        // surfaced as Safari-only. Try one silent refresh; if that still
+        // doesn't produce a session, the user actually needs to sign in again.
+        const { data } = await supabase.auth.refreshSession();
+        setErrorMsg(
+          data.session ? t('recipes.generationError') : t('recipes.sessionExpiredError')
+        );
       } else {
         setErrorMsg(t('recipes.generationError'));
       }

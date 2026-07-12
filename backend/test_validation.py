@@ -64,6 +64,22 @@ def test_translate_full_rejects_recipe_with_too_many_fields(client):
     assert response.status_code == 422
 
 
+def test_generate_recipes_rejects_too_many_ingredients(client):
+    # Regression guard: this cap was 30 (an outlier vs. every other
+    # list-of-strings field in this codebase — pantry.py: 100, shopping.py:
+    # 100, donation.py: 500), which "Add Pantry Items"/"Cook What's
+    # Expiring" routinely exceeded for any moderately stocked pantry,
+    # causing a 422 that surfaced to users as a generic recipe-generation
+    # failure. 101 must still be rejected; 100 itself is accepted (not
+    # separately tested here since a request that passes validation reaches
+    # the real OpenAI call, out of scope for a validation-only test).
+    response = client.post(
+        "/recipes/",
+        json={"ingredients": [f"ingredient{i}" for i in range(101)], "strict": False},
+    )
+    assert response.status_code == 422
+
+
 def test_parse_ingredients_rejects_empty_lines_list(client):
     response = client.post("/recipes/parse-ingredients", json={"lines": []})
     assert response.status_code == 422

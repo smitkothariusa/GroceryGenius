@@ -19,22 +19,22 @@ Tasks 03, 12, 13, 15 (PRs #39–#42) and **9, 14, 16, 17 (PRs #44–#47)** are
 live on grocerygenius.org / grocerygenius-api.onrender.com (health check,
 99 backend tests, 26 frontend tests, auth-required smoke test).
 
-**Task 6 (App.tsx refactor) completed 2026-07-12**, merged to `dev` in five
-sequential PRs per the spec's recommended order: Favorites (#48) →
-MealPlanCalendar wiring (no-op, already fully wired) → Donation (#49) →
-Recipes (#50) → Scanning+Pantry (#51, most entangled, done last).
-`App.tsx`: 7966 → 2624 lines (67% reduction), split into
+**Task 6 (App.tsx refactor) completed and released to production
+2026-07-12**, merged to `dev` in five sequential PRs per the spec's
+recommended order: Favorites (#48) → MealPlanCalendar wiring (no-op,
+already fully wired) → Donation (#49) → Recipes (#50) → Scanning+Pantry
+(#51, most entangled, done last). `App.tsx`: 7966 → 2624 lines (67%
+reduction), split into
 `frontend/src/features/{favorites,donation,recipes,pantry}/`. Each step
 verified independently (tsc, lint, vitest) after cherry-picking off worktree
 agents — every one of the five hit the worktree-isolation gotcha (agent's
 branch silently based off a stale commit instead of the assigned task
 branch); caught and fixed each time via manual `git log` verification +
-cherry-pick before pushing. All five deploys confirmed live on
-dev.grocerygenius.org via `vercel inspect`. Not yet released to `main` —
-this is dev-only so far pending user sign-off, though it qualifies as a
-non-feature (pure refactor, no behavior change) so it's eligible under the
-main-release policy below once confidence is established via more use on
-dev.
+cherry-pick before pushing. **Released to `main` (81e82f5) same day per
+explicit user go-ahead** — verified live on grocerygenius.org (Vercel
+commit check) and grocerygenius-api.onrender.com (health check 200,
+auth-required route 401; backend was unchanged by this frontend-only
+refactor so no new backend deploy occurred).
 
 **Also shipped straight to production this session (unplanned, urgent):** a
 service-worker reload loop (`frontend/index.html` fighting `main.tsx`'s SW

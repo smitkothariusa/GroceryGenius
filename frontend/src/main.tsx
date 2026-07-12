@@ -17,6 +17,20 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 initGlobalErrorHandlers()
 
+// Detecting a new service worker (below) isn't enough on its own — with
+// skipWaiting+clientsClaim (registerType: 'autoUpdate'), the new worker takes
+// control in the background, but the ALREADY-OPEN tab keeps running the old
+// JS it already loaded until something reloads it. Reload once, automatically,
+// the moment control actually changes hands, so an update check finding new
+// code turns into everyone actually running it — not just the SW being ready
+// in the background for whenever the user next happens to reload manually.
+let reloadingForUpdate = false
+navigator.serviceWorker?.addEventListener('controllerchange', () => {
+  if (reloadingForUpdate) return
+  reloadingForUpdate = true
+  window.location.reload()
+})
+
 // Browsers only re-check the SW script on their own schedule (often ~once/24h,
 // and installed mobile PWAs are foregrounded far more than they're freshly
 // navigated, so that check can fire even less often in practice) — this is

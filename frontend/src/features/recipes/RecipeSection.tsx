@@ -223,20 +223,31 @@ export function RecipeSection({
       clearTimeout(timeoutId);
       console.error('Recipe generation error:', err);
       // Prior to this, failures here were never reported anywhere but the
-      // browser console — impossible to diagnose from bug reports alone
-      // (this is how the Safari-specific 401s below went unnoticed).
+      // browser console — impossible to diagnose from bug reports alone.
+      // That gap is exactly how the real cause of "recipe generation fails
+      // on mobile" went unnoticed: it turned out to be a 422 (see below),
+      // not the 401/session-expiry theory this branch was originally added
+      // for — logging is what let us tell the difference instead of guessing.
       logError(err, 'api:recipes.generate');
 
       if (err.name === 'AbortError') {
         setErrorMsg(t('recipes.timeoutError'));
+      } else if (err instanceof Error && /API error: 422/.test(err.message)) {
+        // The backend's ingredient-list cap was 30 — an outlier vs. every
+        // other list field in this codebase (pantry/shopping/donation all
+        // use 100-500) — while "Add Pantry Items"/"Cook What's Expiring"
+        // routinely send every pantry item as an ingredient tag. Anyone with
+        // a moderately stocked pantry (>30 items) tripped this on EVERY
+        // device/browser, which is why it looked mobile-specific: mobile
+        // usage leans harder on those bulk-add buttons than typing
+        // ingredients one at a time. Backend cap raised to 100 to match: if
+        // this still fires, the list is genuinely huge, so tell the user
+        // directly instead of a generic message with no explanation.
+        setErrorMsg(t('recipes.tooManyIngredientsError'));
       } else if (err instanceof Error && /API error: 401/.test(err.message)) {
-        // Safari's storage rules (ITP / stricter PWA storage eviction) can
-        // silently invalidate the Supabase session — supabase.auth.getSession()
-        // then returns no access_token, authFetch sends the request with no
-        // Authorization header, and the backend correctly 401s. Chrome mobile
-        // doesn't share Safari's storage eviction behavior, which is why this
-        // surfaced as Safari-only. Try one silent refresh; if that still
-        // doesn't produce a session, the user actually needs to sign in again.
+        // Session can expire/be evicted between page load and this request.
+        // Try one silent refresh; if that still doesn't produce a session,
+        // the user actually needs to sign in again.
         const { data } = await supabase.auth.refreshSession();
         setErrorMsg(
           data.session ? t('recipes.generationError') : t('recipes.sessionExpiredError')

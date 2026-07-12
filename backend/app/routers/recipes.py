@@ -15,7 +15,13 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 class Ingredients(BaseModel):
-    ingredients: List[Annotated[str, Field(max_length=200)]] = Field(max_length=30)
+    # 30 was an outlier vs. every other list-of-strings field in this codebase
+    # (pantry.py's ingredient_lines: 100, shopping.py's items: 100,
+    # donation.py's items: 500) — routine "Add Pantry Items"/"Cook What's
+    # Expiring" usage populates this from a user's full pantry, which easily
+    # exceeds 30 for anyone with a moderately stocked pantry, causing a 422
+    # that surfaced to users as a generic "failed to generate recipes" error.
+    ingredients: List[Annotated[str, Field(max_length=200)]] = Field(max_length=100)
     strict: bool = False
 
 LANGUAGE_NAMES = {

@@ -45,6 +45,13 @@ registerSW({
   },
   onRegisteredSW(_swUrl, registration) {
     if (!registration) return
+    // Check immediately on every load, not just on a future timer/foreground
+    // event — incognito windows (no pre-existing SW registration to update
+    // FROM) were loading fresh, correct code while normal windows sat on
+    // whatever was previously registered until one of the periodic triggers
+    // below happened to fire. Every page load is itself an opportunity to
+    // check; there's no reason to wait for the first hour or backgrounding.
+    registration.update()
     setInterval(() => registration.update(), 60 * 60 * 1000)
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') registration.update()

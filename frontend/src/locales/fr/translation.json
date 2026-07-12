@@ -416,6 +416,20 @@
     "goodToDonate": "Bon à donner",
     "keepAtHome": "Garder à la maison"
   },
+  "achievements": {
+    "title": "Vos réussites",
+    "streakActive": "Série de {{count}} jours sans gaspillage",
+    "streakStart": "Commencez une série sans gaspillage",
+    "badgesTitle": "Étapes de don",
+    "badge10Name": "Bon départ",
+    "badge50Name": "Soutien constant",
+    "badge100Name": "Fort impact",
+    "badge500Name": "Une grande différence",
+    "badgeUnlockedDesc": "{{count}}+ repas donnés",
+    "badgeLockedDesc": "Encore {{count}} repas",
+    "hide": "Masquer les réussites",
+    "show": "Afficher les réussites"
+  },
   "favorites": {
     "title": "Recettes Favorites",
     "savedOn": "Enregistré",

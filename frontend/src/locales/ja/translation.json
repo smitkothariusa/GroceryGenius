@@ -416,6 +416,20 @@
     "goodToDonate": "寄付に適しています",
     "keepAtHome": "自宅で保管"
   },
+  "achievements": {
+    "title": "あなたの実績",
+    "streakActive": "{{count}}日間 食品ロスゼロ継続中",
+    "streakStart": "食品ロスゼロの記録を始めよう",
+    "badgesTitle": "寄付マイルストーン",
+    "badge10Name": "はじめの一歩",
+    "badge50Name": "継続的なサポート",
+    "badge100Name": "大きな貢献",
+    "badge500Name": "大きな変化",
+    "badgeUnlockedDesc": "{{count}}食以上を寄付しました",
+    "badgeLockedDesc": "あと{{count}}食",
+    "hide": "実績を非表示",
+    "show": "実績を表示"
+  },
   "favorites": {
     "title": "お気に入りレシピ",
     "savedOn": "保存日",

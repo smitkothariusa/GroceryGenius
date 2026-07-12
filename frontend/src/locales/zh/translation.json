@@ -416,6 +416,20 @@
     "goodToDonate": "适合捐赠",
     "keepAtHome": "建议留用"
   },
+  "achievements": {
+    "title": "你的成就",
+    "streakActive": "连续 {{count}} 天零浪费",
+    "streakStart": "开始零浪费记录",
+    "badgesTitle": "捐赠里程碑",
+    "badge10Name": "良好开端",
+    "badge50Name": "持续支持",
+    "badge100Name": "重要贡献",
+    "badge500Name": "巨大改变",
+    "badgeUnlockedDesc": "已捐赠 {{count}}+ 份餐食",
+    "badgeLockedDesc": "还差 {{count}} 份餐食",
+    "hide": "隐藏成就",
+    "show": "显示成就"
+  },
   "favorites": {
     "title": "收藏的食谱",
     "savedOn": "保存于",

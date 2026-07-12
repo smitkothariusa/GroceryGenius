@@ -416,6 +416,20 @@
     "goodToDonate": "Good to donate",
     "keepAtHome": "Keep at home"
   },
+  "achievements": {
+    "title": "Your Achievements",
+    "streakActive": "{{count}}-day zero-waste streak",
+    "streakStart": "Start a zero-waste streak",
+    "badgesTitle": "Donation Milestones",
+    "badge10Name": "Great Start",
+    "badge50Name": "Steady Support",
+    "badge100Name": "Strong Impact",
+    "badge500Name": "Big Difference",
+    "badgeUnlockedDesc": "Donated {{count}}+ meals",
+    "badgeLockedDesc": "{{count}} meals to go",
+    "hide": "Hide achievements",
+    "show": "Show achievements"
+  },
   "favorites": {
     "title": "Favorite Recipes",
     "savedOn": "Saved",

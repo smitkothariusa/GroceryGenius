@@ -3,9 +3,33 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// One version string per build. Baked into the bundle via `define` below AND
+// emitted as version.json (same value) so the running app can fetch version.json
+// at runtime and detect when it's stale — the force-update safety net for
+// installed PWAs that resume frozen and never run the SW's own update check.
+// See src/lib/appVersion.ts.
+const APP_VERSION = Date.now().toString();
+
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(APP_VERSION),
+  },
   plugins: [
     react(),
+    {
+      // Emit version.json alongside the build with the SAME APP_VERSION baked
+      // into the bundle. Not matched by the workbox precache glob (js/css/html/
+      // ico/png/svg only), so it is never service-worker-cached and always
+      // reflects the freshly-deployed build.
+      name: 'gg-emit-version-json',
+      generateBundle() {
+        this.emitFile({
+          type: 'asset',
+          fileName: 'version.json',
+          source: JSON.stringify({ version: APP_VERSION }),
+        });
+      },
+    },
     VitePWA({
       registerType: 'autoUpdate',
       // Registration lives in main.tsx (virtual:pwa-register) so rejection is

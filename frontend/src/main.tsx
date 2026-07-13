@@ -7,6 +7,7 @@ import './i18n'
 import { initGlobalErrorHandlers } from './lib/errorService'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { registerSW } from 'virtual:pwa-register'
+import { checkForNewVersion } from './lib/appVersion'
 
 // Capture beforeinstallprompt before React mounts — the event fires early
 // and would be missed if we only listen inside a useEffect.
@@ -39,6 +40,17 @@ navigator.serviceWorker?.addEventListener('controllerchange', () => {
   if (reloadingForUpdate) return
   reloadingForUpdate = true
   window.location.reload()
+})
+
+// Independent of the service-worker update lifecycle above: compare this
+// bundle's baked-in build version against version.json fetched fresh from the
+// network, and hard-update if stale. This is the safety net for installed PWAs
+// that resume frozen and never trigger the SW's own update check — the reason
+// devices stayed on old builds (missing critical fixes) for days. Run on load
+// and every foreground. See lib/appVersion.ts (conservative + reload-loop-safe).
+checkForNewVersion()
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') checkForNewVersion()
 })
 
 // Browsers only re-check the SW script on their own schedule (often ~once/24h,

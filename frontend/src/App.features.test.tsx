@@ -236,10 +236,16 @@ describe('Recipe generation flow', () => {
     // The generated recipe title renders (as "1. Test Tomato Soup").
     expect(await screen.findByText(/Test Tomato Soup/)).toBeInTheDocument();
 
-    // And the request went to the recipes endpoint.
+    // And the request went to the recipes endpoint — at its canonical path,
+    // WITH the trailing slash. Posting to /recipes made the backend
+    // 307-redirect to /recipes/, and browsers drop the Authorization header
+    // while following that redirect, so the request arrived tokenless and
+    // 401'd. That was the real cause of recipe generation failing on mobile
+    // while working on desktop/incognito, so the slash is asserted exactly.
     expect(h.spies.authFetch).toHaveBeenCalled();
     const calledUrls = h.spies.authFetch.mock.calls.map((c) => String(c[0]));
-    expect(calledUrls.some((u) => /\/recipes\?/.test(u))).toBe(true);
+    expect(calledUrls.some((u) => /\/recipes\/\?/.test(u))).toBe(true);
+    expect(calledUrls.some((u) => /\/recipes\?/.test(u))).toBe(false);
   });
 
   it('shows an error message and does not call the API when no ingredients are entered', async () => {
@@ -250,7 +256,7 @@ describe('Recipe generation flow', () => {
 
     expect((await screen.findAllByText(en.recipes.emptyStatePrompt)).length).toBeGreaterThan(0);
     const calledUrls = h.spies.authFetch.mock.calls.map((c) => String(c[0]));
-    expect(calledUrls.some((u) => /\/recipes\?/.test(u))).toBe(false);
+    expect(calledUrls.some((u) => /\/recipes\/?\?/.test(u))).toBe(false);
   });
 });
 

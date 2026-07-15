@@ -4,6 +4,7 @@ import { streakService } from '../../lib/database';
 import { daysUntilExpiry } from '../../lib/pantryExpiry';
 import { usePantry } from '../pantry/PantryContext';
 import { useDonation } from '../donation/DonationContext';
+import { safeStorage } from '../../lib/safeStorage';
 
 const HIDE_STORAGE_KEY = 'gg_hide_achievements';
 
@@ -36,7 +37,7 @@ export function AchievementsPanel({ isMobile, cardBg, mutedText }: AchievementsP
   const { pantry } = usePantry();
   const { donationImpact } = useDonation();
 
-  const [hidden, setHidden] = useState(() => localStorage.getItem(HIDE_STORAGE_KEY) === 'true');
+  const [hidden, setHidden] = useState(() => safeStorage.getItem(HIDE_STORAGE_KEY) === 'true');
   const [streakDays, setStreakDays] = useState<number | null>(null);
   const checkedInRef = useRef(false);
 
@@ -68,7 +69,7 @@ export function AchievementsPanel({ isMobile, cardBg, mutedText }: AchievementsP
 
   const setHiddenPersisted = (value: boolean) => {
     setHidden(value);
-    localStorage.setItem(HIDE_STORAGE_KEY, String(value));
+    safeStorage.setItem(HIDE_STORAGE_KEY, String(value));
   };
 
   if (hidden) {

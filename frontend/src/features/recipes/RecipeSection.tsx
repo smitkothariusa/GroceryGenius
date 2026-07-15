@@ -6,6 +6,7 @@ import { isExpiringSoon } from '../../lib/pantryExpiry';
 import { logError } from '../../lib/errorService';
 import { supabase, CustomDietaryLabel } from '../../lib/supabase';
 import { useFavorites } from '../favorites/FavoritesContext';
+import { safeStorage } from '../../lib/safeStorage';
 import {
   useRecipes,
   parseIngredients,
@@ -103,7 +104,7 @@ export function RecipeSection({
 
   const handleRecipeModeChange = (mode: 'loose' | 'strict') => {
     setRecipeMode(mode);
-    localStorage.setItem('gg_recipe_mode', mode);
+    safeStorage.setItem('gg_recipe_mode', mode);
   };
 
   const expiringPantryItems = pantry.filter(item => isExpiringSoon(item));

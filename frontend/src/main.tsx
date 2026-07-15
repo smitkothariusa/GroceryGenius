@@ -67,16 +67,30 @@ registerSW({
   },
   onRegisteredSW(_swUrl, registration) {
     if (!registration) return
+    // registration.update() REJECTS on the entirely routine failures below, and
+    // an uncaught rejection here reaches window.onunhandledrejection, which
+    // logs it to error_logs as if it were an app error. That accounted for the
+    // large majority of runtime:unhandledrejection rows in production
+    // (~64: "Failed to update a ServiceWorker ... unknown error when fetching
+    // the script", "Script sw.js load failed", "newestWorker is null",
+    // "The object is in an invalid state", "Timed out while trying to start
+    // the Service Worker"), drowning out real signals. All of them mean
+    // "couldn't check for an update right now" — offline, flaky mobile network,
+    // or no new worker to update to — which is expected and self-corrects on
+    // the next check, so swallow it rather than report it.
+    const checkForUpdate = () => {
+      registration.update().catch(() => { /* no-op: see above */ })
+    }
     // Check immediately on every load, not just on a future timer/foreground
     // event — incognito windows (no pre-existing SW registration to update
     // FROM) were loading fresh, correct code while normal windows sat on
     // whatever was previously registered until one of the periodic triggers
     // below happened to fire. Every page load is itself an opportunity to
     // check; there's no reason to wait for the first hour or backgrounding.
-    registration.update()
-    setInterval(() => registration.update(), 60 * 60 * 1000)
+    checkForUpdate()
+    setInterval(checkForUpdate, 60 * 60 * 1000)
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') registration.update()
+      if (document.visibilityState === 'visible') checkForUpdate()
     })
   },
 })

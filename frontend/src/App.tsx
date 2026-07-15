@@ -35,6 +35,7 @@ import { RecipeSubstitutionModal } from './features/recipes/RecipeSubstitutionMo
 import { PantryProvider, usePantry, type PantryItem } from './features/pantry/PantryContext';
 import { PantrySection } from './features/pantry/PantrySection';
 import { ScanModal } from './features/pantry/ScanModal';
+import { safeStorage } from './lib/safeStorage';
 
 
 interface ShoppingItem {
@@ -57,7 +58,7 @@ const AppContent: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [currentTab, setCurrentTab] = useState<'pantry' | 'recipes' | 'mealplan' | 'shopping' | 'donate' | 'favorites'>(
-    () => (localStorage.getItem('activeTab') as 'pantry' | 'recipes' | 'mealplan' | 'shopping' | 'donate' | 'favorites') || 'pantry'
+    () => (safeStorage.getItem('activeTab') as 'pantry' | 'recipes' | 'mealplan' | 'shopping' | 'donate' | 'favorites') || 'pantry'
   );
   // Bumped whenever a loadUserData() call should be considered stale (a
   // newer load started, or the user signed out) so in-flight responses from
@@ -551,11 +552,11 @@ const AppContent: React.FC = () => {
             totalPounds: 0,
             co2Saved: 0
           });
-          localStorage.removeItem('gg_recipe_mode');
-          localStorage.removeItem('hasSeenTour');
-          localStorage.removeItem('hasSeenMission');
-          localStorage.removeItem('locationPermission');
-          localStorage.removeItem('userLocation');
+          safeStorage.removeItem('gg_recipe_mode');
+          safeStorage.removeItem('hasSeenTour');
+          safeStorage.removeItem('hasSeenMission');
+          safeStorage.removeItem('locationPermission');
+          safeStorage.removeItem('userLocation');
           setUserLocation(null);
           setLocationPermission('pending');
           setRecipeMode('loose');
@@ -588,7 +589,7 @@ const AppContent: React.FC = () => {
   }, []);
 
   const handleTabChange = (tab: typeof currentTab) => {
-    localStorage.setItem('activeTab', tab);
+    safeStorage.setItem('activeTab', tab);
     setIsTabChanging(true);
     setTimeout(() => {
       setCurrentTab(tab);
@@ -598,7 +599,7 @@ const AppContent: React.FC = () => {
 
   const handleTourSkip = () => {
     setShowTour(false);
-    localStorage.setItem('hasSeenTour', 'true');
+    safeStorage.setItem('hasSeenTour', 'true');
   };
 
   const handleTourNext = () => {
@@ -613,7 +614,7 @@ const AppContent: React.FC = () => {
     if (nextIndex >= TOUR_STEPS.length) {
       // Tour complete
       setShowTour(false);
-      localStorage.setItem('hasSeenTour', 'true');
+      safeStorage.setItem('hasSeenTour', 'true');
       success(t('tour.allSet'));
       return;
     }
@@ -2502,8 +2503,8 @@ const AppContent: React.FC = () => {
             <button
               onClick={() => {
                 setShowMissionPopup(false);
-                localStorage.setItem('hasSeenMission', 'true');
-                if (!localStorage.getItem('hasSeenTour')) {
+                safeStorage.setItem('hasSeenMission', 'true');
+                if (!safeStorage.getItem('hasSeenTour')) {
                   handleTabChange('pantry');
                   setTourStep(0);
                   setShowTour(true);

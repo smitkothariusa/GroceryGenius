@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
 import { FoodBank, DonationRecord, DonationImpact } from '../../types/donation';
 import { foodBanks } from '../../data/foodBanks';
+import { safeStorage } from '../../lib/safeStorage';
 
 export interface DropOffSite {
   id: string;
@@ -115,8 +116,8 @@ export function DonationProvider({ children }: { children: ReactNode }) {
 
   // Load location from localStorage on mount
   useEffect(() => {
-    const savedLocationPermission = localStorage.getItem('locationPermission');
-    const savedUserLocation = localStorage.getItem('userLocation');
+    const savedLocationPermission = safeStorage.getItem('locationPermission');
+    const savedUserLocation = safeStorage.getItem('userLocation');
 
     if (savedLocationPermission === 'granted' && savedUserLocation) {
       try {

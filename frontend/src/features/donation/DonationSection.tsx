@@ -4,6 +4,7 @@ import { useDonation } from './DonationContext';
 import { AchievementsPanel } from '../achievements/AchievementsPanel';
 import { classifyPerishability } from './perishability';
 import { daysUntilExpiry } from '../../lib/pantryExpiry';
+import { safeStorage } from '../../lib/safeStorage';
 
 // Mirrors the `PantryItem` shape in App.tsx (not centrally typed yet; this
 // duplication matches the existing pattern in features/favorites for `Recipe`).
@@ -67,8 +68,8 @@ export function DonationSection({
           setLocationPermission('granted');
 
           // Save to localStorage
-          localStorage.setItem('locationPermission', 'granted');
-          localStorage.setItem('userLocation', JSON.stringify(location));
+          safeStorage.setItem('locationPermission', 'granted');
+          safeStorage.setItem('userLocation', JSON.stringify(location));
 
           onSuccess(t('toasts.locationGranted'));
         },
@@ -79,7 +80,7 @@ export function DonationSection({
     } else {
       onWarning(t('toasts.geolocationUnsupported'));
       setLocationPermission('denied');
-      localStorage.setItem('locationPermission', 'denied');
+      safeStorage.setItem('locationPermission', 'denied');
     }
   };
 

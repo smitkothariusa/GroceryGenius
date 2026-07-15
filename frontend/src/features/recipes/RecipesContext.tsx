@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState, type Dispatch, 
 import { useTranslation } from 'react-i18next';
 import { authFetch } from '../../lib/apiClient';
 import { CustomDietaryLabel } from '../../lib/supabase';
+import { safeStorage } from '../../lib/safeStorage';
 
 // Mirrors the `Recipe` shape in App.tsx (recipes are not centrally typed yet;
 // this duplication matches the existing pattern in features/favorites for `Recipe`).
@@ -242,7 +243,7 @@ export function RecipesProvider({ children }: { children: ReactNode }) {
   const { i18n } = useTranslation();
   const [recipeLoading, setRecipeLoading] = useState(false);
   const [recipeMode, setRecipeMode] = useState<'loose' | 'strict'>(
-    () => localStorage.getItem('gg_recipe_mode') === 'strict' ? 'strict' : 'loose'
+    () => safeStorage.getItem('gg_recipe_mode') === 'strict' ? 'strict' : 'loose'
   );
   const [recipeSearchQuery, setRecipeSearchQuery] = useState('');
   const [recipeServings, setRecipeServings] = useState<number | ''>(2);

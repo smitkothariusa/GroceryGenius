@@ -176,7 +176,18 @@ export function RecipeSection({
         ? (recipeSubTab === 'name' ? [recipeSearchQuery.trim()] : ingredientTags)
         : (recipeSearchQuery.trim() ? [recipeSearchQuery.trim(), ...ingredientTags] : ingredientTags);
 
-      const response = await authFetch(`${API_BASE}/recipes?${params.toString()}`, {
+      // NOTE the trailing slash. The backend route is POST /recipes/ , so
+      // posting to /recipes made FastAPI 307-redirect to /recipes/ — and the
+      // browser dropped the Authorization header while following that
+      // cross-origin redirect, so the retried request arrived tokenless and
+      // 401'd ("auth failed: missing authorization header" in the backend
+      // logs, always immediately after a 307 from the same client). This was
+      // the real cause of "recipe generation fails on mobile but works in
+      // incognito/desktop": header-stripping-on-redirect is browser-specific,
+      // and every *other* endpoint has a named sub-path so none of them
+      // redirect — which is why only recipe generation broke. Requesting the
+      // canonical path means there is no redirect to strip anything.
+      const response = await authFetch(`${API_BASE}/recipes/?${params.toString()}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ingredients: allIngredients, strict: recipeMode === 'strict' }),

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { safeStorage } from '../lib/safeStorage';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -75,19 +76,19 @@ const InstallBanner: React.FC = () => {
     if (!debug && (
       !isMobileDevice() ||
       isAlreadyInstalled() ||
-      localStorage.getItem(DISMISSED_KEY)
+      safeStorage.getItem(DISMISSED_KEY)
     )) {
       return;
     }
 
     const handleAppInstalled = () => {
-      localStorage.setItem(DISMISSED_KEY, 'true');
+      safeStorage.setItem(DISMISSED_KEY, 'true');
       setVisible(false);
     };
     window.addEventListener('appinstalled', handleAppInstalled);
 
     const timer = setTimeout(() => {
-      if (!debug && localStorage.getItem(DISMISSED_KEY)) return;
+      if (!debug && safeStorage.getItem(DISMISSED_KEY)) return;
 
       const captured = window.__gg_install_prompt;
       if (captured) {
@@ -113,7 +114,7 @@ const InstallBanner: React.FC = () => {
   }, []);
 
   const handleDismiss = () => {
-    localStorage.setItem(DISMISSED_KEY, 'true');
+    safeStorage.setItem(DISMISSED_KEY, 'true');
     setVisible(false);
   };
 
@@ -122,7 +123,7 @@ const InstallBanner: React.FC = () => {
     await promptRef.current.prompt();
     const { outcome } = await promptRef.current.userChoice;
     if (outcome === 'accepted') {
-      localStorage.setItem(DISMISSED_KEY, 'true');
+      safeStorage.setItem(DISMISSED_KEY, 'true');
     }
     promptRef.current = null;
     window.__gg_install_prompt = undefined;

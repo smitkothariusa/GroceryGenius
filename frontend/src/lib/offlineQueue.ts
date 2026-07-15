@@ -7,6 +7,8 @@
 // calls) once back online. Keeping the dependency one-directional avoids a
 // circular import between the two modules.
 
+import { safeStorage } from './safeStorage';
+
 export type QueueEntity = 'pantry' | 'shopping';
 export type QueueOperation = 'add' | 'update' | 'delete';
 
@@ -67,7 +69,7 @@ export function generateOfflineId(): string {
 
 export function getQueue(): QueueEntry[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = safeStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
@@ -78,7 +80,7 @@ export function getQueue(): QueueEntry[] {
 
 function saveQueue(queue: QueueEntry[]): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(queue));
+    safeStorage.setItem(STORAGE_KEY, JSON.stringify(queue));
   } catch {
     // localStorage full/unavailable — the entry that triggered this save is
     // lost, but a mutation call site must never throw because of it.

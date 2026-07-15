@@ -37,9 +37,43 @@ function serializeError(error: unknown): SerializedError {
   return { message: String(error), stack: null };
 }
 
+/**
+ * Errors that come from code we don't ship and can't fix. error_logs is the
+ * production signal we actually debug from, and this noise was roughly
+ * two-thirds of it — enough that a real 401 affecting 10 users sat buried
+ * among extension crashes and in-app-browser chatter. Dropping it is what
+ * makes the table readable, not merely tidier.
+ *
+ * Deliberately NOT filtered: anything whose stack points into our own bundle,
+ * and opaque messages with no stack ("Internal error", "undefined") — those
+ * could be ours, and silently discarding a real error is far worse than
+ * keeping some noise.
+ */
+function isThirdPartyNoise(message: string, stack: string | null): boolean {
+  // Safari masks injected extension/userscript code as webkit-masked-url;
+  // Chrome/Firefox/Safari extensions surface as *-extension:// origins. A
+  // stack in any of those is by definition not our bundle.
+  if (stack && /webkit-masked-url|chrome-extension:\/\/|moz-extension:\/\/|safari-(web-)?extension:\/\//.test(stack)) {
+    return true;
+  }
+  return [
+    // iOS in-app browsers (Instagram/Facebook/Gmail webviews) — their own
+    // JS bridge timing out, nothing to do with the app.
+    /WKWebView API client did not respond to this postMessage/,
+    // Browser extension messaging into a tab that no longer exists.
+    /Invalid call to runtime\.sendMessage\(\)/,
+    // Crypto-wallet extensions probing every page for a provider.
+    /window\.ethereum/,
+    // Benign and unactionable: fires when a ResizeObserver callback doesn't
+    // settle in one frame. Every app on the web emits these.
+    /ResizeObserver loop (limit exceeded|completed with undelivered notifications)/,
+  ].some((re) => re.test(message));
+}
+
 export async function logError(error: unknown, context: string): Promise<void> {
   try {
     const { message, stack } = serializeError(error);
+    if (isThirdPartyNoise(message, stack)) return;
     const { data: { user } } = await supabase.auth.getUser();
 
     await supabase.from('error_logs').insert({

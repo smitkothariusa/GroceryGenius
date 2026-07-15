@@ -29,6 +29,18 @@ LANGUAGE_NAMES = {
     "de": "German", "zh": "Chinese", "ja": "Japanese",
 }
 
+# Registered at BOTH "" (/recipes) and "/" (/recipes/) so that neither path
+# 307-redirects to the other. Starlette's redirect_slashes would otherwise send
+# /recipes -> /recipes/, and browsers drop the Authorization header when
+# following that redirect, so the retried request arrives tokenless and 401s.
+# That broke recipe generation for clients posting to /recipes (see the
+# trailing-slash comment in frontend RecipeSection.tsx). The frontend now
+# requests the canonical path, but this alias is what rescues clients still
+# running an older cached bundle — they keep posting to /recipes and, without
+# it, would stay broken until their bundle updated. This is the only
+# collection-root route in the API; every other route has a named sub-path and
+# so never redirects.
+@router.post("", include_in_schema=False, response_model=List[dict])
 @router.post("/", response_model=List[dict])
 @limiter.limit(AI_HEAVY_LIMIT)
 async def generate_recipes(request: Request, payload: Ingredients, dietary: Optional[str] = Query(None), language: Optional[str] = Query(None), difficulty: Optional[str] = Query(None)):

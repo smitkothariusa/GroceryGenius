@@ -101,6 +101,28 @@ def test_ai_routes_reject_tokenless_requests():
         assert response.status_code == 401, f"{method.upper()} {path} returned {response.status_code}, expected 401"
 
 
+def test_recipes_generate_never_redirects_between_slash_spellings():
+    """POST /recipes must be served directly, never 307-redirected to /recipes/.
+
+    Browsers drop the Authorization header while following the redirect, so a
+    307 here made the retried request arrive tokenless and 401 with "missing
+    authorization header" — the real cause of recipe generation failing on
+    mobile while working on desktop/incognito (header-stripping-on-redirect is
+    browser-specific). Both spellings must reach the auth dependency and 401 on
+    their own rather than bounce. /recipes is the API's only collection-root
+    route, so it is the only place this can regress.
+    """
+    from app.main import app
+    client = TestClient(app)
+
+    for path in ("/recipes", "/recipes/"):
+        response = client.post(path, json={"ingredients": ["rice"]}, follow_redirects=False)
+        assert response.status_code == 401, (
+            f"POST {path} returned {response.status_code}, expected 401 — a 307 means it "
+            "redirected, and the browser would strip the Authorization header en route"
+        )
+
+
 def test_health_stays_public():
     from app.main import app
     client = TestClient(app)

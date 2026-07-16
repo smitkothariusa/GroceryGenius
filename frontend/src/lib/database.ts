@@ -56,7 +56,12 @@ async function pantryAddRemote(item: PantryAddInput) {
     .single();
 
   if (error) {
-    logError(error, 'api:pantry.add');
+    // Don't log network errors: the caller (pantryService.add) catches these,
+    // queues the write via the offline queue, and returns optimistically — so
+    // the write is deferred, not failed. Logging it produced misleading
+    // api:pantry.add "Load failed"/"Failed to fetch" rows for writes that
+    // actually succeed on replay. Genuine errors (RLS, constraints) still log.
+    if (!isNetworkError(error)) logError(error, 'api:pantry.add');
     throw error;
   }
   return data;
@@ -86,7 +91,9 @@ async function pantryUpdateRemote(id: string, item: PantryUpdateInput) {
     .maybeSingle();
 
   if (error) {
-    logError(error, 'api:pantry.update');
+    // Same as pantryAddRemote: network errors are queued+replayed by the
+    // caller, not failures — don't log them. Real errors still log + throw.
+    if (!isNetworkError(error)) logError(error, 'api:pantry.update');
     throw error;
   }
   return data;

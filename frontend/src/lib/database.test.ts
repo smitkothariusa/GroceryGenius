@@ -28,7 +28,10 @@ function makeBuilder() {
 }
 
 vi.mock('./supabase', () => ({
-  supabase: { from: (..._a: any[]) => makeBuilder() },
+  supabase: {
+    from: (..._a: any[]) => makeBuilder(),
+    auth: { getUser: async () => ({ data: { user: { id: 'u1' } } }) },
+  },
 }));
 
 vi.mock('./errorService', () => ({
@@ -66,6 +69,31 @@ describe('pantryService.update when the row is gone (0 rows)', () => {
       pantryService.update('i1', { name: 'x', quantity: 1, unit: 'pc', category: 'c' }),
     ).rejects.toBeTruthy();
     expect(h.logError).toHaveBeenCalledWith(expect.anything(), 'api:pantry.update');
+  });
+});
+
+describe('network errors are queued, not logged as failures', () => {
+  // pantry add/update log to error_logs, but a network error there is not a
+  // failure — the caller queues the write via the offline queue and replays it
+  // when back online. Logging it produced misleading api:pantry.* "Load failed"
+  // rows for writes that actually succeed. isNetworkError matches "load failed".
+  it('does not log a "Load failed" network error on update (still queues via throw)', async () => {
+    h.result = { data: null, error: { message: 'TypeError: Load failed' } };
+    // pantryService.update catches the throw and enqueues, so it resolves.
+    await pantryService.update('i1', { name: 'x', quantity: 1, unit: 'pc', category: 'c' });
+    expect(h.logError).not.toHaveBeenCalled();
+  });
+
+  it('does not log a "Failed to fetch" network error on add', async () => {
+    h.result = { data: null, error: { message: 'TypeError: Failed to fetch' } };
+    await pantryService.add({ name: 'x', quantity: 1, unit: 'pc', category: 'c' });
+    expect(h.logError).not.toHaveBeenCalled();
+  });
+
+  it('STILL logs a genuine (non-network) error on add', async () => {
+    h.result = { data: null, error: { message: 'new row violates row-level security policy', code: '42501' } };
+    await expect(pantryService.add({ name: 'x', quantity: 1, unit: 'pc', category: 'c' })).rejects.toBeTruthy();
+    expect(h.logError).toHaveBeenCalledWith(expect.anything(), 'api:pantry.add');
   });
 });
 

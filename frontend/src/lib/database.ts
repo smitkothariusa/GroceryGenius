@@ -74,8 +74,16 @@ async function pantryUpdateRemote(id: string, item: PantryUpdateInput) {
       emoji: item.emoji,
     })
     .eq('id', id)
+    // maybeSingle, not single: an update that matches 0 rows is not an error to
+    // report. .single() raised PGRST116 ("Cannot coerce the result to a single
+    // JSON object", 0 rows), which we logged as api:pantry.update — but a
+    // 0-row match just means the row is already gone (deleted on another
+    // device, or the session lapsed so RLS matches nothing). Treat it as a
+    // no-op: return null without logging. Callers apply their edit to local
+    // state from their own input and ignore this return value, so the UI still
+    // reflects the user's change.
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) {
     logError(error, 'api:pantry.update');
@@ -215,8 +223,11 @@ async function shoppingUpdateRemote(id: string, updates: ShoppingUpdateInput) {
     .from('shopping_items')
     .update(updates)
     .eq('id', id)
+    // maybeSingle, not single — same reasoning as pantryUpdateRemote: a 0-row
+    // update (row already gone) must not raise PGRST116. Callers ignore the
+    // returned row and apply their edit to local state from their own input.
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) throw error;
   return data;

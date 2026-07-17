@@ -11,6 +11,45 @@ import { logError } from './errorService';
 // duplicate OpenAI calls or risk duplicate writes.
 const inFlightRequests = new Map<string, Promise<Response>>();
 
+/**
+ * Dispatched on window when authFetch conclusively determines the stored
+ * session is gone (a refresh was attempted and Supabase reported no session /
+ * a dead refresh token — NOT a transient network failure). App listens and
+ * bounces the user to the sign-in screen. Without this, a session that dies
+ * mid-use left the app "half logged in": `user` state stayed truthy so the
+ * authed UI kept rendering, and every authFetch went out tokenless and 401'd —
+ * which looped the barcode scanner firing lookups forever and produced a
+ * 170-in-an-hour burst of api:authFetch.no-token rows.
+ */
+export const AUTH_SESSION_LOST_EVENT = 'gg-auth-session-lost';
+
+// Dispatch the event at most once per lost session. Reset when a token is
+// next successfully attached (a healthy session), so a later death after
+// re-login can signal again.
+let sessionLostSignaled = false;
+
+/**
+ * Only bounce to sign-in on a CONCLUSIVE session loss. Matching known
+ * "session/refresh-token is gone" errors (and nothing else) keeps a transient
+ * network failure during refresh — where the user may still have a valid
+ * session that's momentarily unreachable — from wrongly logging them out.
+ */
+function signalSessionLostIfConclusive(refreshOutcome: string | null): void {
+  if (sessionLostSignaled || !refreshOutcome) return;
+  const m = refreshOutcome.toLowerCase();
+  const conclusive =
+    m.includes('auth session missing') ||
+    m.includes('refresh_token_not_found') ||
+    m.includes('refresh token not found') ||
+    m.includes('invalid refresh token') ||
+    m.includes('already used');
+  if (!conclusive) return;
+  sessionLostSignaled = true;
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(AUTH_SESSION_LOST_EVENT));
+  }
+}
+
 /** Best-effort synchronous key for a request body. Returns null for bodies
  * we can't cheaply/safely compare (streams, Blobs, etc.) — those requests
  * are never deduped, only fetched normally. */
@@ -87,17 +126,19 @@ export async function authFetch(input: RequestInfo | URL, init: RequestInit = {}
     const headers = new Headers(init.headers);
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
+      sessionLostSignaled = false; // healthy session — re-arm the signal
     } else {
-      // We're about to send an authenticated request with NO token, which the
-      // backend rejects as "missing authorization header" — the exact 401 that
-      // broke recipe generation on mobile. This should no longer happen after
-      // the processLock fix (lib/supabase.ts) + the refresh-on-null above; log
-      // WHY if it still does (no token itself is logged) so the post-fix
-      // verification is conclusive rather than another guess.
+      // No token after a refresh attempt. Log why (diagnostic), and — if the
+      // refresh conclusively reported the session is gone — bounce the user to
+      // sign-in rather than leaving them half-logged-in firing tokenless 401s.
+      // The request below still goes out and 401s so this call's caller sees
+      // its usual failure, but the sign-out stops any repeating caller (e.g.
+      // the scanner loop) from firing again.
       logError(
         `authFetch sending request with no token — finalSessionPresent=${session ? 'y' : 'n'} refreshOutcome=${refreshOutcome ?? 'not-attempted'}`,
         'api:authFetch.no-token',
       );
+      signalSessionLostIfConclusive(refreshOutcome);
     }
     const response = await fetch(input, { ...init, headers });
     // Backend slowapi rate limits (10/min heavy, 30/min light) return 429.

@@ -6,7 +6,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { useToast } from './hooks/useToast';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { authService, supabase, profileService, CustomDietaryLabel, Profile } from './lib/supabase';
-import { authFetch } from './lib/apiClient';
+import { authFetch, AUTH_SESSION_LOST_EVENT } from './lib/apiClient';
 import { onRateLimited } from './lib/rateLimitBridge';
 import { escapeHtml } from './lib/escapeHtml';
 import { calorieService } from './lib/database';
@@ -567,6 +567,22 @@ const AppContent: React.FC = () => {
         authListener?.subscription?.unsubscribe();
       };
     }, [setFavorites, setDonationHistory, setDonationImpact, setUserLocation, setLocationPermission, setRecipeMode, setPantry]);
+
+  // Bounce to the sign-in screen when authFetch conclusively determines the
+  // session is gone (see AUTH_SESSION_LOST_EVENT in lib/apiClient). A session
+  // that silently dies mid-use otherwise left the app "half logged in" — the
+  // authed UI kept rendering while every request 401'd, which looped the
+  // barcode scanner and flooded error_logs. signOut() clears the (already
+  // empty) session and fires the SIGNED_OUT handler above, which resets state
+  // and shows the Auth screen. Idempotent if already signed out.
+  useEffect(() => {
+    const onSessionLost = () => {
+      authService.signOut().catch(() => { /* no-op: session already gone */ });
+      setUser(null);
+    };
+    window.addEventListener(AUTH_SESSION_LOST_EVENT, onSessionLost);
+    return () => window.removeEventListener(AUTH_SESSION_LOST_EVENT, onSessionLost);
+  }, []);
 
   // Load user data after authentication - SEPARATE useEffect
   useEffect(() => {

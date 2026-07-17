@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock the supabase client and the rate-limit bridge before importing authFetch.
 // vi.hoisted keeps these defined before the hoisted vi.mock factories run.
@@ -12,7 +12,7 @@ vi.mock('./supabase', () => ({
 vi.mock('./rateLimitBridge', () => ({ notifyRateLimited: vi.fn() }));
 vi.mock('./errorService', () => ({ logError: vi.fn() }));
 
-import { authFetch } from './apiClient';
+import { authFetch, AUTH_SESSION_LOST_EVENT } from './apiClient';
 import { logError } from './errorService';
 
 const NOW_SEC = 1_000_000;
@@ -87,5 +87,77 @@ describe('authFetch — proactive token refresh', () => {
     expect(headers.get('Authorization')).toBeNull();
     expect(logError).toHaveBeenCalledTimes(1);
     expect((logError as any).mock.calls[0][1]).toBe('api:authFetch.no-token');
+  });
+});
+
+describe('authFetch — session-lost sign-in bounce', () => {
+  let events: number;
+  const onLost = () => { events++; };
+
+  beforeEach(async () => {
+    vi.restoreAllMocks();
+    getSession.mockReset();
+    refreshSession.mockReset();
+    vi.spyOn(Date, 'now').mockReturnValue(NOW_SEC * 1000);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('{}', { status: 401 })));
+    window.addEventListener(AUTH_SESSION_LOST_EVENT, onLost);
+    // The once-per-loss flag is module-global and leaks across tests. Re-arm it
+    // the same way production does — a healthy session attaching a token resets
+    // it — then zero the counter so each test starts armed and clean.
+    getSession.mockResolvedValue(sessionExpiringIn(3600, 'rearm-token'));
+    await authFetch('https://api.example.com/rearm', { method: 'POST', body: `b-rearm-${Math.random()}` });
+    events = 0;
+    (logError as any).mockClear(); // shared mock accumulates across tests
+  });
+  afterEach(() => {
+    window.removeEventListener(AUTH_SESSION_LOST_EVENT, onLost);
+  });
+
+  it('dispatches the bounce event when refresh reports the session is gone', async () => {
+    getSession.mockResolvedValue({ data: { session: null } });
+    refreshSession.mockResolvedValue({ data: { session: null }, error: { message: 'Auth session missing!' } });
+
+    await authFetch('https://api.example.com/gone', { method: 'POST', body: 'b-gone' });
+    expect(events).toBe(1);
+  });
+
+  it('does NOT dispatch on a transient network failure during refresh (keeps the user signed in)', async () => {
+    // The user may still have a valid session that's momentarily unreachable —
+    // logging them out here would be a false positive.
+    getSession.mockResolvedValue({ data: { session: null } });
+    refreshSession.mockResolvedValue({ data: { session: null }, error: { message: 'Failed to fetch' } });
+
+    await authFetch('https://api.example.com/net', { method: 'POST', body: 'b-net' });
+    expect(events).toBe(0);
+    // Still logs the diagnostic — we just don't force sign-out on it.
+    expect(logError).toHaveBeenCalledTimes(1);
+  });
+
+  it('dispatches only once across repeated tokenless calls (no sign-out storm)', async () => {
+    getSession.mockResolvedValue({ data: { session: null } });
+    refreshSession.mockResolvedValue({ data: { session: null }, error: { message: 'Invalid Refresh Token' } });
+
+    await authFetch('https://api.example.com/a', { method: 'POST', body: 'b-a' });
+    await authFetch('https://api.example.com/b', { method: 'POST', body: 'b-b' });
+    await authFetch('https://api.example.com/c', { method: 'POST', body: 'b-c' });
+    expect(events).toBe(1);
+  });
+
+  it('re-arms after a healthy session: a later loss dispatches again', async () => {
+    // Lost once…
+    getSession.mockResolvedValue({ data: { session: null } });
+    refreshSession.mockResolvedValue({ data: { session: null }, error: { message: 'Auth session missing!' } });
+    await authFetch('https://api.example.com/lost1', { method: 'POST', body: 'b-lost1' });
+    expect(events).toBe(1);
+
+    // …then a healthy request re-arms the signal…
+    getSession.mockResolvedValue(sessionExpiringIn(3600, 'good-token'));
+    await authFetch('https://api.example.com/ok', { method: 'POST', body: 'b-ok' });
+    expect(events).toBe(1);
+
+    // …so a second loss dispatches again.
+    getSession.mockResolvedValue({ data: { session: null } });
+    await authFetch('https://api.example.com/lost2', { method: 'POST', body: 'b-lost2' });
+    expect(events).toBe(2);
   });
 });

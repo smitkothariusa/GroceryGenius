@@ -137,6 +137,7 @@ vi.mock('./lib/database', () => ({
 // happens and so recipe generation returns a deterministic payload.
 vi.mock('./lib/apiClient', () => ({
   authFetch: (...args: any[]) => h.spies.authFetch(...args),
+  AUTH_SESSION_LOST_EVENT: 'gg-auth-session-lost',
 }));
 
 // Imported after the mocks are registered.

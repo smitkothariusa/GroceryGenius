@@ -63,7 +63,13 @@ const btnSecondary: React.CSSProperties = {
   fontFamily: 'system-ui, -apple-system, sans-serif',
 };
 
-const InstallBanner: React.FC = () => {
+interface InstallBannerProps {
+  /** Notified when the banner shows/hides so the parent can move other
+   *  bottom-anchored UI (the feedback FAB) out from under this full-width bar. */
+  onVisibilityChange?: (visible: boolean) => void;
+}
+
+const InstallBanner: React.FC<InstallBannerProps> = ({ onVisibilityChange }) => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [platform, setPlatform] = useState<'android' | 'ios' | 'ios-other' | null>(null);
@@ -139,6 +145,13 @@ const InstallBanner: React.FC = () => {
       // clipboard not available
     }
   };
+
+  // Kept above the early return below so hook order stays stable.
+  const shown = visible && !!platform;
+  useEffect(() => {
+    onVisibilityChange?.(shown);
+    return () => onVisibilityChange?.(false);
+  }, [shown, onVisibilityChange]);
 
   if (!visible || !platform) return null;
 

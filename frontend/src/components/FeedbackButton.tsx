@@ -6,6 +6,9 @@ type FeedbackCategory = 'bug' | 'suggestion' | 'complaint' | 'compliment';
 
 interface FeedbackButtonProps {
   isMobile: boolean;
+  /** Hide the floating button (e.g. while the full-width install banner covers
+   *  its corner). An already-open feedback dialog stays open. */
+  hidden?: boolean;
 }
 
 const CATEGORIES: { key: FeedbackCategory; emoji: string }[] = [
@@ -28,7 +31,7 @@ const FlagIcon = () => (
   </svg>
 );
 
-const FeedbackButton: React.FC<FeedbackButtonProps> = ({ isMobile }) => {
+const FeedbackButton: React.FC<FeedbackButtonProps> = ({ isMobile, hidden }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState<FeedbackCategory>('suggestion');
@@ -70,7 +73,10 @@ const FeedbackButton: React.FC<FeedbackButtonProps> = ({ isMobile }) => {
 
   return (
     <>
-      {/* FAB — white with purple flag icon, contrasts the purple-blue app gradient */}
+      {/* FAB — white with purple flag icon, contrasts the purple-blue app
+          gradient. Suppressed while a full-width bottom banner (install prompt)
+          occupies the same corner, so the two don't overlap and confuse. */}
+      {!hidden && (
       <button
         onClick={() => setOpen(true)}
         aria-label={t('feedback.buttonLabel')}
@@ -104,6 +110,7 @@ const FeedbackButton: React.FC<FeedbackButtonProps> = ({ isMobile }) => {
       >
         <FlagIcon />
       </button>
+      )}
 
       {open && (
         <div

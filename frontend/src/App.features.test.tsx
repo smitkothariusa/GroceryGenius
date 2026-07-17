@@ -284,7 +284,7 @@ describe('Pantry add / delete', () => {
     expect(await screen.findByText('Bananas')).toBeInTheDocument();
   });
 
-  it('deletes a pantry item via the delete button', async () => {
+  it('deletes a pantry item only after a second confirming tap', async () => {
     h.pantry = [{
       id: 'pantry-1',
       name: 'Old Milk',
@@ -299,12 +299,42 @@ describe('Pantry add / delete', () => {
 
     expect(await screen.findByText('Old Milk')).toBeInTheDocument();
 
-    // The pantry row's delete button carries the localized "Delete" label.
-    const deleteButtons = screen.getAllByRole('button', { name: en.common.delete });
-    fireEvent.click(deleteButtons[0]);
+    // First tap only ARMS the delete — it must not remove anything yet. This is
+    // the guard against accidental deletes (the toast-dismiss-race that removed
+    // unnamed items). The button now carries the "Delete" label.
+    const deleteBtn = screen.getAllByRole('button', { name: en.common.delete })[0];
+    fireEvent.click(deleteBtn);
+
+    expect(h.spies.pantryDelete).not.toHaveBeenCalled();
+    expect(screen.getByText('Old Milk')).toBeInTheDocument();
+
+    // The button re-labels to the "Confirm" affordance; a second tap deletes.
+    const confirmBtn = screen.getAllByRole('button', { name: en.common.confirm })[0];
+    fireEvent.click(confirmBtn);
 
     await waitFor(() => expect(h.spies.pantryDelete).toHaveBeenCalledWith('pantry-1'));
     await waitFor(() => expect(screen.queryByText('Old Milk')).not.toBeInTheDocument());
+  });
+
+  it('does NOT delete when only the first (arming) tap happens', async () => {
+    h.pantry = [{
+      id: 'pantry-keep',
+      name: 'Keep Me',
+      quantity: 2,
+      unit: 'pcs',
+      category: 'other',
+      expiry_date: null,
+      emoji: '📦',
+    }];
+
+    await renderApp();
+    expect(await screen.findByText('Keep Me')).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole('button', { name: en.common.delete })[0]);
+
+    // One tap arms but never deletes — the item and its DB row stay put.
+    expect(h.spies.pantryDelete).not.toHaveBeenCalled();
+    expect(screen.getByText('Keep Me')).toBeInTheDocument();
   });
 });
 

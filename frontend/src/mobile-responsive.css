@@ -261,6 +261,17 @@
     cursor: pointer;
   }
 
+  /* Armed (tap-again-to-confirm) state. The base rule above forces the resting
+     pink background with !important, so the confirm state needs its own
+     !important to turn solid red — otherwise it rendered as unreadable white
+     text on pink. Stays a 38px square showing a ✓ (the word "Confirm" can't
+     fit here; the text label is desktop-only). */
+  .item-delete-btn--armed {
+    background: #dc2626 !important;
+    color: #fff !important;
+    font-size: 1.05rem !important;
+  }
+
   .item-content {
     flex: 1;
     min-width: 0;

@@ -1047,7 +1047,7 @@ export function PantrySection({
                         ✏️ {isMobile ? '' : t('common.edit')}
                       </button>
                       <button
-                          className="item-delete-btn"
+                          className={`item-delete-btn${confirmDeleteId === item.id ? ' item-delete-btn--armed' : ''}`}
                           aria-label={confirmDeleteId === item.id ? t('common.confirm') : t('common.delete')}
                           onClick={() => {
                             if (confirmDeleteId === item.id) {
@@ -1057,8 +1057,10 @@ export function PantrySection({
                             }
                           }}
                         style={{
-                          // Armed state is a solid red so the "tap again to
-                          // confirm" step is unmistakable vs. the resting tint.
+                          // Desktop styling (inline). On mobile these are
+                          // overridden by .item-delete-btn / --armed in
+                          // mobile-responsive.css (fixed 38px square, !important
+                          // colors), where the label is a compact ✓ instead.
                           background: confirmDeleteId === item.id ? '#dc2626' : '#fee2e2',
                           color: confirmDeleteId === item.id ? 'white' : '#dc2626',
                           border: 'none',
@@ -1072,7 +1074,7 @@ export function PantrySection({
                         }}
                       >
                         {confirmDeleteId === item.id
-                          ? t('common.confirm')
+                          ? (isMobile ? '✓' : t('common.confirm'))
                           : (isMobile ? '🗑️' : t('common.delete'))}
                       </button>
                     </div>

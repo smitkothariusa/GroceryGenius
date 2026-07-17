@@ -73,6 +73,9 @@ const AppContent: React.FC = () => {
   const calorieGoalLoadedRef = useRef(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // True while the full-width install banner occupies the bottom edge; used to
+  // hide the feedback FAB so the two don't overlap in the bottom-left corner.
+  const [installBannerVisible, setInstallBannerVisible] = useState(false);
   const [showMissionPopup, setShowMissionPopup] = useState(false);
   const [showTour, setShowTour] = useState(false);
   const [tourStep, setTourStep] = useState(0);
@@ -2642,8 +2645,8 @@ const AppContent: React.FC = () => {
           onSkip={handleTourSkip}
         />
       )}
-      <FeedbackButton isMobile={isMobile} />
-      <InstallBanner />
+      <FeedbackButton isMobile={isMobile} hidden={installBannerVisible} />
+      <InstallBanner onVisibilityChange={setInstallBannerVisible} />
     </div>
   );
 };

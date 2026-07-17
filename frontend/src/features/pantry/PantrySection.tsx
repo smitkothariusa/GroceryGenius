@@ -1,3 +1,4 @@
+import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { pantryService } from '../../lib/database';
 import { isExpiringSoon, parseLocalDate } from '../../lib/pantryExpiry';
@@ -49,6 +50,44 @@ export function PantrySection({
     loadMorePantry,
   } = usePantry();
   const { setItemsToDonate, setShowDonationModal } = useDonation();
+
+  // Two-tap delete guard. Deletes were firing accidentally: the success toast
+  // sits fixed at the bottom over each row's delete button, and its 3s
+  // auto-dismiss races the user's tap — the toast vanishes as they reach for
+  // its ✕ and the tap lands on the delete button underneath, removing an
+  // unnamed item (multiple feedback reports). Requiring a second, deliberate
+  // tap on that specific row's button defeats the race and makes it obvious
+  // which item is being removed. Auto-disarms after 3s so a stray first tap
+  // doesn't leave the button armed.
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const armDelete = (id: string) => {
+    setConfirmDeleteId(id);
+    if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
+    confirmTimerRef.current = setTimeout(() => setConfirmDeleteId(null), 3000);
+  };
+
+  const performDelete = async (item: PantryItem) => {
+    if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
+    setConfirmDeleteId(null);
+    try {
+      // Check if this is a local-only item (scanned items have timestamp-based IDs)
+      const isLocalItem = item.id.includes('-') && item.id.includes('.');
+      if (user && !isLocalItem) {
+        // Only try database delete for items that came from database
+        await pantryService.delete(item.id);
+      }
+      // Always remove from local state
+      setPantry(prev => prev.filter(i => i.id !== item.id));
+      onSuccess(t('toasts.itemRemoved'));
+    } catch (error) {
+      console.error('Error deleting pantry item:', error);
+      // Still remove from local state even if database delete fails
+      setPantry(prev => prev.filter(i => i.id !== item.id));
+      onSuccess(t('toasts.itemRemoved'));
+    }
+  };
 
   const handleEditPantryItem = (item: PantryItem) => {
     setEditingPantryItem(item);
@@ -1009,39 +1048,32 @@ export function PantrySection({
                       </button>
                       <button
                           className="item-delete-btn"
-                          onClick={async () => {
-                            try {
-                              // Check if this is a local-only item (scanned items have timestamp-based IDs)
-                              const isLocalItem = item.id.includes('-') && item.id.includes('.');
-
-                              if (user && !isLocalItem) {
-                                // Only try database delete for items that came from database
-                                await pantryService.delete(item.id);
-                              }
-
-                              // Always remove from local state
-                              setPantry(prev => prev.filter(i => i.id !== item.id));
-                              onSuccess(t('toasts.itemRemoved'));
-                            } catch (error) {
-                              console.error('Error deleting pantry item:', error);
-                              // Still remove from local state even if database delete fails
-                              setPantry(prev => prev.filter(i => i.id !== item.id));
-                              onSuccess(t('toasts.itemRemoved'));
+                          aria-label={confirmDeleteId === item.id ? t('common.confirm') : t('common.delete')}
+                          onClick={() => {
+                            if (confirmDeleteId === item.id) {
+                              performDelete(item);
+                            } else {
+                              armDelete(item.id);
                             }
                           }}
                         style={{
-                          background: '#fee2e2',
-                          color: '#dc2626',
+                          // Armed state is a solid red so the "tap again to
+                          // confirm" step is unmistakable vs. the resting tint.
+                          background: confirmDeleteId === item.id ? '#dc2626' : '#fee2e2',
+                          color: confirmDeleteId === item.id ? 'white' : '#dc2626',
                           border: 'none',
                           padding: isMobile ? '0.5rem' : '0.5rem 1rem',
                           borderRadius: '6px',
                           cursor: 'pointer',
                           fontWeight: '600',
                           fontSize: isMobile ? '0.75rem' : '0.875rem',
-                          flex: isMobile ? '1' : 'initial'
+                          flex: isMobile ? '1' : 'initial',
+                          whiteSpace: 'nowrap'
                         }}
                       >
-                        {isMobile ? '🗑️' : t('common.delete')}
+                        {confirmDeleteId === item.id
+                          ? t('common.confirm')
+                          : (isMobile ? '🗑️' : t('common.delete'))}
                       </button>
                     </div>
                   </div>

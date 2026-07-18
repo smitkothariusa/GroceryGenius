@@ -107,6 +107,24 @@ export function DonationSection({
 
   return (
           <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+            {/* Region availability notice — food banks & drop-off sites are
+                currently Hampton Roads only, with more regions coming. */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '0.6rem',
+              background: '#eef2ff',
+              border: '1px solid #c7d2fe',
+              color: '#3730a3',
+              padding: isMobile ? '0.75rem 0.9rem' : '0.85rem 1.1rem',
+              borderRadius: '12px',
+              marginBottom: isMobile ? '1rem' : '1.5rem',
+              fontSize: isMobile ? '0.85rem' : '0.9rem',
+              lineHeight: 1.45,
+            }}>
+              <span style={{ fontSize: '1.1rem', flexShrink: 0 }} aria-hidden="true">📍</span>
+              <span>{t('donate.regionNotice')}</span>
+            </div>
             {/* Impact Dashboard */}
             <div style={{
               background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)',

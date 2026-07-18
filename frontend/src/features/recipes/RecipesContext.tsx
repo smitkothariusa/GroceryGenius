@@ -163,7 +163,22 @@ export function parseIngredients(recipe: Recipe): ParsedIngredient[] {
 
 export function calculateHealthGrade(recipe: Recipe): string {
   if (!recipe.nutrition) return 'B';
-  const { calories, protein, fiber, sodium, fat } = recipe.nutrition;
+  // Grade the healthiness of ONE serving, independent of how many servings the
+  // user scaled the recipe to. recipe.nutrition is scaled by the serving
+  // selector (scale = servings / originalServings, see RecipeSection), so
+  // grading it directly made the grade drop as servings rose — the thresholds
+  // below (e.g. 350-500 cal is good, >700 penalised; sodium <400 good) are
+  // per-serving figures. Divide the scaling back out so a bigger batch of the
+  // same dish keeps the same grade (reported by a user 2026-07-18).
+  const scale = (recipe.originalServings && recipe.servings)
+    ? recipe.servings / recipe.originalServings
+    : 1;
+  const norm = (v: number) => (scale > 0 ? v / scale : v);
+  const calories = norm(recipe.nutrition.calories);
+  const protein = norm(recipe.nutrition.protein);
+  const fiber = norm(recipe.nutrition.fiber);
+  const sodium = norm(recipe.nutrition.sodium);
+  const fat = norm(recipe.nutrition.fat);
   let score = 70;
 
   if (protein >= 25) score += 12; else if (protein >= 20) score += 10; else if (protein >= 15) score += 6;

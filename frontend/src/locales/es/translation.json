@@ -35,6 +35,11 @@
     "delete": "Eliminar",
     "editItem": "Editar artículo de despensa",
     "saveChanges": "Guardar cambios",
+    "sortBy": "Ordenar por",
+    "sortRecent": "Añadido recientemente",
+    "sortName": "Nombre (A–Z)",
+    "sortExpiry": "Caduca pronto",
+    "sortCategory": "Categoría",
     "emptyPantry": "Tu despensa está vacía. ¡Agrega algunos artículos para comenzar!",
     "addToPantry": "Añadir al despensa",
     "categories": {

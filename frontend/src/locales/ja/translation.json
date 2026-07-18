@@ -35,6 +35,11 @@
     "delete": "削除",
     "editItem": "パントリーアイテムを編集",
     "saveChanges": "変更を保存",
+    "sortBy": "並び替え",
+    "sortRecent": "最近追加",
+    "sortName": "名前 (A–Z)",
+    "sortExpiry": "期限が近い",
+    "sortCategory": "カテゴリー",
     "emptyPantry": "パントリーが空です。アイテムを追加して始めましょう！",
     "addToPantry": "パントリーに追加",
     "categories": {

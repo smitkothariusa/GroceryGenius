@@ -35,6 +35,11 @@
     "delete": "删除",
     "editItem": "编辑储藏室物品",
     "saveChanges": "保存更改",
+    "sortBy": "排序方式",
+    "sortRecent": "最近添加",
+    "sortName": "名称 (A–Z)",
+    "sortExpiry": "即将过期",
+    "sortCategory": "类别",
     "emptyPantry": "您的储藏室是空的。添加一些物品开始吧！",
     "addToPantry": "添加到储藏室",
     "categories": {

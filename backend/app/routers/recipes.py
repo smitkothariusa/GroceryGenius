@@ -1,10 +1,12 @@
 ﻿# backend/app/routers/recipes.py
 import json
 import logging
-from fastapi import APIRouter, HTTPException, Query, Request
+import os
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, Request
 from typing import List, Optional
 from typing_extensions import Annotated
 from pydantic import BaseModel, Field, field_validator
+from supabase import create_client
 from app.services.auth import limiter, AI_HEAVY_LIMIT, AI_LIGHT_LIMIT
 from app.services.openai_client import call_chat_completion
 from app.services.recipe_parser import parse_recipes_text
@@ -13,6 +15,24 @@ from app.services.ingredient_parsing import clean_ingredient_lines, strip_json_c
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+
+
+def _increment_recipes_generated(n: int) -> None:
+    """Best-effort bump of the app-wide `recipes_generated` counter
+    (public.app_stats). Runs as a background task after the response is sent,
+    with the service role — the increment_recipes_generated RPC is restricted to
+    service_role so clients can't inflate the number. Never raises: an
+    impact-metric write must not affect the user's recipe request."""
+    if n <= 0 or not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+        return
+    try:
+        sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+        sb.rpc("increment_recipes_generated", {"n": n}).execute()
+    except Exception:
+        logger.warning("failed to increment recipes_generated counter", exc_info=True)
 
 class Ingredients(BaseModel):
     # 30 was an outlier vs. every other list-of-strings field in this codebase
@@ -43,7 +63,7 @@ LANGUAGE_NAMES = {
 @router.post("", include_in_schema=False, response_model=List[dict])
 @router.post("/", response_model=List[dict])
 @limiter.limit(AI_HEAVY_LIMIT)
-async def generate_recipes(request: Request, payload: Ingredients, dietary: Optional[str] = Query(None), language: Optional[str] = Query(None), difficulty: Optional[str] = Query(None)):
+async def generate_recipes(request: Request, payload: Ingredients, background_tasks: BackgroundTasks, dietary: Optional[str] = Query(None), language: Optional[str] = Query(None), difficulty: Optional[str] = Query(None)):
     ingredients = [i.strip() for i in payload.ingredients if i.strip()]
     if not ingredients:
         return [{"name": "No ingredients provided", "instructions": "Please provide at least one ingredient."}]
@@ -129,7 +149,13 @@ CRITICAL: Return ONLY a valid JSON array with this exact structure:
     try:
         raw = await call_chat_completion(system_prompt, user_prompt, max_tokens=4000, temperature=0.7, route="recipes.generate_recipes")
         recipes = parse_recipes_text(raw, expected=3)
-        
+
+        # Count the real recipes parsed (before any placeholder padding below)
+        # toward the app-wide recipes_generated impact counter. Fires after the
+        # response is sent, so it adds no latency.
+        real_recipe_count = min(len(recipes), 3)
+        background_tasks.add_task(_increment_recipes_generated, real_recipe_count)
+
         # Ensure we have exactly 3 recipes
         if len(recipes) < 3:
             # Generate additional recipes if needed

@@ -35,6 +35,11 @@
     "delete": "Löschen",
     "editItem": "Speisekammer-Artikel bearbeiten",
     "saveChanges": "Änderungen speichern",
+    "sortBy": "Sortieren nach",
+    "sortRecent": "Zuletzt hinzugefügt",
+    "sortName": "Name (A–Z)",
+    "sortExpiry": "Läuft bald ab",
+    "sortCategory": "Kategorie",
     "emptyPantry": "Ihre Speisekammer ist leer. Fügen Sie Artikel hinzu um zu beginnen!",
     "addToPantry": "Zur Speisekammer hinzufügen",
     "categories": {

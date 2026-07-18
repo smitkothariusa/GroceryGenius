@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { pantryService } from '../../lib/database';
+import { safeStorage } from '../../lib/safeStorage';
 import { isExpiringSoon, parseLocalDate } from '../../lib/pantryExpiry';
 import { searchFoods, getSmartExpiryDate, getFoodDisplayName, getSuggestedUnits, type FoodEntry } from '../../data/foodDatabase';
 import { useDonation } from '../donation/DonationContext';
@@ -61,6 +62,38 @@ export function PantrySection({
   // doesn't leave the button armed.
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Pantry sort order. Persisted so the choice sticks across sessions
+  // (requested by several users). NOTE: sorts only the currently-loaded page of
+  // items — fine at typical pantry sizes; revisit if paginated pantries grow.
+  type PantrySort = 'default' | 'name' | 'expiry' | 'category';
+  const [pantrySort, setPantrySort] = useState<PantrySort>(
+    () => (safeStorage.getItem('gg_pantry_sort') as PantrySort) || 'default',
+  );
+  const changePantrySort = (value: PantrySort) => {
+    setPantrySort(value);
+    safeStorage.setItem('gg_pantry_sort', value);
+  };
+  const sortedPantry = useMemo(() => {
+    const items = [...pantry];
+    if (pantrySort === 'name') {
+      items.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (pantrySort === 'category') {
+      items.sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
+    } else if (pantrySort === 'expiry') {
+      // Soonest expiry first; items without an expiry date sink to the bottom.
+      // expiryDate is an ISO 'YYYY-MM-DD' string, so a string compare is
+      // chronological.
+      items.sort((a, b) => {
+        if (!a.expiryDate && !b.expiryDate) return 0;
+        if (!a.expiryDate) return 1;
+        if (!b.expiryDate) return -1;
+        return a.expiryDate.localeCompare(b.expiryDate);
+      });
+    }
+    // 'default' keeps the as-loaded order (most-recently-added first).
+    return items;
+  }, [pantry, pantrySort]);
 
   const armDelete = (id: string) => {
     setConfirmDeleteId(id);
@@ -947,8 +980,27 @@ export function PantrySection({
               </div>
             )}
 
+            {pantry.length > 1 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+                <label htmlFor="pantry-sort" style={{ fontSize: '0.85rem', color: mutedText, fontWeight: 600 }}>
+                  {t('pantry.sortBy')}
+                </label>
+                <select
+                  id="pantry-sort"
+                  value={pantrySort}
+                  onChange={(e) => changePantrySort(e.target.value as PantrySort)}
+                  style={{ padding: '0.4rem 0.6rem', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '0.85rem', background: 'white', cursor: 'pointer' }}
+                >
+                  <option value="default">{t('pantry.sortRecent')}</option>
+                  <option value="name">{t('pantry.sortName')}</option>
+                  <option value="expiry">{t('pantry.sortExpiry')}</option>
+                  <option value="category">{t('pantry.sortCategory')}</option>
+                </select>
+              </div>
+            )}
+
             <div data-tour="pantry-expiry-input" style={{ display: 'grid', gap: '0.75rem' }}>
-              {pantry.map(item => {
+              {sortedPantry.map(item => {
                 const expiring = getExpiringItems().some(e => e.id === item.id);
                 return (
                   <div

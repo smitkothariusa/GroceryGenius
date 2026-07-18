@@ -36,6 +36,11 @@
     "editItem": "Edit Pantry Item",
     "saveChanges": "Save Changes",
     "addToPantry": "Add to Pantry",
+    "sortBy": "Sort by",
+    "sortRecent": "Recently added",
+    "sortName": "Name (A–Z)",
+    "sortExpiry": "Expiring soon",
+    "sortCategory": "Category",
     "emptyPantry": "Your pantry is empty. Add some items to get started!",
     "categories": {
       "produce": "Produce",

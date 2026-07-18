@@ -338,6 +338,42 @@ describe('Pantry add / delete', () => {
   });
 });
 
+describe('Pantry sort', () => {
+  const items = [
+    { id: 'z', name: 'Zucchini', quantity: 1, unit: 'pc', category: 'produce', expiry_date: '2026-09-01', emoji: '🥒' },
+    { id: 'a', name: 'Apples', quantity: 1, unit: 'pc', category: 'produce', expiry_date: '2026-07-20', emoji: '🍎' },
+    { id: 'm', name: 'Milk', quantity: 1, unit: 'L', category: 'dairy', expiry_date: null, emoji: '🥛' },
+  ];
+  const domNames = () =>
+    Array.from(document.querySelectorAll('.item-name')).map((n) => n.textContent);
+
+  it('sorts alphabetically by name when selected', async () => {
+    h.pantry = [...items];
+    await renderApp();
+    await screen.findByText('Zucchini');
+
+    fireEvent.change(screen.getByLabelText(en.pantry.sortBy), { target: { value: 'name' } });
+    expect(domNames()).toEqual(['Apples', 'Milk', 'Zucchini']);
+  });
+
+  it('sorts by soonest expiry, pushing items without a date last', async () => {
+    h.pantry = [...items];
+    await renderApp();
+    await screen.findByText('Zucchini');
+
+    fireEvent.change(screen.getByLabelText(en.pantry.sortBy), { target: { value: 'expiry' } });
+    // Apples (07-20) before Zucchini (09-01); Milk (no date) last.
+    expect(domNames()).toEqual(['Apples', 'Zucchini', 'Milk']);
+  });
+
+  it('does not show the sort control for a single item', async () => {
+    h.pantry = [items[0]];
+    await renderApp();
+    await screen.findByText('Zucchini');
+    expect(screen.queryByLabelText(en.pantry.sortBy)).not.toBeInTheDocument();
+  });
+});
+
 describe('Shopping list', () => {
   beforeEach(() => {
     localStorage.setItem('activeTab', 'shopping');

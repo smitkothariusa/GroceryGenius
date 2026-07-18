@@ -35,6 +35,11 @@
     "delete": "Supprimer",
     "editItem": "Modifier l'article du garde-manger",
     "saveChanges": "Enregistrer les modifications",
+    "sortBy": "Trier par",
+    "sortRecent": "Ajouté récemment",
+    "sortName": "Nom (A–Z)",
+    "sortExpiry": "Expire bientôt",
+    "sortCategory": "Catégorie",
     "emptyPantry": "Votre garde-manger est vide. Ajoutez des articles pour commencer!",
     "addToPantry": "Ajouter au garde-manger",
     "categories": {

@@ -277,36 +277,11 @@ export function ScanModal({
     try {
       console.log('🔍 Looking up barcode:', barcode);
       
-      // Method 1: OpenAI (FIRST - Most reliable for product identification)
-      try {
-        console.log('🤖 Trying OpenAI first...');
-        const aiResponse = await authFetch(`${API_BASE}/barcode/ai-lookup`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ barcode })
-        });
-        
-        if (aiResponse.ok) {
-          const aiData = await aiResponse.json();
-          console.log('OpenAI response:', aiData);
-          
-          if (aiData.name && aiData.name.trim() && !aiData.name.includes('Unknown Product')) {
-            console.log('✅ Found from OpenAI:', aiData.name);
-            onSuccess(t('toasts.productIdentifiedAI'));
-            return {
-              name: aiData.name.trim(),
-              category: aiData.category || 'other',
-              expiryDays: null
-            };
-          }
-        }
-      } catch (err) {
-        console.log('❌ OpenAI failed, trying backup APIs...', err);
-      }
-      
-      // Method 2: OpenFoodFacts (Backup - BEST for food - FREE, no key needed, huge database)
+      // Method 1: OpenFoodFacts — authoritative product database keyed by the
+      // exact barcode. Tried FIRST because it's fast (~200ms) and accurate,
+      // unlike the AI guesses which now run only as fallbacks. Reordered
+      // 2026-07-18 after user reports of slow scans + wrong identifications
+      // (the GPT vision/number calls used to run first).
       try {
         console.log('📡 Trying OpenFoodFacts as backup...');
         const offResponse = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}.json`);
@@ -374,7 +349,7 @@ export function ScanModal({
             
             if (itemName && itemName.trim()) {
               console.log('✅ Found from UPCitemdb:', itemName);
-              
+
               // Map category
               let category = 'other';
               const cat = (item.category || '').toLowerCase();
@@ -422,24 +397,42 @@ export function ScanModal({
       } catch (err) {
         console.log('❌ Barcode Spider failed:', err);
       }
-      
-      // All APIs failed - return placeholder
+
+      // Method 5 (last resort): OpenAI guess from the barcode NUMBER. Least
+      // reliable — no product image, just the digits — so it runs only after
+      // every authoritative database has missed. (Previously this was tried
+      // FIRST, which was a major source of wrong identifications.)
+      try {
+        console.log('🤖 Trying OpenAI number lookup as last resort...');
+        const aiResponse = await authFetch(`${API_BASE}/barcode/ai-lookup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ barcode })
+        });
+        if (aiResponse.ok) {
+          const aiData = await aiResponse.json();
+          if (aiData.name && aiData.name.trim() && !aiData.name.includes('Unknown Product')) {
+            console.log('✅ Found from OpenAI:', aiData.name);
+            onSuccess(t('toasts.productIdentifiedAI'));
+            return {
+              name: aiData.name.trim(),
+              category: aiData.category || 'other',
+              expiryDays: null
+            };
+          }
+        }
+      } catch (err) {
+        console.log('❌ OpenAI number lookup failed:', err);
+      }
+
+      // Nothing matched any database or the number guess. Return null so the
+      // caller can try image vision as a further fallback before giving up.
       console.log('⚠️ Product not found in any database');
-      onWarning(t('toasts.productNotFound'));
-      return {
-        name: `Item ${barcode.substring(barcode.length - 6)}`,
-        category: 'other',
-        expiryDays: null
-      };
-      
+      return null;
+
     } catch (error) {
       console.error('💥 Barcode lookup error:', error);
-      onWarning(t('toasts.barcodeLookupFailed'));
-      return {
-        name: `Item ${barcode.substring(barcode.length - 6)}`,
-        category: 'other',
-        expiryDays: null
-      };
+      return null;
     }
   };
   const handleBarcodeScanner = async () => {
@@ -634,20 +627,29 @@ export function ScanModal({
         // Show loading
         setRecipeLoading(true);
         
-        // Try vision API first if we captured an image
-        let productInfo = null;
-        if (capturedImage) {
+        // Look the decoded barcode up in the authoritative product databases
+        // FIRST (fast + accurate). Only if they all miss do we fall back to the
+        // slower AI image vision — which also covers curved/odd surfaces the
+        // databases have no match for. Reordered 2026-07-18: leading with the
+        // GPT vision call made every scan slow and produced wrong guesses even
+        // when the barcode was a clean database hit (user reports).
+        let productInfo = await lookupBarcode(code);
+
+        if (!productInfo && capturedImage) {
+          console.log('⚠️ Not in databases, trying image vision…');
           productInfo = await lookupBarcodeWithImage(capturedImage);
         }
-        
-        // If vision failed or no image, fallback to barcode number lookup
+
+        // Still nothing — add it under a placeholder name the user can rename.
         if (!productInfo) {
-          if (capturedImage) {
-            console.log('⚠️ Vision lookup failed, trying barcode number...');
-          }
-          productInfo = await lookupBarcode(code);
+          onWarning(t('toasts.productNotFound'));
+          productInfo = {
+            name: `Item ${code.substring(code.length - 6)}`,
+            category: 'other',
+            expiryDays: null
+          };
         }
-        
+
         console.log('Product info received:', productInfo);
         
         // Calculate expiry date if we have days

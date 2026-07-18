@@ -1020,7 +1020,10 @@ export function PantrySection({
                   >
                     <div
                       className="item-content"
-                      style={{ flex: 1 }}
+                      // minWidth:0 lets this flex column shrink so a long item
+                      // name wraps inside it instead of overflowing and blowing
+                      // out the whole row (reported on mobile).
+                      style={{ flex: 1, minWidth: 0 }}
                       onClick={isMobile ? () => handleEditPantryItem(item) : undefined}
                       role={isMobile ? 'button' : undefined}
                       tabIndex={isMobile ? 0 : undefined}
@@ -1029,12 +1032,14 @@ export function PantrySection({
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: isMobile ? '0.5rem' : '0.75rem'
+                        gap: isMobile ? '0.5rem' : '0.75rem',
+                        minWidth: 0
                       }}>
                         <div style={{
                           fontSize: '2rem',
                           width: '40px',
                           height: '40px',
+                          flexShrink: 0,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -1051,8 +1056,8 @@ export function PantrySection({
                             item.category === 'breakfast' ? '🥞' : '📦'
                           )}
                         </div>
-                        <div>
-                          <span className="item-name" style={{ fontWeight: '600', fontSize: '1.05rem', color: '#1f2937' }}>
+                        <div style={{ minWidth: 0 }}>
+                          <span className="item-name" style={{ fontWeight: '600', fontSize: '1.05rem', color: '#1f2937', whiteSpace: 'normal', overflowWrap: 'anywhere' }}>
                             {item.name}
                           </span>
                           <div className="item-meta" style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.25rem' }}>
